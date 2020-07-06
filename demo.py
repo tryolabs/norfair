@@ -16,7 +16,7 @@ class OpenposeDetector():
     def __call__(self, image):
         return self.detector.forward(image, False)
 
-def convert_and_filter_poses(poses):
+def convert_and_filter(poses):
     # Get final poses by filtering out parts of the detections we don't want to track
     body_parts_to_track_indices = [1, 8]  # Neck and midhip (torax length)
     poses = poses[:, body_parts_to_track_indices]
@@ -52,11 +52,9 @@ tracker = norfair.Tracker(distance_function=keypoints_distance)
 
 for frame in video:
     detected_poses = pose_detector(frame)
-    converted_detections = convert_and_filter_poses(detected_poses)
-    predictions = tracker.update(converted_detections, dt=3)
-    # norfair.draw_midpoint(frame, predictions)
-    # norfair.draw_pose(frame, converted_detections, colors.blue)
-    print(predictions)
-    video.write(frame)
-    # video.show(frame, downsample_ratio=4)
-
+    converted_detections = convert_and_filter(detected_poses)
+    predictions = tracker.update(converted_detections, dt=1)
+    norfair.draw_points(frame, converted_detections)
+    norfair.draw_predictions(frame, predictions)
+    # video.write(frame)
+    video.show(frame, downsample_ratio=4)
