@@ -2,7 +2,7 @@ import numpy as np
 
 from .kalman import KalmanTracker
 from sklearn.utils.linear_assignment_ import linear_assignment  # TODO: Remove
-# from scipy.optimize import linear_sum_assignment
+from scipy.optimize import linear_sum_assignment
 
 
 class Tracker:
@@ -43,12 +43,12 @@ class Tracker:
                 print("Found nan values in distance matrix, check your distance function for bugs")
             if np.isinf(distance_matrix).any():
                 print("Found inf values in distance matrix, check your distance function for bugs")
-            matched_indices = linear_assignment(distance_matrix)  # Using hungarian algorithm
-            if len(matched_indices) > 0:
-                unmatched_detections = [d for i, d in enumerate(detections) if i not in matched_indices[:, 0]]
+            matched_row_indices, matched_col_indices = linear_sum_assignment(distance_matrix)
+            if len(matched_row_indices) > 0:
+                unmatched_detections = [d for i, d in enumerate(detections) if i not in matched_row_indices]
 
                 # Handle matched people/detections
-                for match_pair in matched_indices:
+                for match_pair in zip(matched_row_indices, matched_col_indices):
                     match_distance = distance_matrix[match_pair[0], match_pair[1]]
                     matched_detection = detections[match_pair[0]]
                     matched_object = self.objects[match_pair[1]]
@@ -60,7 +60,7 @@ class Tracker:
 
                 # Handle remaining unmatched detections
                 for d, detection in enumerate(detections):
-                    if d not in matched_indices[:, 0]:
+                    if d not in matched_row_indices:
                         self.objects.append(Object(detection, self.hit_inertia_min, self.hit_inertia_max))
             else:
                 # Create new objects from unmatched detections
