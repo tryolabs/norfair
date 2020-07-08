@@ -18,19 +18,10 @@ class OpenposeDetector():
 
 def convert_and_filter(poses):
     # Get final poses by filtering out parts of the detections we don't want to track
-    body_parts_to_track_indices = [1, 8]  # Neck and midhip (torax length)
-    poses = poses[:, body_parts_to_track_indices]
-    # Create filter for objects for which we haven't detected the parts we want to track
-    # TODO: Check if this is necessary
+    poses = poses[:, [1, 8]]  # We'll only track neck(1) and midhip(8)
+    # Create filter for objects for which we haven't detected any of the parts we want to track
     poses = poses[np.any(poses > 0, axis=(1, 2)), :, :]
-
-    # Convert to list
-    # TODO: Check if there is one-line way of doing this
-    # Or if it is even necessary, maybe defining iterable as protocol is better than list
-    detections = []
-    for p in poses:
-        detections.append(p[:, :2])  # Remove probabilities
-    return detections
+    return poses[:, :, :2]  # Remove probabilities from keypoints
 
 def keypoints_distance(detected_pose, person):
     # Find min torax size
@@ -46,7 +37,7 @@ def keypoints_distance(detected_pose, person):
 
     return keypoints_distance
 
-video = norfair.Video(input_path="/home/lalo/data/videos/in/trr_cut_short.mp4")
+video = norfair.Video(input_path="/home/lalo/data/facial_masks_detection/shortest.mp4")
 pose_detector = OpenposeDetector()
 tracker = norfair.Tracker(distance_function=keypoints_distance)
 
@@ -56,5 +47,5 @@ for frame in video:
     predictions = tracker.update(converted_detections, dt=1)
     norfair.draw_points(frame, converted_detections)
     norfair.draw_predictions(frame, predictions)
-    # video.write(frame)
-    video.show(frame, downsample_ratio=4)
+    video.write(frame)
+    # video.show(frame, downsample_ratio=1)
