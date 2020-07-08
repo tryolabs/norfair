@@ -20,7 +20,7 @@ def draw_estimates(frame, objects, radius=None, thickness=None, color=None, id_s
     if radius is None:
         radius = int(frame_scale)
     if id_size is None:
-        id_size = int(frame_scale / 5)
+        id_size = frame_scale / 5
     if thickness is None:
         thickness = int(frame_scale / 5)
     if color is None:
