@@ -6,15 +6,13 @@ from scipy.optimize import linear_sum_assignment
 
 
 class Tracker:
-    def __init__(self, distance_function):
+    def __init__(self, distance_function, hit_inertia_min=4, hit_inertia_max=10, match_distance_threshold=0.5):
         self.objects = []
         self.distance_function = distance_function
-
-        # Config
-        self.hit_inertia_min = 4
-        self.hit_inertia_max = 10
-        self.min_age = 4
-        self.match_distance_threshold = 0.5
+        # TODO: Make the inertias depend on fps and dt??
+        self.hit_inertia_min = hit_inertia_min
+        self.hit_inertia_max = hit_inertia_max
+        self.match_distance_threshold = match_distance_threshold
 
     def update(self, detections, dt=1):
         # TODO: Handle dt != 1
@@ -79,7 +77,7 @@ class Object():
     def __init__(self, initial_detection, hit_inertia_min, hit_inertia_max):
         self.hit_inertia_min = hit_inertia_min
         self.hit_inertia_max = hit_inertia_max
-        self.hit_counter = 5
+        self.hit_counter = hit_inertia_min
         self.last_distance = None
         self.tracker = KalmanTracker(initial_detection)
         self.age = 0
