@@ -69,7 +69,7 @@ class Tracker:
         # Remove stale objects from self.objects list
         self.objects = [p for p in self.objects if p.has_inertia]
 
-        return self.objects
+        return [p for p in self.objects if not p.is_initializing]
 
 
 class Object():
@@ -82,6 +82,7 @@ class Object():
         self.tracker = KalmanTracker(initial_detection)
         self.age = 0
         self.last_detection = initial_detection
+        self.is_initializing = True
 
     def __repr__(self):
         return "<\033[1mObject {}\033[0m (age {})>".format(self.id, self.age)
@@ -89,6 +90,8 @@ class Object():
     def tracker_step(self):
         self.hit_counter -= 1
         self.age += 1
+        if self.is_initializing < (self.hit_inertia_min + self.hit_inertia_max) / 2:
+            self.is_initializing = False
         # Advances the tracker's state
         self.tracker.predict()
 
