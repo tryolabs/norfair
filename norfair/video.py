@@ -16,7 +16,8 @@ class Video():
         if total_frames == 0:
             click.echo(click.style("Error reading input video file.", bold=True))
             click.echo(" Make sure file exists and is a video file.")
-            click.echo(" Using ~ as abbreviation for home folder is not supported.")
+            if "~" in self.input_path:
+                click.echo(" Using ~ as abbreviation for your home folder is not supported.")
             exit()
         self.frame_height = int(self.video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
         self.frame_width = int(self.video_capture.get(cv2.CAP_PROP_FRAME_WIDTH))
