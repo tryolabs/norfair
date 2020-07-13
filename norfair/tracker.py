@@ -1,12 +1,11 @@
 import numpy as np
 
 from .kalman import KalmanTracker
-from sklearn.utils.linear_assignment_ import linear_assignment  # TODO: Remove
 from scipy.optimize import linear_sum_assignment
 
 
 class Tracker:
-    def __init__(self, distance_function, hit_inertia_min=4, hit_inertia_max=10, match_distance_threshold=0.5):
+    def __init__(self, distance_function, hit_inertia_min=10, hit_inertia_max=25, match_distance_threshold=0.5):
         self.objects = []
         self.distance_function = distance_function
         # TODO: Make the inertias depend on fps and dt??
