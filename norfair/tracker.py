@@ -55,12 +55,12 @@ class Tracker:
                     else:
                         unmatched_detections.append(matched_detection)
 
-                # Handle remaining unmatched detections
+                # Create new objects from unmatched detections
                 for d, detection in enumerate(detections):
                     if d not in matched_row_indices:
                         self.objects.append(Object(detection, self.hit_inertia_min, self.hit_inertia_max))
             else:
-                # Create new objects from unmatched detections
+                # Create new objects from remaining unmatched detections
                 for detection in detections:
                     self.objects.append(Object(detection, self.hit_inertia_min, self.hit_inertia_max))
 
@@ -81,21 +81,29 @@ class Object():
         self.tracker = KalmanTracker(initial_detection)
         self.age = 0
         self.last_detection = initial_detection
-        self.is_initializing = True
+        self.is_initializing_flag = True
         self.id = None
 
     def __repr__(self):
-        return "<\033[1mObject {}\033[0m (age {})>".format(self.id, self.age)
+        if self.last_distance is None:
+            placeholder_text = "\033[1mObject_{}\033[0m(age: {}, hit_counter: {}, last_distance: {}, tracker_id: {})"
+        else:
+            placeholder_text = "\033[1mObject_{}\033[0m(age: {}, hit_counter: {}, last_distance: {:.2f}, tracker: {})"
+        return placeholder_text.format(self.id, self.age, self.hit_counter, self.last_distance, self.tracker.id)
 
     def tracker_step(self):
         self.hit_counter -= 1
         self.age += 1
-        if self.is_initializing and self.hit_counter > (self.hit_inertia_min + self.hit_inertia_max) / 2:
-            self.is_initializing = False
-            KalmanTracker.count += 1
-            self.id = KalmanTracker.count
         # Advances the tracker's state
         self.tracker.filter.predict()
+
+    @property
+    def is_initializing(self):
+        if self.is_initializing_flag and self.hit_counter > (self.hit_inertia_min + self.hit_inertia_max) / 2:
+            self.is_initializing_flag = False
+            KalmanTracker.count += 1
+            self.id = KalmanTracker.count
+        return self.is_initializing_flag
 
     @property
     def has_inertia(self):
