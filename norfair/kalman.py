@@ -40,8 +40,7 @@ class KalmanTracker(object):
     self.kf.P *= 10.  # TODO we get 10 * 1000 in velocities, is this correct?
 
     self.time_since_update = 0
-    self.id = KalmanTracker.count
-    KalmanTracker.count += 1
+    # KalmanTracker.count += 1
     self.history = []
     self.hits = 0
     self.hit_streak = 0

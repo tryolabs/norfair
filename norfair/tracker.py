@@ -83,6 +83,7 @@ class Object():
         self.age = 0
         self.last_detection = initial_detection
         self.is_initializing = True
+        self.id = None
 
     def __repr__(self):
         return "<\033[1mObject {}\033[0m (age {})>".format(self.id, self.age)
@@ -90,8 +91,10 @@ class Object():
     def tracker_step(self):
         self.hit_counter -= 1
         self.age += 1
-        if self.is_initializing < (self.hit_inertia_min + self.hit_inertia_max) / 2:
+        if self.is_initializing and self.hit_counter > (self.hit_inertia_min + self.hit_inertia_max) / 2:
             self.is_initializing = False
+            KalmanTracker.count += 1
+            self.id = KalmanTracker.count
         # Advances the tracker's state
         self.tracker.predict()
 
@@ -102,10 +105,6 @@ class Object():
     @property
     def prediction(self):
         return self.tracker.get_state()[0]
-
-    @property
-    def id(self):
-        return self.tracker.id
 
     def hit(self, detection):
         if self.hit_counter < self.hit_inertia_max:
