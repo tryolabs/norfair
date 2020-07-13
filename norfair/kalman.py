@@ -29,7 +29,6 @@ class KalmanTracker(object):
         KalmanTracker.count += 1
         self.last_detection = initial_detection
   
-  
     def update(self, detection, R=None, H=None):
         # TODO Isn't there a better way to do this than just not updating it?
         # At least tell the filter that a time step happened?
