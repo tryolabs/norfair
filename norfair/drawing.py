@@ -15,7 +15,7 @@ def draw_points(frame, detections, radius=None, thickness=None, color=None):
         for point in d:
             cv2.circle(frame, tuple(point.astype(int)), radius=radius, color=color, thickness=thickness)
 
-def draw_estimates(frame, objects, radius=None, thickness=None, color=None, id_size=None, id_color=None):
+def draw_estimates(frame, objects, radius=None, thickness=None, color=None, id_size=None):
     frame_scale = frame.shape[0] * frame.shape[1] / 400000
     if radius is None:
         radius = int(frame_scale)
@@ -23,14 +23,17 @@ def draw_estimates(frame, objects, radius=None, thickness=None, color=None, id_s
         id_size = frame_scale / 5
     if thickness is None:
         thickness = int(frame_scale / 5)
-    if color is None:
-        color = Color.blue
-    if id_color is None:
-        id_color = Color.yellow
 
     for obj in objects:
+        if color is None:
+            point_color = Color.random(obj.id)
+            id_color = point_color
+        else:
+            point_color = color
+            id_color = color
+
         for point in obj.estimate:
-            cv2.circle(frame, tuple(point.astype(int)), radius=radius, color=color, thickness=-1)
+            cv2.circle(frame, tuple(point.astype(int)), radius=radius, color=point_color, thickness=-1)
 
         id_draw_position = centroid(obj.estimate)
         cv2.putText(
@@ -61,3 +64,8 @@ class Color():
     blue = (255, 0, 0)
     teal = (128, 128, 0)
     silver = (192, 192, 192)
+
+    @staticmethod
+    def random(obj_id):
+        color_list = [c for c in Color.__dict__.keys() if c[:2] != "__" and c != "random"]
+        return getattr(Color, color_list[obj_id % len(color_list)])
