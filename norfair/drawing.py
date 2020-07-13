@@ -15,7 +15,7 @@ def draw_points(frame, detections, radius=None, thickness=None, color=None):
         for point in d:
             cv2.circle(frame, tuple(point.astype(int)), radius=radius, color=color, thickness=thickness)
 
-def draw_predictions(frame, objects, radius=None, thickness=None, color=None, id_size=None):
+def draw_predictions(frame, objects, radius=None, thickness=None, color=None, id_size=None, id_color=None):
     frame_scale = frame.shape[0] * frame.shape[1] / 400000
     if radius is None:
         radius = int(frame_scale)
@@ -25,6 +25,8 @@ def draw_predictions(frame, objects, radius=None, thickness=None, color=None, id
         thickness = int(frame_scale / 5)
     if color is None:
         color = Color.blue
+    if id_color is None:
+        id_color = Color.yellow
 
     for obj in objects:
         for point in obj.prediction:
@@ -33,7 +35,7 @@ def draw_predictions(frame, objects, radius=None, thickness=None, color=None, id
         id_draw_position = centroid(obj.prediction)
         cv2.putText(
             frame, str(obj.id), id_draw_position, cv2.FONT_HERSHEY_SIMPLEX, id_size,
-            Color.yellow, thickness, cv2.LINE_AA
+            id_color, thickness, cv2.LINE_AA
         )
 
 def centroid(points):
