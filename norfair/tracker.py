@@ -59,11 +59,11 @@ class Tracker:
                 # Create new objects from unmatched detections
                 for d, detection in enumerate(detections):
                     if d not in matched_row_indices:
-                        self.objects.append(Object(detection, self.hit_inertia_min, self.hit_inertia_max))
+                        self.objects.append(TrackedObject(detection, self.hit_inertia_min, self.hit_inertia_max))
             else:
                 # Create new objects from remaining unmatched detections
                 for detection in detections:
-                    self.objects.append(Object(detection, self.hit_inertia_min, self.hit_inertia_max))
+                    self.objects.append(TrackedObject(detection, self.hit_inertia_min, self.hit_inertia_max))
 
 
         # Remove stale objects from self.objects list
@@ -72,7 +72,7 @@ class Tracker:
         return [p for p in self.objects if not p.is_initializing]
 
 
-class Object():
+class TrackedObject():
     """ TODO: This class and the kalman tracker class should be merged """
     count = 0
 
@@ -119,8 +119,8 @@ class Object():
     def is_initializing(self):
         if self.is_initializing_flag and self.hit_counter > (self.hit_inertia_min + self.hit_inertia_max) / 2:
             self.is_initializing_flag = False
-            Object.count += 1
-            self.id = Object.count
+            TrackedObject.count += 1
+            self.id = TrackedObject.count
         return self.is_initializing_flag
 
     @property
