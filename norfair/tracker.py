@@ -1,7 +1,8 @@
 import numpy as np
 
-from .kalman import KalmanTracker
 from scipy.optimize import linear_sum_assignment
+from filterpy.kalman import KalmanFilter
+import random
 
 
 class Tracker:
@@ -73,36 +74,53 @@ class Tracker:
 
 class Object():
     """ TODO: This class and the kalman tracker class should be merged """
+    count = 0
+
     def __init__(self, initial_detection, hit_inertia_min, hit_inertia_max):
         self.hit_inertia_min = hit_inertia_min
         self.hit_inertia_max = hit_inertia_max
         self.hit_counter = hit_inertia_min
         self.last_distance = None
-        self.tracker = KalmanTracker(initial_detection)
         self.age = 0
-        self.last_detection = initial_detection
         self.is_initializing_flag = True
         self.id = None
+        self.initializing_id = random.randint(0, 9999)
+        self.setup_kf(initial_detection)
 
-    def __repr__(self):
-        if self.last_distance is None:
-            placeholder_text = "\033[1mObject_{}\033[0m(age: {}, hit_counter: {}, last_distance: {}, tracker_id: {})"
-        else:
-            placeholder_text = "\033[1mObject_{}\033[0m(age: {}, hit_counter: {}, last_distance: {:.2f}, tracker: {})"
-        return placeholder_text.format(self.id, self.age, self.hit_counter, self.last_distance, self.tracker.id)
+    def setup_kf(self, initial_detection):
+        tracked_points_num = initial_detection.shape[0]
+        dim_x = 2 * 2 * tracked_points_num  # We need to accomodate for velocities
+        dim_z = 2 * tracked_points_num
+        self.dim_z = dim_z
+        self.filter = KalmanFilter(dim_x=dim_x, dim_z=dim_z)
+
+        # State transition matrix (models physics): numpy.array()
+        self.filter.F = np.eye(dim_x)
+        dt = 1  # At each step we update pos with v * dt
+        for p in range(dim_z):
+            self.filter.F[p, p + dim_z] = dt
+
+        # Measurement function: numpy.array(dim_z, dim_x)
+        self.filter.H = np.eye(dim_z, dim_x,)
+
+        # Measurement uncertainty (sensor noise): numpy.array(dim_z, dim_z)
+        self.filter.R *= 1.
+
+        # Initial state: numpy.array(dim_x, 1)
+        self.filter.x[:dim_z] = np.expand_dims(initial_detection.flatten(), 0).T
 
     def tracker_step(self):
         self.hit_counter -= 1
         self.age += 1
         # Advances the tracker's state
-        self.tracker.filter.predict()
+        self.filter.predict()
 
     @property
     def is_initializing(self):
         if self.is_initializing_flag and self.hit_counter > (self.hit_inertia_min + self.hit_inertia_max) / 2:
             self.is_initializing_flag = False
-            KalmanTracker.count += 1
-            self.id = KalmanTracker.count
+            Object.count += 1
+            self.id = Object.count
         return self.is_initializing_flag
 
     @property
@@ -111,7 +129,9 @@ class Object():
 
     @property
     def estimate(self):
-        return self.tracker.current()
+        positions = self.filter.x.T.flatten()[:self.dim_z].reshape(-1, 2)
+        velocities = self.filter.x.T.flatten()[self.dim_z:].reshape(-1, 2)
+        return positions
 
     def hit(self, detection):
         if self.hit_counter < self.hit_inertia_max:
@@ -124,5 +144,11 @@ class Object():
         H_pos = np.diag(matched_parts_idx).astype(float)
         H_vel = np.zeros(H_pos.shape)
         H = np.hstack([H_pos, H_vel])
-        self.last_detection = detection
-        self.tracker.update(detection, H=H)
+        self.filter.update(np.expand_dims(detection.flatten(), 0).T, None, H)
+
+    def __repr__(self):
+        if self.last_distance is None:
+            placeholder_text = "\033[1mObject_{}\033[0m(age: {}, hit_counter: {}, last_distance: {}, init_id: {})"
+        else:
+            placeholder_text = "\033[1mObject_{}\033[0m(age: {}, hit_counter: {}, last_distance: {:.2f}, init_id: {})"
+        return placeholder_text.format(self.id, self.age, self.hit_counter, self.last_distance, self.initializing_id)

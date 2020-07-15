@@ -47,5 +47,5 @@ for frame in video:
     estimates = tracker.update(converted_detections, dt=1)
     norfair.draw_points(frame, converted_detections)
     norfair.draw_estimates(frame, estimates)
-    # video.write(frame)
-    video.show(frame, downsample_ratio=4)
+    video.write(frame)
+    # video.show(frame, downsample_ratio=1)
