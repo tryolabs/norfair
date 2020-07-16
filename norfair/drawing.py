@@ -12,6 +12,8 @@ def draw_points(frame, detections, radius=None, thickness=None, color=None):
         color = Color.red
 
     for d in detections:
+        if d.shape[1] == 3:
+            d = d[:, :2]  # Remove confidences if present, so only x, y coordinates remain
         for point in d:
             cv2.circle(frame, tuple(point.astype(int)), radius=radius, color=color, thickness=thickness)
 

@@ -6,13 +6,15 @@ import random
 
 
 class Tracker:
-    def __init__(self, distance_function, hit_inertia_min=10, hit_inertia_max=25, match_distance_threshold=0.5):
+    def __init__(self, distance_function, hit_inertia_min=10, hit_inertia_max=25, match_distance_threshold=0.5,
+                 detection_threshold=0):
         self.objects = []
         self.distance_function = distance_function
         # TODO: Make the inertias depend on fps and dt??
         self.hit_inertia_min = hit_inertia_min
         self.hit_inertia_max = hit_inertia_max
         self.match_distance_threshold = match_distance_threshold
+        self.detection_threshold = detection_threshold
 
     def update(self, detections, dt=1):
         # TODO: Handle dt != 1
@@ -59,12 +61,19 @@ class Tracker:
                 # Create new objects from unmatched detections
                 for d, detection in enumerate(detections):
                     if d not in matched_row_indices:
-                        self.objects.append(TrackedObject(detection, self.hit_inertia_min, self.hit_inertia_max))
+                        self.objects.append(
+                            TrackedObject(
+                                detection, self.hit_inertia_min, self.hit_inertia_max, self.detection_threshold
+                            )
+                        )
             else:
                 # Create new objects from remaining unmatched detections
                 for detection in detections:
-                    self.objects.append(TrackedObject(detection, self.hit_inertia_min, self.hit_inertia_max))
-
+                    self.objects.append(
+                        TrackedObject(
+                            detection, self.hit_inertia_min, self.hit_inertia_max, self.detection_threshold
+                        )
+                    )
 
         # Remove stale objects from self.objects list
         self.objects = [p for p in self.objects if p.has_inertia]
@@ -76,9 +85,10 @@ class TrackedObject():
     """ TODO: This class and the kalman tracker class should be merged """
     count = 0
 
-    def __init__(self, initial_detection, hit_inertia_min, hit_inertia_max):
+    def __init__(self, initial_detection, hit_inertia_min, hit_inertia_max, detection_threshold):
         self.hit_inertia_min = hit_inertia_min
         self.hit_inertia_max = hit_inertia_max
+        self.detection_threshold = detection_threshold
         self.hit_counter = hit_inertia_min
         self.last_distance = None
         self.age = 0
@@ -140,11 +150,18 @@ class TrackedObject():
         # We use a kalman filter in which we consider each point as a sensor.
         # This is a hacky way to update only certain sensors (only points which were detected).
         # Hardcoded to our case in which x contains pos and vel for each pos.
-        matched_parts_idx = (detection != 0).flatten()
-        H_pos = np.diag(matched_parts_idx).astype(float)
-        H_vel = np.zeros(H_pos.shape)
-        H = np.hstack([H_pos, H_vel])
-        self.filter.update(np.expand_dims(detection.flatten(), 0).T, None, H)
+        if detection.shape[1] == 2:
+            self.filter.update(np.expand_dims(detection.flatten(), 0).T, None, None)
+        elif detection.shape[1] == 3:
+            matched_points_idx = detection[:, 2] > self.detection_threshold
+            matched_parts_idx = np.array([[v, v] for v in matched_points_idx]).flatten()
+            H_pos = np.diag(matched_parts_idx).astype(float)
+            H_vel = np.zeros(H_pos.shape)
+            H = np.hstack([H_pos, H_vel])
+            self.filter.update(np.expand_dims(detection.flatten(), 0).T, None, H)
+        else:
+            print("\nError with detection format. Each point should be (x, y, confidence) or (x, y). Exiting...")
+            exit()
 
     def __repr__(self):
         if self.last_distance is None:

@@ -21,17 +21,18 @@ def convert_and_filter(poses):
     poses = poses[:, [1, 8]]  # We'll only track neck(1) and midhip(8)
     # Create filter for objects for which we haven't detected any of the parts we want to track
     poses = poses[np.any(poses > 0, axis=(1, 2)), :, :]
-    return poses[:, :, :2]  # Remove probabilities from keypoints
+    return [p for p in poses]
 
 def keypoints_distance(detected_pose, person):
+    detected_points = detected_pose[:, :2]  # We ignore confidence score for matching
     # Find min torax size
-    torax_length_detected_person = np.linalg.norm(detected_pose[0] - detected_pose[1])
+    torax_length_detected_person = np.linalg.norm(detected_points[0] - detected_points[1])
     estimated_pose = person.estimate
     torax_length_estimated_person = np.linalg.norm(estimated_pose[0] - estimated_pose[1])
     min_torax_size = min(torax_length_estimated_person, torax_length_detected_person)
 
     # Keypoints distance in terms of torax size
-    substraction = detected_pose - estimated_pose
+    substraction = detected_points - estimated_pose
     dists_per_point = np.linalg.norm(substraction, axis=1)
     keypoints_distance = np.mean(dists_per_point) / min_torax_size
 
