@@ -82,7 +82,6 @@ class Tracker:
 
 
 class TrackedObject():
-    """ TODO: This class and the kalman tracker class should be merged """
     count = 0
 
     def __init__(self, initial_detection, hit_inertia_min, hit_inertia_max, detection_threshold):
