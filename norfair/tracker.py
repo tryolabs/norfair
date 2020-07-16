@@ -113,7 +113,9 @@ class TrackedObject():
         self.filter.H = np.eye(dim_z, dim_x,)
 
         # Measurement uncertainty (sensor noise): numpy.array(dim_z, dim_z)
-        self.filter.R *= 1.
+        # TODO: maybe we should open this one to the users, as it lets them
+        #       chose between giving more/less importance to the detections
+        self.filter.R *= 4.
 
         # Initial state: numpy.array(dim_x, 1)
         self.filter.x[:dim_z] = np.expand_dims(initial_detection.flatten(), 0).T
@@ -152,6 +154,7 @@ class TrackedObject():
         if detection.shape[1] == 2:
             self.filter.update(np.expand_dims(detection.flatten(), 0).T, None, None)
         elif detection.shape[1] == 3:
+            # TODO use keypoint confidence information to change R on each sensor instead?
             matched_points_idx = detection[:, 2] > self.detection_threshold
             matched_parts_idx = np.array([[v, v] for v in matched_points_idx]).flatten()
             H_pos = np.diag(matched_parts_idx).astype(float)
