@@ -3,28 +3,26 @@ import numpy as np
 
 def draw_points(frame, detections, radius=None, thickness=None, color=None):
     if radius is None:
-        frame_scale = frame.shape[0] * frame.shape[1] / 400000
-        radius = int(max(frame_scale * 1.3, 1))
+        frame_scale = frame.shape[0] * frame.shape[1] / 200000
+        radius = int(max(frame_scale * 0.7, 1))
     if thickness is None:
-        frame_scale = frame.shape[0] * frame.shape[1] / 4000000
-        thickness = int(max(frame_scale * 1.4, 1))
+        frame_scale = frame.shape[0] * frame.shape[1] / 2000000
+        thickness = int(max(frame_scale, 1))
     if color is None:
         color = Color.red
 
     for d in detections:
-        if d.shape[1] == 3:
-            d = d[:, :2]  # Remove confidences if present, so only x, y coordinates remain
-        for point in d:
+        for point in d.points:
             cv2.circle(frame, tuple(point.astype(int)), radius=radius, color=color, thickness=thickness)
 
-def draw_estimates(frame, objects, radius=None, thickness=None, color=None, id_size=None):
-    frame_scale = frame.shape[0] * frame.shape[1] / 400000
+def draw_estimates(frame, objects, radius=None, color=None, id_size=None, id_thickness=None):
+    frame_scale = frame.shape[0] * frame.shape[1] / 200000
     if radius is None:
-        radius = int(frame_scale)
+        radius = int(frame_scale * 0.5)
     if id_size is None:
-        id_size = frame_scale / 5
-    if thickness is None:
-        thickness = int(frame_scale / 5)
+        id_size = frame_scale / 10
+    if id_thickness is None:
+        id_thickness = int(frame_scale / 10)
 
     for obj in objects:
         if color is None:
@@ -40,7 +38,7 @@ def draw_estimates(frame, objects, radius=None, thickness=None, color=None, id_s
         id_draw_position = centroid(obj.estimate)
         cv2.putText(
             frame, str(obj.id), id_draw_position, cv2.FONT_HERSHEY_SIMPLEX, id_size,
-            id_color, thickness, cv2.LINE_AA
+            id_color, id_thickness, cv2.LINE_AA
         )
 
 def centroid(points):

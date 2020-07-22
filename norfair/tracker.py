@@ -81,9 +81,8 @@ class Tracker:
         return [p for p in self.objects if not p.is_initializing]
 
 
-class TrackedObject():
+class TrackedObject:
     count = 0
-
     def __init__(self, initial_detection, hit_inertia_min, hit_inertia_max, detection_threshold):
         self.hit_inertia_min = hit_inertia_min
         self.hit_inertia_max = hit_inertia_max
@@ -94,7 +93,7 @@ class TrackedObject():
         self.is_initializing_flag = True
         self.id = None
         self.initializing_id = random.randint(0, 9999)
-        self.setup_kf(initial_detection)
+        self.setup_kf(initial_detection.points)
 
     def setup_kf(self, initial_detection):
         tracked_points_num = initial_detection.shape[0]
@@ -148,22 +147,16 @@ class TrackedObject():
         if self.hit_counter < self.hit_inertia_max:
             self.hit_counter += 2
 
-        # We use a kalman filter in which we consider each point as a sensor.
-        # This is a hacky way to update only certain sensors (only points which were detected).
-        # Hardcoded to our case in which x contains pos and vel for each pos.
-        if detection.shape[1] == 2:
-            self.filter.update(np.expand_dims(detection.flatten(), 0).T, None, None)
-        elif detection.shape[1] == 3:
-            # TODO use keypoint confidence information to change R on each sensor instead?
-            matched_points_idx = detection[:, 2] > self.detection_threshold
-            matched_parts_idx = np.array([[v, v] for v in matched_points_idx]).flatten()
-            H_pos = np.diag(matched_parts_idx).astype(float)
-            H_vel = np.zeros(H_pos.shape)
-            H = np.hstack([H_pos, H_vel])
-            self.filter.update(np.expand_dims(detection.flatten(), 0).T, None, H)
-        else:
-            print("\nError with detection format. Each point should be (x, y, confidence) or (x, y). Exiting...")
-            exit()
+        # We use a kalman filter in which we consider each coordinate on each point as a sensor.
+        # This is a hacky way to update only certain sensors (only x, y coordinates for
+        # points which were detected).
+        # TODO: Use keypoint confidence information to change R on each sensor instead?
+        points_over_threshold_idx = detection.scores > self.detection_threshold
+        matched_sensors_idx = np.array([[s, s] for s in points_over_threshold_idx]).flatten()
+        H_pos = np.diag(matched_sensors_idx).astype(float)  # We measure x, y positions
+        H_vel = np.zeros(H_pos.shape)  # But we don't directly measure velocity
+        H = np.hstack([H_pos, H_vel])
+        self.filter.update(np.expand_dims(detection.points.flatten(), 0).T, None, H)
 
     def __repr__(self):
         if self.last_distance is None:
@@ -171,3 +164,10 @@ class TrackedObject():
         else:
             placeholder_text = "\033[1mObject_{}\033[0m(age: {}, hit_counter: {}, last_distance: {:.2f}, init_id: {})"
         return placeholder_text.format(self.id, self.age, self.hit_counter, self.last_distance, self.initializing_id)
+
+
+class Detection:
+    def __init__(self, points, scores=None, data=None):
+        self.points = points
+        self.scores = scores
+        self.data = data
