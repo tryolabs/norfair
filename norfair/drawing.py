@@ -2,12 +2,11 @@ import cv2
 import numpy as np
 
 def draw_points(frame, detections, radius=None, thickness=None, color=None):
+    frame_scale = frame.shape[0] / 100
     if radius is None:
-        frame_scale = frame.shape[0] * frame.shape[1] / 200000
         radius = int(max(frame_scale * 0.7, 1))
     if thickness is None:
-        frame_scale = frame.shape[0] * frame.shape[1] / 2000000
-        thickness = int(max(frame_scale, 1))
+        thickness = int(max(frame_scale / 7, 1))
     if color is None:
         color = Color.red
 
@@ -16,7 +15,7 @@ def draw_points(frame, detections, radius=None, thickness=None, color=None):
             cv2.circle(frame, tuple(point.astype(int)), radius=radius, color=color, thickness=thickness)
 
 def draw_estimates(frame, objects, radius=None, color=None, id_size=None, id_thickness=None):
-    frame_scale = frame.shape[0] * frame.shape[1] / 200000
+    frame_scale = frame.shape[0] / 100
     if radius is None:
         radius = int(frame_scale * 0.5)
     if id_size is None:
