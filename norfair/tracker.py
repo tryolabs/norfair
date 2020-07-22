@@ -6,18 +6,16 @@ import random
 
 
 class Tracker:
-    def __init__(self, distance_function, hit_inertia_min=10, hit_inertia_max=25, match_distance_threshold=0.5,
+    def __init__(self, distance_function, hit_inertia_min=10, hit_inertia_max=25, match_distance_threshold=1,
                  detection_threshold=0):
         self.objects = []
         self.distance_function = distance_function
-        # TODO: Make the inertias depend on fps and dt??
         self.hit_inertia_min = hit_inertia_min
         self.hit_inertia_max = hit_inertia_max
         self.match_distance_threshold = match_distance_threshold
         self.detection_threshold = detection_threshold
 
-    def update(self, detections, dt=1):
-        # TODO: Handle dt != 1
+    def update(self, detections=None, period=1):
         # Remove stale trackers and make candidate object real if it has hit inertia
         self.objects = [o for o in self.objects if o.has_inertia]
 
@@ -26,7 +24,7 @@ class Tracker:
             obj.tracker_step()
 
         # Update/create trackers
-        if len(detections) > 0:
+        if detections is not None and len(detections) > 0:
             distance_matrix = np.zeros((len(detections), len(self.objects)), dtype=np.float32)
             for d, detection in enumerate(detections):
                 for o, obj in enumerate(self.objects):
@@ -53,7 +51,7 @@ class Tracker:
                     matched_detection = detections[match_pair[0]]
                     matched_object = self.objects[match_pair[1]]
                     if match_distance < self.match_distance_threshold:
-                        matched_object.hit(matched_detection)
+                        matched_object.hit(matched_detection, period=period)
                         matched_object.last_distance = match_distance
                     else:
                         unmatched_detections.append(matched_detection)
@@ -63,7 +61,11 @@ class Tracker:
                     if d not in matched_row_indices:
                         self.objects.append(
                             TrackedObject(
-                                detection, self.hit_inertia_min, self.hit_inertia_max, self.detection_threshold
+                                detection,
+                                self.hit_inertia_min,
+                                self.hit_inertia_max,
+                                self.detection_threshold,
+                                period
                             )
                         )
             else:
@@ -71,7 +73,11 @@ class Tracker:
                 for detection in detections:
                     self.objects.append(
                         TrackedObject(
-                            detection, self.hit_inertia_min, self.hit_inertia_max, self.detection_threshold
+                            detection,
+                            self.hit_inertia_min,
+                            self.hit_inertia_max,
+                            self.detection_threshold,
+                            period
                         )
                     )
 
@@ -83,11 +89,11 @@ class Tracker:
 
 class TrackedObject:
     count = 0
-    def __init__(self, initial_detection, hit_inertia_min, hit_inertia_max, detection_threshold):
+    def __init__(self, initial_detection, hit_inertia_min, hit_inertia_max, detection_threshold, period=1):
         self.hit_inertia_min = hit_inertia_min
         self.hit_inertia_max = hit_inertia_max
         self.detection_threshold = detection_threshold
-        self.hit_counter = hit_inertia_min
+        self.hit_counter = hit_inertia_min + period
         self.last_distance = None
         self.age = 0
         self.is_initializing_flag = True
@@ -143,9 +149,9 @@ class TrackedObject:
         velocities = self.filter.x.T.flatten()[self.dim_z:].reshape(-1, 2)
         return positions
 
-    def hit(self, detection):
+    def hit(self, detection, period=1):
         if self.hit_counter < self.hit_inertia_max:
-            self.hit_counter += 2
+            self.hit_counter += 2 * period
 
         # We use a kalman filter in which we consider each coordinate on each point as a sensor.
         # This is a hacky way to update only certain sensors (only x, y coordinates for

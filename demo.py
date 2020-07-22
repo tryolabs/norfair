@@ -44,14 +44,19 @@ pose_detector = OpenposeDetector()
 for v in [
         "/home/lalo/data/videos/in/peatonal_sarandi/hard_10s.mp4",
 ]:
-    video = Video(input_path=v, output_path="out")
+    video = Video(input_path=v, output_path="/home/lalo/out")
     tracker = Tracker(distance_function=keypoints_distance)
 
-    for frame in video:
-        detected_poses = pose_detector(frame)
-        converted_detections = convert_and_filter(detected_poses)
-        estimates = tracker.update(converted_detections, dt=1)
-        norfair.draw_points(frame, converted_detections)
+    import random
+    for i, frame in enumerate(video):
+        detection_period = random.randint(1, 5)
+        if i % detection_period == 0:
+            detected_poses = pose_detector(frame)
+            detections = convert_and_filter(detected_poses)
+            estimates = tracker.update(detections=detections, period=detection_period)
+        else:
+            estimates = tracker.update()
+        norfair.draw_points(frame, detections)
         norfair.draw_estimates(frame, estimates)
-        #  video.write(frame)
-        video.show(frame, downsample_ratio=1)
+        video.write(frame)
+        # video.show(frame, downsample_ratio=1)
