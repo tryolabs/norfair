@@ -95,6 +95,7 @@ class TrackedObject:
         self.detection_threshold = detection_threshold
         self.hit_counter = hit_inertia_min + period
         self.last_distance = None
+        self.last_detection = initial_detection
         self.age = 0
         self.is_initializing_flag = True
         self.id = None
@@ -150,6 +151,7 @@ class TrackedObject:
         return positions
 
     def hit(self, detection, period=1):
+        self.last_detection = detection
         if self.hit_counter < self.hit_inertia_max:
             self.hit_counter += 2 * period
 
