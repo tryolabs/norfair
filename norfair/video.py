@@ -86,6 +86,10 @@ class Video():
         if os.path.isdir(self.output_path):
             file_name = self.input_path.split('/')[-1].split('.')[0]
             return self.output_path + '/' + prefix + file_name + "_out" + extension
-        else:
+        elif self.output_path[-4:] in [".avi", ".mp4"]:
             return self.output_path
-
+        else:
+            # TODO: Check that we support mp4
+            print(f"'{self.output_path}' is not an existing folder or an avi/mp4 filename.")
+            print("Exiting...")
+            exit()
