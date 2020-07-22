@@ -1,8 +1,11 @@
 [tool.poetry]
 name = "norfair"
 version = "0.1.0"
-description = ""
+description = "Simple object tracker"
+license = "BSD-3-Clause"
 authors = ["joaqo <joaquin.alori@gmail.com>"]
+repository = "https://github.com/tryolabs/norfair"
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.6"
