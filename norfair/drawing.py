@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 
 def draw_points(frame, detections, radius=None, thickness=None, color=None):
+    if detections is None:
+        return
     frame_scale = frame.shape[0] / 100
     if radius is None:
         radius = int(max(frame_scale * 0.7, 1))
@@ -14,7 +16,7 @@ def draw_points(frame, detections, radius=None, thickness=None, color=None):
         for point in d.points:
             cv2.circle(frame, tuple(point.astype(int)), radius=radius, color=color, thickness=thickness)
 
-def draw_estimates(frame, objects, radius=None, color=None, id_size=None, id_thickness=None):
+def draw_tracked_objects(frame, objects, radius=None, color=None, id_size=None, id_thickness=None):
     frame_scale = frame.shape[0] / 100
     if radius is None:
         radius = int(frame_scale * 0.5)

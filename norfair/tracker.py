@@ -14,6 +14,8 @@ class Tracker:
         self.hit_inertia_max = hit_inertia_max
         self.match_distance_threshold = match_distance_threshold
         self.detection_threshold = detection_threshold
+        TrackedObject.count = 0
+
 
     def update(self, detections=None, period=1):
         # Remove stale trackers and make candidate object real if it has hit inertia
@@ -25,22 +27,26 @@ class Tracker:
 
         # Update/create trackers
         if detections is not None and len(detections) > 0:
-            distance_matrix = np.zeros((len(detections), len(self.objects)), dtype=np.float32)
+            distance_matrix = np.ones((len(detections), len(self.objects)), dtype=np.float32)
+            distance_matrix *= self.match_distance_threshold + 1
             for d, detection in enumerate(detections):
                 for o, obj in enumerate(self.objects):
-                    distance_matrix[d, o] = self.distance_function(detection, obj)
-
-            # Filter detections and objects with no chance of getting matched so we
-            # dont force the hungarian algorithm to minimize them and therefore
-            # introduce the possibility of sub optimal results.
-            # The following 10000000's are just arbitrary very large numbers
-            distance_matrix[np.all(distance_matrix > self.match_distance_threshold, axis=1)] = 10000000
-            distance_matrix[:, np.all(distance_matrix > self.match_distance_threshold, axis=0)] = 10000000
+                    distance = self.distance_function(detection, obj)
+                    # Cap detections and objects with no chance of getting matched so we
+                    # dont force the hungarian algorithm to minimize them and therefore
+                    # introduce the possibility of sub optimal results.
+                    if distance > self.match_distance_threshold:
+                        distance_matrix[d, o] = self.match_distance_threshold + 1
+                    distance_matrix[d, o] = distance
 
             if np.isnan(distance_matrix).any():
-                print("Found nan values in distance matrix, check your distance function for bugs")
+                print("\nReceived nan values from distance function, please check your distance function for errors!")
+                exit()
             if np.isinf(distance_matrix).any():
-                print("Found inf values in distance matrix, check your distance function for bugs")
+                print("\nReceived inf values from distance function, please check your distance function for errors!")
+                print("If you want to explicitly ignore a certain detection - tracked object pair, just")
+                print("return match_distance_threshold + 1 from your distance function.")
+                exit()
             matched_row_indices, matched_col_indices = linear_sum_assignment(distance_matrix)
             if len(matched_row_indices) > 0:
                 unmatched_detections = [d for i, d in enumerate(detections) if i not in matched_row_indices]
@@ -99,7 +105,7 @@ class TrackedObject:
         self.age = 0
         self.is_initializing_flag = True
         self.id = None
-        self.initializing_id = random.randint(0, 9999)
+        self.initializing_id = random.randint(0, 9999)  # Just for debugging
         self.setup_kf(initial_detection.points)
 
     def setup_kf(self, initial_detection):
