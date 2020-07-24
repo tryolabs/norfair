@@ -166,9 +166,12 @@ class TrackedObject:
         # This is a hacky way to update only certain sensors (only x, y coordinates for
         # points which were detected).
         # TODO: Use keypoint confidence information to change R on each sensor instead?
-        points_over_threshold_idx = detection.scores > self.detection_threshold
-        matched_sensors_idx = np.array([[s, s] for s in points_over_threshold_idx]).flatten()
-        H_pos = np.diag(matched_sensors_idx).astype(float)  # We measure x, y positions
+        if detection.scores is not None:
+            points_over_threshold_idx = detection.scores > self.detection_threshold
+            matched_sensors_idx = np.array([[s, s] for s in points_over_threshold_idx]).flatten()
+            H_pos = np.diag(matched_sensors_idx).astype(float)  # We measure x, y positions
+        else:
+            H_pos = np.identity(detection.points.size)
         H_vel = np.zeros(H_pos.shape)  # But we don't directly measure velocity
         H = np.hstack([H_pos, H_vel])
         self.filter.update(np.expand_dims(detection.points.flatten(), 0).T, None, H)
