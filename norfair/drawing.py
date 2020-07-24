@@ -16,7 +16,7 @@ def draw_points(frame, detections, radius=None, thickness=None, color=None):
         for point in d.points:
             cv2.circle(frame, tuple(point.astype(int)), radius=radius, color=color, thickness=thickness)
 
-def draw_tracked_objects(frame, objects, radius=None, color=None, id_size=None, id_thickness=None):
+def draw_tracked_objects(frame, objects, radius=None, color=None, id_size=None, id_thickness=None, draw_points=True):
     frame_scale = frame.shape[0] / 100
     if radius is None:
         radius = int(frame_scale * 0.5)
@@ -33,14 +33,16 @@ def draw_tracked_objects(frame, objects, radius=None, color=None, id_size=None, 
             point_color = color
             id_color = color
 
-        for point in obj.estimate:
-            cv2.circle(frame, tuple(point.astype(int)), radius=radius, color=point_color, thickness=-1)
+        if draw_points:
+            for point in obj.estimate:
+                cv2.circle(frame, tuple(point.astype(int)), radius=radius, color=point_color, thickness=-1)
 
-        id_draw_position = centroid(obj.estimate)
-        cv2.putText(
-            frame, str(obj.id), id_draw_position, cv2.FONT_HERSHEY_SIMPLEX, id_size,
-            id_color, id_thickness, cv2.LINE_AA
-        )
+        if id_size > 0:
+            id_draw_position = centroid(obj.estimate)
+            cv2.putText(
+                frame, str(obj.id), id_draw_position, cv2.FONT_HERSHEY_SIMPLEX, id_size,
+                id_color, id_thickness, cv2.LINE_AA
+            )
 
 def centroid(points):
     length = points.shape[0]
