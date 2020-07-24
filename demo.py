@@ -47,6 +47,7 @@ pose_detector = OpenposeDetector()
 for v in [
         "/home/lalo/data/facial_masks_detection/short.mp4",
         "/home/lalo/data/videos/in/peatonal_sarandi/hard_10s.mp4",
+        "/home/lalo/data/videos/in/cu.mp4",
         "/home/lalo/data/videos/in/trr/trr_cut_short.mp4"
 ]:
     video = Video(input_path=v, output_path="/home/lalo/data/videos/out/norfair/")

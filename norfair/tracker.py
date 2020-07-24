@@ -37,7 +37,8 @@ class Tracker:
                     # introduce the possibility of sub optimal results.
                     if distance > self.match_distance_threshold:
                         distance_matrix[d, o] = self.match_distance_threshold + 1
-                    distance_matrix[d, o] = distance
+                    else:
+                        distance_matrix[d, o] = distance
 
             if np.isnan(distance_matrix).any():
                 print("\nReceived nan values from distance function, please check your distance function for errors!")
