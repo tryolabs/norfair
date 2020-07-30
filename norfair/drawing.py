@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from .utils import validate_points
 
 def draw_points(frame, detections, radius=None, thickness=None, color=None):
     if detections is None:
@@ -13,7 +14,10 @@ def draw_points(frame, detections, radius=None, thickness=None, color=None):
         color = Color.red
 
     for d in detections:
-        for point in d.points:
+        points = d.points
+        points = validate_points(points)
+
+        for point in points:
             cv2.circle(frame, tuple(point.astype(int)), radius=radius, color=color, thickness=thickness)
 
 def draw_tracked_objects(frame, objects, radius=None, color=None, id_size=None, id_thickness=None, draw_points=True):

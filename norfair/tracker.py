@@ -2,6 +2,7 @@ import numpy as np
 
 from scipy.optimize import linear_sum_assignment
 from filterpy.kalman import KalmanFilter
+from .utils import validate_points
 import random
 
 
@@ -110,6 +111,8 @@ class TrackedObject:
         self.setup_kf(initial_detection.points)
 
     def setup_kf(self, initial_detection):
+        initial_detection = validate_points(initial_detection)
+
         tracked_points_num = initial_detection.shape[0]
         dim_x = 2 * 2 * tracked_points_num  # We need to accomodate for velocities
         dim_z = 2 * tracked_points_num
@@ -158,6 +161,9 @@ class TrackedObject:
         return positions
 
     def hit(self, detection, period=1):
+        points = detection.points
+        points = validate_points(points)
+
         self.last_detection = detection
         if self.hit_counter < self.hit_inertia_max:
             self.hit_counter += 2 * period
@@ -171,10 +177,10 @@ class TrackedObject:
             matched_sensors_idx = np.array([[s, s] for s in points_over_threshold_idx]).flatten()
             H_pos = np.diag(matched_sensors_idx).astype(float)  # We measure x, y positions
         else:
-            H_pos = np.identity(detection.points.size)
+            H_pos = np.identity(points.size)
         H_vel = np.zeros(H_pos.shape)  # But we don't directly measure velocity
         H = np.hstack([H_pos, H_vel])
-        self.filter.update(np.expand_dims(detection.points.flatten(), 0).T, None, H)
+        self.filter.update(np.expand_dims(points.flatten(), 0).T, None, H)
 
     def __repr__(self):
         if self.last_distance is None:
