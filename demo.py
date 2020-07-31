@@ -62,5 +62,6 @@ for v in [
         else:
             tracked_objects = tracker.update()
         norfair.draw_tracked_objects(frame, tracked_objects)
+        # norfair.draw_debug_metrics(frame, tracker.objects)
         video.write(frame)
         # video.show(frame, downsample_ratio=1)

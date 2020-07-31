@@ -48,6 +48,50 @@ def draw_tracked_objects(frame, objects, radius=None, color=None, id_size=None, 
                 id_color, id_thickness, cv2.LINE_AA
             )
 
+def draw_debug_metrics(frame, objects, text_size=None, text_thickness=None, color=None):
+    frame_scale = frame.shape[0] / 100
+    if text_size is None:
+        text_size = frame_scale / 10
+    if text_thickness is None:
+        text_thickness = int(frame_scale / 5)
+    radius = int(frame_scale * 0.5)
+
+    for obj in objects:
+        if color is None:
+            text_color = Color.random(obj.initializing_id)
+        else:
+            text_color = color
+        draw_position = centroid(obj.estimate)
+
+        for point in obj.estimate:
+            cv2.circle(frame, tuple(point.astype(int)), radius=radius, color=text_color, thickness=-1)
+
+        # Interframe distance
+        dist = obj.last_distance
+        if dist is None:
+            dist = "-"
+        elif dist > 1000:
+            dist = ">"
+        else:
+            dist = "{:.1f}".format(dist)
+
+        # No support for multiline text in opencv :facepalm:
+        lines_to_draw = (
+            "{}|{}".format(obj.id, obj.initializing_id),
+            "d:{}".format(dist),
+            "a:{}".format(obj.age),
+            "h:{}".format(obj.hit_counter),
+        )
+        for i, line in enumerate(lines_to_draw):
+            draw_position = (
+                int(draw_position[0]),
+                int(draw_position[1] + i * text_size * 7 + 15)
+            )
+            cv2.putText(
+                frame, line, draw_position, cv2.FONT_HERSHEY_SIMPLEX, text_size,
+                text_color, text_thickness, cv2.LINE_AA
+            )
+
 def centroid(points):
     length = points.shape[0]
     sum_x = np.sum(points[:, 0])

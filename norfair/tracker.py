@@ -97,6 +97,7 @@ class Tracker:
 
 class TrackedObject:
     count = 0
+    initializing_count = 0
     def __init__(self, initial_detection, hit_inertia_min, hit_inertia_max, detection_threshold, period=1):
         self.hit_inertia_min = hit_inertia_min
         self.hit_inertia_max = hit_inertia_max
@@ -107,7 +108,8 @@ class TrackedObject:
         self.age = 0
         self.is_initializing_flag = True
         self.id = None
-        self.initializing_id = random.randint(0, 9999)  # Just for debugging
+        self.initializing_id = TrackedObject.initializing_count  # Just for debugging
+        TrackedObject.initializing_count += 1
         self.setup_kf(initial_detection.points)
 
     def setup_kf(self, initial_detection):
