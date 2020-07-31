@@ -49,6 +49,7 @@ class Tracker:
                 print("If you want to explicitly ignore a certain detection - tracked object pair, just")
                 print("return match_distance_threshold + 1 from your distance function.")
                 exit()
+
             matched_row_indices, matched_col_indices = linear_sum_assignment(distance_matrix)
             if len(matched_row_indices) > 0:
                 unmatched_detections = [d for i, d in enumerate(detections) if i not in matched_row_indices]
@@ -63,34 +64,20 @@ class Tracker:
                         matched_object.last_distance = match_distance
                     else:
                         unmatched_detections.append(matched_detection)
-
-                # Create new objects from unmatched detections
-                for d, detection in enumerate(detections):
-                    if d not in matched_row_indices:
-                        self.objects.append(
-                            TrackedObject(
-                                detection,
-                                self.hit_inertia_min,
-                                self.hit_inertia_max,
-                                self.detection_threshold,
-                                period
-                            )
-                        )
             else:
-                # Create new objects from remaining unmatched detections
-                for detection in detections:
-                    self.objects.append(
-                        TrackedObject(
-                            detection,
-                            self.hit_inertia_min,
-                            self.hit_inertia_max,
-                            self.detection_threshold,
-                            period
-                        )
-                    )
+                unmatched_detections = detections
 
-        # Remove stale objects from self.objects list
-        self.objects = [p for p in self.objects if p.has_inertia]
+            # Create new objects from unmatched detections
+            for detection in unmatched_detections:
+                self.objects.append(
+                    TrackedObject(
+                        detection,
+                        self.hit_inertia_min,
+                        self.hit_inertia_max,
+                        self.detection_threshold,
+                        period
+                    )
+                )
 
         return [p for p in self.objects if not p.is_initializing]
 
