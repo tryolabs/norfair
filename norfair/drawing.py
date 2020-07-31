@@ -48,7 +48,14 @@ def draw_tracked_objects(frame, objects, radius=None, color=None, id_size=None, 
                 id_color, id_thickness, cv2.LINE_AA
             )
 
-def draw_debug_metrics(frame, objects, text_size=None, text_thickness=None, color=None):
+def draw_debug_metrics(frame, objects, text_size=None, text_thickness=None, color=None,
+                       only_ids=None, only_initializing_ids=None):
+    """Draw objects with their debug information
+
+    It is recommended to set the input variable `objects` to `your_tracker_object.objects`
+    so you can also debug objects wich haven't finished initializing, and you get a more
+    complete view of what your tracker is doing on each step.
+    """
     frame_scale = frame.shape[0] / 100
     if text_size is None:
         text_size = frame_scale / 10
@@ -57,6 +64,10 @@ def draw_debug_metrics(frame, objects, text_size=None, text_thickness=None, colo
     radius = int(frame_scale * 0.5)
 
     for obj in objects:
+        if only_ids is not None:
+            if obj.id not in only_ids: continue
+        if only_initializing_ids is not None:
+            if obj.initializing_id not in only_initializing_ids: continue
         if color is None:
             text_color = Color.random(obj.initializing_id)
         else:
