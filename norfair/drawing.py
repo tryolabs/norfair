@@ -129,5 +129,8 @@ class Color():
 
     @staticmethod
     def random(obj_id):
-        color_list = [c for c in Color.__dict__.keys() if c[:2] != "__" and c != "random"]
+        color_list = [
+            c for c in Color.__dict__.keys()
+            if c[:2] != "__" and c not in ("random", "red", "white", "grey", "black")
+        ]
         return getattr(Color, color_list[obj_id % len(color_list)])
