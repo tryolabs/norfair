@@ -50,15 +50,15 @@ class Tracker:
                 print("return match_distance_threshold + 1 from your distance function.")
                 exit()
 
-            matched_row_indices, matched_col_indices = linear_sum_assignment(distance_matrix)
-            if len(matched_row_indices) > 0:
-                unmatched_detections = [d for i, d in enumerate(detections) if i not in matched_row_indices]
+            matched_det_indices, matched_obj_indices = linear_sum_assignment(distance_matrix)
+            if len(matched_det_indices) > 0:
+                unmatched_detections = [d for i, d in enumerate(detections) if i not in matched_det_indices]
 
                 # Handle matched people/detections
-                for match_pair in zip(matched_row_indices, matched_col_indices):
-                    match_distance = distance_matrix[match_pair[0], match_pair[1]]
-                    matched_detection = detections[match_pair[0]]
-                    matched_object = self.objects[match_pair[1]]
+                for (match_det_idx, match_obj_idx) in zip(matched_det_indices, matched_obj_indices):
+                    match_distance = distance_matrix[match_det_idx, match_obj_idx]
+                    matched_detection = detections[match_det_idx]
+                    matched_object = self.objects[match_obj_idx]
                     if match_distance < self.match_distance_threshold:
                         matched_object.hit(matched_detection, period=period)
                         matched_object.last_distance = match_distance
