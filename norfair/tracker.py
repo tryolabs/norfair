@@ -1,6 +1,5 @@
 import numpy as np
 
-from scipy.optimize import linear_sum_assignment
 from filterpy.kalman import KalmanFilter
 from .utils import validate_points
 import random
@@ -64,6 +63,7 @@ class Tracker:
                     # Cap detections and objects with no chance of getting matched so we
                     # dont force the hungarian algorithm to minimize them and therefore
                     # introduce the possibility of sub optimal results.
+                    # Note: This is probably not needed with the new distance minimizing algorithm
                     if distance > self.match_distance_threshold:
                         distance_matrix[d, o] = self.match_distance_threshold + 1
                     else:
@@ -78,7 +78,7 @@ class Tracker:
                 print("return match_distance_threshold + 1 from your distance function.")
                 exit()
 
-            matched_det_indices, matched_obj_indices = linear_sum_assignment(distance_matrix)
+            matched_det_indices, matched_obj_indices = self.match_dets_and_objs(distance_matrix)
             if len(matched_det_indices) > 0:
                 unmatched_detections = [d for i, d in enumerate(detections) if i not in matched_det_indices]
 
@@ -98,6 +98,41 @@ class Tracker:
             unmatched_detections = detections
 
         return unmatched_detections
+
+    def match_dets_and_objs(self, distance_matrix):
+        """Matches detections with tracked_objects from a distance matrix
+
+        I used to match by minimizing the global distances, but found several
+        cases in which this was not optimal. So now I just match by starting
+        with the global minimum distance and matching the det-obj corresponding
+        to that distance, then taking the second minimum, and so on until we
+        reach the match_distance_threshold.
+
+        This avoids the the algorithm getting cute with us and matching things
+        that shouldn't be matching just for the sake of minimizing the global
+        distance, which is what used to happen
+        """
+        # NOTE: This implementation is terribly inefficient, but it doesn't
+        #       seem to affect the fps at all.
+        distance_matrix = distance_matrix.copy()
+        if distance_matrix.size > 0:
+            det_idxs = []
+            obj_idxs = []
+            current_min = distance_matrix.min()
+
+            while current_min < self.match_distance_threshold:
+                flattened_arg_min = distance_matrix.argmin()
+                det_idx = flattened_arg_min // distance_matrix.shape[1]
+                obj_idx = flattened_arg_min % distance_matrix.shape[1]
+                det_idxs.append(det_idx)
+                obj_idxs.append(obj_idx)
+                distance_matrix[det_idx, :] = self.match_distance_threshold + 1
+                distance_matrix[:, obj_idx] = self.match_distance_threshold + 1
+                current_min = distance_matrix.min()
+
+            return det_idxs, obj_idxs
+        else:
+            return [], []
 
 
 class TrackedObject:
