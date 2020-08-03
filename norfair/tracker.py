@@ -9,7 +9,7 @@ import random
 class Tracker:
     def __init__(self, distance_function, hit_inertia_min=10, hit_inertia_max=25, match_distance_threshold=1,
                  detection_threshold=0):
-        self.objects = []
+        self.tracked_objects = []
         self.distance_function = distance_function
         self.hit_inertia_min = hit_inertia_min
         self.hit_inertia_max = hit_inertia_max
@@ -19,19 +19,47 @@ class Tracker:
 
 
     def update(self, detections=None, period=1):
+        self.period = period
+
         # Remove stale trackers and make candidate object real if it has hit inertia
-        self.objects = [o for o in self.objects if o.has_inertia]
+        self.tracked_objects = [o for o in self.tracked_objects if o.has_inertia]
 
         # Update tracker
-        for obj in self.objects:
+        for obj in self.tracked_objects:
             obj.tracker_step()
 
-        # Update/create trackers
+        # Update initialized tracked objects with detections
+        unmatched_detections = self.update_objects_in_place(
+            [o for o in self.tracked_objects if not o.is_initializing],
+            detections
+        )
+
+        # Update not yet initialized tracked objects with yet unmatched detections
+        unmatched_detections = self.update_objects_in_place(
+            [o for o in self.tracked_objects if o.is_initializing],
+            unmatched_detections
+        )
+
+        # Create new tracked objects from remaining unmatched detections
+        for detection in unmatched_detections:
+            self.tracked_objects.append(
+                TrackedObject(
+                    detection,
+                    self.hit_inertia_min,
+                    self.hit_inertia_max,
+                    self.detection_threshold,
+                    self.period
+                )
+            )
+
+        return [p for p in self.tracked_objects if not p.is_initializing]
+
+    def update_objects_in_place(self, objects, detections):
         if detections is not None and len(detections) > 0:
-            distance_matrix = np.ones((len(detections), len(self.objects)), dtype=np.float32)
+            distance_matrix = np.ones((len(detections), len(objects)), dtype=np.float32)
             distance_matrix *= self.match_distance_threshold + 1
             for d, detection in enumerate(detections):
-                for o, obj in enumerate(self.objects):
+                for o, obj in enumerate(objects):
                     distance = self.distance_function(detection, obj)
                     # Cap detections and objects with no chance of getting matched so we
                     # dont force the hungarian algorithm to minimize them and therefore
@@ -58,28 +86,18 @@ class Tracker:
                 for (match_det_idx, match_obj_idx) in zip(matched_det_indices, matched_obj_indices):
                     match_distance = distance_matrix[match_det_idx, match_obj_idx]
                     matched_detection = detections[match_det_idx]
-                    matched_object = self.objects[match_obj_idx]
+                    matched_object = objects[match_obj_idx]
                     if match_distance < self.match_distance_threshold:
-                        matched_object.hit(matched_detection, period=period)
+                        matched_object.hit(matched_detection, period=self.period)
                         matched_object.last_distance = match_distance
                     else:
                         unmatched_detections.append(matched_detection)
             else:
                 unmatched_detections = detections
+        else:
+            unmatched_detections = detections
 
-            # Create new objects from unmatched detections
-            for detection in unmatched_detections:
-                self.objects.append(
-                    TrackedObject(
-                        detection,
-                        self.hit_inertia_min,
-                        self.hit_inertia_max,
-                        self.detection_threshold,
-                        period
-                    )
-                )
-
-        return [p for p in self.objects if not p.is_initializing]
+        return unmatched_detections
 
 
 class TrackedObject:
