@@ -72,10 +72,12 @@ class Video():
 
     def write(self, frame):
         if self.output_video is None:
+            # The user may need to access the output file path on their code
+            self.output_file_path = self.generate_output_path('.avi')
             fourcc = cv2.VideoWriter_fourcc(*'XVID')
             self.output_video = cv2.VideoWriter(
                 # TODO: Can we do mp4 instead of avi? Make this configurable?
-                self.generate_output_path('.avi'),
+                self.output_file_path,
                 fourcc,
                 self.fps,
                 (self.frame_width, self.frame_height)
@@ -96,8 +98,9 @@ class Video():
 
     def generate_output_path(self, extension, prefix=''):
         if os.path.isdir(self.output_path):
-            file_name = self.input_path.split('/')[-1].split('.')[0]
-            return self.output_path + '/' + prefix + file_name + "_out" + extension
+            base_file_name = self.input_path.split('/')[-1].split('.')[0]
+            file_name = prefix + base_file_name + "_out" + extension
+            return os.path.join(self.output_path, file_name)
         elif self.output_path[-4:] in [".avi", ".mp4"]:
             return self.output_path
         else:
