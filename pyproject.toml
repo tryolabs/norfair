@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "norfair"
-version = "0.1.2"
+version = "0.1.3"
 description = "Simple object tracker"
 license = "BSD-3-Clause"
 authors = ["joaqo <joaquin.alori@gmail.com>"]
