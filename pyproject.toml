@@ -10,8 +10,8 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.6"
 opencv-python = "^4.2.0"
-click = "^7.1.2"
 filterpy = "^1.4.5"
+rich = "^5.0.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

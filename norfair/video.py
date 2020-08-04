@@ -1,7 +1,9 @@
-import click
 import cv2
 import os
 import time
+
+from rich import print
+from rich.progress import Progress, BarColumn, TimeRemainingColumn
 
 class Video():
 
@@ -14,10 +16,9 @@ class Video():
         self.video_capture = cv2.VideoCapture(self.input_path)
         total_frames = int(self.video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
         if total_frames == 0:
-            click.echo(click.style("Error reading input video file.", bold=True))
-            click.echo(" Make sure file exists and is a video file.")
+            print("[bold red]Error reading input video file:[/bold red] Make sure file exists and is a video file.")
             if "~" in self.input_path:
-                click.echo(" Using ~ as abbreviation for your home folder is not supported.")
+                print("Using ~ as abbreviation for your home folder is not supported.")
             exit()
         self.frame_height = int(self.video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
         self.frame_width = int(self.video_capture.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -27,7 +28,7 @@ class Video():
         # Setup progressbar
         file_name = os.path.basename(self.input_path)
         _, terminal_columns = os.popen('stty size', 'r').read().split()
-        space_for_filename = int(terminal_columns) - 75  # Leave 75 space for progressbar
+        space_for_filename = int(terminal_columns) - 40  # Leave 40 space for progressbar
         abbreviated_file_name = (
             file_name if len(file_name) < space_for_filename
             else "{} ... {}".format(file_name[:space_for_filename // 2 - 3],
@@ -36,21 +37,32 @@ class Video():
         label = "{} {}x{}@{:.0f}fps".format(
             abbreviated_file_name, self.frame_width, self.frame_height, self.fps
         )
-        self.video_progress_bar = click.progressbar(length=total_frames, label=label)
+        self.progress_bar = Progress(
+            "[progress.description]{task.description}",
+            BarColumn(),
+            "[progress.percentage]{task.percentage:>3.0f}%",
+            TimeRemainingColumn(),
+            "[yellow]{task.fields[fps]:.2f}fps",
+            auto_refresh=False,
+            redirect_stdout=False,
+            redirect_stderr=False
+        )
+        self.task = self.progress_bar.add_task(label, total=total_frames, fps=0)
 
     # This is a generator, note the yield keyword below.
     def __iter__(self):
-        with self.video_progress_bar as progress_bar:
+        with self.progress_bar as progress_bar:
             start = time.time()
 
             # Iterate over video
-            for _ in progress_bar:
+            while True:
                 self.frame_counter += 1
-                _, frame = self.video_capture.read()
+                ret, frame = self.video_capture.read()
+                if ret is False or frame is None:
+                    break
+                process_fps = self.frame_counter / (time.time() - start)
+                progress_bar.update(self.task, advance=1, refresh=True, fps=process_fps)
                 yield frame
-
-            stop = time.time()
-            click.echo(f" {self.frame_counter / (stop - start):.2f} fps", nl=False)
 
         # Cleanup
         if self.output_video is not None:
