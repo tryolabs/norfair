@@ -150,9 +150,9 @@ class TrackedObject:
         self.id = None
         self.initializing_id = TrackedObject.initializing_count  # Just for debugging
         TrackedObject.initializing_count += 1
-        self.setup_kf(initial_detection.points)
+        self.setup_filter(initial_detection.points)
 
-    def setup_kf(self, initial_detection):
+    def setup_filter(self, initial_detection):
         initial_detection = validate_points(initial_detection)
 
         tracked_points_num = initial_detection.shape[0]
@@ -177,10 +177,13 @@ class TrackedObject:
 
         # Process uncertainty: numpy.array(dim_x, dim_x)
         # Don't decrease it too much or trackers pay too little attention to detections
-        self.filter.Q[dim_z:, dim_z:] /= 10
+        self.filter.Q /= 10
 
         # Initial state: numpy.array(dim_x, 1)
         self.filter.x[:dim_z] = np.expand_dims(initial_detection.flatten(), 0).T
+
+        # Estimation uncertainty: numpy.array(dim_x, dim_x)
+        self.filter.P[dim_z:, dim_z:] *= 10.
 
     def tracker_step(self):
         self.hit_counter -= 1
