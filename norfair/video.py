@@ -7,10 +7,11 @@ from rich.progress import Progress, BarColumn, TimeRemainingColumn
 
 class Video():
 
-    def __init__(self, input_path, output_path="."):
+    def __init__(self, input_path, output_path=".", label=""):
         self.input_path = input_path
         self.output_path = output_path
         self.output_video = None
+        self.label = label
 
         # Read Input Video
         self.video_capture = cv2.VideoCapture(self.input_path)
@@ -26,16 +27,15 @@ class Video():
         self.frame_counter = 0
 
         # Setup progressbar
-        file_name = os.path.basename(self.input_path)
+        description = os.path.basename(self.input_path)
+        if self.label:
+            description += f" | {self.label}"
         _, terminal_columns = os.popen('stty size', 'r').read().split()
-        space_for_filename = int(terminal_columns) - 40  # Leave 40 space for progressbar
-        abbreviated_file_name = (
-            file_name if len(file_name) < space_for_filename
-            else "{} ... {}".format(file_name[:space_for_filename // 2 - 3],
-                                    file_name[-space_for_filename // 2 + 3:])
-        )
-        label = "{} {}x{}@{:.0f}fps".format(
-            abbreviated_file_name, self.frame_width, self.frame_height, self.fps
+        space_for_description = int(terminal_columns) - 25  # Leave 25 space for progressbar
+        abbreviated_description = (
+            description if len(description) < space_for_description
+            else "{} ... {}".format(description[:space_for_description // 2 - 3],
+                                    description[-space_for_description // 2 + 3:])
         )
         self.progress_bar = Progress(
             "[progress.description]{task.description}",
@@ -47,7 +47,7 @@ class Video():
             redirect_stdout=False,
             redirect_stderr=False
         )
-        self.task = self.progress_bar.add_task(label, total=total_frames, fps=0)
+        self.task = self.progress_bar.add_task(abbreviated_description, total=total_frames, fps=0)
 
     # This is a generator, note the yield keyword below.
     def __iter__(self):
