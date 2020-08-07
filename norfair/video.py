@@ -47,7 +47,7 @@ class Video:
             BarColumn(),
             "[progress.percentage]{task.percentage:>3.0f}%",
             TimeRemainingColumn(),
-            "[yellow]{task.fields[fps]:.2f}fps",
+            "[yellow]{task.fields[fps]:.2f}fps[/yellow]",
             auto_refresh=False,
             redirect_stdout=False,
             redirect_stderr=False,
@@ -72,7 +72,7 @@ class Video:
         # Cleanup
         if self.output_video is not None:
             self.output_video.release()
-            print(f"[green]Video file saved: [/green][yellow]{self.output_file_path}[/yellow]")
+            print(f"[green]Output video file saved to: [/green][white]{self.output_file_path}[/white]")
         self.video_capture.release()
         cv2.destroyAllWindows()
 
