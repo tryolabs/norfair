@@ -7,41 +7,45 @@ from rich.progress import Progress, BarColumn, TimeRemainingColumn
 
 
 class Video:
-    def __init__(self, input_path, output_path=".", label="", codec_fourcc=None):
+    def __init__(self, camera=None, input_path=None, output_path=".", label="", codec_fourcc=None):
+        self.camera = camera
         self.input_path = input_path
         self.output_path = output_path
-        self.output_video = None
         self.label = label
         self.codec_fourcc = codec_fourcc
+        self.output_video = None
+
+        # Input validation
+        if (input_path is None and camera is None) or (input_path is not None and camera is not None):
+            raise ValueError("You must set either 'camera' or 'input_path' arguments when setting 'Video' class")
+        if camera is not None and type(camera) is not int:
+            raise ValueError("Argument 'camera' refers to the device-id of your camera, and must be an int. Setting it to 0 usually works if you don't know the id.")
 
         # Read Input Video
-        self.video_capture = cv2.VideoCapture(self.input_path)
-        total_frames = int(self.video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
-        if total_frames == 0:
-            fail_msg = "[bold red]Error reading input video file:[/bold red] Make sure file exists and is a video file."
-            if "~" in self.input_path:
-                fail_msg += (
-                    "\n[yellow]Using ~ as abbreviation for your home folder is not supported.[/yellow]"
-                )
-            self._fail(fail_msg)
-        self.input_frame_height = int(self.video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        self.input_frame_width = int(self.video_capture.get(cv2.CAP_PROP_FRAME_WIDTH))
+        if self.input_path is not None:
+            self.video_capture = cv2.VideoCapture(self.input_path)
+            total_frames = int(self.video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
+            if total_frames == 0:
+                fail_msg = "[bold red]Error reading input video file:[/bold red] Make sure file exists and is a video file."
+                if "~" in self.input_path:
+                    fail_msg += (
+                        "\n[yellow]Using ~ as abbreviation for your home folder is not supported.[/yellow]"
+                    )
+                self._fail(fail_msg)
+            description = os.path.basename(self.input_path)
+            indeterminate = False
+        else:
+            self.video_capture = cv2.VideoCapture(self.camera)
+            total_frames = 0
+            description = f"Camera({self.camera})"
+            indeterminate = True
         self.fps = self.video_capture.get(cv2.CAP_PROP_FPS)
         self.frame_counter = 0
 
         # Setup progressbar
-        description = os.path.basename(self.input_path)
         if self.label:
             description += f" | {self.label}"
-        _, terminal_columns = os.popen("stty size", "r").read().split()
-        space_for_description = int(terminal_columns) - 25  # Leave 25 space for progressbar
-        abbreviated_description = (
-            description
-            if len(description) < space_for_description
-            else "{} ... {}".format(
-                description[: space_for_description // 2 - 3], description[-space_for_description // 2 + 3 :]
-            )
-        )
+        abbreviated_description = self.abbreviate_description(description)
         self.progress_bar = Progress(
             "[progress.description]{task.description}",
             BarColumn(),
@@ -52,7 +56,9 @@ class Video:
             redirect_stdout=False,
             redirect_stderr=False,
         )
-        self.task = self.progress_bar.add_task(abbreviated_description, total=total_frames, fps=0)
+        self.task = self.progress_bar.add_task(
+            abbreviated_description, total=total_frames, start=not indeterminate, fps=0
+        )
 
     # This is a generator, note the yield keyword below.
     def __iter__(self):
@@ -103,9 +109,13 @@ class Video:
         cv2.waitKey(1)
 
     def get_output_file_path(self):
-        if os.path.isdir(self.output_path):
+        output_path_is_dir = os.path.isdir(self.output_path)
+        if output_path_is_dir and self.input_path is not None:
             base_file_name = self.input_path.split("/")[-1].split(".")[0]
             file_name = base_file_name + "_out.mp4"
+            return os.path.join(self.output_path, file_name)
+        elif output_path_is_dir and self.camera is not None:
+            file_name = f"camera_{self.camera}_out.mp4"
             return os.path.join(self.output_path, file_name)
         else:
             return self.output_path
@@ -125,4 +135,15 @@ class Video:
                 f"[bold red]Could not determine video codec for the provided output filename[/bold red]: "
                 f"[yellow]{filename}[/yellow]\n"
                 f"Please use '.mp4', '.avi', or provide a custom OpenCV fourcc codec name."
+            )
+
+    def abbreviate_description(self, description):
+        """Conditionally abbreviate description so that progress bar fits in small terminals"""
+        _, terminal_columns = os.popen("stty size", "r").read().split()
+        space_for_description = int(terminal_columns) - 25  # Leave 25 space for progressbar
+        if len(description) < space_for_description:
+            return description
+        else:
+            return "{} ... {}".format(
+                description[: space_for_description // 2 - 3], description[-space_for_description // 2 + 3 :]
             )
