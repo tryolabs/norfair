@@ -95,7 +95,7 @@ class Tracker:
             else:
                 unmatched_detections = detections
         else:
-            unmatched_detections = detections
+            unmatched_detections = []
 
         return unmatched_detections
 
