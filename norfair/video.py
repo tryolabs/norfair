@@ -72,7 +72,7 @@ class Video:
         # Cleanup
         if self.output_video is not None:
             self.output_video.release()
-            print(f"[green]Output video file saved to: [/green][white]{self.output_file_path}[/white]")
+            print(f"[white]Output video file saved to: {self.output_file_path}[/white]")
         self.video_capture.release()
         cv2.destroyAllWindows()
 
