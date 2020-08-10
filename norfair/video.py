@@ -45,7 +45,6 @@ class Video:
         # Setup progressbar
         if self.label:
             description += f" | {self.label}"
-        abbreviated_description = self.abbreviate_description(description)
         self.progress_bar = Progress(
             "[progress.description]{task.description}",
             BarColumn(),
@@ -57,7 +56,7 @@ class Video:
             redirect_stderr=False,
         )
         self.task = self.progress_bar.add_task(
-            abbreviated_description, total=total_frames, start=not indeterminate, fps=0
+            self.abbreviate_description(description), total=total_frames, start=not indeterminate, fps=0
         )
 
     # This is a generator, note the yield keyword below.
