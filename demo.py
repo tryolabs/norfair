@@ -45,8 +45,8 @@ import random
 detection_period = 1 # random.randint(1, 5)
 pose_detector = OpenposeDetector()
 for v in [
-        "/home/lalo/data/facial_masks_detection/short.mp4",
         "/home/lalo/data/videos/in/peatonal_sarandi/hard_10s.mp4",
+        "/home/lalo/data/facial_masks_detection/short.mp4",
         "/home/lalo/data/videos/in/cu.mp4",
         "/home/lalo/data/videos/in/trr/trr_cut_short.mp4"
 ]:
