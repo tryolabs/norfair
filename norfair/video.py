@@ -72,7 +72,7 @@ class Video:
         # Cleanup
         if self.output_video is not None:
             self.output_video.release()
-            print(f"[white]Output video file saved to: {self.output_file_path}[/white]")
+            print(f"[white]Output video file saved to: {self.get_output_file_path()}[/white]")
         self.video_capture.release()
         cv2.destroyAllWindows()
 
@@ -83,10 +83,10 @@ class Video:
     def write(self, frame):
         if self.output_video is None:
             # The user may need to access the output file path on their code
-            self.output_file_path = self.generate_output_path()
-            fourcc = cv2.VideoWriter_fourcc(*self.get_codec_fourcc(self.output_file_path))
+            output_file_path = self.get_output_file_path()
+            fourcc = cv2.VideoWriter_fourcc(*self.get_codec_fourcc(output_file_path))
             output_size = (frame.shape[1], frame.shape[0])  # OpenCV format is (width, height)
-            self.output_video = cv2.VideoWriter(self.output_file_path, fourcc, self.fps, output_size,)
+            self.output_video = cv2.VideoWriter(output_file_path, fourcc, self.fps, output_size,)
 
         self.output_video.write(frame)
         cv2.waitKey(1)
@@ -102,10 +102,10 @@ class Video:
         cv2.imshow("Output", frame)
         cv2.waitKey(1)
 
-    def generate_output_path(self, prefix=""):
+    def get_output_file_path(self):
         if os.path.isdir(self.output_path):
             base_file_name = self.input_path.split("/")[-1].split(".")[0]
-            file_name = prefix + base_file_name + "_out.mp4"
+            file_name = base_file_name + "_out.mp4"
             return os.path.join(self.output_path, file_name)
         else:
             return self.output_path
