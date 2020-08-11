@@ -94,7 +94,7 @@ class Video:
             self.output_video = cv2.VideoWriter(output_file_path, fourcc, self.output_fps, output_size,)
 
         self.output_video.write(frame)
-        cv2.waitKey(1)
+        return cv2.waitKey(1)
 
     def show(self, frame, downsample_ratio=1):
         # Resize to lower resolution for faster streaming over slow connections
