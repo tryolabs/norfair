@@ -19,11 +19,11 @@ def print_objects_as_table(tracked_objects):
     print()
     console = Console()
     table = Table(show_header=True, header_style="bold magenta")
-    table.add_column("Id", style="dim")
+    table.add_column("Id", style="yellow", justify="center")
     table.add_column("Age", justify="right")
     table.add_column("Hit Counter", justify="right")
     table.add_column("Last distance", justify="right")
-    table.add_column("Init Id", justify="right")
+    table.add_column("Init Id", justify="center")
     for obj in tracked_objects:
         table.add_row(
             str(obj.id),
