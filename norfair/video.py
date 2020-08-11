@@ -33,30 +33,32 @@ class Video:
                     )
                 self._fail(fail_msg)
             description = os.path.basename(self.input_path)
-            indeterminate = False
         else:
             self.video_capture = cv2.VideoCapture(self.camera)
             total_frames = 0
             description = f"Camera({self.camera})"
-            indeterminate = True
         self.output_fps = output_fps if output_fps is not None else self.video_capture.get(cv2.CAP_PROP_FPS)
         self.frame_counter = 0
 
         # Setup progressbar
         if self.label:
             description += f" | {self.label}"
-        self.progress_bar = Progress(
+        progress_bar_fields = [
             "[progress.description]{task.description}",
             BarColumn(),
-            "[progress.percentage]{task.percentage:>3.0f}%",
-            TimeRemainingColumn(),
             "[yellow]{task.fields[process_fps]:.2f}fps[/yellow]",
+        ]
+        if self.input_path is not None:
+            progress_bar_fields.insert(2, "[progress.percentage]{task.percentage:>3.0f}%")
+            progress_bar_fields.insert(3, TimeRemainingColumn(),)
+        self.progress_bar = Progress(
+            *progress_bar_fields,
             auto_refresh=False,
             redirect_stdout=False,
             redirect_stderr=False,
         )
         self.task = self.progress_bar.add_task(
-            self.abbreviate_description(description), total=total_frames, start=not indeterminate, process_fps=0
+            self.abbreviate_description(description), total=total_frames, start=self.input_path is not None, process_fps=0
         )
 
     # This is a generator, note the yield keyword below.
