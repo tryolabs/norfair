@@ -7,7 +7,7 @@ from rich.progress import Progress, BarColumn, TimeRemainingColumn
 
 
 class Video:
-    def __init__(self, camera=None, input_path=None, output_path=".", label="", codec_fourcc=None):
+    def __init__(self, camera=None, input_path=None, output_path=".", output_fps=None, label="", codec_fourcc=None):
         self.camera = camera
         self.input_path = input_path
         self.output_path = output_path
@@ -39,7 +39,7 @@ class Video:
             total_frames = 0
             description = f"Camera({self.camera})"
             indeterminate = True
-        self.fps = self.video_capture.get(cv2.CAP_PROP_FPS)
+        self.output_fps = output_fps if output_fps is not None else self.video_capture.get(cv2.CAP_PROP_FPS)
         self.frame_counter = 0
 
         # Setup progressbar
@@ -50,13 +50,13 @@ class Video:
             BarColumn(),
             "[progress.percentage]{task.percentage:>3.0f}%",
             TimeRemainingColumn(),
-            "[yellow]{task.fields[fps]:.2f}fps[/yellow]",
+            "[yellow]{task.fields[process_fps]:.2f}fps[/yellow]",
             auto_refresh=False,
             redirect_stdout=False,
             redirect_stderr=False,
         )
         self.task = self.progress_bar.add_task(
-            self.abbreviate_description(description), total=total_frames, start=not indeterminate, fps=0
+            self.abbreviate_description(description), total=total_frames, start=not indeterminate, process_fps=0
         )
 
     # This is a generator, note the yield keyword below.
@@ -71,7 +71,7 @@ class Video:
                 if ret is False or frame is None:
                     break
                 process_fps = self.frame_counter / (time.time() - start)
-                progress_bar.update(self.task, advance=1, refresh=True, fps=process_fps)
+                progress_bar.update(self.task, advance=1, refresh=True, process_fps=process_fps)
                 yield frame
 
         # Cleanup
@@ -91,7 +91,7 @@ class Video:
             output_file_path = self.get_output_file_path()
             fourcc = cv2.VideoWriter_fourcc(*self.get_codec_fourcc(output_file_path))
             output_size = (frame.shape[1], frame.shape[0])  # OpenCV format is (width, height)
-            self.output_video = cv2.VideoWriter(output_file_path, fourcc, self.fps, output_size,)
+            self.output_video = cv2.VideoWriter(output_file_path, fourcc, self.output_fps, output_size,)
 
         self.output_video.write(frame)
         cv2.waitKey(1)
