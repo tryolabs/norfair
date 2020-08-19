@@ -1,4 +1,4 @@
-![Logo](/Users/joaqo/code/norfair/Norfair Logotipo.png)
+![Logo](docs/logo.png)
 
 Norfair is a Python library that adds object tracking to any type of detector. As long as the detector returns (x, y) points, such as the 2 points describing the bounding box of an object detector, or the 17 keypoints of each pose in a pose estimator, Norfair can handle it. Also, the user can customize how the tracking itself is done, so you can add additional information to it, like visual embeddings produced by the detector, or any appearance information that you think may help with tracking.
 
@@ -17,7 +17,7 @@ The distance function can be extremelly simple though, this is how the distance 
 
 and this is how this distance function on Detectron2 only tracking cars looks like:
 
-![](/Users/joaqo/traffic.gif)
+![](docs/traffic.gif)
 
 [Make video smaller and longer with some of those video to gif sites, maybe put detections and tracking video side by side, and maybe link to longer video]
 
@@ -269,6 +269,10 @@ Or if you use you set `Video(camera=0)` to consume a video stream from your webc
 ![camera](/Users/joaqo/camera.gif)
 
 It makes sense to use Norfair even if you don't need tracking, as its lightweight enough to warrant being used just for its video management features.
+
+## Comparisons with other trackers
+
+
 
 ## Disclaimers
 
