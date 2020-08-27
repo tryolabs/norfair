@@ -131,6 +131,6 @@ class Color():
     def random(obj_id):
         color_list = [
             c for c in Color.__dict__.keys()
-            if c[:2] != "__" and c not in ("random", "red", "white", "grey", "black")
+            if c[:2] != "__" and c not in ("random", "red", "white", "grey", "black", "silver")
         ]
         return getattr(Color, color_list[obj_id % len(color_list)])
