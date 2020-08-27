@@ -2,8 +2,6 @@ import cv2
 import numpy as np
 from detectron2.engine import DefaultPredictor
 from detectron2.config import get_cfg
-import sys
-sys.path.append(".")
 from norfair import Detection, Tracker, Video, draw_tracked_objects, draw_points
 
 # Set up Detectron2 object detector
@@ -23,7 +21,7 @@ tracker = Tracker(distance_function=ceintroid_distance, distance_threshold=20)
 
 for frame in video:
     detections = detector(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-    # Convert detections from Detectron2 format into Norfair point format
+    # Wrap Detectron2 detections in Norfair's Detection objects
     detections = [Detection(p) for p in detections['instances'].pred_boxes.get_centers().cpu().numpy()]
     tracked_objects = tracker.update(detections=detections)
     draw_tracked_objects(frame, tracked_objects)
