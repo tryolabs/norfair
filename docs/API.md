@@ -10,7 +10,7 @@ Arguments:
 
 - `hit_inertia_min (optional)`: Each tracked objects keeps an internal hit inertia counter which tracks how often its getting matched to a detection, if it doesn't get any match for a certain amount of frames and it gets below the value set by this argument, the object is destroyed. Defaults to `10`.
 - `hit_inertia_max (optional)`: Each tracked objects keeps an internal hit inertia counter which tracks how often its getting matched to a detection, this argument defines how large this inertia can grow. Defaults to `25`.
-- `match_distance_threshold (optional)`: A detection and a matched object whose distance is below this number can get matched, the opposite is true for larger numbers. Defaults to `1`.
+- `distance_threshold (optional)`: A detection and a matched object whose distance is below this number can get matched, the opposite is true for larger numbers. Defaults to `1`.
 - `detection_threshold (optional)`: Sets the threshold at which a point's score must dip below to be ignored by the tracker. Defaults to 0.
 
 ### Tracker.update
