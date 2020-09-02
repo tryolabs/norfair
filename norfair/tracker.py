@@ -3,17 +3,19 @@ import numpy as np
 from filterpy.kalman import KalmanFilter
 from .utils import validate_points
 import random
+import math
 
 
 class Tracker:
     def __init__(self, distance_function, distance_threshold, hit_inertia_min=10, hit_inertia_max=25, 
-                 detection_threshold=0):
+                 detection_threshold=0, point_transience=4):
         self.tracked_objects = []
         self.distance_function = distance_function
         self.hit_inertia_min = hit_inertia_min
         self.hit_inertia_max = hit_inertia_max
         self.distance_threshold = distance_threshold
         self.detection_threshold = detection_threshold
+        self.point_transience = point_transience
         TrackedObject.count = 0
 
 
@@ -47,7 +49,8 @@ class Tracker:
                     self.hit_inertia_min,
                     self.hit_inertia_max,
                     self.detection_threshold,
-                    self.period
+                    self.period,
+                    self.point_transience
                 )
             )
 
@@ -138,11 +141,17 @@ class Tracker:
 class TrackedObject:
     count = 0
     initializing_count = 0
-    def __init__(self, initial_detection, hit_inertia_min, hit_inertia_max, detection_threshold, period=1):
+    def __init__(self, initial_detection, hit_inertia_min, hit_inertia_max, detection_threshold,
+                 period=1, point_transience=4):
+        self.num_points = validate_points(initial_detection.points).shape[0]
         self.hit_inertia_min = hit_inertia_min
         self.hit_inertia_max = hit_inertia_max
+        self.point_hit_inertia_min = math.floor(hit_inertia_min / point_transience)
+        self.point_hit_inertia_max = math.ceil(hit_inertia_max / point_transience)
         self.detection_threshold = detection_threshold
+        self.initial_period = period
         self.hit_counter = hit_inertia_min + period
+        self.point_hit_counter = np.ones(self.num_points) * self.point_hit_inertia_min
         self.last_distance = None
         self.last_detection = initial_detection
         self.age = 0
@@ -155,9 +164,8 @@ class TrackedObject:
     def setup_filter(self, initial_detection):
         initial_detection = validate_points(initial_detection)
 
-        tracked_points_num = initial_detection.shape[0]
-        dim_x = 2 * 2 * tracked_points_num  # We need to accomodate for velocities
-        dim_z = 2 * tracked_points_num
+        dim_x = 2 * 2 * self.num_points  # We need to accomodate for velocities
+        dim_z = 2 * self.num_points
         self.dim_z = dim_z
         self.filter = KalmanFilter(dim_x=dim_x, dim_z=dim_z)
 
@@ -177,7 +185,7 @@ class TrackedObject:
 
         # Process uncertainty: numpy.array(dim_x, dim_x)
         # Don't decrease it too much or trackers pay too little attention to detections
-        self.filter.Q /= 50
+        self.filter.Q[:dim_z, :dim_z] /= 50
 
         # Initial state: numpy.array(dim_x, 1)
         self.filter.x[:dim_z] = np.expand_dims(initial_detection.flatten(), 0).T
@@ -187,6 +195,7 @@ class TrackedObject:
 
     def tracker_step(self):
         self.hit_counter -= 1
+        self.point_hit_counter -= 1
         self.age += 1
         # Advances the tracker's state
         self.filter.predict()
@@ -209,9 +218,12 @@ class TrackedObject:
         velocities = self.filter.x.T.flatten()[self.dim_z:].reshape(-1, 2)
         return positions
 
+    @property
+    def live_points(self):
+        return self.point_hit_counter > self.point_hit_inertia_min
+
     def hit(self, detection, period=1):
-        points = detection.points
-        points = validate_points(points)
+        points = validate_points(detection.points)
 
         self.last_detection = detection
         if self.hit_counter < self.hit_inertia_max:
@@ -222,11 +234,16 @@ class TrackedObject:
         # points which were detected).
         # TODO: Use keypoint confidence information to change R on each sensor instead?
         if detection.scores is not None:
-            points_over_threshold_idx = detection.scores > self.detection_threshold
-            matched_sensors_idx = np.array([[s, s] for s in points_over_threshold_idx]).flatten()
-            H_pos = np.diag(matched_sensors_idx).astype(float)  # We measure x, y positions
+            assert len(detection.scores.shape) == 1
+            points_over_threshold_mask = detection.scores > self.detection_threshold
+            matched_sensors_mask = np.array([[m, m] for m in points_over_threshold_mask]).flatten()
+            H_pos = np.diag(matched_sensors_mask).astype(float)  # We measure x, y positions
+            self.point_hit_counter[points_over_threshold_mask] += 2 * period
         else:
             H_pos = np.identity(points.size)
+            self.point_hit_counter += 2 * period
+        self.point_hit_counter[self.point_hit_counter >= self.point_hit_inertia_max] = self.point_hit_inertia_max
+        self.point_hit_counter[self.point_hit_counter < 0] = 0
         H_vel = np.zeros(H_pos.shape)  # But we don't directly measure velocity
         H = np.hstack([H_pos, H_vel])
         self.filter.update(np.expand_dims(points.flatten(), 0).T, None, H)

@@ -30,6 +30,8 @@ def draw_tracked_objects(frame, objects, radius=None, color=None, id_size=None, 
         id_thickness = int(frame_scale / 5)
 
     for obj in objects:
+        if not obj.live_points.any():
+            continue
         if color is None:
             point_color = Color.random(obj.id)
             id_color = point_color
@@ -38,11 +40,12 @@ def draw_tracked_objects(frame, objects, radius=None, color=None, id_size=None, 
             id_color = color
 
         if draw_points:
-            for point in obj.estimate:
-                cv2.circle(frame, tuple(point.astype(int)), radius=radius, color=point_color, thickness=-1)
+            for point, live in zip(obj.estimate, obj.live_points):
+                if live:
+                    cv2.circle(frame, tuple(point.astype(int)), radius=radius, color=point_color, thickness=-1)
 
         if id_size > 0:
-            id_draw_position = centroid(obj.estimate)
+            id_draw_position = centroid(obj)
             cv2.putText(
                 frame, str(obj.id), id_draw_position, cv2.FONT_HERSHEY_SIMPLEX, id_size,
                 id_color, id_thickness, cv2.LINE_AA
@@ -64,6 +67,8 @@ def draw_debug_metrics(frame, objects, text_size=None, text_thickness=None, colo
     radius = int(frame_scale * 0.5)
 
     for obj in objects:
+        if not obj.live_points.any():
+            continue
         if only_ids is not None:
             if obj.id not in only_ids: continue
         if only_initializing_ids is not None:
@@ -72,7 +77,7 @@ def draw_debug_metrics(frame, objects, text_size=None, text_thickness=None, colo
             text_color = Color.random(obj.initializing_id)
         else:
             text_color = color
-        draw_position = centroid(obj.estimate)
+        draw_position = centroid(obj)
 
         for point in obj.estimate:
             cv2.circle(frame, tuple(point.astype(int)), radius=radius, color=text_color, thickness=-1)
@@ -103,11 +108,12 @@ def draw_debug_metrics(frame, objects, text_size=None, text_thickness=None, colo
                 text_color, text_thickness, cv2.LINE_AA
             )
 
-def centroid(points):
-    length = points.shape[0]
-    sum_x = np.sum(points[:, 0])
-    sum_y = np.sum(points[:, 1])
-    return int(sum_x/length), int(sum_y/length)
+def centroid(detection):
+    tracked_points = detection.estimate[detection.live_points]
+    num_points = tracked_points.shape[0]
+    sum_x = np.sum(tracked_points[:, 0])
+    sum_y = np.sum(tracked_points[:, 1])
+    return int(sum_x/num_points), int(sum_y/num_points)
 
 class Color():
     green = (0, 128, 0)
