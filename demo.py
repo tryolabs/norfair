@@ -21,21 +21,21 @@ class OpenposeDetector():
 
 def convert_and_filter(detections):
     if detections.shape[0] > 0:
-        keypoints_to_track = [1, 8]  # We'll only track neck=1 and midhip=8
-        poses = detections[:, keypoints_to_track, :2]
-        scores = detections[:, keypoints_to_track, 2]
-        return [Detection(p, scores=s) for (p, s) in zip(poses, scores) if np.all(s > 0)]
+        # keypoints_to_track = [1, 8]  # We'll only track neck=1 and midhip=8
+        poses = detections[:, :, :2]
+        scores = detections[:, :, 2]
+        return [Detection(p, scores=s) for (p, s) in zip(poses, scores) if p[[1, 8]].any()]
 
 def keypoints_distance(detected_pose, tracked_pose):
     detected_points = detected_pose.points
     # Find min torax size
-    torax_length_detected_person = np.linalg.norm(detected_points[0] - detected_points[1])
+    torax_length_detected_person = np.linalg.norm(detected_points[1] - detected_points[8])
     estimated_pose = tracked_pose.estimate
-    torax_length_estimated_person = np.linalg.norm(estimated_pose[0] - estimated_pose[1])
+    torax_length_estimated_person = np.linalg.norm(estimated_pose[1] - estimated_pose[8])
     min_torax_size = min(torax_length_estimated_person, torax_length_detected_person)
 
     # Keypoints distance in terms of torax size
-    substraction = detected_points - estimated_pose
+    substraction = detected_points[[1, 8], :] - estimated_pose[[1, 8], :]
     dists_per_point = np.linalg.norm(substraction, axis=1)
     keypoints_distance = np.mean(dists_per_point) / min_torax_size
 
@@ -51,17 +51,25 @@ for v in [
         "/home/lalo/data/videos/in/trr/trr_cut_short.mp4"
 ]:
     video = Video(input_path=v, output_path="/home/lalo/data/videos/out/norfair/")
-    tracker = Tracker(distance_function=keypoints_distance)
+    tracker = Tracker(distance_function=keypoints_distance, distance_threshold=1, detection_threshold=0.5)
 
     for i, frame in enumerate(video):
         if i % detection_period == 0:
             detected_poses = pose_detector(frame)
             detections = convert_and_filter(detected_poses)
             tracked_objects = tracker.update(detections=detections, period=detection_period)
-            norfair.draw_points(frame, detections)
+            # norfair.draw_points(frame, detections)
         else:
             tracked_objects = tracker.update()
         norfair.draw_tracked_objects(frame, tracked_objects)
         # norfair.draw_debug_metrics(frame, tracker.tracked_objects)
         video.write(frame)
-        # video.show(frame, downsample_ratio=1)
+        # for o in tracker.tracked_objects:
+        #     # if o.id == 29:
+        #     if o.initializing_id == 109:
+        #         video.show(frame, downsample_ratio=1)
+        #         print()
+        #         print(o.last_detection.points[10], o.last_detection.scores[10])
+        #         print(o.estimate[10], o.live_points[10])
+        #         # print(o.live_points)
+        #         import ipdb; ipdb.set_trace()

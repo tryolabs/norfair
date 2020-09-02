@@ -107,7 +107,7 @@ class Video:
                 frame, (frame.shape[1] // downsample_ratio, frame.shape[0] // downsample_ratio),
             )
         cv2.imshow("Output", frame)
-        cv2.waitKey(1)
+        return cv2.waitKey(1)
 
     def get_output_file_path(self):
         output_path_is_dir = os.path.isdir(self.output_path)
