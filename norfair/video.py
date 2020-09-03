@@ -38,6 +38,8 @@ class Video:
             total_frames = 0
             description = f"Camera({self.camera})"
         self.output_fps = output_fps if output_fps is not None else self.video_capture.get(cv2.CAP_PROP_FPS)
+        self.input_height = self.video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        self.input_width = self.video_capture.get(cv2.CAP_PROP_FRAME_WIDTH)
         self.frame_counter = 0
 
         # Setup progressbar
@@ -92,6 +94,7 @@ class Video:
             # The user may need to access the output file path on their code
             output_file_path = self.get_output_file_path()
             fourcc = cv2.VideoWriter_fourcc(*self.get_codec_fourcc(output_file_path))
+            # Set on first frame write in case the user resizes the frame in some way
             output_size = (frame.shape[1], frame.shape[0])  # OpenCV format is (width, height)
             self.output_video = cv2.VideoWriter(output_file_path, fourcc, self.output_fps, output_size,)
 
