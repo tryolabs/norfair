@@ -1,3 +1,5 @@
+import sys
+sys.path.append("../norfair") 
 import norfair
 from norfair import Detection, Tracker, Video
 
@@ -11,7 +13,7 @@ distance_threshold = 0.3
 
 class OpenposeDetector():
     def __init__(self):
-        with open("./open_pose_config.yml", 'r') as stream:
+        with open("./demos/openpose_config.yml", 'r') as stream:
             open_pose_config = yaml.safe_load(stream)["openpose"]
         openpose_dir = open_pose_config['dir']
         sys.path.append(openpose_dir + "/build/python/openpose")
@@ -29,7 +31,7 @@ def keypoints_distance(detected_pose, tracked_pose):
     return distance
 
 pose_detector = OpenposeDetector()
-video = Video(input_path=v, output_path="/home/lalo/data/videos/out/norfair/")
+video = Video(input_path="video.mp4")
 tracker = Tracker(distance_function=keypoints_distance,
                   distance_threshold=distance_threshold,
                   detection_threshold=detection_threshold)
