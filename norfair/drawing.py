@@ -45,14 +45,14 @@ def draw_tracked_objects(frame, objects, radius=None, color=None, id_size=None, 
                     cv2.circle(frame, tuple(point.astype(int)), radius=radius, color=point_color, thickness=-1)
 
         if id_size > 0:
-            id_draw_position = centroid(obj)
+            id_draw_position = centroid(obj.estimate[obj.live_points])
             cv2.putText(
                 frame, str(obj.id), id_draw_position, cv2.FONT_HERSHEY_SIMPLEX, id_size,
                 id_color, id_thickness, cv2.LINE_AA
             )
 
 def draw_debug_metrics(frame, objects, text_size=None, text_thickness=None, color=None,
-                       only_ids=None, only_initializing_ids=None):
+                       only_ids=None, only_initializing_ids=None, score_threshold=0):
     """Draw objects with their debug information
 
     It is recommended to set the input variable `objects` to `your_tracker_object.objects`
@@ -67,7 +67,7 @@ def draw_debug_metrics(frame, objects, text_size=None, text_thickness=None, colo
     radius = int(frame_scale * 0.5)
 
     for obj in objects:
-        if not obj.live_points.any():
+        if not (obj.last_detection.scores > score_threshold).any():
             continue
         if only_ids is not None:
             if obj.id not in only_ids: continue
@@ -77,26 +77,34 @@ def draw_debug_metrics(frame, objects, text_size=None, text_thickness=None, colo
             text_color = Color.random(obj.initializing_id)
         else:
             text_color = color
-        draw_position = centroid(obj)
+        draw_position = centroid(obj.estimate[obj.last_detection.scores > score_threshold])
 
         for point in obj.estimate:
             cv2.circle(frame, tuple(point.astype(int)), radius=radius, color=text_color, thickness=-1)
 
-        # Interframe distance
-        dist = obj.last_distance
-        if dist is None:
-            dist = "-"
-        elif dist > 1000:
-            dist = ">"
+        # Distance to last matched detection
+        last_dist = obj.last_distance
+        if last_dist is None:
+            last_dist = "-"
+        elif last_dist > 999:
+            last_dist = ">"
         else:
-            dist = "{:.1f}".format(dist)
+            last_dist = "{:.2f}".format(last_dist)
+
+        # Distance to currently closest detection
+        current_min_dist = obj.current_min_distance
+        if current_min_dist is None:
+            current_min_dist = "-"
+        else:
+            current_min_dist = "{:.2f}".format(current_min_dist)
 
         # No support for multiline text in opencv :facepalm:
         lines_to_draw = (
             "{}|{}".format(obj.id, obj.initializing_id),
-            "d:{}".format(dist),
             "a:{}".format(obj.age),
             "h:{}".format(obj.hit_counter),
+            "ld:{}".format(last_dist),
+            "cd:{}".format(current_min_dist),
         )
         for i, line in enumerate(lines_to_draw):
             draw_position = (
@@ -108,8 +116,7 @@ def draw_debug_metrics(frame, objects, text_size=None, text_thickness=None, colo
                 text_color, text_thickness, cv2.LINE_AA
             )
 
-def centroid(detection):
-    tracked_points = detection.estimate[detection.live_points]
+def centroid(tracked_points):
     num_points = tracked_points.shape[0]
     sum_x = np.sum(tracked_points[:, 0])
     sum_y = np.sum(tracked_points[:, 1])
