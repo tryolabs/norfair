@@ -81,6 +81,13 @@ class Tracker:
                 print("return distance_threshold + 1 from your distance function.")
                 exit()
 
+            # Used just for debugging distance function
+            if distance_matrix.any():
+                for i, minimum in enumerate(distance_matrix.min(axis=0)):
+                    objects[i].current_min_distance = (
+                        minimum if minimum < self.distance_threshold else None
+                    )
+
             matched_det_indices, matched_obj_indices = self.match_dets_and_objs(distance_matrix)
             if len(matched_det_indices) > 0:
                 unmatched_detections = [d for i, d in enumerate(detections) if i not in matched_det_indices]
@@ -153,6 +160,7 @@ class TrackedObject:
         self.hit_counter = hit_inertia_min + period
         self.point_hit_counter = np.ones(self.num_points) * self.point_hit_inertia_min
         self.last_distance = None
+        self.current_min_distance = None
         self.last_detection = initial_detection
         self.age = 0
         self.is_initializing_flag = True
