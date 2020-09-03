@@ -21,7 +21,7 @@ class OpenposeDetector():
 
 def keypoints_distance(detected_pose, tracked_pose):
     distances = np.linalg.norm(detected_pose.points - tracked_pose.estimate, axis=1)
-    match_num = np.count_nonzero((distances < 20) * (detected_pose.scores > 0.5))
+    match_num = np.count_nonzero((distances < keypoint_dist_threshold) * (detected_pose.scores > 0.2))
     distance = 1 / (1 + match_num)
     return distance
 
@@ -35,6 +35,7 @@ for v in [
         "/home/lalo/data/videos/in/trr/trr_cut_short.mp4"
 ]:
     video = Video(input_path=v, output_path="/home/lalo/data/videos/out/norfair/")
+    keypoint_dist_threshold = video.input_height / 40
     tracker = Tracker(distance_function=keypoints_distance, distance_threshold=0.3,
                       detection_threshold=0.3)
 
@@ -51,7 +52,7 @@ for v in [
         else:
             tracked_objects = tracker.update()
         norfair.draw_tracked_objects(frame, tracked_objects)
-        # norfair.draw_debug_metrics(frame, tracker.tracked_objects)
+        # norfair.draw_debug_metrics(frame, tracker.tracked_objects, score_threshold=0.3)
         video.write(frame)
         # for o in tracker.tracked_objects:
         #     # if o.id == 29:
