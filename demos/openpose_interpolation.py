@@ -25,11 +25,15 @@ class OpenposeDetector():
         return self.detector.forward(image, False)
 
 def keypoints_distance(detected_pose, tracked_pose):
-    points_to_compare = tracked_pose.last_detection.scores > detection_threshold
-    distances = np.linalg.norm(detected_pose.points[points_to_compare] - tracked_pose.estimate[points_to_compare], axis=1)
-    match_num = np.count_nonzero((distances < keypoint_dist_threshold) * (detected_pose.scores[points_to_compare] > detection_threshold))
-    distance = 1 / (1 + match_num)
-    return distance
+    distances = np.linalg.norm(detected_pose.points - tracked_pose.estimate, axis=1)
+    match_num = np.count_nonzero(
+        np.logical_and(
+            distances < keypoint_dist_threshold,
+            detected_pose.scores > detection_threshold,
+            tracked_pose.last_detection.scores > detection_threshold
+        )
+    )
+    return 1 / (1 + match_num)
 
 pose_detector = OpenposeDetector()
 video = Video(input_path="video.mp4")
