@@ -7,7 +7,7 @@ import numpy as np
 import yaml
 import sys
 
-skip_frames = 3
+frame_skip_period = 3
 detection_threshold = 0.2
 distance_threshold = 0.3
 
@@ -25,8 +25,9 @@ class OpenposeDetector():
         return self.detector.forward(image, False)
 
 def keypoints_distance(detected_pose, tracked_pose):
-    distances = np.linalg.norm(detected_pose.points - tracked_pose.estimate, axis=1)
-    match_num = np.count_nonzero((distances < keypoint_dist_threshold) * (detected_pose.scores > detection_threshold))
+    points_to_compare = tracked_pose.last_detection.scores > detection_threshold
+    distances = np.linalg.norm(detected_pose.points[points_to_compare] - tracked_pose.estimate[points_to_compare], axis=1)
+    match_num = np.count_nonzero((distances < keypoint_dist_threshold) * (detected_pose.scores[points_to_compare] > detection_threshold))
     distance = 1 / (1 + match_num)
     return distance
 
@@ -38,13 +39,13 @@ tracker = Tracker(distance_function=keypoints_distance,
 keypoint_dist_threshold = video.input_height / 30
 
 for i, frame in enumerate(video):
-    if i % skip_frames == 0:
+    if i % frame_skip_period == 0:
         detected_poses = pose_detector(frame)
         detections = [
             Detection(p, scores=s)
             for (p, s) in zip(detected_poses[:, :, :2], detected_poses[:, :, 2])
         ]
-        tracked_objects = tracker.update(detections=detections, period=skip_frames)
+        tracked_objects = tracker.update(detections=detections, period=frame_skip_period)
         norfair.draw_points(frame, detections)
     else:
         tracked_objects = tracker.update()
