@@ -52,13 +52,11 @@ for frame in video:
     video.write(frame)
 ```
 
-## Motivation [ Remove ? ]
+## Motivation
 
 Trying out the latest state of the art detectors normally requires running repositiories which weren't intended to be easy to use. These tend to be repositories associated with a research paper describing a novel new way of doing detection, and they are therefore intended to be run as a one-off evaluation script to get some result metric to publish on their particular research paper. This explains why they tend to not be easy to run as inference scripts, or why extracting the core model to use in a stand alone way isn't always trivial.
 
 Norfair was born out of the need to quickly add a simple layer of tracking over a wide range of newly released SOTA detectors. For this reason it was designed to seamlessly be plugged into a complex, highly coupled code base, with minium effort. Norfair provides a series of independent but compatible tools, which you can pick and chose to use in your project.
-
-```This is the diff that shows how adding Norfair's tracking to the AlphaPose repository looks like: [Maybe use a more researchy paper? Or maybe alpha pose is better because we can compare the trackings?]```
 
 ## Installation
 
@@ -72,9 +70,140 @@ You can find the documentation for Norfair's API [here](docs/API.md).
 
 ## Examples
 
-[Example of using Norfair to skip frames on another detector, maybe instance segmentation? Use this to show off progress bar, maybe showing how it's fps is running X times faster than if we inferred all frames or whatever. Maybe create a function to move not tracked points based on how tracked points moved?]
+### AlphaPose
 
-## Disclaimers
+For an example of a model which is very deeply coupled to its code base we have AlphaPose. With Norfair you can try how your own custom tracker works on AlphaPose by just writing this git diff (taken with regards to this [commit](https://github.com/MVIG-SJTU/AlphaPose/commit/ded84d450faf56227680f0527ff7e24ab7268754)) into AlphaPose itself and therefore avoiding the difficulty of decoupling the model from the code base, and use their `video_demo.py` script.
 
-Norfair's point prediction is done using KalmanFilters in a similar way to [SORT](https://arxiv.org/pdf/1602.00763.pdf). For this reason, Norfair works best with static cameras, like security cameras, though the addition of support for moving cameras is being discussed by the team.
+```diff
+diff --git a/dataloader.py b/dataloader.py
+index ed6ee90..a7dedb0 100644
+--- a/dataloader.py
++++ b/dataloader.py
+@@ -17,6 +17,8 @@ import cv2
+ import json
+ import numpy as np
+ import sys
++sys.path.append("/home/lalo/norfair")
++import norfair
+ import time
+ import torch.multiprocessing as mp
+ from multiprocessing import Process
+@@ -606,6 +608,17 @@ class WebcamLoader:
+         # indicate that the thread should be stopped
+         self.stopped = True
+ 
++detection_threshold = 0.2
++keypoint_dist_threshold = None
++def keypoints_distance(detected_pose, tracked_pose):
++    distances = np.linalg.norm(detected_pose.points - tracked_pose.estimate, axis=1)
++    match_num = np.count_nonzero(
++        (distances < keypoint_dist_threshold)
++        * (detected_pose.scores > detection_threshold)
++        * (tracked_pose.last_detection.scores > detection_threshold)
++    )
++    return 1 / (1 + match_num)
++
+ class DataWriter:
+     def __init__(self, save_video=False,
+                 savepath='examples/res/1.avi', fourcc=cv2.VideoWriter_fourcc(*'XVID'), fps=25, frameSize=(640,480),
+@@ -624,6 +637,11 @@ class DataWriter:
+         if opt.save_img:
+             if not os.path.exists(opt.outputpath + '/vis'):
+                 os.mkdir(opt.outputpath + '/vis')
++        self.tracker = norfair.Tracker(
++            distance_function=keypoints_distance,
++            distance_threshold=0.3,
++            detection_threshold=0.2
++        )
+ 
+     def start(self):
+         # start a thread to read frames from the file video stream
+@@ -672,7 +690,15 @@ class DataWriter:
+                     }
+                     self.final_result.append(result)
+                     if opt.save_img or opt.save_video or opt.vis:
+-                        img = vis_frame(orig_img, result)
++                        img = orig_img.copy()
++                        global keypoint_dist_threshold
++                        keypoint_dist_threshold = img.shape[0] / 30
++                        detections = [
++                            norfair.Detection(p['keypoints'].numpy(), scores=p['kp_score'].squeeze().numpy())
++                            for p in result['result']
++                        ]
++                        tracked_objects = self.tracker.update(detections=detections)
++                        norfair.draw_tracked_objects(img, tracked_objects)
+                         if opt.vis:
+                             cv2.imshow("AlphaPose Demo", img)
+                             cv2.waitKey(30)
+```
+
+this produces video like the following:
+
+![alphapose](docs/alphapose.gif)
+
+
+
+### OpenPose
+
+If you just want to accelerate your pose detection, you can use Norfair to run one out of every 3 frames through your detector and let Norfair interpolate the detections through the rest of the frames:
+
+```python
+import norfair
+from norfair import Detection, Tracker, Video
+
+import numpy as np
+import yaml
+import sys
+
+frame_skip_period = 3
+detection_threshold = 0.2
+distance_threshold = 0.3
+
+class OpenposeDetector():
+    def __init__(self):
+        with open("./demos/openpose_config.yml", 'r') as stream:
+            open_pose_config = yaml.safe_load(stream)["openpose"]
+        openpose_dir = open_pose_config['dir']
+        sys.path.append(openpose_dir + "/build/python/openpose")
+        from openpose import OpenPose  # noqa
+        open_pose_config["default_model_folder"] = openpose_dir + "/models/"
+        self.detector = OpenPose(open_pose_config)
+
+    def __call__(self, image):
+        return self.detector.forward(image, False)
+
+def keypoints_distance(detected_pose, tracked_pose):
+    distances = np.linalg.norm(detected_pose.points - tracked_pose.estimate, axis=1)
+    match_num = np.count_nonzero(
+        (distances < keypoint_dist_threshold)
+        * (detected_pose.scores > detection_threshold)
+        * (tracked_pose.last_detection.scores > detection_threshold)
+    )
+    return 1 / (1 + match_num)
+
+pose_detector = OpenposeDetector()
+video = Video(input_path="video.mp4")
+tracker = Tracker(distance_function=keypoints_distance,
+                  distance_threshold=distance_threshold,
+                  detection_threshold=detection_threshold)
+keypoint_dist_threshold = video.input_height / 30
+
+for i, frame in enumerate(video):
+    if i % frame_skip_period == 0:
+        detected_poses = pose_detector(frame)
+        detections = [
+            Detection(p, scores=s)
+            for (p, s) in zip(detected_poses[:, :, :2], detected_poses[:, :, 2])
+        ]
+        tracked_objects = tracker.update(detections=detections, period=frame_skip_period)
+        norfair.draw_points(frame, detections)
+    else:
+        tracked_objects = tracker.update()
+    norfair.draw_tracked_objects(frame, tracked_objects)
+    video.write(frame)
+```
+
+We are skipping 2 out of every 3 frames, which should make your video process 3 times faster, as the time added by running the tracker itself is negligible when compared to not having to run 2 inferences on a deep neural network. The results look like this:
+
+![openpose_skip_3_frames](docs/openpose_skip_3_frames.gif)
 
