@@ -13,7 +13,7 @@ distance_threshold = 0.3
 
 class OpenposeDetector():
     def __init__(self):
-        with open("./demos/openpose_config.yml", 'r') as stream:
+        with open("./demos/openpose/openpose_config.yml", 'r') as stream:
             open_pose_config = yaml.safe_load(stream)["openpose"]
         openpose_dir = open_pose_config['dir']
         sys.path.append(openpose_dir + "/build/python/openpose")
@@ -44,7 +44,8 @@ keypoint_dist_threshold = video.input_height / 30
 for i, frame in enumerate(video):
     if i % frame_skip_period == 0:
         detected_poses = pose_detector(frame)
-        detections = [
+        # Put in readme too
+        detections = [] if not detected_poses.any() else [
             Detection(p, scores=s)
             for (p, s) in zip(detected_poses[:, :, :2], detected_poses[:, :, 2])
         ]
