@@ -37,7 +37,8 @@ pose_detector = OpenposeDetector()
 video = Video(input_path="video.mp4")
 tracker = Tracker(distance_function=keypoints_distance,
                   distance_threshold=distance_threshold,
-                  detection_threshold=detection_threshold)
+                  detection_threshold=detection_threshold,
+                  point_transience=2)
 keypoint_dist_threshold = video.input_height / 30
 
 for i, frame in enumerate(video):
