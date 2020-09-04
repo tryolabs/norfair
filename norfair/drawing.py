@@ -52,7 +52,7 @@ def draw_tracked_objects(frame, objects, radius=None, color=None, id_size=None, 
             )
 
 def draw_debug_metrics(frame, objects, text_size=None, text_thickness=None, color=None,
-                       only_ids=None, only_initializing_ids=None, score_threshold=0):
+                       only_ids=None, only_initializing_ids=None, draw_score_threshold=0):
     """Draw objects with their debug information
 
     It is recommended to set the input variable `objects` to `your_tracker_object.objects`
@@ -67,7 +67,7 @@ def draw_debug_metrics(frame, objects, text_size=None, text_thickness=None, colo
     radius = int(frame_scale * 0.5)
 
     for obj in objects:
-        if not (obj.last_detection.scores > score_threshold).any():
+        if not (obj.last_detection.scores > draw_score_threshold).any():
             continue
         if only_ids is not None:
             if obj.id not in only_ids: continue
@@ -77,7 +77,7 @@ def draw_debug_metrics(frame, objects, text_size=None, text_thickness=None, colo
             text_color = Color.random(obj.initializing_id)
         else:
             text_color = color
-        draw_position = centroid(obj.estimate[obj.last_detection.scores > score_threshold])
+        draw_position = centroid(obj.estimate[obj.last_detection.scores > draw_score_threshold])
 
         for point in obj.estimate:
             cv2.circle(frame, tuple(point.astype(int)), radius=radius, color=text_color, thickness=-1)
