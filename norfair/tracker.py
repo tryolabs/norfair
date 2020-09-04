@@ -170,6 +170,7 @@ class TrackedObject:
         self.initializing_id = TrackedObject.initializing_count  # Just for debugging
         TrackedObject.initializing_count += 1
         self.setup_filter(initial_detection.points)
+        self.detected_at_least_once_points = np.array([False] * self.num_points)
 
     def setup_filter(self, initial_detection):
         initial_detection = validate_points(initial_detection)
@@ -257,6 +258,19 @@ class TrackedObject:
         H_vel = np.zeros(H_pos.shape)  # But we don't directly measure velocity
         H = np.hstack([H_pos, H_vel])
         self.filter.update(np.expand_dims(points.flatten(), 0).T, None, H)
+
+        # Force points being detected for the first time to have velocity = 0
+        # This is needed because some detectors (like OpenPose) set points with
+        # low confidence to coordinates (0, 0). And when they then get their first
+        # real detection this creates a huge velocity vector in our KalmanFilter
+        # and causes the tracker to start with wildly inaccurate estimations which
+        # eventually coverge to the real detections.
+        detected_at_least_once_mask = np.array([[m, m] for m in self.detected_at_least_once_points]).flatten()
+        self.filter.x[self.dim_z:][np.logical_not(detected_at_least_once_mask)] = 0
+        self.detected_at_least_once_points = np.logical_or(
+            self.detected_at_least_once_points,
+            points_over_threshold_mask
+        )
 
     def __repr__(self):
         if self.last_distance is None:
