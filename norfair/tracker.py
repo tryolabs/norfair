@@ -197,6 +197,7 @@ class TrackedObject:
         # Process uncertainty: numpy.array(dim_x, dim_x)
         # Don't decrease it too much or trackers pay too little attention to detections
         self.filter.Q[:dim_z, :dim_z] /= 50
+        self.filter.Q[dim_z:, dim_z:] /= 25
 
         # Initial state: numpy.array(dim_x, 1)
         self.filter.x[:dim_z] = np.expand_dims(initial_detection.flatten(), 0).T
