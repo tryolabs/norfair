@@ -27,11 +27,9 @@ class OpenposeDetector():
 def keypoints_distance(detected_pose, tracked_pose):
     distances = np.linalg.norm(detected_pose.points - tracked_pose.estimate, axis=1)
     match_num = np.count_nonzero(
-        np.logical_and(
-            distances < keypoint_dist_threshold,
-            detected_pose.scores > detection_threshold,
-            tracked_pose.last_detection.scores > detection_threshold
-        )
+        (distances < keypoint_dist_threshold)
+        * (detected_pose.scores > detection_threshold)
+        * (tracked_pose.last_detection.scores > detection_threshold)
     )
     return 1 / (1 + match_num)
 
