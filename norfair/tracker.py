@@ -1,14 +1,22 @@
-import numpy as np
-
-from filterpy.kalman import KalmanFilter
-from .utils import validate_points
-import random
 import math
+import random
+
+import numpy as np
+from filterpy.kalman import KalmanFilter
+
+from .utils import validate_points
 
 
 class Tracker:
-    def __init__(self, distance_function, distance_threshold, hit_inertia_min=10, hit_inertia_max=25, 
-                 detection_threshold=0, point_transience=4):
+    def __init__(
+        self,
+        distance_function,
+        distance_threshold,
+        hit_inertia_min=10,
+        hit_inertia_max=25,
+        detection_threshold=0,
+        point_transience=4,
+    ):
         self.tracked_objects = []
         self.distance_function = distance_function
         self.hit_inertia_min = hit_inertia_min
@@ -17,7 +25,6 @@ class Tracker:
         self.detection_threshold = detection_threshold
         self.point_transience = point_transience
         TrackedObject.count = 0
-
 
     def update(self, detections=None, period=1):
         self.period = period
@@ -31,14 +38,12 @@ class Tracker:
 
         # Update initialized tracked objects with detections
         unmatched_detections = self.update_objects_in_place(
-            [o for o in self.tracked_objects if not o.is_initializing],
-            detections
+            [o for o in self.tracked_objects if not o.is_initializing], detections
         )
 
         # Update not yet initialized tracked objects with yet unmatched detections
         unmatched_detections = self.update_objects_in_place(
-            [o for o in self.tracked_objects if o.is_initializing],
-            unmatched_detections
+            [o for o in self.tracked_objects if o.is_initializing], unmatched_detections
         )
 
         # Create new tracked objects from remaining unmatched detections
@@ -50,7 +55,7 @@ class Tracker:
                     self.hit_inertia_max,
                     self.detection_threshold,
                     self.period,
-                    self.point_transience
+                    self.point_transience,
                 )
             )
 
@@ -73,11 +78,17 @@ class Tracker:
                         distance_matrix[d, o] = distance
 
             if np.isnan(distance_matrix).any():
-                print("\nReceived nan values from distance function, please check your distance function for errors!")
+                print(
+                    "\nReceived nan values from distance function, please check your distance function for errors!"
+                )
                 exit()
             if np.isinf(distance_matrix).any():
-                print("\nReceived inf values from distance function, please check your distance function for errors!")
-                print("If you want to explicitly ignore a certain detection - tracked object pair, just")
+                print(
+                    "\nReceived inf values from distance function, please check your distance function for errors!"
+                )
+                print(
+                    "If you want to explicitly ignore a certain detection - tracked object pair, just"
+                )
                 print("return distance_threshold + 1 from your distance function.")
                 exit()
 
@@ -88,12 +99,18 @@ class Tracker:
                         minimum if minimum < self.distance_threshold else None
                     )
 
-            matched_det_indices, matched_obj_indices = self.match_dets_and_objs(distance_matrix)
+            matched_det_indices, matched_obj_indices = self.match_dets_and_objs(
+                distance_matrix
+            )
             if len(matched_det_indices) > 0:
-                unmatched_detections = [d for i, d in enumerate(detections) if i not in matched_det_indices]
+                unmatched_detections = [
+                    d for i, d in enumerate(detections) if i not in matched_det_indices
+                ]
 
                 # Handle matched people/detections
-                for (match_det_idx, match_obj_idx) in zip(matched_det_indices, matched_obj_indices):
+                for (match_det_idx, match_obj_idx) in zip(
+                    matched_det_indices, matched_obj_indices
+                ):
                     match_distance = distance_matrix[match_det_idx, match_obj_idx]
                     matched_detection = detections[match_det_idx]
                     matched_object = objects[match_obj_idx]
@@ -148,8 +165,16 @@ class Tracker:
 class TrackedObject:
     count = 0
     initializing_count = 0
-    def __init__(self, initial_detection, hit_inertia_min, hit_inertia_max, detection_threshold,
-                 period=1, point_transience=4):
+
+    def __init__(
+        self,
+        initial_detection,
+        hit_inertia_min,
+        hit_inertia_max,
+        detection_threshold,
+        period=1,
+        point_transience=4,
+    ):
         self.num_points = validate_points(initial_detection.points).shape[0]
         self.hit_inertia_min = hit_inertia_min
         self.hit_inertia_max = hit_inertia_max
@@ -187,12 +212,15 @@ class TrackedObject:
             self.filter.F[p, p + dim_z] = dt
 
         # Measurement function: numpy.array(dim_z, dim_x)
-        self.filter.H = np.eye(dim_z, dim_x,)
+        self.filter.H = np.eye(
+            dim_z,
+            dim_x,
+        )
 
         # Measurement uncertainty (sensor noise): numpy.array(dim_z, dim_z)
         # TODO: maybe we should open this one to the users, as it lets them
         #       chose between giving more/less importance to the detections
-        self.filter.R *= 4.
+        self.filter.R *= 4.0
 
         # Process uncertainty: numpy.array(dim_x, dim_x)
         # Don't decrease it too much or trackers pay too little attention to detections
@@ -203,7 +231,7 @@ class TrackedObject:
         self.filter.x[:dim_z] = np.expand_dims(initial_detection.flatten(), 0).T
 
         # Estimation uncertainty: numpy.array(dim_x, dim_x)
-        self.filter.P[dim_z:, dim_z:] *= 10.
+        self.filter.P[dim_z:, dim_z:] *= 10.0
 
     def tracker_step(self):
         self.hit_counter -= 1
@@ -214,7 +242,10 @@ class TrackedObject:
 
     @property
     def is_initializing(self):
-        if self.is_initializing_flag and self.hit_counter > (self.hit_inertia_min + self.hit_inertia_max) / 2:
+        if (
+            self.is_initializing_flag
+            and self.hit_counter > (self.hit_inertia_min + self.hit_inertia_max) / 2
+        ):
             self.is_initializing_flag = False
             TrackedObject.count += 1
             self.id = TrackedObject.count
@@ -226,8 +257,8 @@ class TrackedObject:
 
     @property
     def estimate(self):
-        positions = self.filter.x.T.flatten()[:self.dim_z].reshape(-1, 2)
-        velocities = self.filter.x.T.flatten()[self.dim_z:].reshape(-1, 2)
+        positions = self.filter.x.T.flatten()[: self.dim_z].reshape(-1, 2)
+        velocities = self.filter.x.T.flatten()[self.dim_z :].reshape(-1, 2)
         return positions
 
     @property
@@ -248,13 +279,19 @@ class TrackedObject:
         if detection.scores is not None:
             assert len(detection.scores.shape) == 1
             points_over_threshold_mask = detection.scores > self.detection_threshold
-            matched_sensors_mask = np.array([[m, m] for m in points_over_threshold_mask]).flatten()
-            H_pos = np.diag(matched_sensors_mask).astype(float)  # We measure x, y positions
+            matched_sensors_mask = np.array(
+                [[m, m] for m in points_over_threshold_mask]
+            ).flatten()
+            H_pos = np.diag(matched_sensors_mask).astype(
+                float
+            )  # We measure x, y positions
             self.point_hit_counter[points_over_threshold_mask] += 2 * period
         else:
             H_pos = np.identity(points.size)
             self.point_hit_counter += 2 * period
-        self.point_hit_counter[self.point_hit_counter >= self.point_hit_inertia_max] = self.point_hit_inertia_max
+        self.point_hit_counter[
+            self.point_hit_counter >= self.point_hit_inertia_max
+        ] = self.point_hit_inertia_max
         self.point_hit_counter[self.point_hit_counter < 0] = 0
         H_vel = np.zeros(H_pos.shape)  # But we don't directly measure velocity
         H = np.hstack([H_pos, H_vel])
@@ -266,11 +303,12 @@ class TrackedObject:
         # real detection this creates a huge velocity vector in our KalmanFilter
         # and causes the tracker to start with wildly inaccurate estimations which
         # eventually coverge to the real detections.
-        detected_at_least_once_mask = np.array([[m, m] for m in self.detected_at_least_once_points]).flatten()
-        self.filter.x[self.dim_z:][np.logical_not(detected_at_least_once_mask)] = 0
+        detected_at_least_once_mask = np.array(
+            [[m, m] for m in self.detected_at_least_once_points]
+        ).flatten()
+        self.filter.x[self.dim_z :][np.logical_not(detected_at_least_once_mask)] = 0
         self.detected_at_least_once_points = np.logical_or(
-            self.detected_at_least_once_points,
-            points_over_threshold_mask
+            self.detected_at_least_once_points, points_over_threshold_mask
         )
 
     def __repr__(self):
@@ -278,7 +316,13 @@ class TrackedObject:
             placeholder_text = "\033[1mObject_{}\033[0m(age: {}, hit_counter: {}, last_distance: {}, init_id: {})"
         else:
             placeholder_text = "\033[1mObject_{}\033[0m(age: {}, hit_counter: {}, last_distance: {:.2f}, init_id: {})"
-        return placeholder_text.format(self.id, self.age, self.hit_counter, self.last_distance, self.initializing_id)
+        return placeholder_text.format(
+            self.id,
+            self.age,
+            self.hit_counter,
+            self.last_distance,
+            self.initializing_id,
+        )
 
 
 class Detection:
