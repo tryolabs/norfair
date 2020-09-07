@@ -85,12 +85,12 @@ We provide several examples of how Norfair can be used to add tracking capabilit
 
 ![Norfair OpenPose Demo](docs/openpose_skip_3_frames.gif)
 
-# Commercial support
+## Commercial support
 
 Tryolabs can provide commercial support, implement new features in Norfair or build video analytics tools for solving your challenging problems. Norfair powers several video analytics applications, such as the [face mask detection](https://tryolabs.com/blog/2020/07/09/face-mask-detection-in-street-camera-video-streams-using-ai-behind-the-curtain/) tool developed by Tryolabs.
 
 If you are interested, please [contact us](https://tryolabs.com/#contact).
 
-# License
+## License
 
 Copyright © 2020, [Tryolabs](https://tryolabs.com). Released under the [BSD 3-Clause](LICENSE).
