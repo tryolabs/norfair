@@ -7,7 +7,7 @@ Using Norfair, you can add tracking capabilities to the output of any detector w
 1. You have objects described by a set of points expressed in `(x, y)` coordinates. These points can be anything, like 2 points describing the bounding box output by an object detector, or the 17 keypoints forming the human pose in a pose estimator.
 2. The camera viewpoint is steady.
 
-Norfair is built, used and maintained by [Tryolabs](https//tryolabs.com).
+Norfair is built, used and maintained by [Tryolabs](https://tryolabs.com).
 
 ## Installation
 
