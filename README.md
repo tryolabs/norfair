@@ -1,12 +1,25 @@
-![Logo](docs/logo.png)
+![Norfair by Tryolabs logo](docs/logo.png)
 
-Norfair is a lightweight Python library for adding object tracking to any type of detector. As long as the detector returns points expressed as (x, y) coordinates, such as the 2 points describing the bounding box of an object detector, or the 17 keypoints forming the poses in a pose estimator, Norfair can handle it. Also, using additional information such as the embeddings produced by the detector, or any other appearance information that may improve tracking, is supported.
+Norfair is a lightweight Python library for real-time 2D object tracking.
 
-## Usage
+Using Norfair, you can add tracking capabilities to the output of any detector with just a few lines of code. The only requirements are:
 
-The reason Norfair is so lax with its requirements, is because the decision of what distance function to use for matching detections with tracked objects is left to the user of the library.
+1. You have objects described by a set of points expressed in `(x, y)` coordinates. These points can be anything, like 2 points describing the bounding box output by an object detector, or the 17 keypoints forming the human pose in a pose estimator.
+2. The camera viewpoint is steady.
 
-Internally, Norfair estimates the future position of each point based on its past position. It then tries to match these estimated positions with newly detected points provided by the detector. The interesting part is that the function which calculates the distance between tracked objects and new detections is left for the user of the library to define. Each object tracker can therefore be made as simple or complex as needed.
+Norfair is built, used and maintained by [Tryolabs](https//tryolabs.com).
+
+## Installation
+
+Norfair currently supports Python 3.6+.
+
+```bash
+pip install norfair
+```
+
+## How it works
+
+Norfair works by estimating the future position of each point based on its past position. It then tries to match these estimated positions with newly detected points provided by the detector. For this matching to occur, Norfair can rely on any distance function specified by the user of the library. Therefore, each object tracker can be made as simple or complex as needed.
 
 The following is an example of a particularly simple distance function calculating the Euclidean distance between objects and detections. This is possibly the simplest distance function you could use in Norfair, as it uses just one single point per detection/object.
 
@@ -15,11 +28,11 @@ The following is an example of a particularly simple distance function calculati
      return np.linalg.norm(detection.points - tracked_object.estimate)
 ```
 
-To get the single point detections to use with this distance function we use [Detectron2](https://detectron2.readthedocs.io/tutorials/install.html), and just use the centroids of the bounding boxes it produces around cars.
+To get the single point detections to use with this distance function we use [Detectron2](https://detectron2.readthedocs.io/tutorials/install.html), and just use the centroids of the bounding boxes it produces around cars as our object representations.
 
 ![](docs/traffic.gif)
 
-On the left you can see the points we get from Detectron2, and on the right how Norfair tracks them. Even a straightforward distance function like this one can work when the tracking needed is simple.
+On the left you can see the points we get from Detectron2, and on the right how Norfair tracks them assigning a unique identifier through time. Even a straightforward distance function like this one can work when the tracking needed is simple.
 
 Norfair also provides several useful tools for creating a video inference loop. Here is what the full code for creating the previous example looks like, including the code needed to set up Detectron2:
 
@@ -54,160 +67,30 @@ The video and drawing tools use OpenCV frames, so they are compatible with most 
 
 ## Motivation
 
-Trying out the latest state of the art detectors normally requires running repositiories which weren't intended to be easy to use. These tend to be repositories associated with a research paper describing a novel new way of doing detection, and they are therefore intended to be run as a one-off evaluation script to get some result metric to publish on their particular research paper. This explains why they tend to not be easy to run as inference scripts, or why extracting the core model to use in a stand alone way isn't always trivial.
+Trying out the latest state of the art detectors normally requires running repositiories which weren't intended to be easy to use. These tend to be repositories associated with a research paper describing a novel new way of doing detection, and they are therefore intended to be run as a one-off evaluation script to get some result metric to publish on their particular research paper. This explains why they tend to not be easy to run as inference scripts, or why extracting the core model to use in another standalone script isn't always trivial.
 
-Norfair was born out of the need to quickly add a simple layer of tracking over a wide range of newly released SOTA detectors. For this reason it was designed to seamlessly be plugged into a complex, highly coupled code base, with minium effort. Norfair provides a series of modular but compatible tools, which you can pick and chose to use in your project.
-
-## Installation
-
-```bash
-pip install norfair
-```
+Norfair was born out of the need to quickly add a simple layer of tracking over a wide range of newly released SOTA detectors. It was designed to seamlessly be plugged into a complex, highly coupled code base, with minium effort. Norfair provides a series of modular but compatible tools, which you can pick and chose to use in your project.
 
 ## Documentation
 
-You can find the documentation for Norfair's API [here](docs/API.md).
+You can find the documentation for Norfair's API [here](docs/README.md).
 
 ## Examples
 
-### AlphaPose
+We provide several examples of how Norfair can be used to add tracking capabilities to several different detectors.
 
-Sometimes detection models are deeply coupled to their code base, and extracting them for using in your own video loop is very hard. This is very common in repositories based on research papers, which are usually meant to execute a one-off evaluation job for getting the metrics for their associated paper. [ Delete I think ]
+1. [Simple tracking of cars](demos/detectron2/README.md) using [Detectron2](https://github.com/facebookresearch/detectron2).
+2. [Simple tracking pedestrians](demos/alphapose/README.md) using [AlphaPose](https://github.com/MVIG-SJTU/AlphaPose).
+3. [Interpolating frames with no detections](demos/openpose/README.md) using [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose).
 
-An example of a model which is very deeply coupled to its code base is AlphaPose. With Norfair you can try out your own custom tracker on the very accurate poses produced by AlphaPose by just applying this git diff (with regards to this [commit](https://github.com/MVIG-SJTU/AlphaPose/commit/ded84d450faf56227680f0527ff7e24ab7268754)) into AlphaPose itself, and therefore avoiding the difficult job of decoupling the model from the code base. Just apply this diff and use their `video_demo.py` script on your video.
+![Norfair OpenPose Demo](docs/openpose_skip_3_frames.gif)
 
-```diff
-diff --git a/dataloader.py b/dataloader.py
-index ed6ee90..a7dedb0 100644
---- a/dataloader.py
-+++ b/dataloader.py
-@@ -17,6 +17,8 @@ import cv2
- import json
- import numpy as np
- import sys
-+sys.path.append("/home/lalo/norfair")
-+import norfair
- import time
- import torch.multiprocessing as mp
- from multiprocessing import Process
-@@ -606,6 +608,17 @@ class WebcamLoader:
-         # indicate that the thread should be stopped
-         self.stopped = True
- 
-+detection_threshold = 0.2
-+keypoint_dist_threshold = None
-+def keypoints_distance(detected_pose, tracked_pose):
-+    distances = np.linalg.norm(detected_pose.points - tracked_pose.estimate, axis=1)
-+    match_num = np.count_nonzero(
-+        (distances < keypoint_dist_threshold)
-+        * (detected_pose.scores > detection_threshold)
-+        * (tracked_pose.last_detection.scores > detection_threshold)
-+    )
-+    return 1 / (1 + match_num)
-+
- class DataWriter:
-     def __init__(self, save_video=False,
-                 savepath='examples/res/1.avi', fourcc=cv2.VideoWriter_fourcc(*'XVID'), fps=25, frameSize=(640,480),
-@@ -624,6 +637,11 @@ class DataWriter:
-         if opt.save_img:
-             if not os.path.exists(opt.outputpath + '/vis'):
-                 os.mkdir(opt.outputpath + '/vis')
-+        self.tracker = norfair.Tracker(
-+            distance_function=keypoints_distance,
-+            distance_threshold=0.3,
-+            detection_threshold=0.2
-+        )
- 
-     def start(self):
-         # start a thread to read frames from the file video stream
-@@ -672,7 +690,15 @@ class DataWriter:
-                     }
-                     self.final_result.append(result)
-                     if opt.save_img or opt.save_video or opt.vis:
--                        img = vis_frame(orig_img, result)
-+                        img = orig_img.copy()
-+                        global keypoint_dist_threshold
-+                        keypoint_dist_threshold = img.shape[0] / 30
-+                        detections = [
-+                            norfair.Detection(p['keypoints'].numpy(), scores=p['kp_score'].squeeze().numpy())
-+                            for p in result['result']
-+                        ]
-+                        tracked_objects = self.tracker.update(detections=detections)
-+                        norfair.draw_tracked_objects(img, tracked_objects)
-                         if opt.vis:
-                             cv2.imshow("AlphaPose Demo", img)
-                             cv2.waitKey(30)
-```
+# Commercial support
 
-This produces the following results:
+Tryolabs can provide commercial support, implement new features in Norfair or build video analytics tools for solving your challenging problems. Norfair powers several video analytics applications, such as the [face mask detection](https://tryolabs.com/blog/2020/07/09/face-mask-detection-in-street-camera-video-streams-using-ai-behind-the-curtain/) tool developed by Tryolabs.
 
-![alphapose](docs/alphapose.gif)
+If you are interested, please [contact us](https://tryolabs.com/#contact).
 
+# License
 
-
-### OpenPose
-
-If you just want to accelerate your pose detection, you can use Norfair to only run one out of every 3 frames through your detector and let Norfair interpolate the detections through the rest of the frames:
-
-```python
-import norfair
-from norfair import Detection, Tracker, Video
-
-import numpy as np
-import yaml
-import sys
-
-frame_skip_period = 3
-detection_threshold = 0.2
-distance_threshold = 0.3
-
-class OpenposeDetector():
-    def __init__(self):
-        with open("./demos/openpose_config.yml", 'r') as stream:
-            open_pose_config = yaml.safe_load(stream)["openpose"]
-        openpose_dir = open_pose_config['dir']
-        sys.path.append(openpose_dir + "/build/python/openpose")
-        from openpose import OpenPose  # noqa
-        open_pose_config["default_model_folder"] = openpose_dir + "/models/"
-        self.detector = OpenPose(open_pose_config)
-
-    def __call__(self, image):
-        return self.detector.forward(image, False)
-
-def keypoints_distance(detected_pose, tracked_pose):
-    distances = np.linalg.norm(detected_pose.points - tracked_pose.estimate, axis=1)
-    match_num = np.count_nonzero(
-        (distances < keypoint_dist_threshold)
-        * (detected_pose.scores > detection_threshold)
-        * (tracked_pose.last_detection.scores > detection_threshold)
-    )
-    return 1 / (1 + match_num)
-
-pose_detector = OpenposeDetector()
-video = Video(input_path="video.mp4")
-tracker = Tracker(distance_function=keypoints_distance,
-                  distance_threshold=distance_threshold,
-                  detection_threshold=detection_threshold)
-keypoint_dist_threshold = video.input_height / 30
-
-for i, frame in enumerate(video):
-    if i % frame_skip_period == 0:
-        detected_poses = pose_detector(frame)
-        detections = [] if not detected_poses.any() else [
-            Detection(p, scores=s)
-            for (p, s) in zip(detected_poses[:, :, :2], detected_poses[:, :, 2])
-        ]
-        tracked_objects = tracker.update(detections=detections, period=frame_skip_period)
-        norfair.draw_points(frame, detections)
-    else:
-        tracked_objects = tracker.update()
-    norfair.draw_tracked_objects(frame, tracked_objects)
-    video.write(frame)
-```
-
-We are skipping 2 out of every 3 frames, which should make your video process 3 times faster, as the time added by running the tracker itself is negligible when compared to not having to run 2 inferences on a deep neural network.
-
-This is how the results look like:
-
-![openpose_skip_3_frames](docs/openpose_skip_3_frames.gif)
-
+Copyright © 2020, [Tryolabs](https://tryolabs.com). Released under the [BSD 3-Clause](LICENSE).
