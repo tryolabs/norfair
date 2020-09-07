@@ -1,9 +1,9 @@
 [tool.poetry]
 name = "norfair"
 version = "0.1.4"
-description = "Simple object tracker"
+description = "Lightweight Python library for real-time 2D object tracking."
 license = "BSD-3-Clause"
-authors = ["joaqo <joaquin.alori@gmail.com>"]
+authors = ["Tryolabs <hello@tryolabs.com>"]
 repository = "https://github.com/tryolabs/norfair"
 readme = "README.md"
 
