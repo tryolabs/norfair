@@ -1,11 +1,10 @@
 import sys
-sys.path.append("../norfair") 
+import yaml
+import numpy as np
 import norfair
+
 from norfair import Detection, Tracker, Video
 
-import numpy as np
-import yaml
-import sys
 
 frame_skip_period = 3
 detection_threshold = 0.2
