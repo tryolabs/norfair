@@ -1,13 +1,21 @@
-import cv2
 import os
 import time
 
+import cv2
 from rich import print
-from rich.progress import Progress, BarColumn, TimeRemainingColumn
+from rich.progress import BarColumn, Progress, TimeRemainingColumn
 
 
 class Video:
-    def __init__(self, camera=None, input_path=None, output_path=".", output_fps=None, label="", codec_fourcc=None):
+    def __init__(
+        self,
+        camera=None,
+        input_path=None,
+        output_path=".",
+        output_fps=None,
+        label="",
+        codec_fourcc=None,
+    ):
         self.camera = camera
         self.input_path = input_path
         self.output_path = output_path
@@ -16,10 +24,16 @@ class Video:
         self.output_video = None
 
         # Input validation
-        if (input_path is None and camera is None) or (input_path is not None and camera is not None):
-            raise ValueError("You must set either 'camera' or 'input_path' arguments when setting 'Video' class")
+        if (input_path is None and camera is None) or (
+            input_path is not None and camera is not None
+        ):
+            raise ValueError(
+                "You must set either 'camera' or 'input_path' arguments when setting 'Video' class"
+            )
         if camera is not None and type(camera) is not int:
-            raise ValueError("Argument 'camera' refers to the device-id of your camera, and must be an int. Setting it to 0 usually works if you don't know the id.")
+            raise ValueError(
+                "Argument 'camera' refers to the device-id of your camera, and must be an int. Setting it to 0 usually works if you don't know the id."
+            )
 
         # Read Input Video
         if self.input_path is not None:
@@ -28,16 +42,18 @@ class Video:
             if total_frames == 0:
                 fail_msg = "[bold red]Error reading input video file:[/bold red] Make sure file exists and is a video file."
                 if "~" in self.input_path:
-                    fail_msg += (
-                        "\n[yellow]Using ~ as abbreviation for your home folder is not supported.[/yellow]"
-                    )
+                    fail_msg += "\n[yellow]Using ~ as abbreviation for your home folder is not supported.[/yellow]"
                 self._fail(fail_msg)
             description = os.path.basename(self.input_path)
         else:
             self.video_capture = cv2.VideoCapture(self.camera)
             total_frames = 0
             description = f"Camera({self.camera})"
-        self.output_fps = output_fps if output_fps is not None else self.video_capture.get(cv2.CAP_PROP_FPS)
+        self.output_fps = (
+            output_fps
+            if output_fps is not None
+            else self.video_capture.get(cv2.CAP_PROP_FPS)
+        )
         self.input_height = self.video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT)
         self.input_width = self.video_capture.get(cv2.CAP_PROP_FRAME_WIDTH)
         self.frame_counter = 0
@@ -51,8 +67,13 @@ class Video:
             "[yellow]{task.fields[process_fps]:.2f}fps[/yellow]",
         ]
         if self.input_path is not None:
-            progress_bar_fields.insert(2, "[progress.percentage]{task.percentage:>3.0f}%")
-            progress_bar_fields.insert(3, TimeRemainingColumn(),)
+            progress_bar_fields.insert(
+                2, "[progress.percentage]{task.percentage:>3.0f}%"
+            )
+            progress_bar_fields.insert(
+                3,
+                TimeRemainingColumn(),
+            )
         self.progress_bar = Progress(
             *progress_bar_fields,
             auto_refresh=False,
@@ -60,7 +81,10 @@ class Video:
             redirect_stderr=False,
         )
         self.task = self.progress_bar.add_task(
-            self.abbreviate_description(description), total=total_frames, start=self.input_path is not None, process_fps=0
+            self.abbreviate_description(description),
+            total=total_frames,
+            start=self.input_path is not None,
+            process_fps=0,
         )
 
     # This is a generator, note the yield keyword below.
@@ -75,13 +99,17 @@ class Video:
                 if ret is False or frame is None:
                     break
                 process_fps = self.frame_counter / (time.time() - start)
-                progress_bar.update(self.task, advance=1, refresh=True, process_fps=process_fps)
+                progress_bar.update(
+                    self.task, advance=1, refresh=True, process_fps=process_fps
+                )
                 yield frame
 
         # Cleanup
         if self.output_video is not None:
             self.output_video.release()
-            print(f"[white]Output video file saved to: {self.get_output_file_path()}[/white]")
+            print(
+                f"[white]Output video file saved to: {self.get_output_file_path()}[/white]"
+            )
         self.video_capture.release()
         cv2.destroyAllWindows()
 
@@ -95,8 +123,16 @@ class Video:
             output_file_path = self.get_output_file_path()
             fourcc = cv2.VideoWriter_fourcc(*self.get_codec_fourcc(output_file_path))
             # Set on first frame write in case the user resizes the frame in some way
-            output_size = (frame.shape[1], frame.shape[0])  # OpenCV format is (width, height)
-            self.output_video = cv2.VideoWriter(output_file_path, fourcc, self.output_fps, output_size,)
+            output_size = (
+                frame.shape[1],
+                frame.shape[0],
+            )  # OpenCV format is (width, height)
+            self.output_video = cv2.VideoWriter(
+                output_file_path,
+                fourcc,
+                self.output_fps,
+                output_size,
+            )
 
         self.output_video.write(frame)
         return cv2.waitKey(1)
@@ -107,7 +143,11 @@ class Video:
 
             # Note that frame.shape[1] corresponds to width, and opencv format is (width, height)
             frame = cv2.resize(
-                frame, (frame.shape[1] // downsample_ratio, frame.shape[0] // downsample_ratio),
+                frame,
+                (
+                    frame.shape[1] // downsample_ratio,
+                    frame.shape[0] // downsample_ratio,
+                ),
             )
         cv2.imshow("Output", frame)
         return cv2.waitKey(1)
@@ -144,10 +184,13 @@ class Video:
     def abbreviate_description(self, description):
         """Conditionally abbreviate description so that progress bar fits in small terminals"""
         _, terminal_columns = os.popen("stty size", "r").read().split()
-        space_for_description = int(terminal_columns) - 25  # Leave 25 space for progressbar
+        space_for_description = (
+            int(terminal_columns) - 25
+        )  # Leave 25 space for progressbar
         if len(description) < space_for_description:
             return description
         else:
             return "{} ... {}".format(
-                description[: space_for_description // 2 - 3], description[-space_for_description // 2 + 3 :]
+                description[: space_for_description // 2 - 3],
+                description[-space_for_description // 2 + 3 :],
             )
