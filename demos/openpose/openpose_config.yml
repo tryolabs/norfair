@@ -1,5 +1,5 @@
 openpose:
-  dir: /home/lalo/openpose_original_version/openpose
+  dir: /home/<user>/openpose_original_version/openpose
   # output_image_with_skeletons: true
   logging_level: 3
   output_resolution: -1x-1 # 320x176

@@ -2,9 +2,8 @@ import cv2
 import numpy as np
 from detectron2.engine import DefaultPredictor
 from detectron2.config import get_cfg
-import sys
-sys.path.append(".")
-from norfair import Detection, Tracker, Video, draw_tracked_objects, draw_points
+
+from norfair import Detection, Tracker, Video, draw_tracked_objects
 
 # Set up Detectron2 object detector
 cfg = get_cfg()
