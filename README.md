@@ -41,7 +41,7 @@ The following is an example of a particularly simple distance function calculati
 
 As an example we use [Detectron2](https://github.com/facebookresearch/detectron2) to get the single point detections to use with this distance function. We just use the centroids of the bounding boxes it produces around cars as our detections and get the following results.
 
-![](docs/traffic.gif)
+![Tracking cars with Norfair](docs/traffic.gif)
 
 On the left you can see the points we get from Detectron2, and on the right how Norfair tracks them assigning a unique identifier through time. Even a straightforward distance function like this one can work when the tracking needed is simple.
 
@@ -50,9 +50,10 @@ Norfair also provides several useful tools for creating a video inference loop. 
 ```python
 import cv2
 import numpy as np
-from detectron2.engine import DefaultPredictor
 from detectron2.config import get_cfg
-from norfair import Detection, Tracker, Video, draw_tracked_objects, draw_points
+from detectron2.engine import DefaultPredictor
+
+from norfair import Detection, Tracker, Video, draw_tracked_objects
 
 # Set up Detectron2 object detector
 cfg = get_cfg()
