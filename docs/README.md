@@ -1,58 +1,60 @@
-# API (Add links between refernces and definitions of things)
+# API
 
 ## Tracker
 
-In charge of performing the tracking and storing the tracked objects as you iterate over the video. The `Tracker` class first needs to get instantiated as an object, and then continuously updated inside your video processing loop as you get new detections using its `update` method.
+In class in charge of performing the tracking of the detections produced by the detector. The `Tracker` class first needs to get instantiated as an object, and then continuously updated inside a video processing loop by feeding new detections into its [`update`](#tracker.update) method.
 
-Arguments:
+##### Arguments:
 
-- `distance_function`: Function used by the tracker to determine the distance between newly detected objects and the tracked objects the tracker is tracking. This function should take 2 arguments, the first being a detection of type `Detection` and the second a tracked object of type `TrackedObject`, and should return a number (####check if it could be and Int and a Float!)
-
-- `hit_inertia_min (optional)`: Each tracked objects keeps an internal hit inertia counter which tracks how often its getting matched to a detection, if it doesn't get any match for a certain amount of frames and it gets below the value set by this argument, the object is destroyed. Defaults to `10`.
-- `hit_inertia_max (optional)`: Each tracked objects keeps an internal hit inertia counter which tracks how often its getting matched to a detection, this argument defines how large this inertia can grow. Defaults to `25`.
-- `distance_threshold (optional)`: A detection and a matched object whose distance is below this number can get matched, the opposite is true for larger numbers. Defaults to `1`.
-- `detection_threshold (optional)`: Sets the threshold at which a point's score must dip below to be ignored by the tracker. Defaults to 0.
+- `distance_function`: Function used by the tracker to determine the distance between newly detected objects and the objects the tracker is currently tracking. This function should take 2 arguments, the first being a detection of type [`Detection`](#detection), and the second a tracked object of type [`TrackedObject`](#trackedobject), and should return a `float` with the distance it calculates.
+- `distance_threshold`: Defines what is the maximum distance that can constitute a match. Detections and tracked objects whose distance are above this threshold won't be matched by the tracker.
+- `hit_inertia_min (optional)`: Each tracked objects keeps an internal hit inertia counter which tracks how often its getting matched to a detection, each time it gets a match this counter goes up, and each time it doesn't it goes down. If it doesn't get any match for a certain amount of frames, and it then gets below the value set by this argument, the object is destroyed. Defaults to `10`.
+- `hit_inertia_max (optional)`: Each tracked objects keeps an internal hit inertia counter which tracks how often its getting matched to a detection, each time it gets a match this counter goes up, and each time it doesn't it goes down. This argument defines how large this inertia can grow, and therefore defines how long an object can live without getting matched to any detections. Defaults to `25`.
+- `detection_threshold (optional)`: Sets the threshold at which the scores of the points in a detection being fed into the tracker must dip below to be ignored by the tracker. Defaults to `0`.
+- `point_transience (optional)`: Each tracked object keeps track of how much often of the points its tracking has been getting matched. Points that are getting matches are said to be live, and points which aren't are said to not be live. This determines things like which points in a tracked object get drawn by [`draw_tracked_objects`](#draw_tracked_objects) and which don't. This argument determines how short lived points not getting matched are. Defaults to `4`.
 
 ### Tracker.update
 
-The function to which the detections must be passed to as you iterate through your video.
+The function through which the detections found in each frame must be passed to the tracker.
 
-Arguments:
+##### Arguments:
 
-- `detections (optional)`: The detections in the current frame being processed. A list of `Detection`s. If there aren't any detections, or you are skipping frames on purpose and the current frame is getting framed, the update function should still be run so the tracker keeps advancing, but with this argument set to None, or without any arguments.
-- `period`: You can chose not to run your detector on all frames, so as to process the video faster. This parameter sets how many frames have been ignored by the detector since the last unignored frame. It can change as you process a video, which is useful if you are dynamically changing how many frames your detector is skipping on a video when working in real-time.
+- `detections (optional)`:  A list of [`Detection`](#detection)s which represent the detections found in the current frame being processed. If no detections have been found in the current frame, or the user is purposely skipping frames to improve video processing time, this argument should be set to None or ignored, as the update function is needed to advance the state of the Kalman Filters inside the tracker. Defaults to `None`.
+- `period (optional)`: The user can chose not to run their detector on all frames, so as to process video faster. This parameter sets every how many frames the detector is getting ran, so that the tracker is aware of this situation and can handle it properly. This argument can be reset on each frame processed, which is useful if the user is dynamically changing how many frames the detector is skipping on a video when working in real-time. Defaults to `1`.
 
-Returns:
+##### Returns:
 
-- A list of `TrackedObjects`.
+- A list of [`TrackedObject`](#trackedobject)s.
 
 ## Detection
 
-The object which encodes how Norfair understands detections.
+Detections returned by the detector must be converted to a `Detection` object before being used by Norfair.
 
-Arguments:
+##### Arguments:
 
-- `points`: A numpy array of shape `(number of points per object, 2)`, with each point being an `x, y` coordinate in the image, which the previous `2` references. The number of points per object must be the same for every detection fed into a particular tracker (###########test this).
-- `scores`: An array of length `number of points per object` which assigns a score to each of the points defined in `points`. This is used to tell the tracker which points to ignore. This way we can use still use detections for which we don't haven't detected the position of every point.
-- `data`: The argument to which any extra data you want to use in your distance function can be stored. Anything you store here will be available to you in your distance function so you can do interesting things like use embeddings for taking into account the detection's appearance and not just position when tracking objects.
+- `points`: A numpy array of shape `(number of points per object, 2)`, with each row being a point expressed as `x, y` coordinates on the image. The number of points per detection must be constant for each particular tracker.
+- `scores`: An array of length `number of points per object` which assigns a score to each of the points defined in `points`. This is used to inform the tracker of which points to ignore; any point with a score below `detection_threshold` will be ignored. This useful for cases in which detections don't always have every point detected, as is often the case in pose estimators.
+- `data`: The place to store any extra data which may be useful when calculating the distance function. Anything stored here will be available to use inside the distance function. This enables the development of more interesting trackers which can do things like assign an appearance embedding to each detection to aid in its tracking.
 
 ## TrackedObject
 
-The object returned by the tracker's `update` function on each iteration.
+The objects returned by the tracker's `update` function on each iteration. They represent the objects currently being tracked by the tracker.
 
-Properties:
+##### Properties:
 
-- `estimate`: where the tracker predicts the point will be in the current frame based on past detections. A numpy array with the same shape as the detections being fed to the tracker that produced it.
+- `estimate`: Where the tracker predicts the point will be in the current frame based on past detections. A numpy array with the same shape as the detections being fed to the tracker that produced it.
 - `id`: The unique identifier assigned to this object by the tracker.
 - `last_detection`: The last detection that matched with this tracked object.
 - `last_distance`: The distance the tracker had with the last object it matched with.
-- `age`: the age of this object measured in number of frames.
+- `age`: The age of this object measured in number of frames.
+- `live_points`: A boolean mask with shape `(number of points per object)`. Points marked as `True` have recently been matched with detections. Points marked as `False` haven't and are to be considered as stale, and should be ignored. Functions like [`draw_tracked_objects`](#draw_tracked_objects) use this property to determine which points not to draw.
+- `initializing_id`: On top of `id`, objects also have an `initializing_id` which is the id they are given internally by the `Tracker`, which is used for debugging. Each new object created by the `Tracker` starts as an uninitialized `TrackedObject`, which needs to reach a certain match rate to be converted into a full blown `TrackedObject`. This is the id assigned to `TrackedObject` while they are getting initialized. 
 
 ## Video
 
-Norfair provides a `Video` class to provide a simple and pythonic api to interact with video. It returns regular OpenCV frames which allows you to use the huge number of tools OpenCV provides to modify images.
+Class that provides a simple and pythonic way to interact with video. It returns regular OpenCV frames which enables the usage of the huge number of tools OpenCV provides to modify images.
 
-You can get a simple video inference loop with just:
+A simple video inference loop can be defined with just:
 
 ```python
 video = Video(input_path="video.mp4")
@@ -61,43 +63,31 @@ for frame in video:
     video.write(frame)
 ```
 
-It makes sense to use Norfair even if you don't need tracking, as its lightweight enough to warrant being used just for its video management features.
+##### Arguments:
 
-![camera](file:///Users/joaqo/camera.gif?lastModify=1598507860)
-
-[Sacar esto de la camara es ridiculo, hacer alarde de progress bars es medio lame]
-
-Or if you use you set `Video(camera=0)` to consume a video stream from your webcam:
-
-![file](file:///Users/joaqo/file.gif?lastModify=1598507860)
-
-we think the api is a bit more pythonic than the standard OpenCV api, provides a lot of good defaults and provides ammenities such as progress bars and more.
-
-Arguments:
-
-- `camera=None`: An integer representing the device Id of the camera you want to get your video from. Webcams tend to have an Id of `0`. `camera` and `input_path` can't be used at the same time, you have to chose one.
-- `input_path=None`: A string representing the path to your input video file. `camera` and `input_path` can't be used at the same time, you have to chose one.
-- `output_path="."`: The output path to the video where you want to save your modified frames.
-- `output_fps=None`: Allows you to chose the fps to encode your output file at. If not provided Norfair infers it from your video input source. This is useful for video cameras, where you may know the input fps, but where latency added to your video loop by your detector or other code can make your real fps be much lower than your input fps.
-- `label=""`: Label to add to progress bar when processing the current video.
-- `codec_fourcc=None`: Encoding for output file.
+- `camera (optional)`: An integer representing the device id of the camera to be used as the video source. Webcams tend to have an id of `0`. Arguments `camera` and `input_path` can't be used at the same time, one must be chosen.
+- `input_path (optional)`: A string consisting of the path to the video file to be used as the video source. Arguments `camera` and `input_path` can't be used at the same time, one must be chosen.
+- `output_path (optional)`: The path to the output video to be generated. Can be a folder or a file name. Defaults to `"."`.
+- `output_fps (optional)`: The frames per second at which to encode the output video file. If not provided it is set to be equal to the input video source's fps. This argument is useful when using live video cameras as a video source, where the user may know the input fps, but where the frames are being fed to the output video at a rate that is lower than the video source's fps, due to the latency added by the detector. This can result in an output video that was fed frames at a certain fps, that consequently encodes them at a higher fps (the video source's fps), which results in a sped up video output.
+- `label (optional)`: Label to add to the progress bar that appears when processing the current video.
+- `codec_fourcc (optional)`: OpenCV encoding for output video file.
 
 ### Video.write
 
-Function that writes a frame (usually a frame modified by the user in some way) to an output video file.
+Function to which the frames which will compose the output video should get passed to.
 
-Arguments:
+##### Arguments:
 
-- `frame`: The OpenCV frame to be write to file.
+- `frame`: The OpenCV frame to write to file.
 
 ### Video.show
 
-Function that shows a frame (usually a frame modified by the user in some way) through a GUI video stream.
+Function that displays the frame passed to it through a GUI. Usually used inside a video inference loop to show the output video.
 
-Arguments:
+##### Arguments:
 
-- `frame`: The OpenCV frame to be shown.
-- `downsample_ratio=1`: How much to downsample the frame being show. Useful when looking at the GUI video through a slow internet connectioin using something like X11 forwarding on an ssh connection.
+- `frame`: The OpenCV frame to be displayed.
+- `downsample_ratio (optional)`: How much to downsample the frame being show. Useful when streaming the GUI video display through a slow internet connectioin using something like X11 forwarding on an ssh connection. Defaults to `1`.
 
 ### Video.get_output_file_path
 
@@ -105,71 +95,71 @@ Function which returns the output path being used in case you are writing your f
 
 ## draw_points
 
-Function that draws the points in a list of detections on a frame.
+Function that draws a list of detections on a frame.
 
-Arguments:
+##### Arguments:
 
-- `frame`: OpenCV frame to draw on. Modified in place.
-- `detections`: List of `Detection`s to be drawn.
-- `radius=None`: radius of the circles representing the detections.
-- `thickness=None`: Thickness of the circles representing the detections.
-- `color=None`: `Color` of the circles representing the detections.
+- `frame`: The OpenCV frame to draw on. Modified in place.
+- `detections`: List of [`Detection`](#detection)s to be drawn.
+- `radius (optional)`: Radius of the circles representing the detected points.
+- `thickness (optional)`: Thickness of the circles representing the detected points.
+- `color (optional)`: [`Color`](#color) of the circles representing the detected points.
 
 ## draw_tracked_objects
 
 Function that draws a list of tracked objects on a frame.
 
-Arguments:
+##### Arguments:
 
-- `frame`: OpenCV frame to draw on. Modified in place.
-- `objects`: List of `TrackedObject`s to be drawn.
-- `radius=None`: radius of the circles representing the tracked objects.
-- `color=None`: `Color` of the circles representing the tracked objects.
-- `id_size=None`: Size of the identifying number being drawn on each tracked object. The id wont get drawn if `id_size` is set to 0.
-- `id_thickness=None`: Thickness of the identifying number being drawn on each tracked object.
-- `draw_points=True`: Boolean determining if the function should draw the points estimated by the tracker. If set to true the points get drawn, if set to false only the id number gets drawn.
+- `frame`: The OpenCV frame to draw on. Modified in place.
+- `objects`: List of [`TrackedObject`](#trackedobject)s to be drawn.
+- `radius (optional)`: Radius of the circles representing the points estimated by the tracked objects.
+- `color (optional)`: [`Color`](#color) of the circles representing the points estimated by the tracked objects.
+- `id_size (optional)`: Size of the id number being drawn on each tracked object. The id wont get drawn if `id_size` is set to 0.
+- `id_thickness (optional)`: Thickness of the id number being drawn on each tracked object.
+- `draw_points (optional)`: Boolean determining if the function should draw the points estimated by the tracked objects. If set to `True` the points get drawn, if set to `False` only the id numbers get drawn. Defaults to `True`.
 
 ##  draw_debug_metrics
 
-Function that draws debug information of tracked objects on a frame. Usefull while developing your distance function.
+Function that draws debug information about the tracked objects on a frame. Usefull while developing your distance function.
 
-Arguments:
+##### Arguments:
 
-- `frame`: OpenCV frame to draw on. Modified in place.
-- `objects`: List of `TrackedObject`s to be drawn.
-- `text_size=None`: Size of the text displaying the debug information.
-- `text_thickness=None`: Thickness of the text displaying the debug information.
-- `color=None`: `Color` of the text displaying the debug information.
-- `only_ids=None`: List of Ids that determine which objects to display the debug information of. Only objects whose id is in this list will display their debug information.
-- `only_initializing_ids=None`: Objects have an internal id called initializing id which is used by the tracker to manage objects which may never be instantiated into a full object, it may be useful to filter by this id when debugging. List of Ids that determine which objects to display the debug information of. Only objects whose initializing id is in this list will display their debug information.
+- `frame`: The OpenCV frame to draw on. Modified in place.
+- `objects`:  List of [`TrackedObject`](#trackedobject)s to be drawn.
+- `text_size (optional)`: Size of the text displaying the debug information.
+- `text_thickness (optional)`: Thickness of the text displaying the debug information.
+- `color (optional)`: [`Color`](#color) of the text displaying the debug information.
+- `only_ids (optional)`: List of ids that determines which objects to display the debug information of. Only the objects whose id is in this list will get their debug information drawn on the frame.
+- `only_initializing_ids (optional)`: List of `initializing_id`s that determines which objects to display the debug information of. Only objects whose `initializing_id` is in this list will display their debug information. [`TrackedObject`](#trackedobject)s have an internal id called `initializing_id` which is used by the tracker to manage objects which may never be instantiated into full objects, it may be useful to filter objects by this id when debugging objects not correctly initializing, or initializing too often.
 
 ## Color
 
-Object which represents an OpenCV color. Its properties are the colors which it can represent. For example, just set `Color.blue` to get the OpenCV tuple representing the color blue.
+Object which represents an OpenCV color. Its properties are the colors which it can represent. For example, set `Color.blue` to get the OpenCV tuple representing the color blue.
 
-Properties:
+##### Properties:
 
-- green
-- white
-- olive
-- black
-- navy
-- red
-- maroon
-- grey
-- purple
-- yellow
-- lime
-- fuchsia
-- aqua
-- blue
-- teal
-- silver
+- `green`
+- `white`
+- `olive`
+- `black`
+- `navy`
+- `red`
+- `maroon`
+- `grey`
+- `purple`
+- `yellow`
+- `lime`
+- `fuchsia`
+- `aqua`
+- `blue`
+- `teal`
+- `silver`
 
 ## print_objects_as_table
 
 Function that prints a list of objects and their debug information as a table to console. Useful for debugging.
 
-Arguments:
+##### Arguments:
 
-- `tracked_objects`: List of `Object`s to print as a table.
+- `tracked_objects`: List of [`TrackedObject`](#trackedobject)s to print as a table.
