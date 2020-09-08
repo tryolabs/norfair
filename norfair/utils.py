@@ -9,10 +9,13 @@ def validate_points(points):
         points = points[np.newaxis, ...]
     else:
         if points.shape[1] != 2 or len(points.shape) > 2:
-            print(f"The shape of `Detection.points` should be (num_of_points_to_track, 2), not {points.shape}.")
+            print(
+                f"The shape of `Detection.points` should be (num_of_points_to_track, 2), not {points.shape}."
+            )
             print("Check your detection conversion code.")
             exit()
     return points
+
 
 def print_objects_as_table(tracked_objects):
     """Used for helping in debugging"""
@@ -30,6 +33,6 @@ def print_objects_as_table(tracked_objects):
             str(obj.age),
             str(obj.hit_counter),
             f"{obj.last_distance:.4f}",
-            str(obj.initializing_id)
+            str(obj.initializing_id),
         )
     console.print(table)

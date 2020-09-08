@@ -4,19 +4,15 @@ Norfair is a customizable lightweight Python library for real-time 2D object tra
 
 Using Norfair, you can add tracking capabilities to the output of any detector with just a few lines of code.
 
-#### Features
+## Features
 
 - Any detector expressing its detections as a series of `(x, y)` coordinates can be used with Norfair. This includes detectors performing object detection, pose estimation, and instance segmentation.
 
-- The user gets to write the distance function that Norfair uses to match tracked objects with new detections, making Norfair extremely customizable.
+- Customizable distance function used to match tracked objects with new detections. This function can potentially make use of extra information, such as appearance embeddings.
 
-- Extra information such as appearance embeddings can be used to help with tracking.
+- Modular in nature, so it can easily be inserted into the video inference loop of an already existing detection project, but it can also be used to build a new project from scratch using just Norfair and a detection model.
 
-- Norfair is built to be modular, so it can easily be inserted into the video inference loop of an already existing detection project, but it can also be used to build a new project from scratch using just Norfair + a detection model.
-
-- It's fast. The only thing bounding inference speed will be the detection network feeding detections to Norfair.
-
-  
+- Fast. The only thing bounding inference speed will be the detection network feeding detections to Norfair.
 
 Norfair is built, used and maintained by [Tryolabs](https://tryolabs.com).
 
@@ -41,7 +37,7 @@ The following is an example of a particularly simple distance function calculati
 
 As an example we use [Detectron2](https://github.com/facebookresearch/detectron2) to get the single point detections to use with this distance function. We just use the centroids of the bounding boxes it produces around cars as our detections and get the following results.
 
-![](docs/traffic.gif)
+![Tracking cars with Norfair](docs/traffic.gif)
 
 On the left you can see the points we get from Detectron2, and on the right how Norfair tracks them assigning a unique identifier through time. Even a straightforward distance function like this one can work when the tracking needed is simple.
 
@@ -50,9 +46,10 @@ Norfair also provides several useful tools for creating a video inference loop. 
 ```python
 import cv2
 import numpy as np
-from detectron2.engine import DefaultPredictor
 from detectron2.config import get_cfg
-from norfair import Detection, Tracker, Video, draw_tracked_objects, draw_points
+from detectron2.engine import DefaultPredictor
+
+from norfair import Detection, Tracker, Video, draw_tracked_objects
 
 # Set up Detectron2 object detector
 cfg = get_cfg()
