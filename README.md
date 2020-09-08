@@ -4,19 +4,15 @@ Norfair is a customizable lightweight Python library for real-time 2D object tra
 
 Using Norfair, you can add tracking capabilities to the output of any detector with just a few lines of code.
 
-#### Features
+## Features
 
 - Any detector expressing its detections as a series of `(x, y)` coordinates can be used with Norfair. This includes detectors performing object detection, pose estimation, and instance segmentation.
 
-- The user gets to write the distance function that Norfair uses to match tracked objects with new detections, making Norfair extremely customizable.
+- Customizable distance function used to match tracked objects with new detections. This function can potentially make use of extra information, such as appearance embeddings.
 
-- Extra information such as appearance embeddings can be used to help with tracking.
+- Modular in nature, so it can easily be inserted into the video inference loop of an already existing detection project, but it can also be used to build a new project from scratch using just Norfair and a detection model.
 
-- Norfair is built to be modular, so it can easily be inserted into the video inference loop of an already existing detection project, but it can also be used to build a new project from scratch using just Norfair + a detection model.
-
-- It's fast. The only thing bounding inference speed will be the detection network feeding detections to Norfair.
-
-  
+- Fast. The only thing bounding inference speed will be the detection network feeding detections to Norfair.
 
 Norfair is built, used and maintained by [Tryolabs](https://tryolabs.com).
 
