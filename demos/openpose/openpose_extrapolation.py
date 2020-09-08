@@ -49,7 +49,6 @@ keypoint_dist_threshold = video.input_height / 30
 for i, frame in enumerate(video):
     if i % frame_skip_period == 0:
         detected_poses = pose_detector(frame)
-        # Put in readme too
         detections = (
             []
             if not detected_poses.any()
