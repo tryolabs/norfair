@@ -8,13 +8,13 @@ Using Norfair, you can add tracking capabilities to the output of any detector w
 
 - Any detector expressing its detections as a series of `(x, y)` coordinates can be used with Norfair. This includes detectors performing object detection, pose estimation, and instance segmentation.
 
-- The user gets to write the distance function that Norfair uses to match tracked objects with new detections, making Norfair extremelly customizable.
+- The user gets to write the distance function that Norfair uses to match tracked objects with new detections, making Norfair extremely customizable.
 
 - Extra information such as appearance embeddings can be used to help with tracking.
 
-- Norfair is built to be modular, so it can easily be inserted into the video inference loop of an already existing detection project, but it can also be used to build a new project from scratch using just Norfar + a detection model.
+- Norfair is built to be modular, so it can easily be inserted into the video inference loop of an already existing detection project, but it can also be used to build a new project from scratch using just Norfair + a detection model.
 
-- Its fast. The only thing bounding inference speed will be the detection network feeding detections to Norfair.
+- It's fast. The only thing bounding inference speed will be the detection network feeding detections to Norfair.
 
   
 
@@ -39,7 +39,7 @@ The following is an example of a particularly simple distance function calculati
      return np.linalg.norm(detection.points - tracked_object.estimate)
 ```
 
-As an example we use [Detectron2](https://detectron2.readthedocs.io/tutorials/install.html) to get the single point detections to use with this distance function. We just use the centroids of the bounding boxes it produces around cars as our detections and get the following results.
+As an example we use [Detectron2](https://github.com/facebookresearch/detectron2) to get the single point detections to use with this distance function. We just use the centroids of the bounding boxes it produces around cars as our detections and get the following results.
 
 ![](docs/traffic.gif)
 
@@ -77,9 +77,9 @@ The video and drawing tools use OpenCV frames, so they are compatible with most 
 
 ## Motivation
 
-Trying out the latest state of the art detectors normally requires running repositiories which weren't intended to be easy to use. These tend to be repositories associated with a research paper describing a novel new way of doing detection, and they are therefore intended to be run as a one-off evaluation script to get some result metric to publish on a particular research paper. This explains why they tend to not be easy to run as inference scripts, or why extracting the core model to use in another standalone script isn't always trivial.
+Trying out the latest state of the art detectors normally requires running repositories which weren't intended to be easy to use. These tend to be repositories associated with a research paper describing a novel new way of doing detection, and they are therefore intended to be run as a one-off evaluation script to get some result metric to publish on a particular research paper. This explains why they tend to not be easy to run as inference scripts, or why extracting the core model to use in another standalone script isn't always trivial.
 
-Norfair was born out of the need to quickly add a simple layer of tracking over a wide range of newly released SOTA detectors. It was designed to seamlessly be plugged into a complex, highly coupled code base, with minium effort. Norfair provides a series of modular but compatible tools, which you can pick and chose to use in your project.
+Norfair was born out of the need to quickly add a simple layer of tracking over a wide range of newly released SOTA detectors. It was designed to seamlessly be plugged into a complex, highly coupled code base, with minimum effort. Norfair provides a series of modular but compatible tools, which you can pick and chose to use in your project.
 
 ## Documentation
 
