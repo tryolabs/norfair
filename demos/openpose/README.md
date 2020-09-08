@@ -1,17 +1,17 @@
-# OpenPose frame detection interpolation demo
+# Speed OpenPose inference using tracking
 
-Demo for interpolating frames with no detections. Based on [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose) version 1.4.
+Demo for extrapolating detections through skipped frames. Based on [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose) version 1.4.
 
 ## Instructions
 
-1. [Follow the instructions](https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/doc/installation.md) to install OpenPose.
-2. Run `openpose_interpolation.py`.
+1. Install [OpenPose version 1.4](https://github.com/CMU-Perceptual-Computing-Lab/openpose/releases/tag/v1.4.0).
+2. Run `openpose_extrapolation.py`.
 
 ## Explanation
 
-If you just want to accelerate your application such as pose detection, you can setup your detector to skip some frames, and let Norfair interpolate the detections through the rest of the frames.
+If you just want to speed up inference on a detector, you can make your detector skip frames, and use Norfair to extrapolate the detections through these skipped frames.
 
-In this example, we are skipping 2 out of every 3 frames, which should make your video process 3 times faster. This is because the time added by running the tracker itself is negligible when compared to not having to run 2 inferences on a deep neural network.
+In this example, we are skipping 2 out of every 3 frames, which should make the video process 3 times faster. This is because the time added by running the Norfair itself is negligible when compared to not having to run 2 inferences on a deep neural network.
 
 This is how the results look like:
 
