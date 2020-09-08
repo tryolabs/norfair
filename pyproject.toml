@@ -4,8 +4,25 @@ version = "0.1.4"
 description = "Lightweight Python library for real-time 2D object tracking."
 license = "BSD-3-Clause"
 authors = ["Tryolabs <hello@tryolabs.com>"]
-repository = "https://github.com/tryolabs/norfair"
 readme = "README.md"
+homepage = "https://tryolabs.com"
+repository = "https://github.com/tryolabs/norfair"
+keywords = ["object tracking", "kalman filters"]
+classifiers = [
+    "Development Status :: 2 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD License",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Libraries",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+]
 
 [tool.poetry.dependencies]
 python = "^3.6"
