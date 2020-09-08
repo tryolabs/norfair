@@ -287,6 +287,7 @@ class TrackedObject:
             )  # We measure x, y positions
             self.point_hit_counter[points_over_threshold_mask] += 2 * period
         else:
+            points_over_threshold_mask = np.array([True] * self.num_points)
             H_pos = np.identity(points.size)
             self.point_hit_counter += 2 * period
         self.point_hit_counter[

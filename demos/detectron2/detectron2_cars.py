@@ -18,7 +18,7 @@ def ceintroid_distance(detection, tracked_object):
 
 
 # Norfair
-video = Video(input_path="./video.mp4")
+video = Video(input_path="/home/lalo/in/traffic_2.mp4")
 tracker = Tracker(distance_function=ceintroid_distance, distance_threshold=20)
 
 for frame in video:
@@ -26,7 +26,10 @@ for frame in video:
     # Wrap Detectron2 detections in Norfair's Detection objects
     detections = [
         Detection(p)
-        for p in detections["instances"].pred_boxes.get_centers().cpu().numpy()
+        for p, c in
+        zip(detections["instances"].pred_boxes.get_centers().cpu().numpy(),
+            detections["instances"].pred_classes)
+        if c == 2
     ]
     tracked_objects = tracker.update(detections=detections)
     draw_tracked_objects(frame, tracked_objects)
