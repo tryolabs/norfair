@@ -1,11 +1,22 @@
 ![Norfair by Tryolabs logo](docs/logo.png)
 
-Norfair is a lightweight Python library for real-time 2D object tracking.
+Norfair is a customizable lightweight Python library for real-time 2D object tracking.
 
-Using Norfair, you can add tracking capabilities to the output of any detector with just a few lines of code. The only requirements are:
+Using Norfair, you can add tracking capabilities to the output of any detector with just a few lines of code.
 
-1. You have objects described by a set of points expressed in `(x, y)` coordinates. These points can be anything, like 2 points describing the bounding box output by an object detector, or the 17 keypoints forming the human pose in a pose estimator.
-2. The camera viewpoint is steady.
+#### Features
+
+- Any detector expressing its detections as a series of `(x, y)` coordinates can be used with Norfair. This includes detectors performing object detection, pose estimation, and instance segmentation.
+
+- The user gets to write the distance function that Norfair uses to match tracked objects with new detections, making Norfair extremelly customizable.
+
+- Extra information such as appearance embeddings can be used to help with tracking.
+
+- Norfair is built to be modular, so it can easily be inserted into the video inference loop of an already existing detection project, but it can also be used to build a new project from scratch using just Norfar + a detection model.
+
+- Its fast. The only thing bounding inference speed will be the detection network feeding detections to Norfair.
+
+  
 
 Norfair is built, used and maintained by [Tryolabs](https://tryolabs.com).
 
@@ -19,16 +30,16 @@ pip install norfair
 
 ## How it works
 
-Norfair works by estimating the future position of each point based on its past position. It then tries to match these estimated positions with newly detected points provided by the detector. For this matching to occur, Norfair can rely on any distance function specified by the user of the library. Therefore, each object tracker can be made as simple or complex as needed.
+Norfair works by estimating the future position of each point based on its past position. It then tries to match these estimated positions with newly detected points provided by the detector. For this matching to occur, Norfair can rely on any distance function specified by the user of the library. Therefore, each object tracker can be made as simple or as complex as needed.
 
-The following is an example of a particularly simple distance function calculating the Euclidean distance between objects and detections. This is possibly the simplest distance function you could use in Norfair, as it uses just one single point per detection/object.
+The following is an example of a particularly simple distance function calculating the Euclidean distance between tracked objects and detections. This is possibly the simplest distance function you could use in Norfair, as it uses just one single point per detection/object.
 
 ```python
  def euclidean_distance(detection, tracked_object):
      return np.linalg.norm(detection.points - tracked_object.estimate)
 ```
 
-To get the single point detections to use with this distance function we use [Detectron2](https://detectron2.readthedocs.io/tutorials/install.html), and just use the centroids of the bounding boxes it produces around cars as our object representations.
+As an example we use [Detectron2](https://detectron2.readthedocs.io/tutorials/install.html) to get the single point detections to use with this distance function. We just use the centroids of the bounding boxes it produces around cars as our detections and get the following results.
 
 ![](docs/traffic.gif)
 
@@ -56,7 +67,6 @@ tracker = Tracker(distance_function=euclidean_distance, distance_threshold=20)
 
 for frame in video:
     detections = detector(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-    # Convert Detectron2 detections into Norfair's Detection objects
     detections = [Detection(p) for p in detections['instances'].pred_boxes.get_centers().cpu().numpy()]
     tracked_objects = tracker.update(detections=detections)
     draw_tracked_objects(frame, tracked_objects)
@@ -67,7 +77,7 @@ The video and drawing tools use OpenCV frames, so they are compatible with most 
 
 ## Motivation
 
-Trying out the latest state of the art detectors normally requires running repositiories which weren't intended to be easy to use. These tend to be repositories associated with a research paper describing a novel new way of doing detection, and they are therefore intended to be run as a one-off evaluation script to get some result metric to publish on their particular research paper. This explains why they tend to not be easy to run as inference scripts, or why extracting the core model to use in another standalone script isn't always trivial.
+Trying out the latest state of the art detectors normally requires running repositiories which weren't intended to be easy to use. These tend to be repositories associated with a research paper describing a novel new way of doing detection, and they are therefore intended to be run as a one-off evaluation script to get some result metric to publish on a particular research paper. This explains why they tend to not be easy to run as inference scripts, or why extracting the core model to use in another standalone script isn't always trivial.
 
 Norfair was born out of the need to quickly add a simple layer of tracking over a wide range of newly released SOTA detectors. It was designed to seamlessly be plugged into a complex, highly coupled code base, with minium effort. Norfair provides a series of modular but compatible tools, which you can pick and chose to use in your project.
 
@@ -81,7 +91,7 @@ We provide several examples of how Norfair can be used to add tracking capabilit
 
 1. [Simple tracking of cars](demos/detectron2/README.md) using [Detectron2](https://github.com/facebookresearch/detectron2).
 2. [Simple tracking pedestrians](demos/alphapose/README.md) using [AlphaPose](https://github.com/MVIG-SJTU/AlphaPose).
-3. [Interpolating frames with no detections](demos/openpose/README.md) using [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose).
+3. [Speed up inference by interpolating detections](demos/openpose/README.md) using [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose).
 
 ![Norfair OpenPose Demo](docs/openpose_skip_3_frames.gif)
 
