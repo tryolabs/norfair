@@ -9,9 +9,9 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.6"
-opencv-python = ">= 3.2.0, < 5.0.0"
 filterpy = "^1.4.5"
 rich = "^6.1.1"
+opencv-contrib-python = ">= 3.2.0, < 5.0.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.0.1"
