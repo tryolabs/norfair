@@ -1,12 +1,12 @@
 # Tracking pedestrians with AlphaPose
 
-This example uses Norfair to add tracking capabilities to [AlphaPose](https://github.com/MVIG-SJTU/AlphaPose).
+An example of how to integrate Norfair into the video inference loop of a pre existing repository. This example uses Norfair to try out custom trackers on [AlphaPose](https://github.com/MVIG-SJTU/AlphaPose).
 
 ## Instructions
 
 
-1. [Follow the instructions](https://github.com/MVIG-SJTU/AlphaPose/blob/master/docs/INSTALL.md) to install AlphaPose.
-2. Apply this diff and use their [video_demo.py](https://github.com/MVIG-SJTU/AlphaPose/blob/master/detector/yolo/video_demo.py) script on your video.
+1. [Follow the instructions](https://github.com/MVIG-SJTU/AlphaPose/tree/pytorch#installation) to install the Pytorch version of AlphaPose.
+2. Apply this diff to this [commit](https://github.com/MVIG-SJTU/AlphaPose/commit/ded84d450faf56227680f0527ff7e24ab7268754) on AlphaPose and use their [video_demo.py](https://github.com/MVIG-SJTU/AlphaPose/blob/ded84d450faf56227680f0527ff7e24ab7268754/video_demo.py) to process your video.
 
     ```diff
     diff --git a/dataloader.py b/dataloader.py
