@@ -4,6 +4,5 @@ python:
   - "3.7"
   - "3.8"
 install:
-    pip install --upgrade pip
     pip install tox-travis
-script: tox -v
+script: travis_wait 30 tox -v
