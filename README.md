@@ -88,7 +88,7 @@ We provide several examples of how Norfair can be used to add tracking capabilit
 
 1. [Simple tracking of cars](demos/detectron2/README.md) using [Detectron2](https://github.com/facebookresearch/detectron2).
 2. [Simple tracking pedestrians](demos/alphapose/README.md) using [AlphaPose](https://github.com/MVIG-SJTU/AlphaPose).
-3. [Speed up inference by extrapolating detections](demos/openpose/README.md) using [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose).
+3. [Speed up pose estimation by extrapolating detections](demos/openpose/README.md) using [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose).
 
 ![Norfair OpenPose Demo](docs/openpose_skip_3_frames.gif)
 
