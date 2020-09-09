@@ -28,7 +28,7 @@ for frame in video:
         Detection(p)
         for p, c in
         zip(detections["instances"].pred_boxes.get_centers().cpu().numpy(),
-            detections["instances"].pred_classes)
+            detections["instances"].pred_classes.cpu().numpy())
         if c == 2
     ]
     tracked_objects = tracker.update(detections=detections)
