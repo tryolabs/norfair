@@ -1,5 +1,6 @@
-from norfair import __version__
+import norfair
 
 
-def test_version():
-    assert __version__ == "0.1.0"
+def test_norfair():
+    # TODO: write actual tests
+    assert True
