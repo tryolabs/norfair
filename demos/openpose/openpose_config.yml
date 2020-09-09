@@ -1,10 +1,7 @@
 openpose:
-  dir: /home/<user>/openpose_original_version/openpose
-  # output_image_with_skeletons: true
+  dir: <openpose_directory>/openpose
   logging_level: 3
   output_resolution: -1x-1 # 320x176
-  # net_resolution: -1x368 # 320x176
-  # net_resolution: -1x512 # 320x176
   net_resolution: -1x768 # 320x176
   model_pose: BODY_25
   alpha_pose: 0.6
@@ -13,79 +10,3 @@ openpose:
   render_threshold: 0.05
   num_gpu_start: 0  # If GPU version is built, and multiple GPUs are available, set the ID here
   disable_blending: false
-  # body_part_keys:
-  #   - nose
-  #   - neck
-  #   - rshoulder
-  #   - relbow
-  #   - rwrist
-  #   - lshoulder
-  #   - lelbow
-  #   - lwrist
-  #   - midhip
-  #   - rhip
-  #   - rknee
-  #   - rankle
-  #   - lhip
-  #   - lknee
-  #   - lankle
-  #   - reye
-  #   - leye
-  #   - rear
-  #   - lear
-  #   - lbigtoe
-  #   - lsmalltoe
-  #   - lheel
-  #   - rbigtoe
-  #   - rsmalltoe
-  #   - rheel
-  # body_part_map:
-  #   nose:
-  #     - neck
-  #   neck:
-  #     - rshoulder
-  #     - lshoulder 
-  #     - midhip
-  #   rshoulder:
-  #     - relbow
-  #   relbow:
-  #     - rwrist
-  #   rwrist:
-  #   lshoulder:
-  #     - lelbow
-  #   lelbow:
-  #     - lwrist
-  #   lwrist:
-  #   midhip:
-  #     - rhip
-  #     - lhip
-  #   rhip:
-  #     - rknee
-  #   rknee:
-  #     - rankle
-  #   rankle:
-  #     - rbigtoe
-  #     - rheel
-  #   lhip:
-  #     - lknee
-  #   lknee:
-  #     - lankle
-  #   lankle:
-  #     - lbigtoe
-  #     - lheel
-  #   reye:
-  #     - nose
-  #   leye:
-  #     - nose
-  #   rear:
-  #     - reye
-  #   lear:
-  #     - leye
-  #   lbigtoe:
-  #     - lsmalltoe
-  #   lsmalltoe:
-  #   lheel:
-  #   rbigtoe:
-  #     - rsmalltoe
-  #   rsmalltoe:
-  #   rheel:
