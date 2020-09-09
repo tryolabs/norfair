@@ -2,15 +2,15 @@
 
 Norfair is a customizable lightweight Python library for real-time 2D object tracking.
 
-Using Norfair, you can add tracking capabilities to the output of any detector with just a few lines of code.
+Using Norfair, you can add tracking capabilities to any detector with just a few lines of code.
 
 ## Features
 
 - Any detector expressing its detections as a series of `(x, y)` coordinates can be used with Norfair. This includes detectors performing object detection, pose estimation, and instance segmentation.
 
-- Customizable distance function used to match tracked objects with new detections. This function can potentially make use of extra information, such as appearance embeddings.
+- The function used to calculate the distance between tracked objects and detections is defined by the user, making the tracker extremely customizable. This function can make use of any extra information, such as appearance embeddings, which can heavily improve tracking performance.
 
-- Modular in nature, so it can easily be inserted into the video inference loop of an already existing detection project, but it can also be used to build a new project from scratch using just Norfair and a detection model.
+- Modular. It can easily be inserted into complex video processing pipelines to add tracking to existing projects. At the same time it is possible to build a video inference loop from scratch using just Norfair and a detector.
 
 - Fast. The only thing bounding inference speed will be the detection network feeding detections to Norfair.
 
@@ -26,7 +26,7 @@ pip install norfair
 
 ## How it works
 
-Norfair works by estimating the future position of each point based on its past position. It then tries to match these estimated positions with newly detected points provided by the detector. For this matching to occur, Norfair can rely on any distance function specified by the user of the library. Therefore, each object tracker can be made as simple or as complex as needed.
+Norfair works by estimating the future position of each point based on its past positions. It then tries to match these estimated positions with newly detected points provided by the detector. For this matching to occur, Norfair can rely on any distance function specified by the user of the library. Therefore, each object tracker can be made as simple or as complex as needed.
 
 The following is an example of a particularly simple distance function calculating the Euclidean distance between tracked objects and detections. This is possibly the simplest distance function you could use in Norfair, as it uses just one single point per detection/object.
 
