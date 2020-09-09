@@ -70,7 +70,7 @@ for frame in video:
     video.write(frame)
 ```
 
-The video and drawing tools use OpenCV frames, so they are compatible with most Python video code available online.
+The video and drawing tools use OpenCV frames, so they are compatible with most Python video code available online. The point tracking is based on [SORT](https://arxiv.org/pdf/1602.00763.pdf).
 
 ## Motivation
 
