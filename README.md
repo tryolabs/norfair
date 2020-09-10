@@ -37,7 +37,7 @@ The following is an example of a particularly simple distance function calculati
      return np.linalg.norm(detection.points - tracked_object.estimate)
 ```
 
-As an example we use [Detectron2](https://github.com/facebookresearch/detectron2) to get the single point detections to use with this distance function. We just use the centroids of the bounding boxes it produces around cars as our detections and get the following results.
+As an example we use [Detectron2](https://github.com/facebookresearch/detectron2) to get the single point detections to use with this distance function. We just use the centroids of the bounding boxes it produces around cars as our detections, and get the following results.
 
 ![Tracking cars with Norfair](docs/traffic.gif)
 
@@ -72,7 +72,7 @@ for frame in video:
     video.write(frame)
 ```
 
-The video and drawing tools use OpenCV frames, so they are compatible with most Python video code available online. The point tracking is based on [SORT](https://arxiv.org/pdf/1602.00763.pdf).
+The video and drawing tools use OpenCV frames, so they are compatible with most Python video code available online. The point tracking is based on [SORT](https://arxiv.org/pdf/1602.00763.pdf) generalized to detections consisting of a dynamically changing amount of points per detection.
 
 ## Motivation
 
