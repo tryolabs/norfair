@@ -1,11 +1,11 @@
 import argparse
+
 import cv2
+import numpy as np
 import torch
 from models import Yolov4
-from tool.utils import load_class_names, plot_boxes_cv2
 from tool.torch_utils import do_detect
-
-import numpy as np
+from tool.utils import load_class_names, plot_boxes_cv2
 
 import norfair
 from norfair import Detection, Tracker, Video
