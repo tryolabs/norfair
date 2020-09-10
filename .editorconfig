@@ -12,7 +12,7 @@ charset = utf-8
 [*.py]
 max_line_length = 88
 
-[*.yaml, *.yml]
+[*.{yml,yaml}]
 indent_size = 2
 
 [*.json]
