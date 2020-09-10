@@ -10,7 +10,11 @@ on:
 
 jobs:
 
-  build-test-release:
+  #
+  # Builds our package and runs the tests under supported
+  # versions of Python.
+  #
+  build-test:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 3
@@ -35,8 +39,29 @@ jobs:
       - name: Test with tox
         run: tox
 
+  #
+  # Build & upload release to PyPI.
+  #
+  # Executed only if GitHub release is "published".
+  #
+  release:
+    runs-on: ubuntu-latest
+    needs: [build-test]
+    if: github.event_name == 'release'
+    env:
+      PYTHON_VERSION: 3.8
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Poetry
+        uses: Gr1N/setup-poetry@v3
+
       - name: Release to PyPI
-        if: github.event_name == 'release' && matrix.python-version == 3.8
         env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
         run: |
