@@ -3,12 +3,12 @@ import argparse
 import cv2
 import numpy as np
 import torch
-from models import Yolov4
-from tool.torch_utils import do_detect
-from tool.utils import load_class_names, plot_boxes_cv2
 
 import norfair
+from models import Yolov4
 from norfair import Detection, Tracker, Video
+from tool.torch_utils import do_detect
+from tool.utils import load_class_names, plot_boxes_cv2
 
 max_distance_between_points = 30
 
