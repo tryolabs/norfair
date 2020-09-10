@@ -1,4 +1,4 @@
-# Detectron 2 example
+# Detectron2 example
 
 Simplest possible example of tracking. Based on [Detectron2](https://github.com/facebookresearch/detectron2).
 
