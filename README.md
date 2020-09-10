@@ -89,8 +89,9 @@ You can find the documentation for Norfair's API [here](docs/README.md).
 We provide several examples of how Norfair can be used to add tracking capabilities to several different detectors.
 
 1. [Simple tracking of cars](demos/detectron2/README.md) using [Detectron2](https://github.com/facebookresearch/detectron2).
-2. [Simple tracking pedestrians](demos/alphapose/README.md) using [AlphaPose](https://github.com/MVIG-SJTU/AlphaPose).
-3. [Speed up pose estimation by extrapolating detections](demos/openpose/README.md) using [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose).
+2. [Simple tracking of cars](demos/yolov4/README.md) using [YOLOv4](https://github.com/Tianxiaomo/pytorch-YOLOv4/tree/master).
+3. [Simple tracking pedestrians](demos/alphapose/README.md) using [AlphaPose](https://github.com/MVIG-SJTU/AlphaPose).
+4. [Speed up pose estimation by extrapolating detections](demos/openpose/README.md) using [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose).
 
 ![Norfair OpenPose Demo](docs/openpose_skip_3_frames.gif)
 
