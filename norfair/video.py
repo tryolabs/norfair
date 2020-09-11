@@ -37,13 +37,14 @@ class Video:
 
         # Read Input Video
         if self.input_path is not None:
+            if "~" in self.input_path:
+                self.input_path = os.path.expanduser(self.input_path)
+            if not os.path.isfile(self.input_path):
+                self._fail(f"[bold red]Error:[/bold red] File '{self.input_path}' does not exist.")
             self.video_capture = cv2.VideoCapture(self.input_path)
             total_frames = int(self.video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
             if total_frames == 0:
-                fail_msg = "[bold red]Error reading input video file:[/bold red] Make sure file exists and is a video file."
-                if "~" in self.input_path:
-                    fail_msg += "\n[yellow]Using ~ as abbreviation for your home folder is not supported.[/yellow]"
-                self._fail(fail_msg)
+                self._fail(f"[bold red]Error:[/bold red] '{self.input_path}' does not seem to be a video file supported by OpenCV. If the video file is not the problem, please check that your OpenCV installation is working correctly.")
             description = os.path.basename(self.input_path)
         else:
             self.video_capture = cv2.VideoCapture(self.camera)
