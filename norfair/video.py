@@ -38,7 +38,7 @@ class Video:
         # Read Input Video
         if self.input_path is not None:
             if "~" in self.input_path:
-                self._fail(f"[bold red]Error reading file:[/bold red] '{self.input_path}'\n[yellow]Using ~ as abbreviation for your home folder is not supported.[/yellow]")
+                self.input_path = os.path.expanduser(self.input_path)
             if not os.path.isfile(self.input_path):
                 self._fail(f"[bold red]Error:[/bold red] File '{self.input_path}' does not exist.")
             self.video_capture = cv2.VideoCapture(self.input_path)
