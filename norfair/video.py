@@ -44,8 +44,7 @@ class Video:
             self.video_capture = cv2.VideoCapture(self.input_path)
             total_frames = int(self.video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
             if total_frames == 0:
-                fail_msg = "[bold red]Error:[/bold red] '{self.input_path}' is not a video file supported by OpenCV."
-                self._fail(fail_msg)
+                self._fail(f"[bold red]Error:[/bold red] '{self.input_path}' does not seem to be a video file supported by OpenCV. If the video file is not the problem, please check that your OpenCV installation is working correctly.")
             description = os.path.basename(self.input_path)
         else:
             self.video_capture = cv2.VideoCapture(self.camera)
