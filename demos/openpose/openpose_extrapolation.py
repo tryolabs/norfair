@@ -2,11 +2,12 @@ import argparse
 import sys
 
 import numpy as np
-import yaml
 
 import norfair
 from norfair import Detection, Tracker, Video
 
+# Insert the path to your openpose instalation folder here
+openpose_install_path = "openpose/openpose"
 frame_skip_period = 3
 detection_threshold = 0.01
 distance_threshold = 0.4
@@ -14,14 +15,24 @@ distance_threshold = 0.4
 
 class OpenposeDetector:
     def __init__(self):
-        with open("openpose_config.yml", "r") as stream:
-            open_pose_config = yaml.safe_load(stream)["openpose"]
-        openpose_dir = open_pose_config["dir"]
+        config = {}
+        config['dir'] = openpose_install_path
+        config['logging_level'] = 3
+        config['output_resolution'] = "-1x-1" # 320x176
+        config['net_resolution'] = "-1x768" # 320x176
+        config['model_pose'] = "BODY_25"
+        config['alpha_pose'] = 0.6
+        config['scale_gap'] = 0.3
+        config['scale_number'] = 1
+        config['render_threshold'] = 0.05
+        config['num_gpu_start'] = 0  # If GPU version is built, and multiple GPUs are available, set the ID here
+        config['disable_blending'] = False
+        openpose_dir = config["dir"]
         sys.path.append(openpose_dir + "/build/python/openpose")
         from openpose import OpenPose  # noqa
 
-        open_pose_config["default_model_folder"] = openpose_dir + "/models/"
-        self.detector = OpenPose(open_pose_config)
+        config["default_model_folder"] = openpose_dir + "/models/"
+        self.detector = OpenPose(config)
 
     def __call__(self, image):
         return self.detector.forward(image, False)
