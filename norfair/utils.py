@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from rich.console import Console
 from rich.table import Table
@@ -36,3 +37,13 @@ def print_objects_as_table(tracked_objects):
             str(obj.initializing_id),
         )
     console.print(table)
+
+def get_terminal_size(default=(80, 24)):
+    columns, lines = default
+    for fd in range(0,3): # First in order 0=Std In, 1=Std Out, 2=Std Error
+        try:
+            columns, lines = os.get_terminal_size(fd)
+        except OSError:
+            continue
+        break    
+    return columns, lines
