@@ -95,6 +95,15 @@ We provide several examples of how Norfair can be used to add tracking capabilit
 
 ![Norfair OpenPose Demo](docs/openpose_skip_3_frames.gif)
 
+## Other Trackers
+
+Norfair's contribution to Python's object tracker library repertoire is its ability to work with any object detector by being able to work with a variable amount of points per detection, and the ability for the user to heavily customize the tracker by creating their own distance function. Comparing with other libraries:
+
+- [**OpenCV**](https://opencv.org) includes several tracking solutions like KCF Tracker and MedianFlow Tracker which are run by making the user select a part of the screen to track, and then letting the tracker follow that area. They tend not to be run on top of a detector and are not very robust.
+- [**dlib**](http://dlib.net) includes a correlation single object tracker. You have to create your own multiple object tracker on top of it yourself if you want to track multiple objects with it.
+- [**AlphaPose**](https://github.com/MVIG-SJTU/AlphaPose) just released a new version of their human pose tracker. This tracker is tightly integrated into their code base and to the task of tracking human poses.
+- [**SORT**](https://github.com/abewley/sort) and [**Deep SORT**](https://github.com/nwojke/deep_sort) are similar to this repo in that they use kalman filters (and a deep embedding for Deep SORT), but they are hardcoded to a fixed distance function and to tracking boxes. Norfair also adds some filtering when matching tracked objects with detections, and changes the Hungarian Algorithm for its own distance minimizer.
+
 ## Commercial support
 
 Tryolabs can provide commercial support, implement new features in Norfair or build video analytics tools for solving your challenging problems. Norfair powers several video analytics applications, such as the [face mask detection](https://tryolabs.com/blog/2020/07/09/face-mask-detection-in-street-camera-video-streams-using-ai-behind-the-curtain/) tool developed by Tryolabs.

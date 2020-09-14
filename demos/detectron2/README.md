@@ -7,8 +7,7 @@ Simplest possible example of tracking. Based on [Detectron2](https://github.com/
 Assuming Norfair is installed:
 
 1. [Follow the instructions](https://detectron2.readthedocs.io/tutorials/install.html) to install Detectron2.
-2. `pip install torchvision`
-3. Copy the `detectron2_cars.py` and `. For the demo, we are using [this traffic footage](https://www.youtube.com/watch?v=aio9g9_xVio).
+2. Run `python detectron2_cars.py`. For the demo, we are using [this traffic footage](https://www.youtube.com/watch?v=aio9g9_xVio).
 
 ## Explanation
 
