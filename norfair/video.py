@@ -5,6 +5,7 @@ import cv2
 from rich import print
 from rich.progress import BarColumn, Progress, TimeRemainingColumn
 
+from .utils import get_terminal_size
 
 class Video:
     def __init__(
@@ -184,7 +185,7 @@ class Video:
 
     def abbreviate_description(self, description):
         """Conditionally abbreviate description so that progress bar fits in small terminals"""
-        _, terminal_columns = os.popen("stty size", "r").read().split()
+        terminal_columns, _ = get_terminal_size()
         space_for_description = (
             int(terminal_columns) - 25
         )  # Leave 25 space for progressbar
