@@ -1,5 +1,4 @@
 import math
-import random
 
 import numpy as np
 from filterpy.kalman import KalmanFilter
@@ -258,7 +257,7 @@ class TrackedObject:
     @property
     def estimate(self):
         positions = self.filter.x.T.flatten()[: self.dim_z].reshape(-1, 2)
-        velocities = self.filter.x.T.flatten()[self.dim_z :].reshape(-1, 2)
+        velocities = self.filter.x.T.flatten()[self.dim_z:].reshape(-1, 2)
         return positions
 
     @property
@@ -292,7 +291,7 @@ class TrackedObject:
             self.point_hit_counter += 2 * period
         self.point_hit_counter[
             self.point_hit_counter >= self.point_hit_inertia_max
-        ] = self.point_hit_inertia_max
+            ] = self.point_hit_inertia_max
         self.point_hit_counter[self.point_hit_counter < 0] = 0
         H_vel = np.zeros(H_pos.shape)  # But we don't directly measure velocity
         H = np.hstack([H_pos, H_vel])
@@ -307,7 +306,7 @@ class TrackedObject:
         detected_at_least_once_mask = np.array(
             [[m, m] for m in self.detected_at_least_once_points]
         ).flatten()
-        self.filter.x[self.dim_z :][np.logical_not(detected_at_least_once_mask)] = 0
+        self.filter.x[self.dim_z:][np.logical_not(detected_at_least_once_mask)] = 0
         self.detected_at_least_once_points = np.logical_or(
             self.detected_at_least_once_points, points_over_threshold_mask
         )
