@@ -7,6 +7,7 @@ from rich.table import Table
 
 from .tracker import TrackedObject
 
+
 def validate_points(points: np.array):
     # If the user is tracking only a single point, reformat it slightly.
     if points.shape == (2,):
@@ -40,6 +41,7 @@ def print_objects_as_table(tracked_objects: List[TrackedObject]):
             str(obj.initializing_id),
         )
     console.print(table)
+
 
 def get_terminal_size(default: Tuple = (80, 24)):
     columns, lines = default
