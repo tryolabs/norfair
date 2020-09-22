@@ -1,10 +1,19 @@
+from typing import Optional, Tuple, List
+
 import cv2
 import numpy as np
 
+from .tracker import Detection, TrackedObject
 from .utils import validate_points
 
 
-def draw_points(frame, detections, radius=None, thickness=None, color=None):
+def draw_points(
+    frame: np.array,
+    detections: List[Detection],
+    radius: Optional[int] = None,
+    thickness: Optional[int] = None,
+    color: Optional[Tuple] = None
+):
     if detections is None:
         return
     frame_scale = frame.shape[0] / 100
@@ -30,13 +39,13 @@ def draw_points(frame, detections, radius=None, thickness=None, color=None):
 
 
 def draw_tracked_objects(
-    frame,
-    objects,
-    radius=None,
-    color=None,
-    id_size=None,
-    id_thickness=None,
-    draw_points=True,
+    frame: np.array,
+    objects: List[TrackedObject],
+    radius: Optional[int] = None,
+    color: Optional[Tuple] = None,
+    id_size: Optional[float] = None,
+    id_thickness: Optional[int] = None,
+    draw_points: bool = True,
 ):
     frame_scale = frame.shape[0] / 100
     if radius is None:
@@ -82,14 +91,14 @@ def draw_tracked_objects(
 
 
 def draw_debug_metrics(
-    frame,
-    objects,
-    text_size=None,
-    text_thickness=None,
-    color=None,
+    frame: np.array,
+    objects: List[TrackedObject],
+    text_size: Optional[float] = None,
+    text_thickness: Optional[int] = None,
+    color: Optional[Tuple] = None,
     only_ids=None,
     only_initializing_ids=None,
-    draw_score_threshold=0,
+    draw_score_threshold: float = 0,
 ):
     """Draw objects with their debug information
 
@@ -171,7 +180,7 @@ def draw_debug_metrics(
             )
 
 
-def centroid(tracked_points):
+def centroid(tracked_points: np.array):
     num_points = tracked_points.shape[0]
     sum_x = np.sum(tracked_points[:, 0])
     sum_y = np.sum(tracked_points[:, 1])
@@ -197,7 +206,7 @@ class Color:
     silver = (192, 192, 192)
 
     @staticmethod
-    def random(obj_id):
+    def random(obj_id: int):
         color_list = [
             c
             for c in Color.__dict__.keys()
