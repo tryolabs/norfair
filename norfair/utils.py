@@ -5,8 +5,6 @@ import numpy as np
 from rich.console import Console
 from rich.table import Table
 
-from .tracker import TrackedObject
-
 
 def validate_points(points: np.array) -> np.array:
     # If the user is tracking only a single point, reformat it slightly.
@@ -22,7 +20,7 @@ def validate_points(points: np.array) -> np.array:
     return points
 
 
-def print_objects_as_table(tracked_objects: List[TrackedObject]):
+def print_objects_as_table(tracked_objects: List):
     """Used for helping in debugging"""
     print()
     console = Console()
