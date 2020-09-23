@@ -180,7 +180,7 @@ def draw_debug_metrics(
             )
 
 
-def centroid(tracked_points: np.array):
+def centroid(tracked_points: np.array) -> Tuple[int, int]:
     num_points = tracked_points.shape[0]
     sum_x = np.sum(tracked_points[:, 0])
     sum_y = np.sum(tracked_points[:, 1])
@@ -206,7 +206,7 @@ class Color:
     silver = (192, 192, 192)
 
     @staticmethod
-    def random(obj_id: int):
+    def random(obj_id: int) -> Tuple[int, int, int]:
         color_list = [
             c
             for c in Color.__dict__.keys()
