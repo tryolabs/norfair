@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-
+import random
 from .utils import validate_points
 
 
@@ -14,8 +14,10 @@ def draw_points(frame, detections, radius=None, thickness=None, color=None):
         thickness = int(max(frame_scale / 7, 1))
     if color is None:
         color = Color.red
-
+    color_is_rand = color==Color.rand
     for d in detections:
+        if color_is_rand:
+            color = Color.random(random.randint(0, 20))
         points = d.points
         points = validate_points(points)
 
@@ -195,6 +197,7 @@ class Color:
     blue = (255, 0, 0)
     teal = (128, 128, 0)
     silver = (192, 192, 192)
+    rand = (-1, -1, -1) #random color for each detection
 
     @staticmethod
     def random(obj_id):
@@ -202,6 +205,6 @@ class Color:
             c
             for c in Color.__dict__.keys()
             if c[:2] != "__"
-            and c not in ("random", "red", "white", "grey", "black", "silver")
+            and c not in ("random", "red", "white", "grey", "black", "silver", "rand")
         ]
         return getattr(Color, color_list[obj_id % len(color_list)])
