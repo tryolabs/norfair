@@ -38,7 +38,25 @@ class OpenposeDetector:
         return self.detector.forward(image, False)
 
 def keypoints_distance(detected_pose, tracked_pose):
-    distances = np.linalg.norm(detected_pose.points - tracked_pose.estimate, axis=1)
+    ps = [np.inf]
+    distances=0
+    diagonal = 0
+
+    hor_min_pt = min(detected_pose.points[:, 0])
+    hor_max_pt = max(detected_pose.points[:, 0])
+    ver_min_pt = min(detected_pose.points[:, 1])
+    ver_max_pt = max(detected_pose.points[:, 1])
+
+    #set keypoint_dist_threshold based on object size, and calculate
+    #distance between detections and tracker estimations
+    for p in ps:
+        distances += np.linalg.norm(detected_pose.points - tracked_pose.estimate, ord=p, axis=1)
+        diagonal += np.linalg.norm( [hor_max_pt-hor_min_pt, ver_max_pt-ver_min_pt], ord=p)
+
+    distances = distances/len(ps)
+    keypoint_dist_threshold = video.input_height*(diagonal<video.input_height/3)/50 + diagonal*(diagonal>=video.input_height/3)/25 
+
+
     match_num = np.count_nonzero(
         (distances < keypoint_dist_threshold)
         * (detected_pose.scores > detection_threshold)
