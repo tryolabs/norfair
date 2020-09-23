@@ -3,13 +3,12 @@ from typing import Optional, Tuple, List
 import cv2
 import numpy as np
 
-from .tracker import Detection, TrackedObject
 from .utils import validate_points
 
 
 def draw_points(
     frame: np.array,
-    detections: List[Detection],
+    detections: List,
     radius: Optional[int] = None,
     thickness: Optional[int] = None,
     color: Optional[Tuple] = None
@@ -40,7 +39,7 @@ def draw_points(
 
 def draw_tracked_objects(
     frame: np.array,
-    objects: List[TrackedObject],
+    objects: List,
     radius: Optional[int] = None,
     color: Optional[Tuple] = None,
     id_size: Optional[float] = None,
@@ -92,7 +91,7 @@ def draw_tracked_objects(
 
 def draw_debug_metrics(
     frame: np.array,
-    objects: List[TrackedObject],
+    objects: List,
     text_size: Optional[float] = None,
     text_thickness: Optional[int] = None,
     color: Optional[Tuple] = None,
@@ -211,6 +210,6 @@ class Color:
             c
             for c in Color.__dict__.keys()
             if c[:2] != "__"
-            and c not in ("random", "red", "white", "grey", "black", "silver")
+               and c not in ("random", "red", "white", "grey", "black", "silver")
         ]
         return getattr(Color, color_list[obj_id % len(color_list)])
