@@ -1,5 +1,5 @@
 import math
-import random
+from typing import Callable, Optional, Sequence
 
 import numpy as np
 from filterpy.kalman import KalmanFilter
@@ -10,12 +10,12 @@ from .utils import validate_points
 class Tracker:
     def __init__(
         self,
-        distance_function,
-        distance_threshold,
-        hit_inertia_min=10,
-        hit_inertia_max=25,
-        detection_threshold=0,
-        point_transience=4,
+        distance_function: Callable[["Detection", "TrackedObject"], float],
+        distance_threshold: float,
+        hit_inertia_min: int = 10,
+        hit_inertia_max: int = 25,
+        detection_threshold: float = 0,
+        point_transience: float = 4,
     ):
         self.tracked_objects = []
         self.distance_function = distance_function
@@ -26,7 +26,8 @@ class Tracker:
         self.point_transience = point_transience
         TrackedObject.count = 0
 
-    def update(self, detections=None, period=1):
+    def update(self, detections: Optional[Sequence["Detection"]] = None,
+               period: int = 1):
         self.period = period
 
         # Remove stale trackers and make candidate object real if it has hit inertia
@@ -61,7 +62,8 @@ class Tracker:
 
         return [p for p in self.tracked_objects if not p.is_initializing]
 
-    def update_objects_in_place(self, objects, detections):
+    def update_objects_in_place(self, objects: Sequence["TrackedObject"],
+                                detections: Optional[Sequence["Detection"]]):
         if detections is not None and len(detections) > 0:
             distance_matrix = np.ones((len(detections), len(objects)), dtype=np.float32)
             distance_matrix *= self.distance_threshold + 1
@@ -126,7 +128,7 @@ class Tracker:
 
         return unmatched_detections
 
-    def match_dets_and_objs(self, distance_matrix):
+    def match_dets_and_objs(self, distance_matrix: np.array):
         """Matches detections with tracked_objects from a distance matrix
 
         I used to match by minimizing the global distances, but found several
@@ -168,12 +170,12 @@ class TrackedObject:
 
     def __init__(
         self,
-        initial_detection,
-        hit_inertia_min,
-        hit_inertia_max,
-        detection_threshold,
-        period=1,
-        point_transience=4,
+        initial_detection: "Detection",
+        hit_inertia_min: int,
+        hit_inertia_max: int,
+        detection_threshold: float,
+        period: float = 1,
+        point_transience: float = 4,
     ):
         self.num_points = validate_points(initial_detection.points).shape[0]
         self.hit_inertia_min = hit_inertia_min
@@ -197,7 +199,7 @@ class TrackedObject:
         self.setup_filter(initial_detection.points)
         self.detected_at_least_once_points = np.array([False] * self.num_points)
 
-    def setup_filter(self, initial_detection):
+    def setup_filter(self, initial_detection: np.array):
         initial_detection = validate_points(initial_detection)
 
         dim_x = 2 * 2 * self.num_points  # We need to accomodate for velocities
@@ -258,14 +260,14 @@ class TrackedObject:
     @property
     def estimate(self):
         positions = self.filter.x.T.flatten()[: self.dim_z].reshape(-1, 2)
-        velocities = self.filter.x.T.flatten()[self.dim_z :].reshape(-1, 2)
+        velocities = self.filter.x.T.flatten()[self.dim_z:].reshape(-1, 2)
         return positions
 
     @property
     def live_points(self):
         return self.point_hit_counter > self.point_hit_inertia_min
 
-    def hit(self, detection, period=1):
+    def hit(self, detection: "Detection", period: int = 1):
         points = validate_points(detection.points)
 
         self.last_detection = detection
@@ -292,7 +294,7 @@ class TrackedObject:
             self.point_hit_counter += 2 * period
         self.point_hit_counter[
             self.point_hit_counter >= self.point_hit_inertia_max
-        ] = self.point_hit_inertia_max
+            ] = self.point_hit_inertia_max
         self.point_hit_counter[self.point_hit_counter < 0] = 0
         H_vel = np.zeros(H_pos.shape)  # But we don't directly measure velocity
         H = np.hstack([H_pos, H_vel])
@@ -307,7 +309,7 @@ class TrackedObject:
         detected_at_least_once_mask = np.array(
             [[m, m] for m in self.detected_at_least_once_points]
         ).flatten()
-        self.filter.x[self.dim_z :][np.logical_not(detected_at_least_once_mask)] = 0
+        self.filter.x[self.dim_z:][np.logical_not(detected_at_least_once_mask)] = 0
         self.detected_at_least_once_points = np.logical_or(
             self.detected_at_least_once_points, points_over_threshold_mask
         )
@@ -327,7 +329,7 @@ class TrackedObject:
 
 
 class Detection:
-    def __init__(self, points, scores=None, data=None):
+    def __init__(self, points: np.array, scores=None, data=None):
         self.points = points
         self.scores = scores
         self.data = data

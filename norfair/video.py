@@ -1,21 +1,24 @@
 import os
 import time
+from typing import Optional
 
 import cv2
+import numpy as np
 from rich import print
 from rich.progress import BarColumn, Progress, TimeRemainingColumn
 
 from .utils import get_terminal_size
 
+
 class Video:
     def __init__(
         self,
-        camera=None,
-        input_path=None,
-        output_path=".",
-        output_fps=None,
-        label="",
-        codec_fourcc=None,
+        camera: Optional[int] = None,
+        input_path: Optional[str] = None,
+        output_path: str = ".",
+        output_fps: Optional[float] = None,
+        label: str = "",
+        codec_fourcc: Optional[str] = None,
     ):
         self.camera = camera
         self.input_path = input_path
@@ -41,11 +44,13 @@ class Video:
             if "~" in self.input_path:
                 self.input_path = os.path.expanduser(self.input_path)
             if not os.path.isfile(self.input_path):
-                self._fail(f"[bold red]Error:[/bold red] File '{self.input_path}' does not exist.")
+                self._fail(
+                    f"[bold red]Error:[/bold red] File '{self.input_path}' does not exist.")
             self.video_capture = cv2.VideoCapture(self.input_path)
             total_frames = int(self.video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
             if total_frames == 0:
-                self._fail(f"[bold red]Error:[/bold red] '{self.input_path}' does not seem to be a video file supported by OpenCV. If the video file is not the problem, please check that your OpenCV installation is working correctly.")
+                self._fail(
+                    f"[bold red]Error:[/bold red] '{self.input_path}' does not seem to be a video file supported by OpenCV. If the video file is not the problem, please check that your OpenCV installation is working correctly.")
             description = os.path.basename(self.input_path)
         else:
             self.video_capture = cv2.VideoCapture(self.camera)
@@ -115,11 +120,11 @@ class Video:
         self.video_capture.release()
         cv2.destroyAllWindows()
 
-    def _fail(self, msg):
+    def _fail(self, msg: str):
         print(msg)
         exit()
 
-    def write(self, frame):
+    def write(self, frame: np.array) -> int:
         if self.output_video is None:
             # The user may need to access the output file path on their code
             output_file_path = self.get_output_file_path()
@@ -139,10 +144,9 @@ class Video:
         self.output_video.write(frame)
         return cv2.waitKey(1)
 
-    def show(self, frame, downsample_ratio=1):
+    def show(self, frame: np.array, downsample_ratio: int = 1) -> int:
         # Resize to lower resolution for faster streaming over slow connections
         if downsample_ratio is not None:
-
             # Note that frame.shape[1] corresponds to width, and opencv format is (width, height)
             frame = cv2.resize(
                 frame,
@@ -154,7 +158,7 @@ class Video:
         cv2.imshow("Output", frame)
         return cv2.waitKey(1)
 
-    def get_output_file_path(self):
+    def get_output_file_path(self) -> str:
         output_path_is_dir = os.path.isdir(self.output_path)
         if output_path_is_dir and self.input_path is not None:
             base_file_name = self.input_path.split("/")[-1].split(".")[0]
@@ -166,7 +170,7 @@ class Video:
         else:
             return self.output_path
 
-    def get_codec_fourcc(self, filename):
+    def get_codec_fourcc(self, filename: str) -> str:
         if self.codec_fourcc is not None:
             return self.codec_fourcc
 
@@ -183,7 +187,7 @@ class Video:
                 f"Please use '.mp4', '.avi', or provide a custom OpenCV fourcc codec name."
             )
 
-    def abbreviate_description(self, description):
+    def abbreviate_description(self, description: str) -> str:
         """Conditionally abbreviate description so that progress bar fits in small terminals"""
         terminal_columns, _ = get_terminal_size()
         space_for_description = (
@@ -194,5 +198,5 @@ class Video:
         else:
             return "{} ... {}".format(
                 description[: space_for_description // 2 - 3],
-                description[-space_for_description // 2 + 3 :],
+                description[-space_for_description // 2 + 3:],
             )
