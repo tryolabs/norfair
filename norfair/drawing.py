@@ -1,17 +1,18 @@
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple, Sequence
 
 import cv2
 import numpy as np
 
+from .tracker import Detection, TrackedObject
 from .utils import validate_points
 
 
 def draw_points(
     frame: np.array,
-    detections: List,
+    detections: Sequence["Detection"],
     radius: Optional[int] = None,
     thickness: Optional[int] = None,
-    color: Optional[Tuple] = None
+    color: Optional[Tuple[int, int, int]] = None
 ):
     if detections is None:
         return
@@ -39,9 +40,9 @@ def draw_points(
 
 def draw_tracked_objects(
     frame: np.array,
-    objects: List,
+    objects: Sequence["TrackedObject"],
     radius: Optional[int] = None,
-    color: Optional[Tuple] = None,
+    color: Optional[Tuple[int, int, int]] = None,
     id_size: Optional[float] = None,
     id_thickness: Optional[int] = None,
     draw_points: bool = True,
@@ -91,10 +92,10 @@ def draw_tracked_objects(
 
 def draw_debug_metrics(
     frame: np.array,
-    objects: List,
+    objects: Sequence["TrackedObject"],
     text_size: Optional[float] = None,
     text_thickness: Optional[int] = None,
-    color: Optional[Tuple] = None,
+    color: Optional[Tuple[int, int, int]] = None,
     only_ids=None,
     only_initializing_ids=None,
     draw_score_threshold: float = 0,
