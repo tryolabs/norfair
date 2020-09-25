@@ -62,7 +62,7 @@ class Tracker:
 
         return [p for p in self.tracked_objects if not p.is_initializing]
 
-    def update_objects_in_place(self, objects: Sequence,
+    def update_objects_in_place(self, objects: Sequence["TrackedObject"],
                                 detections: Optional[Sequence["Detection"]]):
         if detections is not None and len(detections) > 0:
             distance_matrix = np.ones((len(detections), len(objects)), dtype=np.float32)
