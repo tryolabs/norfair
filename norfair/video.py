@@ -1,11 +1,11 @@
 import os
 import time
-from typing import Optional
+from typing import Optional, List, Union
 
 import cv2
 import numpy as np
 from rich import print
-from rich.progress import BarColumn, Progress, TimeRemainingColumn
+from rich.progress import BarColumn, Progress, TimeRemainingColumn, ProgressColumn
 
 from .utils import get_terminal_size
 
@@ -68,7 +68,7 @@ class Video:
         # Setup progressbar
         if self.label:
             description += f" | {self.label}"
-        progress_bar_fields = [
+        progress_bar_fields: List[Union[str, ProgressColumn]] = [
             "[progress.description]{task.description}",
             BarColumn(),
             "[yellow]{task.fields[process_fps]:.2f}fps[/yellow]",
