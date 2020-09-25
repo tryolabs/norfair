@@ -1,5 +1,5 @@
 import os
-from typing import List, Tuple
+from typing import Tuple, Sequence
 
 import numpy as np
 from rich.console import Console
@@ -20,7 +20,7 @@ def validate_points(points: np.array) -> np.array:
     return points
 
 
-def print_objects_as_table(tracked_objects: List):
+def print_objects_as_table(tracked_objects: Sequence):
     """Used for helping in debugging"""
     print()
     console = Console()
@@ -41,7 +41,7 @@ def print_objects_as_table(tracked_objects: List):
     console.print(table)
 
 
-def get_terminal_size(default: Tuple = (80, 24)) -> Tuple[int, int]:
+def get_terminal_size(default: Tuple[int, int] = (80, 24)) -> Tuple[int, int]:
     columns, lines = default
     for fd in range(0, 3):  # First in order 0=Std In, 1=Std Out, 2=Std Error
         try:
