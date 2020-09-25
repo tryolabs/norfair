@@ -1,5 +1,5 @@
 import math
-from typing import Callable, Union, Optional, List
+from typing import Callable, Optional, Sequence
 
 import numpy as np
 from filterpy.kalman import KalmanFilter
@@ -10,12 +10,12 @@ from .utils import validate_points
 class Tracker:
     def __init__(
         self,
-        distance_function: Callable,
-        distance_threshold: Union[int, float],
+        distance_function: Callable[["Detection", "TrackedObject"], float],
+        distance_threshold: float,
         hit_inertia_min: int = 10,
         hit_inertia_max: int = 25,
-        detection_threshold: Union[int, float] = 0,
-        point_transience: Union[int, float] = 4,
+        detection_threshold: float = 0,
+        point_transience: float = 4,
     ):
         self.tracked_objects = []
         self.distance_function = distance_function
@@ -26,7 +26,8 @@ class Tracker:
         self.point_transience = point_transience
         TrackedObject.count = 0
 
-    def update(self, detections: Optional[List] = None, period: int = 1):
+    def update(self, detections: Optional[Sequence["Detection"]] = None,
+               period: int = 1):
         self.period = period
 
         # Remove stale trackers and make candidate object real if it has hit inertia
@@ -61,7 +62,8 @@ class Tracker:
 
         return [p for p in self.tracked_objects if not p.is_initializing]
 
-    def update_objects_in_place(self, objects: List, detections: Optional[List]):
+    def update_objects_in_place(self, objects: Sequence,
+                                detections: Optional[Sequence["Detection"]]):
         if detections is not None and len(detections) > 0:
             distance_matrix = np.ones((len(detections), len(objects)), dtype=np.float32)
             distance_matrix *= self.distance_threshold + 1
@@ -168,12 +170,12 @@ class TrackedObject:
 
     def __init__(
         self,
-        initial_detection,
+        initial_detection: "Detection",
         hit_inertia_min: int,
         hit_inertia_max: int,
-        detection_threshold: Union[int, float],
-        period: Union[int, float] = 1,
-        point_transience: Union[int, float] = 4,
+        detection_threshold: float,
+        period: float = 1,
+        point_transience: float = 4,
     ):
         self.num_points = validate_points(initial_detection.points).shape[0]
         self.hit_inertia_min = hit_inertia_min
@@ -265,7 +267,7 @@ class TrackedObject:
     def live_points(self):
         return self.point_hit_counter > self.point_hit_inertia_min
 
-    def hit(self, detection, period: int = 1):
+    def hit(self, detection: "Detection", period: int = 1):
         points = validate_points(detection.points)
 
         self.last_detection = detection
