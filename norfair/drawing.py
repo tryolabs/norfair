@@ -2,6 +2,7 @@ from typing import Optional, Tuple, Sequence
 
 import cv2
 import numpy as np
+import random
 
 from .tracker import Detection, TrackedObject
 from .utils import validate_points
@@ -59,7 +60,8 @@ def draw_tracked_objects(
         if not obj.live_points.any():
             continue
         if color is None:
-            point_color = Color.random(obj.id)
+            object_id = obj.id if obj.id is not None else random.randint(0, 999)
+            point_color = Color.random(object_id)
             id_color = point_color
         else:
             point_color = color
@@ -140,20 +142,18 @@ def draw_debug_metrics(
             )
 
         # Distance to last matched detection
-        last_dist = obj.last_distance
-        if last_dist is None:
+        if obj.last_distance is None:
             last_dist = "-"
-        elif last_dist > 999:
+        elif obj.last_distance > 999:
             last_dist = ">"
         else:
-            last_dist = "{:.2f}".format(last_dist)
+            last_dist = "{:.2f}".format(obj.last_distance)
 
         # Distance to currently closest detection
-        current_min_dist = obj.current_min_distance
-        if current_min_dist is None:
+        if obj.current_min_distance is None:
             current_min_dist = "-"
         else:
-            current_min_dist = "{:.2f}".format(current_min_dist)
+            current_min_dist = "{:.2f}".format(obj.current_min_distance)
 
         # No support for multiline text in opencv :facepalm:
         lines_to_draw = (

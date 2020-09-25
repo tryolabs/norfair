@@ -25,7 +25,7 @@ class Video:
         self.output_path = output_path
         self.label = label
         self.codec_fourcc = codec_fourcc
-        self.output_video = None
+        self.output_video: Optional[cv2.VideoWriter] = None
 
         # Input validation
         if (input_path is None and camera is None) or (
@@ -170,7 +170,7 @@ class Video:
         else:
             return self.output_path
 
-    def get_codec_fourcc(self, filename: str) -> str:
+    def get_codec_fourcc(self, filename: str) -> Optional[str]:
         if self.codec_fourcc is not None:
             return self.codec_fourcc
 
@@ -186,6 +186,7 @@ class Video:
                 f"[yellow]{filename}[/yellow]\n"
                 f"Please use '.mp4', '.avi', or provide a custom OpenCV fourcc codec name."
             )
+            return None  # Had to add this return to make mypya happy. I don't like this.
 
     def abbreviate_description(self, description: str) -> str:
         """Conditionally abbreviate description so that progress bar fits in small terminals"""

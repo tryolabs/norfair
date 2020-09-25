@@ -1,5 +1,5 @@
 import math
-from typing import Callable, Optional, Sequence
+from typing import Callable, Optional, Sequence, List
 
 import numpy as np
 from filterpy.kalman import KalmanFilter
@@ -15,9 +15,9 @@ class Tracker:
         hit_inertia_min: int = 10,
         hit_inertia_max: int = 25,
         detection_threshold: float = 0,
-        point_transience: float = 4,
+        point_transience: int = 4,
     ):
-        self.tracked_objects = []
+        self.tracked_objects: Sequence["TrackedObject"] = []
         self.distance_function = distance_function
         self.hit_inertia_min = hit_inertia_min
         self.hit_inertia_max = hit_inertia_max
@@ -26,7 +26,7 @@ class Tracker:
         self.point_transience = point_transience
         TrackedObject.count = 0
 
-    def update(self, detections: Optional[Sequence["Detection"]] = None,
+    def update(self, detections: Optional[List["Detection"]] = None,
                period: int = 1):
         self.period = period
 
@@ -63,7 +63,7 @@ class Tracker:
         return [p for p in self.tracked_objects if not p.is_initializing]
 
     def update_objects_in_place(self, objects: Sequence["TrackedObject"],
-                                detections: Optional[Sequence["Detection"]]):
+                                detections: Optional[List["Detection"]]):
         if detections is not None and len(detections) > 0:
             distance_matrix = np.ones((len(detections), len(objects)), dtype=np.float32)
             distance_matrix *= self.distance_threshold + 1
@@ -174,27 +174,27 @@ class TrackedObject:
         hit_inertia_min: int,
         hit_inertia_max: int,
         detection_threshold: float,
-        period: float = 1,
-        point_transience: float = 4,
+        period: int = 1,
+        point_transience: int = 4,
     ):
         self.num_points = validate_points(initial_detection.points).shape[0]
-        self.hit_inertia_min = hit_inertia_min
-        self.hit_inertia_max = hit_inertia_max
-        self.point_hit_inertia_min = math.floor(hit_inertia_min / point_transience)
-        self.point_hit_inertia_max = math.ceil(hit_inertia_max / point_transience)
+        self.hit_inertia_min: int = hit_inertia_min
+        self.hit_inertia_max: int = hit_inertia_max
+        self.point_hit_inertia_min: int = math.floor(hit_inertia_min / point_transience)
+        self.point_hit_inertia_max: int = math.ceil(hit_inertia_max / point_transience)
         if (self.point_hit_inertia_max - self.point_hit_inertia_min) < period:
             self.point_hit_inertia_max = self.point_hit_inertia_min + period
-        self.detection_threshold = detection_threshold
-        self.initial_period = period
-        self.hit_counter = hit_inertia_min + period
-        self.point_hit_counter = np.ones(self.num_points) * self.point_hit_inertia_min
-        self.last_distance = None
-        self.current_min_distance = None
-        self.last_detection = initial_detection
-        self.age = 0
-        self.is_initializing_flag = True
-        self.id = None
-        self.initializing_id = TrackedObject.initializing_count  # Just for debugging
+        self.detection_threshold: float = detection_threshold
+        self.initial_period: int = period
+        self.hit_counter: int = hit_inertia_min + period
+        self.point_hit_counter: np.ndarray = np.ones(self.num_points) * self.point_hit_inertia_min
+        self.last_distance: Optional[float] = None
+        self.current_min_distance: Optional[float] = None
+        self.last_detection: "Detection" = initial_detection
+        self.age: int = 0
+        self.is_initializing_flag: bool = True
+        self.id: Optional[int] = None
+        self.initializing_id: int = TrackedObject.initializing_count  # Just for debugging
         TrackedObject.initializing_count += 1
         self.setup_filter(initial_detection.points)
         self.detected_at_least_once_points = np.array([False] * self.num_points)
