@@ -4,7 +4,7 @@
 
 Norfair is a customizable lightweight Python library for real-time 2D object tracking.
 
-Using Norfair, you can add tracking capabilities to any detector with just a few lines of code.
+Using Norfair, you can add tracking capabilities to any detector with just a few lines of code. Try our simple car tracking demo running on top of YOLOv4 on any youtube video on this [Google Colab notebook](https://colab.research.google.com/github/tryolabs/norfair/blob/master/demos/yolov4/yolov4_demo.ipynb) right now!
 
 ## Features
 
