@@ -16,17 +16,17 @@ distance_threshold = 0.4
 class OpenposeDetector:
     def __init__(self):
         config = {}
-        config['dir'] = openpose_install_path
-        config['logging_level'] = 3
-        config['output_resolution'] = "-1x-1" # 320x176
-        config['net_resolution'] = "-1x768" # 320x176
-        config['model_pose'] = "BODY_25"
-        config['alpha_pose'] = 0.6
-        config['scale_gap'] = 0.3
-        config['scale_number'] = 1
-        config['render_threshold'] = 0.05
-        config['num_gpu_start'] = 0  # If GPU version is built, and multiple GPUs are available, set the ID here
-        config['disable_blending'] = False
+        config["dir"] = openpose_install_path
+        config["logging_level"] = 3
+        config["output_resolution"] = "-1x-1"  # 320x176
+        config["net_resolution"] = "-1x768"  # 320x176
+        config["model_pose"] = "BODY_25"
+        config["alpha_pose"] = 0.6
+        config["scale_gap"] = 0.3
+        config["scale_number"] = 1
+        config["render_threshold"] = 0.05
+        config["num_gpu_start"] = 0  # If GPU version is built, and multiple GPUs are available, set the ID here
+        config["disable_blending"] = False
         openpose_dir = config["dir"]
         sys.path.append(openpose_dir + "/build/python/openpose")
         from openpose import OpenPose  # noqa
@@ -37,9 +37,10 @@ class OpenposeDetector:
     def __call__(self, image):
         return self.detector.forward(image, False)
 
+
 def keypoints_distance(detected_pose, tracked_pose):
     ps = [np.inf]
-    distances=0
+    distances = 0
     diagonal = 0
 
     hor_min_pt = min(detected_pose.points[:, 0])
@@ -47,15 +48,21 @@ def keypoints_distance(detected_pose, tracked_pose):
     ver_min_pt = min(detected_pose.points[:, 1])
     ver_max_pt = max(detected_pose.points[:, 1])
 
-    #set keypoint_dist_threshold based on object size, and calculate
-    #distance between detections and tracker estimations
+    # set keypoint_dist_threshold based on object size, and calculate
+    # distance between detections and tracker estimations
     for p in ps:
-        distances += np.linalg.norm(detected_pose.points - tracked_pose.estimate, ord=p, axis=1)
-        diagonal += np.linalg.norm( [hor_max_pt-hor_min_pt, ver_max_pt-ver_min_pt], ord=p)
+        distances += np.linalg.norm(
+            detected_pose.points - tracked_pose.estimate, ord=p, axis=1
+        )
+        diagonal += np.linalg.norm(
+            [hor_max_pt - hor_min_pt, ver_max_pt - ver_min_pt], ord=p
+        )
 
-    distances = distances/len(ps)
-    keypoint_dist_threshold = video.input_height*(diagonal<video.input_height/3)/50 + diagonal*(diagonal>=video.input_height/3)/25 
-
+    distances = distances / len(ps)
+    keypoint_dist_threshold = (
+        video.input_height * (diagonal < video.input_height / 3) / 50
+        + diagonal * (diagonal >= video.input_height / 3) / 25
+    )
 
     match_num = np.count_nonzero(
         (distances < keypoint_dist_threshold)
@@ -63,6 +70,7 @@ def keypoints_distance(detected_pose, tracked_pose):
         * (tracked_pose.last_detection.scores > detection_threshold)
     )
     return 1 / (1 + match_num)
+
 
 pose_detector = OpenposeDetector()
 parser = argparse.ArgumentParser(description="Track human poses in a video.")
