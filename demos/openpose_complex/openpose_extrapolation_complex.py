@@ -25,7 +25,9 @@ class OpenposeDetector:
         config["scale_gap"] = 0.3
         config["scale_number"] = 1
         config["render_threshold"] = 0.05
-        config["num_gpu_start"] = 0  # If GPU version is built, and multiple GPUs are available, set the ID here
+        config[
+            "num_gpu_start"
+        ] = 0  # If GPU version is built, and multiple GPUs are available, set the ID here
         config["disable_blending"] = False
         openpose_dir = config["dir"]
         sys.path.append(openpose_dir + "/build/python/openpose")
