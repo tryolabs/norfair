@@ -220,18 +220,18 @@ class TrackedObject:
         # Measurement uncertainty (sensor noise): numpy.array(dim_z, dim_z)
         # TODO: maybe we should open this one to the users, as it lets them
         #       chose between giving more/less importance to the detections
-        self.filter.R *= 4.0
+        self.filter.R *= 4.0 
 
         # Process uncertainty: numpy.array(dim_x, dim_x)
         # Don't decrease it too much or trackers pay too little attention to detections
         # self.filter.Q[:dim_z, :dim_z] /= 50
-        self.filter.Q[dim_z:, dim_z:] /= 10
+        self.filter.Q[dim_z:, dim_z:] /= 20 
 
         # Initial state: numpy.array(dim_x, 1)
         self.filter.x[:dim_z] = np.expand_dims(initial_detection.flatten(), 0).T
 
         # Estimation uncertainty: numpy.array(dim_x, dim_x)
-        self.filter.P[dim_z:, dim_z:] *= 10.0
+        self.filter.P[dim_z:, dim_z:] *= 10.0 
 
     def tracker_step(self):
         self.hit_counter -= 1
