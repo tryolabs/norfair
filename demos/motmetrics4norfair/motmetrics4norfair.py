@@ -7,8 +7,8 @@ import cv2
 from norfair import Detection, Tracker, Video, lib_metrics
 from rich.progress import Progress
 
-#Flag to decide if making an output video or not
-make_video_output = False
+# Flag to decide if making an output video or not
+make_video_output = True
 
 # Insert the path to your openpose instalation folder here
 frame_skip_period = 1
@@ -46,7 +46,7 @@ for testing_video in args:
         out_video = cv2.VideoWriter(video_path, fourcc, fps, image_size)  # video file
 
     def keypoints_distance(detected_pose, tracked_pose):
-        ps = [1, 2, np.inf] 
+        ps = [1, 2, np.inf]
         distances = 0
         diagonal = 0
 
@@ -68,8 +68,12 @@ for testing_video in args:
         distances = distances / len(ps)
 
         keypoint_dist_threshold = (
+            v_resolution * (diagonal < v_resolution / 3) / 67
         v_resolution * (diagonal < v_resolution / 3) / 67 
+            v_resolution * (diagonal < v_resolution / 3) / 67
+            + diagonal * (diagonal >= v_resolution / 3) / 17
         + diagonal * (diagonal >= v_resolution / 3) / 17 
+            + diagonal * (diagonal >= v_resolution / 3) / 17
         )
 
         match_num = np.count_nonzero(
@@ -110,13 +114,13 @@ for testing_video in args:
         task = progress.add_task("[red]" + testing_video, total=last_frame)
         while actual_frame <= last_frame:
             progress.update(task, advance=1)
+            detections = []  # initialize list with detections
             if actual_frame % frame_skip_period == 0:
                 actual_det = []
                 while (i < len(row_order)) & (matrix_det[i - 1, 0] == actual_frame):
                     actual_det.append(matrix_det[i, :])
                     i += 1
                 actual_det = np.array(actual_det)
-                detections = []
                 if actual_det.shape[0] > 0:
                     for j in range(actual_det.shape[0]):
                         points = [actual_det[j, [2, 3]], actual_det[j, [4, 5]]]
@@ -131,8 +135,9 @@ for testing_video in args:
                     detections=detections, period=frame_skip_period
                 )
             else:
+                while (i < len(row_order)) & (matrix_det[i - 1, 0] == actual_frame):
+                    i += 1
                 tracked_objects = tracker.update()
-
             # save new frame on output video file
             if make_video_output:
                 frame_location = (
