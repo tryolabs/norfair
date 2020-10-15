@@ -146,7 +146,7 @@ class Video:
 
     def show(self, frame: np.array, downsample_ratio: int = 1) -> int:
         # Resize to lower resolution for faster streaming over slow connections
-        if downsample_ratio and downsample_ratio > 1:
+        if downsample_ratio != 1:
             # Note that frame.shape[1] corresponds to width, and opencv format is (width, height)
             frame = cv2.resize(
                 frame,
