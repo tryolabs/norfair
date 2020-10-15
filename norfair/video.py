@@ -144,16 +144,15 @@ class Video:
         self.output_video.write(frame)
         return cv2.waitKey(1)
 
-    def show(self, frame: np.array, downsample_ratio: int = 1) -> int:
+    def show(self, frame: np.array, downsample_ratio: float = 1.0) -> int:
         # Resize to lower resolution for faster streaming over slow connections
-        if downsample_ratio != 1:
-            # Note that frame.shape[1] corresponds to width, and opencv format is (width, height)
+        if downsample_ratio != 1.0:
+            f = 1.0 / downsample_ratio
             frame = cv2.resize(
-                frame,
-                (
-                    frame.shape[1] // downsample_ratio,
-                    frame.shape[0] // downsample_ratio,
-                ),
+                frame, 
+                dsize = (0,0), 
+                fx = f, 
+                fy = f,
             )
         cv2.imshow("Output", frame)
         return cv2.waitKey(1)
