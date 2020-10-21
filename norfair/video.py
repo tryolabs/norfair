@@ -147,12 +147,12 @@ class Video:
     def show(self, frame: np.array, downsample_ratio: float = 1.0) -> int:
         # Resize to lower resolution for faster streaming over slow connections
         if downsample_ratio != 1.0:
-            f = 1.0 / downsample_ratio
             frame = cv2.resize(
-                frame, 
-                dsize = (0,0), 
-                fx = f, 
-                fy = f,
+                frame,
+                (
+                    frame.shape[1] // downsample_ratio,
+                    frame.shape[0] // downsample_ratio,
+                ),
             )
         cv2.imshow("Output", frame)
         return cv2.waitKey(1)
