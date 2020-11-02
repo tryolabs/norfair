@@ -329,7 +329,8 @@ class TrackedObject:
 
 
 class Detection:
-    def __init__(self, points: np.array, scores=None, data=None):
+    def __init__(self, points: np.array, scores=None, data=None, mask=None):
         self.points = points
         self.scores = scores
         self.data = data
+        self.mask = mask

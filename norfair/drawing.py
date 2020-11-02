@@ -38,6 +38,22 @@ def draw_points(
                 thickness=thickness,
             )
 
+def draw_masks(
+    frame: np.array,
+    detections: Sequence["Detection"],
+    alpha: float = 0.4,
+    color = (255, 0, 0)
+):
+    if detections is None:
+        return
+    frame = frame.astype(np.float32)
+
+    for d in detections:
+        mask = d.mask
+        idx = np.nonzero(mask)
+        frame[idx[0], idx[1], :] *= 1.0 - alpha
+        frame[idx[0], idx[1], :] += alpha * np.array(color)
+    return frame.astype(np.uint8)
 
 def draw_tracked_objects(
     frame: np.array,
