@@ -1,49 +1,32 @@
-import argparse
 import sys
 import os.path
 import numpy as np
 import norfair
-import cv2
-from norfair import Detection, Tracker, Video, lib_metrics
-from rich.progress import Progress
+from norfair import Detection, Tracker, Video, lib_metrics, video
 
-# Flag to decide if making an output video or not
-make_video_output = True
+# get arguments from terminal
+(
+    videos,
+    input_path,
+    save_path,
+    make_video,
+    show_metrics,
+    save_pred,
+) = lib_metrics.get_arguments()
 
-# Insert the path to your openpose instalation folder here
 frame_skip_period = 1
 detection_threshold = 0.01
 distance_threshold = 0.4
 
-# detection location
-input_path = "/home/aguscas/MOT17/MOT17/train/"
-save_path = "/home/aguscas/preds/"  # location to save predictions
-
-# get the name of the testing videos to proccess from command line
-args = sys.argv[1:]
+Accumulator = lib_metrics.accumulators(input_path=input_path)
 
 # proccess every video
-for testing_video in args:
-    input_path_det = input_path + testing_video + "/det/det.txt"
-
-    out_file_name = os.path.join(save_path + testing_video + ".txt")
+for testing_video in videos:
+    input_path_det = os.path.join(input_path, testing_video, "det/det.txt")
 
     # Search vertical resolution in seqinfo.ini
-    seqinfo_path = input_path + testing_video + "/seqinfo.ini"
+    seqinfo_path = os.path.join(input_path, testing_video, "seqinfo.ini")
     v_resolution = lib_metrics.search_value_on_document(seqinfo_path, "imHeight")
-
-    # things that are only necessary if making output video
-    if make_video_output:
-        # search framerate in seqinfo.ini
-        fps = lib_metrics.search_value_on_document(seqinfo_path, "frameRate")
-
-        # Search horizontal reolution in seqinfo.ini
-        h_resolution = lib_metrics.search_value_on_document(seqinfo_path, "imWidth")
-        image_size = (h_resolution, v_resolution)
-
-        video_path = save_path + "videos/" + testing_video + ".mp4"  # video file name
-        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-        out_video = cv2.VideoWriter(video_path, fourcc, fps, image_size)  # video file
 
     def keypoints_distance(detected_pose, tracked_pose):
         ps = [1, 2, np.inf]
@@ -69,10 +52,6 @@ for testing_video in args:
 
         keypoint_dist_threshold = (
             v_resolution * (diagonal < v_resolution / 3) / 67
-        v_resolution * (diagonal < v_resolution / 3) / 67 
-            v_resolution * (diagonal < v_resolution / 3) / 67
-            + diagonal * (diagonal >= v_resolution / 3) / 17
-        + diagonal * (diagonal >= v_resolution / 3) / 17 
             + diagonal * (diagonal >= v_resolution / 3) / 17
         )
 
@@ -83,26 +62,28 @@ for testing_video in args:
         )
         return 1 / (1 + match_num)
 
-    matrix_det = np.loadtxt(input_path_det, dtype="f", delimiter=",")
+    all_detections = lib_metrics.Det_from_file(
+        input_path=input_path, file_name=testing_video
+    )
 
-    row_order = np.argsort(matrix_det[:, 0])
+    last_frame = int(
+        all_detections.matrix_detections[
+            all_detections.matrix_detections.shape[0] - 1, 0
+        ]
+    )  # last frame number
 
-    matrix_det = matrix_det[row_order]
+    # inirialize output text file
+    if save_pred:
+        Text_file = lib_metrics.text_file(
+            input_path=input_path, save_path=save_path, file_name=testing_video
+        )
 
-    # detections coordinates refer to box corners
-    matrix_det[:, 4] = matrix_det[:, 2] + matrix_det[:, 4]
-    matrix_det[:, 5] = matrix_det[:, 3] + matrix_det[:, 5]
+    if make_video:  # initialize video()
+        Video_file = video.video_from_frames(
+            input_path=input_path, save_path=save_path, file_name=testing_video
+        )
 
-    # frames with detections
-    first_frame = int(matrix_det[0, 0])  # first frame number
-    last_frame = int(matrix_det[len(row_order) - 1, 0])  # last frame number
-
-    actual_frame = first_frame  # actual frame number
-    i = 1  # index that select row number on matrix_det
-
-    # create file in which predictions will be saved
-    out_file = open(out_file_name, "w+")
-
+    # initialize tracker
     tracker = Tracker(
         distance_function=keypoints_distance,
         distance_threshold=distance_threshold,
@@ -110,54 +91,35 @@ for testing_video in args:
         point_transience=2,
     )
 
-    with Progress() as progress:
-        task = progress.add_task("[red]" + testing_video, total=last_frame)
-        while actual_frame <= last_frame:
-            progress.update(task, advance=1)
+    # initialize accumulator for this video
+    Accumulator.create_acc(file_name=testing_video)
+
+    for actual_frame in np.arange(1, last_frame + 1):
             detections = []  # initialize list with detections
             if actual_frame % frame_skip_period == 0:
-                actual_det = []
-                while (i < len(row_order)) & (matrix_det[i - 1, 0] == actual_frame):
-                    actual_det.append(matrix_det[i, :])
-                    i += 1
-                actual_det = np.array(actual_det)
-                if actual_det.shape[0] > 0:
-                    for j in range(actual_det.shape[0]):
-                        points = [actual_det[j, [2, 3]], actual_det[j, [4, 5]]]
-                        points = np.array(points)
-                        conf = actual_det[j, 6]
-                        new_detection = Detection(
-                            points, np.array([1, 1])
-                        )  # set to [1,1] or [conf,conf]
-                        detections.append(new_detection)
-
+            detections = all_detections.get_dets_from_frame(frame_number=actual_frame)
                 tracked_objects = tracker.update(
                     detections=detections, period=frame_skip_period
                 )
             else:
-                while (i < len(row_order)) & (matrix_det[i - 1, 0] == actual_frame):
-                    i += 1
                 tracked_objects = tracker.update()
             # save new frame on output video file
-            if make_video_output:
-                frame_location = (
-                    input_path
-                    + testing_video
-                    + "/img1/"
-                    + str(actual_frame).zfill(6)
-                    + ".jpg"
-                )
-                lib_metrics.write_video(
-                    out_video, frame_location, detections, tracked_objects
-                )
+        if make_video:
+            Video_file.update_video(detections=detections, predictions=tracked_objects)
+        # update output text file
+        if save_pred:
+            Text_file.update_text_file(predictions=tracked_objects)
 
-            lib_metrics.write_predictions(
-                frame_number=actual_frame, objects=tracked_objects, out_file=out_file
-            )
-            actual_frame += 1
+        Accumulator.update(predictions=tracked_objects)
 
-    if make_video_output:
-        cv2.destroyAllWindows()
-        out_video.release()
+    if make_video:
+        Video_file.close_video()
+    if save_pred:
+        Text_file.close_file()
 
-    out_file.close()
+    Accumulator.end_acc()
+
+Accumulator.compute_metrics(save_path=save_path)
+
+if show_metrics:
+    Accumulator.print_metrics()

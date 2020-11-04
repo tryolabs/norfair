@@ -4,7 +4,9 @@ import random
 from .utils import validate_points
 
 
-def draw_points(frame, detections, radius=None, thickness=None, color=None):
+def draw_points(
+    frame, detections, radius=None, thickness=None, color=None, random_color=False
+):
     if detections is None:
         return
     frame_scale = frame.shape[0] / 100
@@ -14,9 +16,8 @@ def draw_points(frame, detections, radius=None, thickness=None, color=None):
         thickness = int(max(frame_scale / 7, 1))
     if color is None:
         color = Color.red
-    color_is_rand = color == Color.rand
     for d in detections:
-        if color_is_rand:
+        if random_color:
             color = Color.random(random.randint(0, 20))
         points = d.points
         points = validate_points(points)
@@ -179,6 +180,82 @@ def centroid(tracked_points):
     return int(sum_x / num_points), int(sum_y / num_points)
 
 
+def draw_boxes(frame, detections, line_color=None, line_width=None, random_color=False):
+    frame_scale = frame.shape[0] / 100
+    if detections is None:
+        return frame
+    frame_scale = frame_scale / 100
+    if line_width is None:
+        line_width = int(max(frame_scale / 7, 1))
+    if line_color is None:
+        line_color = Color.red
+    for d in detections:
+        if random_color:
+            line_color = Color.random(random.randint(0, 20))
+        points = d.points
+        points = validate_points(points)
+        points = points.astype(int)
+        cv2.rectangle(
+            frame,
+            tuple(points[0, :]),
+            tuple(points[1, :]),
+            color=line_color,
+            thickness=line_width,
+        )
+    return frame
+
+
+def draw_tracked_boxes(
+    frame,
+    objects,
+    line_color=None,
+    line_width=None,
+    id_size=None,
+    id_thickness=None,
+    draw_box=True,
+):
+    frame_scale = frame.shape[0] / 100
+    if line_width is None:
+        line_width = int(frame_scale * 0.5)
+    if id_size is None:
+        id_size = frame_scale / 10
+    if id_thickness is None:
+        id_thickness = int(frame_scale / 5)
+    color_is_None = line_color == None
+    for obj in objects:
+        if not obj.live_points.any():
+            continue
+        if color_is_None:
+            line_color = Color.random(obj.id)
+        id_color = line_color
+
+        if draw_box:
+            points = obj.estimate
+            points = points.astype(int)
+            cv2.rectangle(
+                frame,
+                tuple(points[0, :]),
+                tuple(points[1, :]),
+                color=line_color,
+                thickness=line_width,
+            )
+
+        if id_size > 0:
+            id_draw_position = np.mean(points, axis=0)
+            id_draw_position = id_draw_position.astype(int)
+            cv2.putText(
+                frame,
+                str(obj.id),
+                tuple(id_draw_position),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                id_size,
+                id_color,
+                id_thickness,
+                cv2.LINE_AA,
+            )
+    return frame
+
+
 class Color:
     green = (0, 128, 0)
     white = (255, 255, 255)
@@ -196,7 +273,6 @@ class Color:
     blue = (255, 0, 0)
     teal = (128, 128, 0)
     silver = (192, 192, 192)
-    rand = (-1, -1, -1)  # random color for each detection
 
     @staticmethod
     def random(obj_id):
