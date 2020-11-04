@@ -1,104 +1,18 @@
 import os
 import time
+import sys
 import numpy as np
 import random
 import cv2
+import argparse
 from rich import print
 from .utils import validate_points
-from rich.progress import BarColumn, Progress, TimeRemainingColumn
-
-
-def draw_boxes(frame, detections, line_color=None, line_width=None):
-    frame_scale = frame.shape[0] / 100
-    if detections is None:
-        return frame
-    frame_scale = frame_scale / 100
-    if line_width is None:
-        line_width = int(max(frame_scale / 7, 1))
-    if line_color is None:
-        line_color = Color.red
-    color_is_rand = line_color == Color.rand
-    for d in detections:
-        if color_is_rand:
-            line_color = Color.random(random.randint(0, 20))
-        points = d.points
-        points = validate_points(points)
-        points = points.astype(int)
-        cv2.rectangle(
-            frame,
-            tuple(points[0, :]),
-            tuple(points[1, :]),
-            color=line_color,
-            thickness=line_width,
-        )
-    return frame
-
-
-def draw_tracked_boxes(
-    frame,
-    objects,
-    line_color=None,
-    line_width=None,
-    id_size=None,
-    id_thickness=None,
-    draw_box=True,
-):
-    frame_scale = frame.shape[0] / 100
-    if line_width is None:
-        line_width = int(frame_scale * 0.5)
-    if id_size is None:
-        id_size = frame_scale / 10
-    if id_thickness is None:
-        id_thickness = int(frame_scale / 5)
-    color_is_None = line_color == None
-    for obj in objects:
-        if not obj.live_points.any():
-            continue
-        if color_is_None:
-            line_color = Color.random(obj.id)
-        id_color = line_color
-
-        if draw_box:
-            points = obj.estimate
-            points = points.astype(int)
-            cv2.rectangle(
-                frame,
-                tuple(points[0, :]),
-                tuple(points[1, :]),
-                color=line_color,
-                thickness=line_width,
-            )
-
-        if id_size > 0:
-            id_draw_position = np.mean(points, axis=0)
-            id_draw_position = id_draw_position.astype(int)
-            cv2.putText(
-                frame,
-                str(obj.id),
-                tuple(id_draw_position),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                id_size,
-                id_color,
-                id_thickness,
-                cv2.LINE_AA,
-            )
-    return frame
-
-
-def write_video(output_video, frame_path, detections=None, tracked_objects=None):
-    frame = cv2.imread(frame_path)
-    frame = draw_boxes(frame, detections, line_color=None, line_width=None)
-    frame = draw_tracked_boxes(
-        frame,
-        tracked_objects,
-        line_color=None,
-        line_width=None,
-        id_size=None,
-        id_thickness=None,
-        draw_box=True,
-    )
-    output_video.write(frame)
-    cv2.waitKey(1)
+from rich.progress import BarColumn, Progress, TimeRemainingColumn, track
+from norfair import Detection
+import norfair
+import motmetrics as mm
+from collections import OrderedDict
+import pandas as pd
 
 
 def search_value_on_document(file_path, value_name):
@@ -142,31 +56,321 @@ def write_predictions(frame_number, objects=None, out_file=None):
         out_file.write("\n")
 
 
-class Color:
-    green = (0, 128, 0)
-    white = (255, 255, 255)
-    olive = (0, 128, 128)
-    black = (0, 0, 0)
-    navy = (128, 0, 0)
-    red = (0, 0, 255)
-    maroon = (0, 0, 128)
-    grey = (128, 128, 128)
-    purple = (128, 0, 128)
-    yellow = (0, 255, 255)
-    lime = (0, 255, 0)
-    fuchsia = (255, 0, 255)
-    aqua = (255, 255, 0)
-    blue = (255, 0, 0)
-    teal = (128, 128, 0)
-    silver = (192, 192, 192)
-    rand = (-1, -1, -1)  # random color for each detection
+def Process_text_file(path):
+    # this function process detections and ground truth files, so the can be used by norfair
+    matrix = np.loadtxt(path, dtype="f", delimiter=",")
+    row_order = np.argsort(matrix[:, 0])
+    matrix = matrix[row_order]
+    # coordinates refer to box corners
+    matrix[:, 4] = matrix[:, 2] + matrix[:, 4]
+    matrix[:, 5] = matrix[:, 3] + matrix[:, 5]
+    return matrix
 
-    @staticmethod
-    def random(obj_id):
-        color_list = [
-            c
-            for c in Color.__dict__.keys()
-            if c[:2] != "__"
-            and c not in ("random", "red", "white", "grey", "black", "silver", "rand")
+
+def get_arguments():
+    parser = argparse.ArgumentParser(
+        description="Make position predictions based on detections txt file."
+    )
+    parser.add_argument(
+        "files",
+        type=str,
+        nargs="+",
+        help="input_path save_path videos_to_proccess (optional flag make_video)",
+    )
+    arguments = parser.parse_args().files
+
+    make_video = "make_video" in arguments
+    if make_video:
+        arguments.remove("make_video")
+
+    show_metrics = "show_metrics" in arguments
+    if show_metrics:
+        arguments.remove("show_metrics")
+
+    save_pred = "save_pred" in arguments
+    if save_pred:
+        arguments.remove("save_pred")
+
+    # detections location
+    input_path = arguments[0]  # "/home/aguscas/MOT17/MOT17/train/"
+    # location to save predictions
+    save_path = arguments[1]  # "/home/aguscas/preds/"
+
+    all_videos = "all_videos" in arguments
+    if all_videos:
+        arguments.remove("all_videos")
+        videos = [f for f in sorted(os.listdir(input_path))]
+        videos = [
+            f for f in videos if f[:3] == "MOT"
+        ]  # removes every other folder that may not be a valid file
+        exceptions = arguments[2:]
+        videos = [
+            f for f in videos if f not in exceptions
+        ]  # remove the specified exceptions (files that )
+    else:
+        videos = arguments[2:]
+
+    return videos, input_path, save_path, make_video, show_metrics, save_pred
+
+
+class text_file:
+    def __init__(self, input_path=None, save_path=".", file_name=None):
+
+        if input_path is None:
+            raise ValueError(
+                "You must set 'input_path' argument when setting 'text_file' class"
+            )
+        if file_name is None:
+            raise ValueError(
+                "You must set 'file_name' argument when setting 'text_file' class"
+            )
+
+        predictions_folder = os.path.join(save_path, "predictions")
+        if not os.path.exists(predictions_folder):
+            os.makedirs(predictions_folder)
+
+        out_file_name = os.path.join(predictions_folder, file_name + ".txt")
+        self.text_file = open(out_file_name, "w+")
+
+        self.frame_number = 1
+
+    def update_text_file(self, predictions):
+        write_predictions(
+            frame_number=self.frame_number, objects=predictions, out_file=self.text_file
+        )
+        self.frame_number += 1
+
+    def close_file(self):
+        self.text_file.close()
+
+
+class Det_from_file:
+    def __init__(self, input_path=None, file_name=None):
+        # get detecions matrix data with rows corresponding to:
+        # frame, id, bb_left, bb_top, bb_right, bb_down, conf, x, y, z
+        if input_path is None:
+            raise ValueError(
+                "You must set 'input_path' argument when setting 'Det_from_file' class"
+            )
+        if file_name is None:
+            raise ValueError(
+                "You must set 'file_name' argument when setting 'Det_from_file' class"
+            )
+        detections_path = os.path.join(input_path, file_name, "det/det.txt")
+        self.matrix_detections = Process_text_file(path=detections_path)
+
+    def get_dets_from_frame(self, frame_number=None):
+        # this function returns a list of norfair Detections class, corresponding to frame=frame_number
+
+        if frame_number is None:
+            raise ValueError(
+                "You must set 'frame_number' argument when calling get_dets_from_frame()"
+            )
+
+        indexes = np.argwhere(self.matrix_detections[:, 0] == frame_number)
+        detections = []
+        if len(indexes) > 0:
+            actual_det = self.matrix_detections[indexes]
+            actual_det.shape = [actual_det.shape[0], actual_det.shape[2]]
+            for j in range(len(indexes)):
+                points = [actual_det[j, [2, 3]], actual_det[j, [4, 5]]]
+                points = np.array(points)
+                conf = actual_det[j, 6]
+                new_detection = Detection(
+                    points, np.array([1, 1])
+                )  # set to [1,1] or [conf,conf]
+                detections.append(new_detection)
+        self.actual_detections = detections
+        return detections
+
+
+class accumulators:
+    def __init__(self, input_path=None):
+        if input_path is None:
+            raise ValueError(
+                "You must set 'input_path' argument when setting 'accumulator' class"
+            )
+        self.input_path = input_path
+        self.matrixes_predictions = []
+        self.names = []
+
+    def create_acc(self, file_name=None):
+        if file_name is None:
+            raise ValueError(
+                "You must set 'file_name' argument when creating new accumulator"
+            )
+        self.frame_number = 1
+        # save the name of this video in a list
+        self.names = np.hstack((self.names, file_name))
+        # initialize a matrix where we will save our predictions for this video (in the MOTChallenge format)
+        self.matrix_predictions = []
+
+        # initialize progress bar
+        seqinfo_path = os.path.join(self.input_path, file_name, "seqinfo.ini")
+        total_frames = search_value_on_document(seqinfo_path, "seqLength")
+        self.progress_bar_iter = track(
+            range(total_frames - 1), description=file_name, transient=False
+        )
+
+    def update(self, predictions=None):
+        # get the tracked boxes from this frame in an array
+        for obj in predictions:
+            new_row = [
+                self.frame_number,
+                obj.id,
+                obj.estimate[0, 0],
+                obj.estimate[0, 1],
+                obj.estimate[1, 0] - obj.estimate[0, 0],
+                obj.estimate[1, 1] - obj.estimate[0, 1],
+                -1,
+                -1,
+                -1,
+                -1,
+            ]
+            if np.shape(self.matrix_predictions)[0] == 0:
+                self.matrix_predictions = new_row
+            else:
+                self.matrix_predictions = np.vstack((self.matrix_predictions, new_row))
+        self.frame_number += 1
+        # advance in progress bar
+        try:
+            next(self.progress_bar_iter)
+        except StopIteration:
+            return
+
+    def end_acc(self):
+        # append the accumulator of this video with the others accumulators
+        self.matrixes_predictions.append(self.matrix_predictions)
+
+    def compute_metrics(
+        self,
+        save_path=".",
+        metrics=None,
+        generate_overall=True,
+        file_name="metrics.txt",
+    ):
+        if metrics == None:
+            metrics = list(mm.metrics.motchallenge_metrics)
+
+        self.summary = eval_motChallenge(
+            matrixes_predictions=self.matrixes_predictions,
+            input_path=self.input_path,
+            filenames=self.names,
+            metrics=metrics,
+            generate_overall=generate_overall,
+        )
+
+        # create file to save metrics
+        if not os.path.exists(save_path):
+            os.makedirs(save_folder)
+        metrics_path = os.path.join(save_path, file_name)
+        metrics_file = open(metrics_path, "w+")
+        metrics_file.write(self.summary)
+        metrics_file.close()
+        return self.summary
+
+    def print_metrics(self):
+        print(self.summary)
+
+
+def load_motchallenge(matrix_data, min_confidence=-1):
+    r"""Load MOT challenge data.
+
+    Params
+    ------
+    matrix_data : array  of float that has [frame, id, X, Y, width, height, conf, cassId, visibility] in each row, for each prediction on a particular video
+
+    min_confidence : float
+        Rows with confidence less than this threshold are removed.
+        Defaults to -1. You should set this to 1 when loading
+        ground truth MOTChallenge data, so that invalid rectangles in
+        the ground truth are not considered during matching.
+
+    Returns
+    ------
+    df : pandas.DataFrame
+        The returned dataframe has the following columns
+            'X', 'Y', 'Width', 'Height', 'Confidence', 'ClassId', 'Visibility'
+        The dataframe is indexed by ('FrameId', 'Id')
+    """
+
+    df = pd.DataFrame(
+        data=matrix_data,
+        columns=[
+            "FrameId",
+            "Id",
+            "X",
+            "Y",
+            "Width",
+            "Height",
+            "Confidence",
+            "ClassId",
+            "Visibility",
+            "unused",
+        ],
+    )
+    df = df.set_index(["FrameId", "Id"])
+    # Account for matlab convention.
+    df[["X", "Y"]] -= (1, 1)
+
+    # Removed trailing column
+    del df["unused"]
+
+    # Remove all rows without sufficient confidence
+    return df[df["Confidence"] >= min_confidence]
+
+
+def compare_dataframes(gts, ts):
+    """Builds accumulator for each sequence."""
+    accs = []
+    names = []
+    for k, tsacc in ts.items():
+        print("Comparing ", k, "...")
+        if k in gts:
+            accs.append(
+                mm.utils.compare_to_groundtruth(gts[k], tsacc, "iou", distth=0.5)
+            )
+            names.append(k)
+
+    return accs, names
+
+
+def eval_motChallenge(
+    matrixes_predictions, input_path, filenames, metrics=None, generate_overall=True
+):
+
+    gt = OrderedDict(
+        [
+            (
+                f,
+                mm.io.loadtxt(
+                    os.path.join(input_path, f, "gt/gt.txt"),
+                    fmt="mot15-2D",
+                    min_confidence=1,
+                ),
+            )
+            for f in filenames
         ]
-        return getattr(Color, color_list[obj_id % len(color_list)])
+    )
+    ts = OrderedDict(
+        [
+            (filenames[n], load_motchallenge(matrixes_predictions[n]))
+            for n in range(len(filenames))
+        ]
+    )
+
+    mh = mm.metrics.create()
+
+    accs, names = compare_dataframes(gt, ts)
+
+    if metrics == None:
+        metrics = list(mm.metrics.motchallenge_metrics)
+    mm.lap.default_solver = "scipy"
+    print("Computing metrics...")
+    summary = mh.compute_many(
+        accs, names=names, metrics=metrics, generate_overall=generate_overall
+    )
+    summary = mm.io.render_summary(
+        summary, formatters=mh.formatters, namemap=mm.io.motchallenge_metric_names
+    )
+    return summary
