@@ -15,6 +15,7 @@ class Tracker:
         distance_threshold: float,
         hit_inertia_min: int = 10,
         hit_inertia_max: int = 25,
+        initialization_delay: Optional[int] = None,
         detection_threshold: float = 0,
         point_transience: int = 4,
     ):
@@ -22,6 +23,15 @@ class Tracker:
         self.distance_function = distance_function
         self.hit_inertia_min = hit_inertia_min
         self.hit_inertia_max = hit_inertia_max
+        if initialization_delay < 0 or initialization_delay > self.hit_inertia_max - self.hit_inertia_min:
+            raise ValueError(
+                f"Argument 'initialization_delay' for 'Tracker' class should be an int between 0 and (hit_inertia_max - hit_inertia_min = {hit_inertia_max - hit_inertia_min}). The selected value is {initialization_delay}.\n"
+            )
+        self.initialization_delay = (
+            (self.hit_inertia_min + self.hit_inertia_max) / 2
+            if initialization_delay is None
+            else initialization_delay
+        )
         self.distance_threshold = distance_threshold
         self.detection_threshold = detection_threshold
         self.point_transience = point_transience
@@ -174,6 +184,7 @@ class TrackedObject:
         initial_detection: "Detection",
         hit_inertia_min: int,
         hit_inertia_max: int,
+        initialization_delay: int,
         detection_threshold: float,
         period: int = 1,
         point_transience: int = 4,
@@ -187,6 +198,7 @@ class TrackedObject:
             exit()
         self.hit_inertia_min: int = hit_inertia_min
         self.hit_inertia_max: int = hit_inertia_max
+        self.initialization_delay = initialization_delay
         self.point_hit_inertia_min: int = math.floor(hit_inertia_min / point_transience)
         self.point_hit_inertia_max: int = math.ceil(hit_inertia_max / point_transience)
         if (self.point_hit_inertia_max - self.point_hit_inertia_min) < period:
@@ -253,7 +265,7 @@ class TrackedObject:
     def is_initializing(self):
         if (
             self.is_initializing_flag
-            and self.hit_counter > (self.hit_inertia_min + self.hit_inertia_max) / 2
+            and self.hit_counter > self.hit_inertia_min + self.initialization_delay
         ):
             self.is_initializing_flag = False
             TrackedObject.count += 1
