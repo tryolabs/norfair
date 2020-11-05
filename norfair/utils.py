@@ -2,6 +2,7 @@ import os
 from typing import Tuple, Sequence
 
 import numpy as np
+from rich import print
 from rich.console import Console
 from rich.table import Table
 
@@ -10,15 +11,21 @@ def validate_points(points: np.array) -> np.array:
     # If the user is tracking only a single point, reformat it slightly.
     if points.shape == (2,):
         points = points[np.newaxis, ...]
+    elif len(points.shape) == 1:
+        print_detection_error_message_and_exit(points)
     else:
         if points.shape[1] != 2 or len(points.shape) > 2:
-            print(
-                f"The shape of `Detection.points` should be (num_of_points_to_track, 2), not {points.shape}."
-            )
-            print("Check your detection conversion code.")
-            exit()
+            print_detection_error_message_and_exit(points)
     return points
 
+def print_detection_error_message_and_exit(points):
+    print("\n[red]INPUT ERROR:[/red]")
+    print(
+        f"Each `Detection` object should have a property `points` of shape (num_of_points_to_track, 2), not {points.shape}. Check your `Detection` list creation code."
+    )
+    print("You can read the documentation for the `Detection` class here:")
+    print("https://github.com/tryolabs/norfair/tree/master/docs#detection\n")
+    exit()
 
 def print_objects_as_table(tracked_objects: Sequence):
     """Used for helping in debugging"""

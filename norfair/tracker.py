@@ -4,6 +4,7 @@ from typing import Callable, Optional, Sequence, List
 import numpy as np
 from filterpy.kalman import KalmanFilter
 
+from rich import print
 from .utils import validate_points
 
 
@@ -177,7 +178,13 @@ class TrackedObject:
         period: int = 1,
         point_transience: int = 4,
     ):
-        self.num_points = validate_points(initial_detection.points).shape[0]
+        try:
+            self.num_points = validate_points(initial_detection.points).shape[0]
+        except AttributeError:
+            print(
+                f"\n[red]ERROR[/red]: The detection list fed into `tracker.update()` should be composed of {Detection} objects not {type(initial_detection)}.\n"
+            )
+            exit()
         self.hit_inertia_min: int = hit_inertia_min
         self.hit_inertia_max: int = hit_inertia_max
         self.point_hit_inertia_min: int = math.floor(hit_inertia_min / point_transience)
