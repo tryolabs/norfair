@@ -30,7 +30,7 @@ The function through which the detections found in each frame must be passed to 
 
 Detections returned by the detector must be converted to a `Detection` object before being used by Norfair.
 
-##### Arguments:
+##### Arguments and Properties:
 
 - `points`: A numpy array of shape `(number of points per object, 2)`, with each row being a point expressed as `x, y` coordinates on the image. The number of points per detection must be constant for each particular tracker.
 - `scores`: An array of length `number of points per object` which assigns a score to each of the points defined in `points`. This is used to inform the tracker of which points to ignore; any point with a score below `detection_threshold` will be ignored. This useful for cases in which detections don't always have every point detected, as is often the case in pose estimators.
