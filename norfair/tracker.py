@@ -15,7 +15,7 @@ class Tracker:
         distance_threshold: float,
         hit_inertia_min: int = 10,
         hit_inertia_max: int = 25,
-        initialization_delay: Optional[int] = None,
+        initialization_delay: Optional[int] = 0,
         detection_threshold: float = 0,
         point_transience: int = 4,
     ):
