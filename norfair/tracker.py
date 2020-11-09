@@ -65,6 +65,7 @@ class Tracker:
                     detection,
                     self.hit_inertia_min,
                     self.hit_inertia_max,
+                    self.initialization_delay,
                     self.detection_threshold,
                     self.period,
                     self.point_transience,
