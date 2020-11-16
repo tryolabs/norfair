@@ -116,7 +116,7 @@ def draw_debug_metrics(
     radius = int(frame_scale * 0.5)
 
     for obj in objects:
-        if not (obj.last_detection.scores > draw_score_threshold).any():
+        if not (obj.last_detection.scores is None) and not (obj.last_detection.scores > draw_score_threshold).any():
             continue
         if only_ids is not None:
             if obj.id not in only_ids:
@@ -129,7 +129,7 @@ def draw_debug_metrics(
         else:
             text_color = color
         draw_position = centroid(
-            obj.estimate[obj.last_detection.scores > draw_score_threshold]
+            obj.estimate[obj.last_detection.scores > draw_score_threshold] if obj.last_detection.scores is not None else obj.estimate
         )
 
         for point in obj.estimate:
