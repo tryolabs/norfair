@@ -227,7 +227,6 @@ def draw_tracked_boxes(
             continue
         if color_is_None:
             line_color = Color.random(obj.id)
-        id_color = line_color
 
         if draw_box:
             points = obj.estimate

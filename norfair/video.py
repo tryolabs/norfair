@@ -202,26 +202,28 @@ class Video:
             )
 
 
-class video_from_frames:
-    def __init__(self, input_path=None, save_path=".", file_name=None):
+class VideoFromFrames:
+    def __init__(self, input_path=None, save_path="."):
 
         if input_path is None:
             raise ValueError(
                 "You must set 'input_path' argument when setting 'video_output' class"
             )
-        if file_name is None:
-            raise ValueError(
-                "You must set 'file_name' argument when setting 'video_output' class"
-            )
-        seqinfo_path = os.path.join(input_path, file_name, "seqinfo.ini")
 
-        # search framerate on seqinfo
+        file_name = os.path.split(input_path)[1]
+
+        seqinfo_path = os.path.join(input_path, "seqinfo.ini")
+
+        # search framerate on seqinfo.ini
         fps = lib_metrics.search_value_on_document(seqinfo_path, "frameRate")
 
         # Search resolution in seqinfo.ini
         h_resolution = lib_metrics.search_value_on_document(seqinfo_path, "imWidth")
         v_resolution = lib_metrics.search_value_on_document(seqinfo_path, "imHeight")
         image_size = (h_resolution, v_resolution)
+
+        # search total frames in seqinfo.ini
+        self.length = lib_metrics.search_value_on_document(seqinfo_path, "seqLength")
 
         videos_folder = os.path.join(save_path, "videos")
         if not os.path.exists(videos_folder):
@@ -237,38 +239,20 @@ class video_from_frames:
         self.frame_number = 1
         self.video = cv2.VideoWriter(video_path, fourcc, fps, image_size)  # video file
 
-    def update_video(self, detections=None, predictions=None):
-        frame_location = os.path.join(
+    def get_frame(self):
+        frame_path = os.path.join(
             self.input_path,
-            self.file_name,
             "img1",
             str(self.frame_number).zfill(6) + ".jpg",
         )
-        write_video(
-            self.video,
-            frame_path=frame_location,
-            detections=detections,
-            tracked_objects=predictions,
-        )
-        self.frame_number += 1
-        return
 
-    def close_video(self):
+        self.frame_number += 1
+        return cv2.imread(frame_path)
+
+    def update(self, frame):
+        self.video.write(frame)
+        cv2.waitKey(1)
+
+        if self.frame_number > self.length:
         cv2.destroyAllWindows()
         self.video.release()
-
-
-def write_video(output_video, frame_path, detections=None, tracked_objects=None):
-    frame = cv2.imread(frame_path)
-    frame = drawing.draw_boxes(frame, detections, line_color=None, line_width=None)
-    frame = drawing.draw_tracked_boxes(
-        frame,
-        tracked_objects,
-        line_color=None,
-        line_width=None,
-        id_size=None,
-        id_thickness=None,
-        draw_box=True,
-    )
-    output_video.write(frame)
-    cv2.waitKey(1)
