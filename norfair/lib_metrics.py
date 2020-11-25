@@ -4,7 +4,6 @@ import sys
 import numpy as np
 import random
 import cv2
-import argparse
 from rich import print
 from .utils import validate_points
 from rich.progress import BarColumn, Progress, TimeRemainingColumn, track
@@ -56,8 +55,8 @@ def write_predictions(frame_number, objects=None, out_file=None):
         out_file.write("\n")
 
 
-def Process_text_file(path):
-    # this function process detections and ground truth files, so the can be used by norfair
+def process_text_file(path):
+    """this function process detections and ground truth file, ordering them by frame, and making the box coordinates references to the corners positions"""
     matrix = np.loadtxt(path, dtype="f", delimiter=",")
     row_order = np.argsort(matrix[:, 0])
     matrix = matrix[row_order]
@@ -67,63 +66,18 @@ def Process_text_file(path):
     return matrix
 
 
-def get_arguments():
-    parser = argparse.ArgumentParser(
-        description="Make position predictions based on detections txt file."
-    )
-    parser.add_argument(
-        "files",
-        type=str,
-        nargs="+",
-        help="input_path save_path videos_to_proccess (optional flag make_video)",
-    )
-    arguments = parser.parse_args().files
-
-    make_video = "make_video" in arguments
-    if make_video:
-        arguments.remove("make_video")
-
-    show_metrics = "show_metrics" in arguments
-    if show_metrics:
-        arguments.remove("show_metrics")
-
-    save_pred = "save_pred" in arguments
-    if save_pred:
-        arguments.remove("save_pred")
-
-    # detections location
-    input_path = arguments[0]  # "/home/aguscas/MOT17/MOT17/train/"
-    # location to save predictions
-    save_path = arguments[1]  # "/home/aguscas/preds/"
-
-    all_videos = "all_videos" in arguments
-    if all_videos:
-        arguments.remove("all_videos")
-        videos = [f for f in sorted(os.listdir(input_path))]
-        videos = [
-            f for f in videos if f[:3] == "MOT"
-        ]  # removes every other folder that may not be a valid file
-        exceptions = arguments[2:]
-        videos = [
-            f for f in videos if f not in exceptions
-        ]  # remove the specified exceptions (files that )
-    else:
-        videos = arguments[2:]
-
-    return videos, input_path, save_path, make_video, show_metrics, save_pred
-
-
-class text_file:
-    def __init__(self, input_path=None, save_path=".", file_name=None):
+class TextFile:
+    def __init__(self, input_path=None, save_path="."):
 
         if input_path is None:
             raise ValueError(
                 "You must set 'input_path' argument when setting 'text_file' class"
             )
-        if file_name is None:
-            raise ValueError(
-                "You must set 'file_name' argument when setting 'text_file' class"
-            )
+
+        file_name = os.path.split(input_path)[1]
+
+        seqinfo_path = os.path.join(input_path, "seqinfo.ini")
+        self.length = search_value_on_document(seqinfo_path, "seqLength")
 
         predictions_folder = os.path.join(save_path, "predictions")
         if not os.path.exists(predictions_folder):
@@ -140,27 +94,34 @@ class text_file:
         )
         self.frame_number += 1
 
-    def close_file(self):
+        if self.frame_number > self.length:
         self.text_file.close()
 
 
-class Det_from_file:
-    def __init__(self, input_path=None, file_name=None):
-        # get detecions matrix data with rows corresponding to:
-        # frame, id, bb_left, bb_top, bb_right, bb_down, conf, x, y, z
+class DetFromFile:
+    """From txt files with the detections, get norfair detections"""
+
+    def __init__(self, input_path=None):
+        """get detecions matrix data with rows corresponding to:
+        frame, id, bb_left, bb_top, bb_right, bb_down, conf, x, y, z"""
         if input_path is None:
             raise ValueError(
                 "You must set 'input_path' argument when setting 'Det_from_file' class"
             )
-        if file_name is None:
-            raise ValueError(
-                "You must set 'file_name' argument when setting 'Det_from_file' class"
-            )
-        detections_path = os.path.join(input_path, file_name, "det/det.txt")
-        self.matrix_detections = Process_text_file(path=detections_path)
+        detections_path = os.path.join(input_path, "det/det.txt")
+        self.matrix_detections = process_text_file(path=detections_path)
+
+        seqinfo_path = os.path.join(input_path, "seqinfo.ini")
+        length = search_value_on_document(seqinfo_path, "seqLength")
+
+        self.ordered_by_frame = []
+
+        for frame_number in np.arange(1, length + 1):
+            dets_on_this_frame = self.get_dets_from_frame(frame_number)
+            self.ordered_by_frame.append(dets_on_this_frame)
 
     def get_dets_from_frame(self, frame_number=None):
-        # this function returns a list of norfair Detections class, corresponding to frame=frame_number
+        """ this function returns a list of norfair Detections class, corresponding to frame=frame_number """
 
         if frame_number is None:
             raise ValueError(
@@ -172,10 +133,10 @@ class Det_from_file:
         if len(indexes) > 0:
             actual_det = self.matrix_detections[indexes]
             actual_det.shape = [actual_det.shape[0], actual_det.shape[2]]
-            for j in range(len(indexes)):
-                points = [actual_det[j, [2, 3]], actual_det[j, [4, 5]]]
+            for det in actual_det:
+                points = [[det[2], det[3]], [det[4], det[5]]]
                 points = np.array(points)
-                conf = actual_det[j, 6]
+                conf = det[6]
                 new_detection = Detection(
                     points, np.array([1, 1])
                 )  # set to [1,1] or [conf,conf]
@@ -184,32 +145,36 @@ class Det_from_file:
         return detections
 
 
-class accumulators:
-    def __init__(self, input_path=None):
+class Accumulators:
+    def __init__(self):
+        self.matrixes_predictions = []
+        self.paths = []
+
+    def create_acc(self, input_path=None):
+        if not hasattr(self, 'matrixes_predictions'):
+            self.matrixes_predictions=[]
+        if not hasattr(self, 'paths'):
+            self.paths=[]
+
+
         if input_path is None:
             raise ValueError(
-                "You must set 'input_path' argument when setting 'accumulator' class"
+                "You must set 'input_path' argument when creating new accumulator"
             )
-        self.input_path = input_path
-        self.matrixes_predictions = []
-        self.names = []
 
-    def create_acc(self, file_name=None):
-        if file_name is None:
-            raise ValueError(
-                "You must set 'file_name' argument when creating new accumulator"
-            )
+        file_name = os.path.split(input_path)[1]
+
         self.frame_number = 1
-        # save the name of this video in a list
-        self.names = np.hstack((self.names, file_name))
+        # save the path of this video in a list
+        self.paths = np.hstack((self.paths, input_path))
         # initialize a matrix where we will save our predictions for this video (in the MOTChallenge format)
         self.matrix_predictions = []
 
         # initialize progress bar
-        seqinfo_path = os.path.join(self.input_path, file_name, "seqinfo.ini")
-        total_frames = search_value_on_document(seqinfo_path, "seqLength")
+        seqinfo_path = os.path.join(input_path, "seqinfo.ini")
+        length = search_value_on_document(seqinfo_path, "seqLength")
         self.progress_bar_iter = track(
-            range(total_frames - 1), description=file_name, transient=False
+            range(length - 1), description=file_name, transient=False
         )
 
     def update(self, predictions=None):
@@ -236,29 +201,27 @@ class accumulators:
         try:
             next(self.progress_bar_iter)
         except StopIteration:
+            self.matrixes_predictions.append(self.matrix_predictions)
             return
-
-    def end_acc(self):
-        # append the accumulator of this video with the others accumulators
-        self.matrixes_predictions.append(self.matrix_predictions)
 
     def compute_metrics(
         self,
-        save_path=".",
         metrics=None,
         generate_overall=True,
-        file_name="metrics.txt",
     ):
         if metrics == None:
             metrics = list(mm.metrics.motchallenge_metrics)
 
         self.summary = eval_motChallenge(
             matrixes_predictions=self.matrixes_predictions,
-            input_path=self.input_path,
-            filenames=self.names,
+            paths=self.paths,
             metrics=metrics,
             generate_overall=generate_overall,
         )
+
+        return self.summary
+
+    def save_metrics(self, save_path=".", file_name="metrics.txt"):
 
         # create file to save metrics
         if not os.path.exists(save_path):
@@ -267,14 +230,13 @@ class accumulators:
         metrics_file = open(metrics_path, "w+")
         metrics_file.write(self.summary)
         metrics_file.close()
-        return self.summary
 
     def print_metrics(self):
         print(self.summary)
 
 
 def load_motchallenge(matrix_data, min_confidence=-1):
-    r"""Load MOT challenge data.
+    """Load MOT challenge data.
 
     Params
     ------
@@ -335,27 +297,25 @@ def compare_dataframes(gts, ts):
     return accs, names
 
 
-def eval_motChallenge(
-    matrixes_predictions, input_path, filenames, metrics=None, generate_overall=True
-):
-
+def eval_motChallenge(matrixes_predictions, paths, metrics=None, generate_overall=True):
     gt = OrderedDict(
         [
             (
-                f,
+                os.path.split(p)[1],
                 mm.io.loadtxt(
-                    os.path.join(input_path, f, "gt/gt.txt"),
+                    os.path.join(p, "gt/gt.txt"),
                     fmt="mot15-2D",
                     min_confidence=1,
                 ),
             )
-            for f in filenames
+            for p in paths
         ]
     )
+
     ts = OrderedDict(
         [
-            (filenames[n], load_motchallenge(matrixes_predictions[n]))
-            for n in range(len(filenames))
+            (os.path.split(paths[n])[1], load_motchallenge(matrixes_predictions[n]))
+            for n in range(len(paths))
         ]
     )
 
