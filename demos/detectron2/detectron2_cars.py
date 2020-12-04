@@ -18,7 +18,7 @@ def ceintroid_distance(detection, tracked_object):
 
 
 # Norfair
-video = Video(input_path="~/video.mp4")
+video = Video(input_path="./video.mp4")
 tracker = Tracker(distance_function=ceintroid_distance, distance_threshold=20)
 
 for frame in video:
