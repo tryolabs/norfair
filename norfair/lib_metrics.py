@@ -95,7 +95,7 @@ class TextFile:
         self.frame_number += 1
 
         if self.frame_number > self.length:
-        self.text_file.close()
+            self.text_file.close()
 
 
 class DetFromFile:

@@ -5,7 +5,7 @@ from .utils import validate_points
 
 
 def draw_points(
-    frame, detections, radius=None, thickness=None, color=None, random_color=False
+    frame, detections, radius=None, thickness=None, color=None,
 ):
     if detections is None:
         return
@@ -17,8 +17,6 @@ def draw_points(
     if color is None:
         color = Color.red
     for d in detections:
-        if random_color:
-            color = Color.random(random.randint(0, 20))
         points = d.points
         points = validate_points(points)
         for point in points:
@@ -248,7 +246,7 @@ def draw_tracked_boxes(
                 tuple(id_draw_position),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 id_size,
-                id_color,
+                line_color,
                 id_thickness,
                 cv2.LINE_AA,
             )
@@ -279,6 +277,6 @@ class Color:
             c
             for c in Color.__dict__.keys()
             if c[:2] != "__"
-            and c not in ("random", "red", "white", "grey", "black", "silver", "rand")
+            and c not in ("random", "red", "white", "grey", "black", "silver")
         ]
         return getattr(Color, color_list[obj_id % len(color_list)])

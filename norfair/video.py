@@ -4,7 +4,7 @@ import time
 import cv2
 from rich import print
 from rich.progress import BarColumn, Progress, TimeRemainingColumn
-from norfair import lib_metrics, drawing
+from norfair import lib_metrics
 
 
 class Video:
@@ -254,5 +254,5 @@ class VideoFromFrames:
         cv2.waitKey(1)
 
         if self.frame_number > self.length:
-        cv2.destroyAllWindows()
-        self.video.release()
+            cv2.destroyAllWindows()
+            self.video.release()
