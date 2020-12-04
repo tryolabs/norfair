@@ -189,7 +189,6 @@ class TrackedObject:
         self.last_distance = None
         self.current_min_distance = None
         self.last_detection = initial_detection
-        self.first_detection = initial_detection
         self.age = 0
         self.is_initializing_flag = True
         self.id = None
