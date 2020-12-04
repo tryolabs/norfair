@@ -9,10 +9,10 @@ frame_skip_period = 1
 detection_threshold = 0.01
 distance_threshold = 0.4
 
-    parser = argparse.ArgumentParser(
+parser = argparse.ArgumentParser(
     description="Generate trackers and compare them with groundtruth data"
-    )
-    parser.add_argument(
+)
+parser.add_argument(
     "--make_video", action="store_true", help="To generate an output video"
 )
 parser.add_argument(
@@ -113,13 +113,13 @@ for testing_video in videos:
 
     for frame_number, detections in enumerate(all_detections):
         if frame_number % frame_skip_period == 0:
-                tracked_objects = tracker.update(
-                    detections=detections, period=frame_skip_period
-                )
-            else:
-                tracked_objects = tracker.update()
+            tracked_objects = tracker.update(
+                detections=detections, period=frame_skip_period
+            )
+        else:
+            tracked_objects = tracker.update()
 
-            # save new frame on output video file
+        # save new frame on output video file
         if make_video:
             frame = Video_file.get_frame()
             frame = drawing.draw_boxes(frame, detections=detections)
@@ -133,7 +133,7 @@ for testing_video in videos:
         Accumulator.update(predictions=tracked_objects)
 
 Accumulator.compute_metrics()
-    Accumulator.print_metrics()
+Accumulator.print_metrics()
 
 if save_metrics:
     Accumulator.save_metrics(save_path=save_path)
