@@ -13,22 +13,27 @@ import motmetrics as mm
 from collections import OrderedDict
 import pandas as pd
 
+class InformationFile:
+    def __init__(self, file_path):
+        with open(file_path, "r") as myfile:
+            self.file = myfile.read()
 
-def search_value_on_document(file_path, value_name):
-    with open(file_path, "r") as myfile:
-        seqinfo = myfile.read()
-    position = seqinfo.find(value_name)
-    position = position + len(value_name)
-    while not seqinfo[position].isdigit():
-        position += 1
-    value_str = ""
-    while seqinfo[position].isdigit():
-        value_str = value_str + seqinfo[position]
-        position += 1
-    return int(value_str)
+    def search(self, variable_name):
+        index_position_on_this_document = self.file.find(variable_name)
+        index_position_on_this_document = index_position_on_this_document + len(variable_name)
+        while not self.file[index_position_on_this_document].isdigit():
+            index_position_on_this_document += 1
+        value_string = ""
+        while self.file[index_position_on_this_document].isdigit():
+            value_string = value_string + self.file[index_position_on_this_document]
+            index_position_on_this_document += 1
+        return int(value_string)
 
-
-def write_predictions(frame_number, objects=None, out_file=None):
+def write_predictions(frame_number, objects=None, output_text_file=None):
+    '''
+    Write tracked object information on the output file (for this frame), in the format
+    frame_number, id, bb_left, bb_top, bb_width, bb_height, -1, -1, -1, -1
+    '''
     # write tracked objects information in the output file
     for t in range(len(objects)):
         frame_str = str(int(frame_number))
@@ -51,33 +56,33 @@ def write_predictions(frame_number, objects=None, out_file=None):
             + bb_height_str
             + ",-1,-1,-1,-1"
         )
-        out_file.write(row_text_out)
-        out_file.write("\n")
+        output_text_file.write(row_text_out)
+        output_text_file.write("\n")
 
 
-def process_text_file(path):
-    """this function process detections and ground truth file, ordering them by frame, and making the box coordinates references to the corners positions"""
-    matrix = np.loadtxt(path, dtype="f", delimiter=",")
-    row_order = np.argsort(matrix[:, 0])
-    matrix = matrix[row_order]
+def process_text_file(text_file_path):
+    """
+    This function proccess detections and ground truth text files, ordering the data by frame, and making the box coordinates reference to corners positions.
+    """
+    matrix_data = np.loadtxt(text_file_path, dtype="f", delimiter=",")
+    row_order = np.argsort(matrix_data[:, 0])
+    matrix_data = matrix_data[row_order]
     # coordinates refer to box corners
-    matrix[:, 4] = matrix[:, 2] + matrix[:, 4]
-    matrix[:, 5] = matrix[:, 3] + matrix[:, 5]
-    return matrix
+    matrix_data[:, 4] = matrix_data[:, 2] + matrix_data[:, 4]
+    matrix_data[:, 5] = matrix_data[:, 3] + matrix_data[:, 5]
+    return matrix_data
 
 
-class TextFile:
-    def __init__(self, input_path=None, save_path="."):
-
-        if input_path is None:
-            raise ValueError(
-                "You must set 'input_path' argument when setting 'text_file' class"
-            )
+class PredictionsTextFile:
+    def __init__(self, input_path, save_path=".", information_file=None):
 
         file_name = os.path.split(input_path)[1]
 
-        seqinfo_path = os.path.join(input_path, "seqinfo.ini")
-        self.length = search_value_on_document(seqinfo_path, "seqLength")
+        if information_file is None:
+            seqinfo_path = os.path.join(input_path, "seqinfo.ini")
+            information_file = InformationFile(file_path = seqinfo_path)
+
+        self.length = information_file.search(variable_name = "seqLength")
 
         predictions_folder = os.path.join(save_path, "predictions")
         if not os.path.exists(predictions_folder):
@@ -90,77 +95,59 @@ class TextFile:
 
     def update_text_file(self, predictions):
         write_predictions(
-            frame_number=self.frame_number, objects=predictions, out_file=self.text_file
+            frame_number=self.frame_number, objects=predictions, output_text_file=self.text_file
         )
         self.frame_number += 1
 
         if self.frame_number > self.length:
             self.text_file.close()
 
+def get_detections(input_path, information_file=None):
+    class DetectionFileParser:
+        """Get Norfair detections from MOTChallenge text files containing detections"""
+        def __init__(self, input_path, information_file=None):
+            #Get detecions matrix data with rows corresponding to:
+            # frame, id, bb_left, bb_top, bb_right, bb_down, conf, x, y, z
+            detections_path = os.path.join(input_path, "det/det.txt")
+            self.matrix_detections = process_text_file(text_file_path=detections_path)
 
-class DetFromFile:
-    """From txt files with the detections, get norfair detections"""
+            if information_file is None:
+                seqinfo_path = os.path.join(input_path, "seqinfo.ini")
+                information_file = InformationFile(file_path = seqinfo_path)
+            length = information_file.search(variable_name = "seqLength")
 
-    def __init__(self, input_path=None):
-        """get detecions matrix data with rows corresponding to:
-        frame, id, bb_left, bb_top, bb_right, bb_down, conf, x, y, z"""
-        if input_path is None:
-            raise ValueError(
-                "You must set 'input_path' argument when setting 'Det_from_file' class"
-            )
-        detections_path = os.path.join(input_path, "det/det.txt")
-        self.matrix_detections = process_text_file(path=detections_path)
+            self.ordered_by_frame = []
 
-        seqinfo_path = os.path.join(input_path, "seqinfo.ini")
-        length = search_value_on_document(seqinfo_path, "seqLength")
+            for frame_number in np.arange(1, length + 1):
+                dets_on_this_frame = self.get_dets_from_frame(frame_number)
+                self.ordered_by_frame.append(dets_on_this_frame)
 
-        self.ordered_by_frame = []
+        def get_dets_from_frame(self, frame_number):
+            """ this function returns a list of norfair Detections class, corresponding to frame=frame_number """
 
-        for frame_number in np.arange(1, length + 1):
-            dets_on_this_frame = self.get_dets_from_frame(frame_number)
-            self.ordered_by_frame.append(dets_on_this_frame)
+            indexes = np.argwhere(self.matrix_detections[:, 0] == frame_number)
+            detections = []
+            if len(indexes) > 0:
+                actual_det = self.matrix_detections[indexes]
+                actual_det.shape = [actual_det.shape[0], actual_det.shape[2]]
+                for det in actual_det:
+                    points = np.array([[det[2], det[3]], [det[4], det[5]]])
+                    conf = det[6]
+                    new_detection = Detection(
+                        points, np.array([conf, conf])
+                    ) 
+                    detections.append(new_detection)
+            self.actual_detections = detections
+            return detections
 
-    def get_dets_from_frame(self, frame_number=None):
-        """ this function returns a list of norfair Detections class, corresponding to frame=frame_number """
-
-        if frame_number is None:
-            raise ValueError(
-                "You must set 'frame_number' argument when calling get_dets_from_frame()"
-            )
-
-        indexes = np.argwhere(self.matrix_detections[:, 0] == frame_number)
-        detections = []
-        if len(indexes) > 0:
-            actual_det = self.matrix_detections[indexes]
-            actual_det.shape = [actual_det.shape[0], actual_det.shape[2]]
-            for det in actual_det:
-                points = [[det[2], det[3]], [det[4], det[5]]]
-                points = np.array(points)
-                conf = det[6]
-                new_detection = Detection(
-                    points, np.array([1, 1])
-                )  # set to [1,1] or [conf,conf]
-                detections.append(new_detection)
-        self.actual_detections = detections
-        return detections
-
+    return DetectionFileParser(input_path=input_path, information_file=information_file).ordered_by_frame
 
 class Accumulators:
     def __init__(self):
         self.matrixes_predictions = []
         self.paths = []
 
-    def create_acc(self, input_path=None):
-        if not hasattr(self, 'matrixes_predictions'):
-            self.matrixes_predictions=[]
-        if not hasattr(self, 'paths'):
-            self.paths=[]
-
-
-        if input_path is None:
-            raise ValueError(
-                "You must set 'input_path' argument when creating new accumulator"
-            )
+    def create_accumulator(self, input_path, information_file=None):
 
         file_name = os.path.split(input_path)[1]
 
@@ -171,8 +158,10 @@ class Accumulators:
         self.matrix_predictions = []
 
         # initialize progress bar
-        seqinfo_path = os.path.join(input_path, "seqinfo.ini")
-        length = search_value_on_document(seqinfo_path, "seqLength")
+        if information_file is None:
+            seqinfo_path = os.path.join(input_path, "seqinfo.ini")
+            information_file = InformationFile(file_path = seqinfo_path)
+        length = information_file.search(variable_name = "seqLength")
         self.progress_bar_iter = track(
             range(length - 1), description=file_name, transient=False
         )
@@ -209,7 +198,7 @@ class Accumulators:
         metrics=None,
         generate_overall=True,
     ):
-        if metrics == None:
+        if metrics is None:
             metrics = list(mm.metrics.motchallenge_metrics)
 
         self.summary = eval_motChallenge(
@@ -223,7 +212,6 @@ class Accumulators:
 
     def save_metrics(self, save_path=".", file_name="metrics.txt"):
 
-        # create file to save metrics
         if not os.path.exists(save_path):
             os.makedirs(save_folder)
         metrics_path = os.path.join(save_path, file_name)
@@ -237,6 +225,9 @@ class Accumulators:
 
 def load_motchallenge(matrix_data, min_confidence=-1):
     """Load MOT challenge data.
+
+    This is modification of the function load_motchallenge from the MOT library, defined in io.py
+    The panda dataframe is generated from a numpy array (matrix_data) instead of a text file.
 
     Params
     ------

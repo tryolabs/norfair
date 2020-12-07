@@ -4,7 +4,7 @@ import time
 import cv2
 from rich import print
 from rich.progress import BarColumn, Progress, TimeRemainingColumn
-from norfair import lib_metrics
+from norfair import metrics
 
 
 class Video:
@@ -203,27 +203,23 @@ class Video:
 
 
 class VideoFromFrames:
-    def __init__(self, input_path=None, save_path="."):
+    def __init__(self, input_path, save_path=".", information_file = None):
 
-        if input_path is None:
-            raise ValueError(
-                "You must set 'input_path' argument when setting 'video_output' class"
-            )
+        if information_file is None:
+            information_file = metrics.InformationFile(file_path = os.path.join(input_path, "seqinfo.ini"))
 
         file_name = os.path.split(input_path)[1]
 
-        seqinfo_path = os.path.join(input_path, "seqinfo.ini")
-
         # search framerate on seqinfo.ini
-        fps = lib_metrics.search_value_on_document(seqinfo_path, "frameRate")
+        fps = information_file.search(variable_name = "frameRate")
 
         # Search resolution in seqinfo.ini
-        h_resolution = lib_metrics.search_value_on_document(seqinfo_path, "imWidth")
-        v_resolution = lib_metrics.search_value_on_document(seqinfo_path, "imHeight")
-        image_size = (h_resolution, v_resolution)
+        horizontal_resolution = information_file.search(variable_name = "imWidth") 
+        vertical_resolution = information_file.search(variable_name = "imHeight")
+        image_size = (horizontal_resolution, vertical_resolution)
 
         # search total frames in seqinfo.ini
-        self.length = lib_metrics.search_value_on_document(seqinfo_path, "seqLength")
+        self.length = information_file.search(variable_name = "seqLength") 
 
         videos_folder = os.path.join(save_path, "videos")
         if not os.path.exists(videos_folder):
