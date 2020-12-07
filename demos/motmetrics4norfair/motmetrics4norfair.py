@@ -2,7 +2,7 @@ import sys
 import os.path
 import numpy as np
 import norfair
-from norfair import Detection, Tracker, lib_metrics, video, drawing
+from norfair import Detection, Tracker, metrics, video, drawing
 import argparse
 
 frame_skip_period = 1
@@ -10,52 +10,51 @@ detection_threshold = 0.01
 distance_threshold = 0.4
 
 parser = argparse.ArgumentParser(
-    description="Generate trackers and compare them with groundtruth data"
+    description="""
+Evaluate a basic tracker on MOTChallenge data.
+Display on terminal the MOTChallenge metrics results 
+""", 
+    #formatter_class=argparse.RawTextHelpFormatter
 )
 parser.add_argument(
-    "--make_video", action="store_true", help="To generate an output video"
+    "--make_video", action="store_true", help="""Generate an output video. 
+    You need to have the following folder containing each frame of this video
+    <file_to_proccess>/img1/"""
 )
 parser.add_argument(
     "--save_pred",
     action="store_true",
-    help="To generate a txt file with your predictions",
+    help="Generate a txt file with your predictions",
 )
 parser.add_argument(
     "--save_metrics",
     action="store_true",
-    help="To generate a txt file with your metrics",
+    help="Generate a txt file with your MOTChallenge metrics results",
 )
 parser.add_argument(
-        "files",
+        "video_files",
         type=str,
         nargs="+",
-    help="files_to_process and optionally the output_path if any kind of output file (optional arguments) is specified",
-    )
+    help="""
+        Path to files you want to proccess.
+
+        Be sure that for each path, you have the files:
+        <path>/det/det.txt and 
+        <path>/gt/gt.txt, containing your detections and ground truth data respectively""")
+
 args = parser.parse_args()
 
-make_video = args.make_video
-save_pred = args.save_pred
-save_metrics = args.save_metrics
+output_path = "."
 
-if make_video or save_pred or save_metrics:
-    save_path = args.files[-1]
-    if not os.path.isdir(save_path):
-        raise ValueError(
-            "You must specify 'save_path' directory if you want to get an output file"
-        )
-    args.files.remove(save_path)
+accumulator = metrics.Accumulators()
 
-videos = args.files
-
-Accumulator = lib_metrics.Accumulators()
-
-# proccess every video
-for testing_video in videos:
+for testing_video in args.video_files:
     input_path = os.path.dirname(testing_video)
 
     # Search vertical resolution in seqinfo.ini
     seqinfo_path = os.path.join(input_path, "seqinfo.ini")
-    v_resolution = lib_metrics.search_value_on_document(seqinfo_path, "imHeight")
+    info_file = metrics.InformationFile(file_path = seqinfo_path)
+    vertical_resolution = info_file.search(variable_name = "imHeight")
 
     def keypoints_distance(detected_pose, tracked_pose):
         ps = [1, 2, np.inf]
@@ -67,7 +66,7 @@ for testing_video in videos:
         ver_min_pt = min(detected_pose.points[:, 1])
         ver_max_pt = max(detected_pose.points[:, 1])
 
-        # set keypoint_dist_threshold based on object size, and calculate
+        # Set keypoint_dist_threshold based on object size, and calculate
         # distance between detections and tracker estimations
         for p in ps:
             distances += np.linalg.norm(
@@ -80,8 +79,8 @@ for testing_video in videos:
         distances = distances / len(ps)
 
         keypoint_dist_threshold = (
-            v_resolution * (diagonal < v_resolution / 3) / 67
-            + diagonal * (diagonal >= v_resolution / 3) / 17
+            vertical_resolution * (diagonal < vertical_resolution / 3) / 67
+            + diagonal * (diagonal >= vertical_resolution / 3) / 17
         )
 
         match_num = np.count_nonzero(
@@ -91,16 +90,14 @@ for testing_video in videos:
         )
         return 1 / (1 + match_num)
 
-    all_detections = lib_metrics.DetFromFile(input_path=input_path).ordered_by_frame
+    all_detections = metrics.get_detections(input_path=input_path, information_file = info_file)
 
-    # inirialize output text file
-    if save_pred:
-        Text_file = lib_metrics.TextFile(input_path=input_path, save_path=save_path)
+    if args.save_pred:
+        predictions_text_file = metrics.PredictionsTextFile(input_path=input_path, save_path=output_path, information_file = info_file)
 
-    if make_video:  # initialize video()
-        Video_file = video.VideoFromFrames(input_path=input_path, save_path=save_path)
+    if args.make_video: 
+        video_file = video.VideoFromFrames(input_path=input_path, save_path=output_path, information_file = info_file)
 
-    # initialize tracker
     tracker = Tracker(
         distance_function=keypoints_distance,
         distance_threshold=distance_threshold,
@@ -109,7 +106,7 @@ for testing_video in videos:
     )
 
     # initialize accumulator for this video
-    Accumulator.create_acc(input_path=input_path)
+    accumulator.create_accumulator(input_path=input_path, information_file = info_file)
 
     for frame_number, detections in enumerate(all_detections):
         if frame_number % frame_skip_period == 0:
@@ -120,20 +117,20 @@ for testing_video in videos:
             tracked_objects = tracker.update()
 
         # save new frame on output video file
-        if make_video:
-            frame = Video_file.get_frame()
+        if args.make_video:
+            frame = video_file.get_frame()
             frame = drawing.draw_boxes(frame, detections=detections)
             frame = drawing.draw_tracked_boxes(frame=frame, objects=tracked_objects)
-            Video_file.update(frame=frame)
+            video_file.update(frame=frame)
 
         # update output text file
-        if save_pred:
-            Text_file.update_text_file(predictions=tracked_objects)
+        if args.save_pred:
+            predictions_text_file.update_text_file(predictions=tracked_objects)
 
-        Accumulator.update(predictions=tracked_objects)
+        accumulator.update(predictions=tracked_objects)
 
-Accumulator.compute_metrics()
-Accumulator.print_metrics()
+accumulator.compute_metrics()
+accumulator.print_metrics()
 
-if save_metrics:
-    Accumulator.save_metrics(save_path=save_path)
+if args.save_metrics:
+    accumulator.save_metrics(save_path=output_path)
