@@ -68,7 +68,6 @@ else:
 accumulator = metrics.Accumulators()
 
 for input_path in sequences_paths:
-
     # Search vertical resolution in seqinfo.ini
     seqinfo_path = os.path.join(input_path, "seqinfo.ini")
     info_file = metrics.InformationFile(file_path=seqinfo_path)
@@ -142,7 +141,7 @@ for input_path in sequences_paths:
 
         # Save new frame on output video file
         if args.make_video:
-            frame = video_file.get_frame()
+            frame = next(video_file)
             frame = drawing.draw_boxes(frame, detections=detections)
             frame = drawing.draw_tracked_boxes(frame=frame, objects=tracked_objects)
             video_file.update(frame=frame)

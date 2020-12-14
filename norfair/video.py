@@ -235,17 +235,20 @@ class VideoFromFrames:
         self.frame_number = 1
         self.video = cv2.VideoWriter(video_path, fourcc, fps, image_size)  # Video file
 
-    def get_frame(self, frame_number=None):
-        if frame_number is None:
-            frame_number = self.frame_number
+    def __iter__(self):
+        self.frame_number = 1
+
+    def __next__(self):
+        if self.frame_number <= self.length:
         frame_path = os.path.join(
             self.input_path,
             "img1",
             str(self.frame_number).zfill(6) + ".jpg",
         )
+            self.frame_number += 1
 
-        self.frame_number += 1
         return cv2.imread(frame_path)
+        raise StopIteration()
 
     def update(self, frame):
         self.video.write(frame)
