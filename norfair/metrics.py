@@ -144,7 +144,7 @@ class PredictionsTextFile:
     def __next__(self):
         if self.frame_number <= self.length:
             self.frame_number += 1
-            # frame_number is always 1 unit bigger than the corresponding index in self.sorted_by_frame, and
+            # Frame_number is always 1 unit bigger than the corresponding index in self.sorted_by_frame, and
             # also we just incremented the frame_number, so now is 2 units bigger than the corresponding index
             return self.sorted_by_frame[self.frame_number - 2]
 
