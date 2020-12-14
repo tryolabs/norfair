@@ -1,17 +1,12 @@
 import os
-import time
-import sys
 import numpy as np
-import random
-import cv2
 from rich import print
-from .utils import validate_points
-from rich.progress import BarColumn, Progress, TimeRemainingColumn, track
+from rich.progress import track
 from norfair import Detection
-import norfair
 import motmetrics as mm
 from collections import OrderedDict
 import pandas as pd
+
 
 class InformationFile:
     def __init__(self, file_path):
@@ -20,21 +15,23 @@ class InformationFile:
 
     def search(self, variable_name):
         index_position_on_this_document = self.file.find(variable_name)
-        index_position_on_this_document = index_position_on_this_document + len(variable_name)
+        index_position_on_this_document = index_position_on_this_document + len(
+            variable_name
+        )
         while not self.file[index_position_on_this_document].isdigit():
             index_position_on_this_document += 1
         value_string = ""
         while self.file[index_position_on_this_document].isdigit():
-            value_string = value_string + self.file[index_position_on_this_document]
+            value_string += self.file[index_position_on_this_document]
             index_position_on_this_document += 1
         return int(value_string)
 
+
 def write_predictions(frame_number, objects=None, output_text_file=None):
-    '''
-    Write tracked object information on the output file (for this frame), in the format
+    """
+    Write tracked object information in the output file (for this frame), in the format
     frame_number, id, bb_left, bb_top, bb_width, bb_height, -1, -1, -1, -1
-    '''
-    # write tracked objects information in the output file
+    """
     for t in range(len(objects)):
         frame_str = str(int(frame_number))
         id_str = str(int(objects[t].id))
@@ -60,29 +57,39 @@ def write_predictions(frame_number, objects=None, output_text_file=None):
         output_text_file.write("\n")
 
 
-def process_text_file(text_file_path):
+def create_array_with_detections_from_text_file(text_file_path):
     """
-    This function proccess detections and ground truth text files, ordering the data by frame, and making the box coordinates reference to corners positions.
+    This function receives a text file with detections in the MOTChallenge format.
+    It sorts the detections by frame, and makes the box coordinates refer to box corners
+    positions instead of (x, y, width, height), so that each point in a detection
+    corresponds to a point in a frame, and not to a 'fictional' point such as (width, height).
     """
     matrix_data = np.loadtxt(text_file_path, dtype="f", delimiter=",")
     row_order = np.argsort(matrix_data[:, 0])
     matrix_data = matrix_data[row_order]
-    # coordinates refer to box corners
+    # Coordinates refer to box corners
     matrix_data[:, 4] = matrix_data[:, 2] + matrix_data[:, 4]
     matrix_data[:, 5] = matrix_data[:, 3] + matrix_data[:, 5]
     return matrix_data
 
 
 class PredictionsTextFile:
+    """Generates a text file with your predicted tracked objects, in the MOTChallenge format.
+    It needs the 'input_path', which is the path to the sequence being processed,
+    the 'save_path', and optionally the 'information_file' (in case you don't give an
+    'information_file', is assumed there is one in the input_path folder)
+
+    """
+
     def __init__(self, input_path, save_path=".", information_file=None):
 
         file_name = os.path.split(input_path)[1]
 
         if information_file is None:
             seqinfo_path = os.path.join(input_path, "seqinfo.ini")
-            information_file = InformationFile(file_path = seqinfo_path)
+            information_file = InformationFile(file_path=seqinfo_path)
 
-        self.length = information_file.search(variable_name = "seqLength")
+        self.length = information_file.search(variable_name="seqLength")
 
         predictions_folder = os.path.join(save_path, "predictions")
         if not os.path.exists(predictions_folder):
@@ -93,34 +100,60 @@ class PredictionsTextFile:
 
         self.frame_number = 1
 
-    def update_text_file(self, predictions):
-        write_predictions(
-            frame_number=self.frame_number, objects=predictions, output_text_file=self.text_file
+    def update(self, predictions, frame_number=None):
+        if frame_number is None:
+            frame_number = self.frame_number
+        """
+        Write tracked object information in the output file (for this frame), in the format
+        frame_number, id, bb_left, bb_top, bb_width, bb_height, -1, -1, -1, -1
+        """
+        for obj in predictions:
+            frame_str = str(int(frame_number))
+            id_str = str(int(obj.id))
+            bb_left_str = str((obj.estimate[0, 0]))
+            bb_top_str = str((obj.estimate[0, 1]))  # [0,1]
+            bb_width_str = str((obj.estimate[1, 0] - obj.estimate[0, 0]))
+            bb_height_str = str((obj.estimate[1, 1] - obj.estimate[0, 1]))
+            row_text_out = (
+                frame_str
+                + ","
+                + id_str
+                + ","
+                + bb_left_str
+                + ","
+                + bb_top_str
+                + ","
+                + bb_width_str
+                + ","
+                + bb_height_str
+                + ",-1,-1,-1,-1"
         )
+            self.text_file.write(row_text_out)
+            self.text_file.write("\n")
+
         self.frame_number += 1
 
         if self.frame_number > self.length:
             self.text_file.close()
 
-def get_detections(input_path, information_file=None):
+
     class DetectionFileParser:
         """Get Norfair detections from MOTChallenge text files containing detections"""
+
         def __init__(self, input_path, information_file=None):
-            #Get detecions matrix data with rows corresponding to:
+        self.frame_number = 0
+
+        # Get detecions matrix data with rows corresponding to:
             # frame, id, bb_left, bb_top, bb_right, bb_down, conf, x, y, z
             detections_path = os.path.join(input_path, "det/det.txt")
-            self.matrix_detections = process_text_file(text_file_path=detections_path)
+        self.matrix_detections = create_array_with_detections_from_text_file(
+            text_file_path=detections_path
+        )
 
             if information_file is None:
                 seqinfo_path = os.path.join(input_path, "seqinfo.ini")
-                information_file = InformationFile(file_path = seqinfo_path)
-            length = information_file.search(variable_name = "seqLength")
-
-            self.ordered_by_frame = []
-
-            for frame_number in np.arange(1, length + 1):
-                dets_on_this_frame = self.get_dets_from_frame(frame_number)
-                self.ordered_by_frame.append(dets_on_this_frame)
+            information_file = InformationFile(file_path=seqinfo_path)
+        self.length = information_file.search(variable_name="seqLength")
 
         def get_dets_from_frame(self, frame_number):
             """ this function returns a list of norfair Detections class, corresponding to frame=frame_number """
@@ -133,14 +166,21 @@ def get_detections(input_path, information_file=None):
                 for det in actual_det:
                     points = np.array([[det[2], det[3]], [det[4], det[5]]])
                     conf = det[6]
-                    new_detection = Detection(
-                        points, np.array([conf, conf])
-                    ) 
+                new_detection = Detection(points, np.array([conf, conf]))
                     detections.append(new_detection)
             self.actual_detections = detections
             return detections
 
-    return DetectionFileParser(input_path=input_path, information_file=information_file).ordered_by_frame
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.frame_number < self.length:
+            self.frame_number += 1
+            return self.get_dets_from_frame(self.frame_number)
+
+        raise StopIteration()
+
 
 class Accumulators:
     def __init__(self):
@@ -152,22 +192,22 @@ class Accumulators:
         file_name = os.path.split(input_path)[1]
 
         self.frame_number = 1
-        # save the path of this video in a list
+        # Save the path of this video in a list
         self.paths = np.hstack((self.paths, input_path))
-        # initialize a matrix where we will save our predictions for this video (in the MOTChallenge format)
+        # Initialize a matrix where we will save our predictions for this video (in the MOTChallenge format)
         self.matrix_predictions = []
 
-        # initialize progress bar
+        # Initialize progress bar
         if information_file is None:
             seqinfo_path = os.path.join(input_path, "seqinfo.ini")
-            information_file = InformationFile(file_path = seqinfo_path)
-        length = information_file.search(variable_name = "seqLength")
+            information_file = InformationFile(file_path=seqinfo_path)
+        length = information_file.search(variable_name="seqLength")
         self.progress_bar_iter = track(
             range(length - 1), description=file_name, transient=False
         )
 
     def update(self, predictions=None):
-        # get the tracked boxes from this frame in an array
+        # Get the tracked boxes from this frame in an array
         for obj in predictions:
             new_row = [
                 self.frame_number,
@@ -186,7 +226,7 @@ class Accumulators:
             else:
                 self.matrix_predictions = np.vstack((self.matrix_predictions, new_row))
         self.frame_number += 1
-        # advance in progress bar
+        # Advance in progress bar
         try:
             next(self.progress_bar_iter)
         except StopIteration:
@@ -226,8 +266,8 @@ class Accumulators:
 def load_motchallenge(matrix_data, min_confidence=-1):
     """Load MOT challenge data.
 
-    This is modification of the function load_motchallenge from the MOT library, defined in io.py
-    The panda dataframe is generated from a numpy array (matrix_data) instead of a text file.
+    This is a modification of the function load_motchallenge from the py-motmetrics library, defined in io.py
+    In this version, the pandas dataframe is generated from a numpy array (matrix_data) instead of a text file.
 
     Params
     ------

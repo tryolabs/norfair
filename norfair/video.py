@@ -203,39 +203,41 @@ class Video:
 
 
 class VideoFromFrames:
-    def __init__(self, input_path, save_path=".", information_file = None):
+    def __init__(self, input_path, save_path=".", information_file=None):
 
         if information_file is None:
-            information_file = metrics.InformationFile(file_path = os.path.join(input_path, "seqinfo.ini"))
+            information_file = metrics.InformationFile(
+                file_path=os.path.join(input_path, "seqinfo.ini")
+            )
 
         file_name = os.path.split(input_path)[1]
 
-        # search framerate on seqinfo.ini
-        fps = information_file.search(variable_name = "frameRate")
+        # Search framerate on seqinfo.ini
+        fps = information_file.search(variable_name="frameRate")
 
         # Search resolution in seqinfo.ini
-        horizontal_resolution = information_file.search(variable_name = "imWidth") 
-        vertical_resolution = information_file.search(variable_name = "imHeight")
+        horizontal_resolution = information_file.search(variable_name="imWidth")
+        vertical_resolution = information_file.search(variable_name="imHeight")
         image_size = (horizontal_resolution, vertical_resolution)
 
-        # search total frames in seqinfo.ini
-        self.length = information_file.search(variable_name = "seqLength") 
+        # Search total frames in seqinfo.ini
+        self.length = information_file.search(variable_name="seqLength")
 
         videos_folder = os.path.join(save_path, "videos")
         if not os.path.exists(videos_folder):
             os.makedirs(videos_folder)
 
-        video_path = os.path.join(
-            videos_folder, file_name + ".mp4"
-        )  # save_path + "videos/" + testing_video + ".mp4"  # video file name
+        video_path = os.path.join(videos_folder, file_name + ".mp4")
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")
 
         self.file_name = file_name
         self.input_path = input_path
         self.frame_number = 1
-        self.video = cv2.VideoWriter(video_path, fourcc, fps, image_size)  # video file
+        self.video = cv2.VideoWriter(video_path, fourcc, fps, image_size)  # Video file
 
-    def get_frame(self):
+    def get_frame(self, frame_number=None):
+        if frame_number is None:
+            frame_number = self.frame_number
         frame_path = os.path.join(
             self.input_path,
             "img1",
