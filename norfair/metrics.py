@@ -117,6 +117,10 @@ class PredictionsTextFile:
             information_file = InformationFile(file_path=seqinfo_path)
         self.length = information_file.search(variable_name="seqLength")
 
+        self.sorted_by_frame = []
+        for frame_number in range(1, self.length + 1):
+            self.sorted_by_frame.append(self.get_dets_from_frame(frame_number))
+
         def get_dets_from_frame(self, frame_number):
             """ this function returns a list of norfair Detections class, corresponding to frame=frame_number """
 
@@ -140,7 +144,9 @@ class PredictionsTextFile:
     def __next__(self):
         if self.frame_number <= self.length:
             self.frame_number += 1
-            return self.get_dets_from_frame(self.frame_number - 1)
+            # frame_number is always 1 unit bigger than the corresponding index in self.sorted_by_frame, and
+            # also we just incremented the frame_number, so now is 2 units bigger than the corresponding index
+            return self.sorted_by_frame[self.frame_number - 2]
 
         raise StopIteration()
 
