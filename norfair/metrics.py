@@ -27,52 +27,6 @@ class InformationFile:
         return int(value_string)
 
 
-def write_predictions(frame_number, objects=None, output_text_file=None):
-    """
-    Write tracked object information in the output file (for this frame), in the format
-    frame_number, id, bb_left, bb_top, bb_width, bb_height, -1, -1, -1, -1
-    """
-    for t in range(len(objects)):
-        frame_str = str(int(frame_number))
-        id_str = str(int(objects[t].id))
-        bb_left_str = str((objects[t].estimate[0, 0]))
-        bb_top_str = str((objects[t].estimate[0, 1]))  # [0,1]
-        bb_width_str = str((objects[t].estimate[1, 0] - objects[t].estimate[0, 0]))
-        bb_height_str = str((objects[t].estimate[1, 1] - objects[t].estimate[0, 1]))
-        row_text_out = (
-            frame_str
-            + ","
-            + id_str
-            + ","
-            + bb_left_str
-            + ","
-            + bb_top_str
-            + ","
-            + bb_width_str
-            + ","
-            + bb_height_str
-            + ",-1,-1,-1,-1"
-        )
-        output_text_file.write(row_text_out)
-        output_text_file.write("\n")
-
-
-def create_array_with_detections_from_text_file(text_file_path):
-    """
-    This function receives a text file with detections in the MOTChallenge format.
-    It sorts the detections by frame, and makes the box coordinates refer to box corners
-    positions instead of (x, y, width, height), so that each point in a detection
-    corresponds to a point in a frame, and not to a 'fictional' point such as (width, height).
-    """
-    matrix_data = np.loadtxt(text_file_path, dtype="f", delimiter=",")
-    row_order = np.argsort(matrix_data[:, 0])
-    matrix_data = matrix_data[row_order]
-    # Coordinates refer to box corners
-    matrix_data[:, 4] = matrix_data[:, 2] + matrix_data[:, 4]
-    matrix_data[:, 5] = matrix_data[:, 3] + matrix_data[:, 5]
-    return matrix_data
-
-
 class PredictionsTextFile:
     """Generates a text file with your predicted tracked objects, in the MOTChallenge format.
     It needs the 'input_path', which is the path to the sequence being processed,
@@ -141,13 +95,21 @@ class PredictionsTextFile:
         """Get Norfair detections from MOTChallenge text files containing detections"""
 
         def __init__(self, input_path, information_file=None):
-        self.frame_number = 0
+        self.frame_number = 1
 
         # Get detecions matrix data with rows corresponding to:
             # frame, id, bb_left, bb_top, bb_right, bb_down, conf, x, y, z
             detections_path = os.path.join(input_path, "det/det.txt")
-        self.matrix_detections = create_array_with_detections_from_text_file(
-            text_file_path=detections_path
+
+        self.matrix_detections = np.loadtxt(detections_path, dtype="f", delimiter=",")
+        row_order = np.argsort(self.matrix_detections[:, 0])
+        self.matrix_detections = self.matrix_detections[row_order]
+        # Coordinates refer to box corners
+        self.matrix_detections[:, 4] = (
+            self.matrix_detections[:, 2] + self.matrix_detections[:, 4]
+        )
+        self.matrix_detections[:, 5] = (
+            self.matrix_detections[:, 3] + self.matrix_detections[:, 5]
         )
 
             if information_file is None:
@@ -172,12 +134,13 @@ class PredictionsTextFile:
             return detections
 
     def __iter__(self):
+        self.frame_number = 1
         return self
 
     def __next__(self):
-        if self.frame_number < self.length:
+        if self.frame_number <= self.length:
             self.frame_number += 1
-            return self.get_dets_from_frame(self.frame_number)
+            return self.get_dets_from_frame(self.frame_number - 1)
 
         raise StopIteration()
 
