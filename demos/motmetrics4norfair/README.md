@@ -1,20 +1,24 @@
-# Compute MOTChallenge metricsx
+# Compute MOTChallenge metrics
 
-This program allows you to get your predictions and compute MOTChallenge metrics, using a text document with detections in the MOTChallenge format.
+Generate trackers using a text document with detections in the [MOTChallenge](https://motchallenge.net) format, and compute MOTChallenge metrics comparing your tracked objects with a ground truth text file using [py-motmetrics](https://github.com/cheind/py-motmetrics) library.
 
-You can find MOTchallenge datasets (detections and ground truth files) in https://motchallenge.net
+## Datasets Download
 
-Run the following command to download MOT17 challenge data, including folder with pictures for each video (5.5 GB)
-    curl -O https://motchallenge.net/data/MOT17.zip
+Run one of the following commands to download the [MOT17](https://motchallenge.net) challege:
 
-Alternatively, you can download the same challenge without the corresponding images (9.7 MB)
-    curl -O https://motchallenge.net/data/MOT17Labels.zip
+```bash
+curl -O https://motchallenge.net/data/MOT17.zip # Detections + Ground Truth + Images (5.5GB)
 
-You can download the py-motmetrics running the following command on terminal:
+curl -O https://motchallenge.net/data/MOT17Labels.zip # Detections + Ground Truth (9.7 MB)
+``` 
+
+## Instructions
+
+1. Install py-motmetrics:
+```bash
     pip install motmetrics==1.2.0
-
-The official py-motmetrics repository can be found in:
-https://github.com/cheind/py-motmetrics
-
-Run the following command to display on terminal the motmetrics4norfair help instructions:
+``` 
+2. Display the motmetrics4norfair instructions: 
+```bash
     python motmetrics4norfair.py --help
+``` 

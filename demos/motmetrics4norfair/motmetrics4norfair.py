@@ -1,4 +1,3 @@
-import sys
 import os.path
 import numpy as np
 import norfair
@@ -14,50 +13,69 @@ parser = argparse.ArgumentParser(
 Evaluate a basic tracker on MOTChallenge data.
 Display on terminal the MOTChallenge metrics results 
 """, 
-    #formatter_class=argparse.RawTextHelpFormatter
 )
 parser.add_argument(
-    "--make_video", action="store_true", help="""Generate an output video. 
+    "--make_video",
+    action="store_true",
+    help="""Generate an output video, using the frames provided in the MOTChallenge dataset
     You need to have the following folder containing each frame of this video
-    <file_to_proccess>/img1/"""
+    <file_to_proccess>/img1/""",
 )
 parser.add_argument(
     "--save_pred",
     action="store_true",
-    help="Generate a txt file with your predictions",
+    help="Generate a text file with your predictions",
 )
 parser.add_argument(
     "--save_metrics",
     action="store_true",
-    help="Generate a txt file with your MOTChallenge metrics results",
+    help="Generate a text file with your MOTChallenge metrics results",
 )
 parser.add_argument(
-        "video_files",
+    "--output_path",
         type=str,
-        nargs="+",
+    nargs="?",
+    default=".",
     help="""
-        Path to files you want to proccess.
+Output path
+""",
+)
 
-        Be sure that for each path, you have the files:
-        <path>/det/det.txt and 
-        <path>/gt/gt.txt, containing your detections and ground truth data respectively""")
+parser.add_argument(
+    "dataset_path", type=str, nargs="?", help="""Path to your dataset folder"""
+)
+
+parser.add_argument(
+    "--select_sequences",
+    type=str,
+    nargs="+",
+    help="""
+        If you want to select a subset of folders in your dataset path. Insert the names of the folders you want to process.
+        """,
+)
 
 args = parser.parse_args()
 
-output_path = "."
+output_path = args.output_path
+
+if args.select_sequences is None:
+    sequences_paths = [f.path for f in os.scandir(args.dataset_path) if f.is_dir()]
+else:
+    sequences_paths = [
+        os.path.join(args.dataset_path, f) for f in args.select_sequences
+    ]
 
 accumulator = metrics.Accumulators()
 
-for testing_video in args.video_files:
-    input_path = os.path.dirname(testing_video)
+for input_path in sequences_paths:
 
     # Search vertical resolution in seqinfo.ini
     seqinfo_path = os.path.join(input_path, "seqinfo.ini")
-    info_file = metrics.InformationFile(file_path = seqinfo_path)
-    vertical_resolution = info_file.search(variable_name = "imHeight")
+    info_file = metrics.InformationFile(file_path=seqinfo_path)
+    vertical_resolution = info_file.search(variable_name="imHeight")
 
     def keypoints_distance(detected_pose, tracked_pose):
-        ps = [1, 2, np.inf]
+        norm_orders = [1, 2, np.inf]
         distances = 0
         diagonal = 0
 
@@ -68,7 +86,7 @@ for testing_video in args.video_files:
 
         # Set keypoint_dist_threshold based on object size, and calculate
         # distance between detections and tracker estimations
-        for p in ps:
+        for p in norm_orders:
             distances += np.linalg.norm(
                 detected_pose.points - tracked_pose.estimate, ord=p, axis=1
             )
@@ -76,7 +94,7 @@ for testing_video in args.video_files:
                 [hor_max_pt - hor_min_pt, ver_max_pt - ver_min_pt], ord=p
             )
 
-        distances = distances / len(ps)
+        distances = distances / len(norm_orders)
 
         keypoint_dist_threshold = (
             vertical_resolution * (diagonal < vertical_resolution / 3) / 67
@@ -90,13 +108,19 @@ for testing_video in args.video_files:
         )
         return 1 / (1 + match_num)
 
-    all_detections = metrics.get_detections(input_path=input_path, information_file = info_file)
+    all_detections = metrics.DetectionFileParser(
+        input_path=input_path, information_file=info_file
+    )
 
     if args.save_pred:
-        predictions_text_file = metrics.PredictionsTextFile(input_path=input_path, save_path=output_path, information_file = info_file)
+        predictions_text_file = metrics.PredictionsTextFile(
+            input_path=input_path, save_path=output_path, information_file=info_file
+        )
 
     if args.make_video: 
-        video_file = video.VideoFromFrames(input_path=input_path, save_path=output_path, information_file = info_file)
+        video_file = video.VideoFromFrames(
+            input_path=input_path, save_path=output_path, information_file=info_file
+        )
 
     tracker = Tracker(
         distance_function=keypoints_distance,
@@ -105,8 +129,8 @@ for testing_video in args.video_files:
         point_transience=2,
     )
 
-    # initialize accumulator for this video
-    accumulator.create_accumulator(input_path=input_path, information_file = info_file)
+    # Initialize accumulator for this video
+    accumulator.create_accumulator(input_path=input_path, information_file=info_file)
 
     for frame_number, detections in enumerate(all_detections):
         if frame_number % frame_skip_period == 0:
@@ -116,16 +140,16 @@ for testing_video in args.video_files:
         else:
             tracked_objects = tracker.update()
 
-        # save new frame on output video file
+        # Save new frame on output video file
         if args.make_video:
             frame = video_file.get_frame()
             frame = drawing.draw_boxes(frame, detections=detections)
             frame = drawing.draw_tracked_boxes(frame=frame, objects=tracked_objects)
             video_file.update(frame=frame)
 
-        # update output text file
+        # Update output text file
         if args.save_pred:
-            predictions_text_file.update_text_file(predictions=tracked_objects)
+            predictions_text_file.update(predictions=tracked_objects)
 
         accumulator.update(predictions=tracked_objects)
 
