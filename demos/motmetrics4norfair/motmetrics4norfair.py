@@ -9,15 +9,15 @@ detection_threshold = 0.01
 distance_threshold = 0.4
 
 parser = argparse.ArgumentParser(
-    description="""Evaluate a basic tracker on MOTChallenge data. Display on terminal the MOTChallenge metrics results """
+    description="Evaluate a basic tracker on MOTChallenge data. Display on terminal the MOTChallenge metrics results "
 )
 parser.add_argument(
-    "dataset_path", type=str, nargs="?", help="""Path to your dataset folder"""
+    "dataset_path", type=str, nargs="?", help="Path to your dataset folder"
 )
 parser.add_argument(
     "--make_video",
     action="store_true",
-    help="""Generate an output video, using the frames provided by the MOTChallenge dataset.""",
+    help="Generate an output video, using the frames provided by the MOTChallenge dataset.",
 )
 parser.add_argument(
     "--save_pred",
@@ -36,7 +36,7 @@ parser.add_argument(
     "--select_sequences",
     type=str,
     nargs="+",
-    help="""If you want to select a subset of sequences in your dataset path. Insert the names of the sequences you want to process.""",
+    help="If you want to select a subset of sequences in your dataset path. Insert the names of the sequences you want to process.",
 )
 
 args = parser.parse_args()
@@ -122,7 +122,7 @@ for input_path in sequences_paths:
                 detections=detections, period=frame_skip_period
             )
         else:
-            detections=[]
+            detections = []
             tracked_objects = tracker.update()
 
         # Draw detection and tracked object boxes on frame

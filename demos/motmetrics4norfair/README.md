@@ -16,7 +16,7 @@ curl -O https://motchallenge.net/data/MOT17Labels.zip  # To download Detections 
 unzip MOT17Labels.zip
 ``` 
 
-Given that the ground truth files for the testing set is not publicly available, you will only be able to use motmetrics4norfair with the training set.
+Given that the ground truth files for the testing set are not publicly available, you will only be able to use motmetrics4norfair with the training set.
 
 2. Install py-motmetrics:
 ```bash
