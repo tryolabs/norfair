@@ -9,7 +9,7 @@ detection_threshold = 0.01
 distance_threshold = 0.4
 
 parser = argparse.ArgumentParser(
-    description="""Evaluate a basic tracker on MOTChallenge data.Display on terminal the MOTChallenge metrics results """
+    description="""Evaluate a basic tracker on MOTChallenge data. Display on terminal the MOTChallenge metrics results """
 )
 parser.add_argument(
     "dataset_path", type=str, nargs="?", help="""Path to your dataset folder"""
