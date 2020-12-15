@@ -5,7 +5,11 @@ from .utils import validate_points
 
 
 def draw_points(
-    frame, detections, radius=None, thickness=None, color=None,
+    frame,
+    detections,
+    radius=None,
+    thickness=None,
+    color=None,
 ):
     if detections is None:
         return

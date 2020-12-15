@@ -31,8 +31,7 @@ class PredictionsTextFile:
     """Generates a text file with your predicted tracked objects, in the MOTChallenge format.
     It needs the 'input_path', which is the path to the sequence being processed,
     the 'save_path', and optionally the 'information_file' (in case you don't give an
-    'information_file', is assumed there is one in the input_path folder)
-
+    'information_file', is assumed there is one in the input_path folder).
     """
 
     def __init__(self, input_path, save_path=".", information_file=None):
