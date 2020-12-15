@@ -36,7 +36,7 @@ parser.add_argument(
     "--select_sequences",
     type=str,
     nargs="+",
-    help="""If you want to select a subset of sequences in your dataset path. Insert the names of the sequeces you want to process.""",
+    help="""If you want to select a subset of sequences in your dataset path. Insert the names of the sequences you want to process.""",
 )
 
 args = parser.parse_args()
