@@ -122,6 +122,7 @@ for input_path in sequences_paths:
                 detections=detections, period=frame_skip_period
             )
         else:
+            detections=[]
             tracked_objects = tracker.update()
 
         # Draw detection and tracked object boxes on frame
