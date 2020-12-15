@@ -18,11 +18,7 @@ unzip MOT17Labels.zip
 
 Given that the ground truth files for the testing set are not publicly available, you will only be able to use motmetrics4norfair with the training set.
 
-2. Install py-motmetrics:
-```bash
-    pip install motmetrics==1.2.0
-``` 
-3. Display the motmetrics4norfair instructions: 
+2. Display the motmetrics4norfair instructions: 
 ```bash
     python motmetrics4norfair.py --help 
 ``` 

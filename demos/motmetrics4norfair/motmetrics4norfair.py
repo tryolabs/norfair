@@ -30,7 +30,7 @@ parser.add_argument(
     help="Generate a text file with your MOTChallenge metrics results",
 )
 parser.add_argument(
-    "--output_path", type=str, nargs="?", default=".", help="""Output path"""
+    "--output_path", type=str, nargs="?", default=".", help="Output path"
 )
 parser.add_argument(
     "--select_sequences",
