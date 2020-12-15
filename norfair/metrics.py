@@ -81,7 +81,7 @@ class PredictionsTextFile:
                 + ","
                 + bb_height_str
                 + ",-1,-1,-1,-1"
-        )
+            )
             self.text_file.write(row_text_out)
             self.text_file.write("\n")
 
@@ -91,15 +91,15 @@ class PredictionsTextFile:
             self.text_file.close()
 
 
-    class DetectionFileParser:
-        """Get Norfair detections from MOTChallenge text files containing detections"""
+class DetectionFileParser:
+    """Get Norfair detections from MOTChallenge text files containing detections"""
 
-        def __init__(self, input_path, information_file=None):
+    def __init__(self, input_path, information_file=None):
         self.frame_number = 1
 
         # Get detecions matrix data with rows corresponding to:
-            # frame, id, bb_left, bb_top, bb_right, bb_down, conf, x, y, z
-            detections_path = os.path.join(input_path, "det/det.txt")
+        # frame, id, bb_left, bb_top, bb_right, bb_down, conf, x, y, z
+        detections_path = os.path.join(input_path, "det/det.txt")
 
         self.matrix_detections = np.loadtxt(detections_path, dtype="f", delimiter=",")
         row_order = np.argsort(self.matrix_detections[:, 0])
@@ -112,8 +112,8 @@ class PredictionsTextFile:
             self.matrix_detections[:, 3] + self.matrix_detections[:, 5]
         )
 
-            if information_file is None:
-                seqinfo_path = os.path.join(input_path, "seqinfo.ini")
+        if information_file is None:
+            seqinfo_path = os.path.join(input_path, "seqinfo.ini")
             information_file = InformationFile(file_path=seqinfo_path)
         self.length = information_file.search(variable_name="seqLength")
 
@@ -121,21 +121,21 @@ class PredictionsTextFile:
         for frame_number in range(1, self.length + 1):
             self.sorted_by_frame.append(self.get_dets_from_frame(frame_number))
 
-        def get_dets_from_frame(self, frame_number):
-            """ this function returns a list of norfair Detections class, corresponding to frame=frame_number """
+    def get_dets_from_frame(self, frame_number):
+        """ this function returns a list of norfair Detections class, corresponding to frame=frame_number """
 
-            indexes = np.argwhere(self.matrix_detections[:, 0] == frame_number)
-            detections = []
-            if len(indexes) > 0:
-                actual_det = self.matrix_detections[indexes]
-                actual_det.shape = [actual_det.shape[0], actual_det.shape[2]]
-                for det in actual_det:
-                    points = np.array([[det[2], det[3]], [det[4], det[5]]])
-                    conf = det[6]
+        indexes = np.argwhere(self.matrix_detections[:, 0] == frame_number)
+        detections = []
+        if len(indexes) > 0:
+            actual_det = self.matrix_detections[indexes]
+            actual_det.shape = [actual_det.shape[0], actual_det.shape[2]]
+            for det in actual_det:
+                points = np.array([[det[2], det[3]], [det[4], det[5]]])
+                conf = det[6]
                 new_detection = Detection(points, np.array([conf, conf]))
-                    detections.append(new_detection)
-            self.actual_detections = detections
-            return detections
+                detections.append(new_detection)
+        self.actual_detections = detections
+        return detections
 
     def __iter__(self):
         self.frame_number = 1
@@ -303,9 +303,7 @@ def eval_motChallenge(matrixes_predictions, paths, metrics=None, generate_overal
             (
                 os.path.split(p)[1],
                 mm.io.loadtxt(
-                    os.path.join(p, "gt/gt.txt"),
-                    fmt="mot15-2D",
-                    min_confidence=1,
+                    os.path.join(p, "gt/gt.txt"), fmt="mot15-2D", min_confidence=1
                 ),
             )
             for p in paths

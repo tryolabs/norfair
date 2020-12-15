@@ -9,17 +9,15 @@ detection_threshold = 0.01
 distance_threshold = 0.4
 
 parser = argparse.ArgumentParser(
-    description="""
-Evaluate a basic tracker on MOTChallenge data.
-Display on terminal the MOTChallenge metrics results 
-""", 
+    description="""Evaluate a basic tracker on MOTChallenge data.Display on terminal the MOTChallenge metrics results """
+)
+parser.add_argument(
+    "dataset_path", type=str, nargs="?", help="""Path to your dataset folder"""
 )
 parser.add_argument(
     "--make_video",
     action="store_true",
-    help="""Generate an output video, using the frames provided in the MOTChallenge dataset
-    You need to have the following folder containing each frame of this video
-    <file_to_proccess>/img1/""",
+    help="""Generate an output video, using the frames provided by the MOTChallenge dataset.""",
 )
 parser.add_argument(
     "--save_pred",
@@ -32,26 +30,13 @@ parser.add_argument(
     help="Generate a text file with your MOTChallenge metrics results",
 )
 parser.add_argument(
-    "--output_path",
-        type=str,
-    nargs="?",
-    default=".",
-    help="""
-Output path
-""",
+    "--output_path", type=str, nargs="?", default=".", help="""Output path"""
 )
-
-parser.add_argument(
-    "dataset_path", type=str, nargs="?", help="""Path to your dataset folder"""
-)
-
 parser.add_argument(
     "--select_sequences",
     type=str,
     nargs="+",
-    help="""
-        If you want to select a subset of folders in your dataset path. Insert the names of the folders you want to process.
-        """,
+    help="""If you want to select a subset of sequences in your dataset path. Insert the names of the sequeces you want to process.""",
 )
 
 args = parser.parse_args()
@@ -116,7 +101,7 @@ for input_path in sequences_paths:
             input_path=input_path, save_path=output_path, information_file=info_file
         )
 
-    if args.make_video: 
+    if args.make_video:
         video_file = video.VideoFromFrames(
             input_path=input_path, save_path=output_path, information_file=info_file
         )
@@ -139,7 +124,7 @@ for input_path in sequences_paths:
         else:
             tracked_objects = tracker.update()
 
-        # Save new frame on output video file
+        # Draw detection and tracked object boxes on frame
         if args.make_video:
             frame = next(video_file)
             frame = drawing.draw_boxes(frame, detections=detections)
