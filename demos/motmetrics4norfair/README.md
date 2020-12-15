@@ -6,13 +6,13 @@ Demo on how to evaluate a Norfair tracker on the [MOTChallenge](https://motchall
 1. Download the [MOT17](https://motchallenge.net/data/MOT17/) dataset running
 
 ```bash
-curl -O https://motchallenge.net/data/MOT17.zip #To download Detections + Ground Truth + Images (5.5GB)
+curl -O https://motchallenge.net/data/MOT17.zip  # To download Detections + Ground Truth + Images (5.5GB)  
 unzip MOT17.zip
  ``` 
 or
 
 ```bash
-curl -O https://motchallenge.net/data/MOT17Labels.zip #To download Detections + Ground Truth (9.7 MB)
+curl -O https://motchallenge.net/data/MOT17Labels.zip  # To download Detections + Ground Truth (9.7 MB)  
 unzip MOT17Labels.zip
 ``` 
 
