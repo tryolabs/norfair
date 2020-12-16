@@ -1,15 +1,19 @@
+from typing import Optional, Tuple, Sequence
+
 import cv2
 import numpy as np
 import random
+
+from .tracker import Detection, TrackedObject
 from .utils import validate_points
 
 
 def draw_points(
-    frame,
-    detections,
-    radius=None,
-    thickness=None,
-    color=None,
+    frame: np.array,
+    detections: Sequence["Detection"],
+    radius: Optional[int] = None,
+    thickness: Optional[int] = None,
+    color: Optional[Tuple[int, int, int]] = None
 ):
     if detections is None:
         return
@@ -34,13 +38,13 @@ def draw_points(
 
 
 def draw_tracked_objects(
-    frame,
-    objects,
-    radius=None,
-    color=None,
-    id_size=None,
-    id_thickness=None,
-    draw_points=True,
+    frame: np.array,
+    objects: Sequence["TrackedObject"],
+    radius: Optional[int] = None,
+    color: Optional[Tuple[int, int, int]] = None,
+    id_size: Optional[float] = None,
+    id_thickness: Optional[int] = None,
+    draw_points: bool = True,
 ):
     frame_scale = frame.shape[0] / 100
     if radius is None:
@@ -54,7 +58,8 @@ def draw_tracked_objects(
         if not obj.live_points.any():
             continue
         if color is None:
-            point_color = Color.random(obj.id)
+            object_id = obj.id if obj.id is not None else random.randint(0, 999)
+            point_color = Color.random(object_id)
             id_color = point_color
         else:
             point_color = color
@@ -86,14 +91,14 @@ def draw_tracked_objects(
 
 
 def draw_debug_metrics(
-    frame,
-    objects,
-    text_size=None,
-    text_thickness=None,
-    color=None,
+    frame: np.array,
+    objects: Sequence["TrackedObject"],
+    text_size: Optional[float] = None,
+    text_thickness: Optional[int] = None,
+    color: Optional[Tuple[int, int, int]] = None,
     only_ids=None,
     only_initializing_ids=None,
-    draw_score_threshold=0,
+    draw_score_threshold: float = 0,
 ):
     """Draw objects with their debug information
 
@@ -109,7 +114,7 @@ def draw_debug_metrics(
     radius = int(frame_scale * 0.5)
 
     for obj in objects:
-        if not (obj.last_detection.scores > draw_score_threshold).any():
+        if not (obj.last_detection.scores is None) and not (obj.last_detection.scores > draw_score_threshold).any():
             continue
         if only_ids is not None:
             if obj.id not in only_ids:
@@ -122,7 +127,7 @@ def draw_debug_metrics(
         else:
             text_color = color
         draw_position = centroid(
-            obj.estimate[obj.last_detection.scores > draw_score_threshold]
+            obj.estimate[obj.last_detection.scores > draw_score_threshold] if obj.last_detection.scores is not None else obj.estimate
         )
 
         for point in obj.estimate:
@@ -135,20 +140,18 @@ def draw_debug_metrics(
             )
 
         # Distance to last matched detection
-        last_dist = obj.last_distance
-        if last_dist is None:
+        if obj.last_distance is None:
             last_dist = "-"
-        elif last_dist > 999:
+        elif obj.last_distance > 999:
             last_dist = ">"
         else:
-            last_dist = "{:.2f}".format(last_dist)
+            last_dist = "{:.2f}".format(obj.last_distance)
 
         # Distance to currently closest detection
-        current_min_dist = obj.current_min_distance
-        if current_min_dist is None:
+        if obj.current_min_distance is None:
             current_min_dist = "-"
         else:
-            current_min_dist = "{:.2f}".format(current_min_dist)
+            current_min_dist = "{:.2f}".format(obj.current_min_distance)
 
         # No support for multiline text in opencv :facepalm:
         lines_to_draw = (
@@ -175,7 +178,7 @@ def draw_debug_metrics(
             )
 
 
-def centroid(tracked_points):
+def centroid(tracked_points: np.array) -> Tuple[int, int]:
     num_points = tracked_points.shape[0]
     sum_x = np.sum(tracked_points[:, 0])
     sum_y = np.sum(tracked_points[:, 1])
@@ -276,11 +279,11 @@ class Color:
     silver = (192, 192, 192)
 
     @staticmethod
-    def random(obj_id):
+    def random(obj_id: int) -> Tuple[int, int, int]:
         color_list = [
             c
             for c in Color.__dict__.keys()
             if c[:2] != "__"
-            and c not in ("random", "red", "white", "grey", "black", "silver")
+               and c not in ("random", "red", "white", "grey", "black", "silver")
         ]
         return getattr(Color, color_list[obj_id % len(color_list)])

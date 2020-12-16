@@ -13,13 +13,13 @@ cfg.MODEL.WEIGHTS = "detectron2://COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3
 detector = DefaultPredictor(cfg)
 
 # Distance function
-def ceintroid_distance(detection, tracked_object):
+def centroid_distance(detection, tracked_object):
     return np.linalg.norm(detection.points - tracked_object.estimate)
 
 
 # Norfair
 video = Video(input_path="./video.mp4")
-tracker = Tracker(distance_function=ceintroid_distance, distance_threshold=20)
+tracker = Tracker(distance_function=centroid_distance, distance_threshold=20)
 
 for frame in video:
     detections = detector(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))

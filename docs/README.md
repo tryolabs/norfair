@@ -2,7 +2,7 @@
 
 ## Tracker
 
-In class in charge of performing the tracking of the detections produced by the detector. The `Tracker` class first needs to get instantiated as an object, and then continuously updated inside a video processing loop by feeding new detections into its [`update`](#tracker.update) method.
+The class in charge of performing the tracking of the detections produced by the detector. The `Tracker` class first needs to get instantiated as an object, and then continuously updated inside a video processing loop by feeding new detections into its [`update`](#tracker.update) method.
 
 ##### Arguments:
 
@@ -10,6 +10,7 @@ In class in charge of performing the tracking of the detections produced by the 
 - `distance_threshold`: Defines what is the maximum distance that can constitute a match. Detections and tracked objects whose distance are above this threshold won't be matched by the tracker.
 - `hit_inertia_min (optional)`: Each tracked objects keeps an internal hit inertia counter which tracks how often it's getting matched to a detection, each time it gets a match this counter goes up, and each time it doesn't it goes down. If it doesn't get any match for a certain amount of frames, and it then gets below the value set by this argument, the object is destroyed. Defaults to `10`.
 - `hit_inertia_max (optional)`: Each tracked objects keeps an internal hit inertia counter which tracks how often it's getting matched to a detection, each time it gets a match this counter goes up, and each time it doesn't it goes down. This argument defines how large this inertia can grow, and therefore defines how long an object can live without getting matched to any detections. Defaults to `25`.
+- `initialization_delay (optional)`: Each tracked object waits till its internal hit intertia counter goes over `hit_inertia_min` to be considered as a potential object to be returned to the user by the Tracker. The argument `initialization_delay` determines by how much the object's hit inertia counter must exceed `hit_inertia_min` to be considered as initialized and get returned to the user as a real object. Defaults to `(hit_inertia_min + hit_inertia_max) / 2`.
 - `detection_threshold (optional)`: Sets the threshold at which the scores of the points in a detection being fed into the tracker must dip below to be ignored by the tracker. Defaults to `0`.
 - `point_transience (optional)`: Each tracked object keeps track of how much often of the points its tracking has been getting matched. Points that are getting matches are said to be live, and points which aren't are said to not be live. This determines things like which points in a tracked object get drawn by [`draw_tracked_objects`](#draw_tracked_objects) and which don't. This argument determines how short lived points not getting matched are. Defaults to `4`.
 
@@ -30,7 +31,7 @@ The function through which the detections found in each frame must be passed to 
 
 Detections returned by the detector must be converted to a `Detection` object before being used by Norfair.
 
-##### Arguments:
+##### Arguments and Properties:
 
 - `points`: A numpy array of shape `(number of points per object, 2)`, with each row being a point expressed as `x, y` coordinates on the image. The number of points per detection must be constant for each particular tracker.
 - `scores`: An array of length `number of points per object` which assigns a score to each of the points defined in `points`. This is used to inform the tracker of which points to ignore; any point with a score below `detection_threshold` will be ignored. This useful for cases in which detections don't always have every point detected, as is often the case in pose estimators.

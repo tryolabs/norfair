@@ -88,12 +88,23 @@ You can find the documentation for Norfair's API [here](docs/README.md).
 
 We provide several examples of how Norfair can be used to add tracking capabilities to several different detectors.
 
-1. [Simple tracking of cars](demos/detectron2/README.md) using [Detectron2](https://github.com/facebookresearch/detectron2).
-2. [Simple tracking of cars](demos/yolov4/README.md) using [YOLOv4](https://github.com/Tianxiaomo/pytorch-YOLOv4/tree/master).
-3. [Simple tracking pedestrians](demos/alphapose/README.md) using [AlphaPose](https://github.com/MVIG-SJTU/AlphaPose).
-4. [Speed up pose estimation by extrapolating detections](demos/openpose/README.md) using [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose).
+1. [Simple tracking of cars](demos/detectron2) using [Detectron2](https://github.com/facebookresearch/detectron2).
+2. [Faster tracking of cars](demos/yolov4) using [YOLOv4](https://github.com/Tianxiaomo/pytorch-YOLOv4/tree/master). Try it on any youtube video on this [Google Colab notebook](https://colab.research.google.com/github/tryolabs/norfair/blob/master/demos/yolov4/yolov4_demo.ipynb).
+3. Inserting Norfair into an existing project: [Simple tracking of pedestrians](demos/alphapose) using [AlphaPose](https://github.com/MVIG-SJTU/AlphaPose).
+4. [Speed up pose estimation by extrapolating detections](demos/openpose) using [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose).
 
 ![Norfair OpenPose Demo](docs/openpose_skip_3_frames.gif)
+
+## Comparison to other trackers
+
+Norfair's contribution to Python's object tracker library repertoire is its ability to work with any object detector by being able to work with a variable number of points per detection, and the ability for the user to heavily customize the tracker by creating their own distance function.
+
+If you are looking for a tracker, here are some other projects worth noting:
+
+- [**OpenCV**](https://opencv.org) includes several tracking solutions like [KCF Tracker](https://docs.opencv.org/3.4/d2/dff/classcv_1_1TrackerKCF.html) and [MedianFlow Tracker](https://docs.opencv.org/3.4/d7/d86/classcv_1_1TrackerMedianFlow.html) which are run by making the user select a part of the frame to track, and then letting the tracker follow that area. They tend not to be run on top of a detector and are not very robust.
+- [**dlib**](http://dlib.net) includes a correlation single object tracker. You have to create your own multiple object tracker on top of it yourself if you want to track multiple objects with it.
+- [**AlphaPose**](https://github.com/MVIG-SJTU/AlphaPose) just released a new version of their human pose tracker. This tracker is tightly integrated into their code base, and to the task of tracking human poses.
+- [**SORT**](https://github.com/abewley/sort) and [**Deep SORT**](https://github.com/nwojke/deep_sort) are similar to this repo in that they use Kalman filters (and a deep embedding for Deep SORT), but they are hardcoded to a fixed distance function and to tracking boxes. Norfair also adds some filtering when matching tracked objects with detections, and changes the Hungarian Algorithm for its own distance minimizer. Both these repos are also released under the GPL license, which might be an issue for some individuals or companies because the source code of derivative works needs to be published.
 
 ## Commercial support
 

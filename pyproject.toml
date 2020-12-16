@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "norfair"
-version = "0.1.7"
+version = "0.1.8"
 description = "Lightweight Python library for real-time 2D object tracking."
 license = "BSD-3-Clause"
 authors = ["Tryolabs <hello@tryolabs.com>"]
