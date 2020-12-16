@@ -15,6 +15,8 @@ max_distance_between_points = 30
 
 class YOLO:
     def __init__(self, weightfile, use_cuda=True):
+        if use_cuda and not torch.cuda.is_available():
+            raise Exception("Selected use_cuda=True, but cuda is not available to Pytorch")
         self.use_cuda = use_cuda
         self.model = Yolov4(yolov4conv137weight=None, n_classes=80, inference=True)
         pretrained_dict = torch.load(
