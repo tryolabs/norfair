@@ -1,5 +1,5 @@
 # Compute MOTChallenge metrics
-Demo on how to evaluate a Norfair tracker on the [MOTChallenge](https://motchallenge.net), using [py-motmetrics](https://github.com/cheind/py-motmetrics) library.
+Demo on how to evaluate a Norfair tracker on the [MOTChallenge](https://motchallenge.net).
 
 ## Instructions
 
