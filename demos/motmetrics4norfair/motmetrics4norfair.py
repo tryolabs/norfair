@@ -12,7 +12,7 @@ parser = argparse.ArgumentParser(
     description="Evaluate a basic tracker on MOTChallenge data. Display on terminal the MOTChallenge metrics results "
 )
 parser.add_argument(
-    "dataset_path", type=str, nargs="?", help="Path to your dataset folder"
+    "dataset_path", type=str, nargs="?", help="Path to the MOT Challenge train dataset folder (test dataset doesn't provide labels)"
 )
 parser.add_argument(
     "--make_video",
@@ -42,6 +42,13 @@ parser.add_argument(
 args = parser.parse_args()
 
 output_path = args.output_path
+
+if args.save_metrics:
+    print("Saving metrics file at " + os.path.join(output_path, "metrics.txt"))
+if args.save_pred:
+    print("Saving predictions files at " + os.path.join(output_path, "predictions/"))
+if args.make_video:
+    print("Saving videos at " + os.path.join(output_path, "videos/"))
 
 if args.select_sequences is None:
     sequences_paths = [f.path for f in os.scandir(args.dataset_path) if f.is_dir()]
