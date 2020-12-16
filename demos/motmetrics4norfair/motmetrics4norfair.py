@@ -12,7 +12,10 @@ parser = argparse.ArgumentParser(
     description="Evaluate a basic tracker on MOTChallenge data. Display on terminal the MOTChallenge metrics results "
 )
 parser.add_argument(
-    "dataset_path", type=str, nargs="?", help="Path to the MOT Challenge train dataset folder (test dataset doesn't provide labels)"
+    "dataset_path",
+    type=str,
+    nargs="?",
+    help="Path to the MOT Challenge train dataset folder (test dataset doesn't provide labels)",
 )
 parser.add_argument(
     "--make_video",
