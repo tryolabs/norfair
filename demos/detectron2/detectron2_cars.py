@@ -26,9 +26,10 @@ for frame in video:
     # Wrap Detectron2 detections in Norfair's Detection objects
     detections = [
         Detection(p)
-        for p, c in
-        zip(detections["instances"].pred_boxes.get_centers().cpu().numpy(),
-            detections["instances"].pred_classes)
+        for p, c in zip(
+            detections["instances"].pred_boxes.get_centers().cpu().numpy(),
+            detections["instances"].pred_classes,
+        )
         if c == 2
     ]
     tracked_objects = tracker.update(detections=detections)
