@@ -18,6 +18,7 @@ def validate_points(points: np.array) -> np.array:
             print_detection_error_message_and_exit(points)
     return points
 
+
 def print_detection_error_message_and_exit(points):
     print("\n[red]INPUT ERROR:[/red]")
     print(
@@ -26,6 +27,7 @@ def print_detection_error_message_and_exit(points):
     print("You can read the documentation for the `Detection` class here:")
     print("https://github.com/tryolabs/norfair/tree/master/docs#detection\n")
     exit()
+
 
 def print_objects_as_table(tracked_objects: Sequence):
     """Used for helping in debugging"""
