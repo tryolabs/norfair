@@ -13,19 +13,19 @@ class InformationFile:
         self.path = file_path
         with open(file_path, "r") as myfile:
             self.file = myfile.read()
-        self.file = self.file.splitlines()
+        self.lines = self.file.splitlines()
 
     def search(self, variable_name):
-        line = 0
-        while self.file[line][0 : len(variable_name)] != variable_name:
-            line += 1
-            if line >= len(self.file):
-                raise ValueError("Couldn't find '" + variable_name + "' in " + self.path)
-        string = self.file[line][len(variable_name) + 1 :]
-        if string.isdigit():
-            return int(string)
+        for line in self.lines:
+            if line[: len(variable_name)] == variable_name:
+                result = line[len(variable_name) + 1 :]
+                break
         else:
-            return string
+            raise ValueError(f"Couldn't find '{variable_name}' in {self.path}")
+        if result.isdigit():
+            return int(result)
+        else:
+            return result
 
 
 class PredictionsTextFile:
