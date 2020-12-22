@@ -13,7 +13,7 @@ def draw_points(
     detections: Sequence["Detection"],
     radius: Optional[int] = None,
     thickness: Optional[int] = None,
-    color: Optional[Tuple[int, int, int]] = None
+    color: Optional[Tuple[int, int, int]] = None,
 ):
     if detections is None:
         return
@@ -114,7 +114,10 @@ def draw_debug_metrics(
     radius = int(frame_scale * 0.5)
 
     for obj in objects:
-        if not (obj.last_detection.scores is None) and not (obj.last_detection.scores > draw_score_threshold).any():
+        if (
+            not (obj.last_detection.scores is None)
+            and not (obj.last_detection.scores > draw_score_threshold).any()
+        ):
             continue
         if only_ids is not None:
             if obj.id not in only_ids:
@@ -127,7 +130,9 @@ def draw_debug_metrics(
         else:
             text_color = color
         draw_position = centroid(
-            obj.estimate[obj.last_detection.scores > draw_score_threshold] if obj.last_detection.scores is not None else obj.estimate
+            obj.estimate[obj.last_detection.scores > draw_score_threshold]
+            if obj.last_detection.scores is not None
+            else obj.estimate
         )
 
         for point in obj.estimate:
@@ -284,6 +289,6 @@ class Color:
             c
             for c in Color.__dict__.keys()
             if c[:2] != "__"
-               and c not in ("random", "red", "white", "grey", "black", "silver")
+            and c not in ("random", "red", "white", "grey", "black", "silver")
         ]
         return getattr(Color, color_list[obj_id % len(color_list)])

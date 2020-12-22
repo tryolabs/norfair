@@ -45,12 +45,14 @@ class Video:
                 self.input_path = os.path.expanduser(self.input_path)
             if not os.path.isfile(self.input_path):
                 self._fail(
-                    f"[bold red]Error:[/bold red] File '{self.input_path}' does not exist.")
+                    f"[bold red]Error:[/bold red] File '{self.input_path}' does not exist."
+                )
             self.video_capture = cv2.VideoCapture(self.input_path)
             total_frames = int(self.video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
             if total_frames == 0:
                 self._fail(
-                    f"[bold red]Error:[/bold red] '{self.input_path}' does not seem to be a video file supported by OpenCV. If the video file is not the problem, please check that your OpenCV installation is working correctly.")
+                    f"[bold red]Error:[/bold red] '{self.input_path}' does not seem to be a video file supported by OpenCV. If the video file is not the problem, please check that your OpenCV installation is working correctly."
+                )
             description = os.path.basename(self.input_path)
         else:
             self.video_capture = cv2.VideoCapture(self.camera)
@@ -185,7 +187,9 @@ class Video:
                 f"[yellow]{filename}[/yellow]\n"
                 f"Please use '.mp4', '.avi', or provide a custom OpenCV fourcc codec name."
             )
-            return None  # Had to add this return to make mypya happy. I don't like this.
+            return (
+                None  # Had to add this return to make mypya happy. I don't like this.
+            )
 
     def abbreviate_description(self, description: str) -> str:
         """Conditionally abbreviate description so that progress bar fits in small terminals"""
@@ -198,7 +202,7 @@ class Video:
         else:
             return "{} ... {}".format(
                 description[: space_for_description // 2 - 3],
-                description[-space_for_description // 2 + 3:],
+                description[-space_for_description // 2 + 3 :],
             )
 
 
@@ -234,6 +238,8 @@ class VideoFromFrames:
         self.input_path = input_path
         self.frame_number = 1
         self.video = cv2.VideoWriter(video_path, fourcc, fps, image_size)  # Video file
+        self.image_extension = information_file.search("imExt")
+        self.image_directory = information_file.search("imDir")
 
     def __iter__(self):
         self.frame_number = 1
@@ -242,7 +248,9 @@ class VideoFromFrames:
     def __next__(self):
         if self.frame_number <= self.length:
             frame_path = os.path.join(
-                self.input_path, "img1", str(self.frame_number).zfill(6) + ".jpg"
+                self.input_path,
+                self.image_directory,
+                str(self.frame_number).zfill(6) + self.image_extension,
             )
             self.frame_number += 1
 

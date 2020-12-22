@@ -10,21 +10,22 @@ import pandas as pd
 
 class InformationFile:
     def __init__(self, file_path):
+        self.path = file_path
         with open(file_path, "r") as myfile:
-            self.file = myfile.read()
+            file = myfile.read()
+        self.lines = file.splitlines()
 
     def search(self, variable_name):
-        index_position_on_this_document = self.file.find(variable_name)
-        index_position_on_this_document = index_position_on_this_document + len(
-            variable_name
-        )
-        while not self.file[index_position_on_this_document].isdigit():
-            index_position_on_this_document += 1
-        value_string = ""
-        while self.file[index_position_on_this_document].isdigit():
-            value_string += self.file[index_position_on_this_document]
-            index_position_on_this_document += 1
-        return int(value_string)
+        for line in self.lines:
+            if line[: len(variable_name)] == variable_name:
+                result = line[len(variable_name) + 1 :]
+                break
+        else:
+            raise ValueError(f"Couldn't find '{variable_name}' in {self.path}")
+        if result.isdigit():
+            return int(result)
+        else:
+            return result
 
 
 class PredictionsTextFile:
@@ -320,7 +321,7 @@ def eval_motChallenge(matrixes_predictions, paths, metrics=None, generate_overal
 
     accs, names = compare_dataframes(gt, ts)
 
-    if metrics == None:
+    if metrics is None:
         metrics = list(mm.metrics.motchallenge_metrics)
     mm.lap.default_solver = "scipy"
     print("Computing metrics...")
