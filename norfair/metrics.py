@@ -12,8 +12,8 @@ class InformationFile:
     def __init__(self, file_path):
         self.path = file_path
         with open(file_path, "r") as myfile:
-            self.file = myfile.read()
-        self.lines = self.file.splitlines()
+            file = myfile.read()
+        self.lines = file.splitlines()
 
     def search(self, variable_name):
         for line in self.lines:
