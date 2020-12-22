@@ -238,8 +238,8 @@ class VideoFromFrames:
         self.input_path = input_path
         self.frame_number = 1
         self.video = cv2.VideoWriter(video_path, fourcc, fps, image_size)  # Video file
-        self.imExt = information_file.search("imExt")
-        self.imDir = information_file.search("imDir")
+        self.image_extension = information_file.search("imExt")
+        self.image_directory = information_file.search("imDir")
 
     def __iter__(self):
         self.frame_number = 1
@@ -249,8 +249,8 @@ class VideoFromFrames:
         if self.frame_number <= self.length:
             frame_path = os.path.join(
                 self.input_path,
-                self.imDir,
-                str(self.frame_number).zfill(6) + self.imExt,
+                self.image_directory,
+                str(self.frame_number).zfill(6) + self.image_extension,
             )
             self.frame_number += 1
 
