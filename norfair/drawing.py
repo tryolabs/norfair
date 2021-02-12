@@ -10,7 +10,6 @@ import random
 
 import numpy as np
 
-from .tracker import Detection, TrackedObject
 from .utils import validate_points
 
 
