@@ -8,7 +8,7 @@ from norfair import Detection
 
 try:
     import motmetrics as mm
-except:
+except ImportError:
     from .utils import DummyMOTMetricsImport
 
     mm = DummyMOTMetricsImport()
