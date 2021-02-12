@@ -4,7 +4,7 @@ Demo for extrapolating detections through skipped frames. Based on [OpenPose](ht
 
 ## Instructions
 
-1. Install norfair with `pip install norfair[video]`.
+1. Install Norfair with `pip install norfair[video]`.
 2. Install [OpenPose version 1.4](https://github.com/CMU-Perceptual-Computing-Lab/openpose/releases/tag/v1.4.0).
 3. Run `python openpose_extrapolation.py`.
 

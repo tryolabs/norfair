@@ -22,15 +22,19 @@ Norfair is built, used and maintained by [Tryolabs](https://tryolabs.com).
 
 Norfair currently supports Python 3.7+.
 
-For pure python version that works anywhere install as:
+For the pure version with minimal Python dependencies, install as:
+
 ```bash
 pip install norfair
 ```
 
-For more features install as:
+Note that this will NOT install OpenCV, which is needed for video aplications. Therefore, you need to make sure Norfair runs in an environment with an existing OpenCV installation.
+
+To make Norfair install the dependencies to support more features, install as:
+
 ```bash
-pip install norfair[metrics]  # Supports running MOT metrics evaluation
 pip install norfair[video]  # Adds several video helper features running on OpenCV
+pip install norfair[metrics]  # Supports running MOT metrics evaluation
 pip install norfair[metrics,video]  # Everything included
 ```
 
@@ -122,4 +126,4 @@ If you are interested, please [contact us](https://tryolabs.com/#contact).
 
 ## License
 
-Copyright © 2020, [Tryolabs](https://tryolabs.com). Released under the [BSD 3-Clause](LICENSE).
+Copyright © 2021, [Tryolabs](https://tryolabs.com). Released under the [BSD 3-Clause](LICENSE).
