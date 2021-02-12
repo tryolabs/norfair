@@ -68,3 +68,14 @@ def get_cutout(points, image):
     max_y = int(max(points[:, 1]))
     min_y = int(min(points[:, 1]))
     return image[min_y:max_y, min_x:max_x]
+
+
+class DummyOpenCVImport:
+    def __getattribute__(self, name):
+        print("You are trying to use Norfair's video features. Install with `pip install norfair\[video]`, or install opencv-python manually.")
+        exit()
+
+class DummyMOTMetricsImport:
+    def __getattribute__(self, name):
+        print("You are trying to use Norfair's metrics features. Install with `pip install norfair\[metrics]`, or install motmetrics manually.")
+        exit()

@@ -1,6 +1,9 @@
 from typing import Optional, Tuple, Sequence
-
-import cv2
+try:
+    import cv2
+except:
+    from utils import DummyOpenCVImport
+    cv2 = DummyOpenCVImport()
 import numpy as np
 import random
 
