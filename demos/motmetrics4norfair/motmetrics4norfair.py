@@ -1,6 +1,5 @@
 import os.path
 import numpy as np
-import norfair
 from norfair import Detection, Tracker, metrics, video, drawing
 import argparse
 

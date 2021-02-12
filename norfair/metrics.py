@@ -6,7 +6,7 @@ from norfair import Detection
 try:
     import motmetrics as mm
 except:
-    from utils import DummyMOTMetricsImport
+    from .utils import DummyMOTMetricsImport
     mm = DummyMOTMetricsImport()
 from collections import OrderedDict
 import pandas as pd
