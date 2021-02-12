@@ -4,7 +4,7 @@ from typing import Optional, List, Union
 try:
     import cv2
 except ImportError:
-    from utils import DummyOpenCVImport
+    from .utils import DummyOpenCVImport
     cv2 = DummyOpenCVImport()
 import numpy as np
 from rich import print
