@@ -3,7 +3,7 @@ import os.path
 
 import numpy as np
 
-from norfair import Detection, Tracker, drawing, metrics, video
+from norfair import Tracker, drawing, metrics, video
 
 frame_skip_period = 1
 detection_threshold = 0.01
