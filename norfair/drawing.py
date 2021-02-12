@@ -2,7 +2,7 @@ from typing import Optional, Sequence, Tuple
 
 try:
     import cv2
-except:
+except ImportError:
     from .utils import DummyOpenCVImport
 
     cv2 = DummyOpenCVImport()
