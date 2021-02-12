@@ -72,10 +72,17 @@ def get_cutout(points, image):
 
 class DummyOpenCVImport:
     def __getattribute__(self, name):
-        print("You are trying to use Norfair's video features. Install with `pip install norfair\[video]`, or install opencv-python manually.")
+        print(
+            """[bold red]Missing dependency:[/bold red] you are trying to use Norfair's video features. However, OpenCV is not installed.
+
+Please, make sure there is an existing installation of OpenCV or install Norfair with `pip install norfair\[video]`."""
+        )
         exit()
+
 
 class DummyMOTMetricsImport:
     def __getattribute__(self, name):
-        print("You are trying to use Norfair's metrics features. Install with `pip install norfair\[metrics]`, or install motmetrics manually.")
+        print(
+            """[bold red]Missing dependency:[/bold red] you are trying to use Norfair's metrics features. Please, install Norfair with `pip install norfair\[metrics]`."""
+        )
         exit()
