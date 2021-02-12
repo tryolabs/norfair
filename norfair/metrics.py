@@ -1,14 +1,19 @@
 import os
+
 import numpy as np
 from rich import print
 from rich.progress import track
+
 from norfair import Detection
+
 try:
     import motmetrics as mm
 except:
     from .utils import DummyMOTMetricsImport
+
     mm = DummyMOTMetricsImport()
 from collections import OrderedDict
+
 import pandas as pd
 
 

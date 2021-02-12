@@ -1,5 +1,5 @@
 import os
-from typing import Tuple, Sequence
+from typing import Sequence, Tuple
 
 import numpy as np
 from rich import print
