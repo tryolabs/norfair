@@ -1,10 +1,10 @@
 import math
-from typing import Callable, Optional, Sequence, List
+from typing import Callable, List, Optional, Sequence
 
 import numpy as np
 from filterpy.kalman import KalmanFilter
-
 from rich import print
+
 from .utils import validate_points
 
 
