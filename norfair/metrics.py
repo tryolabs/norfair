@@ -8,13 +8,14 @@ from norfair import Detection
 
 try:
     import motmetrics as mm
+    import pandas as pd
 except ImportError:
     from .utils import DummyMOTMetricsImport
 
     mm = DummyMOTMetricsImport()
+    pandas = DummyMOTMetricsImport()
 from collections import OrderedDict
 
-import pandas as pd
 
 
 class InformationFile:
@@ -166,6 +167,9 @@ class Accumulators:
         self.paths = []
 
     def create_accumulator(self, input_path, information_file=None):
+        # Check that motmetrics is installed here, so we don't have to process
+        # the whole dataset before failing out if we don't.
+        mm.metrics
 
         file_name = os.path.split(input_path)[1]
 
