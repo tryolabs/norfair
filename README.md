@@ -22,7 +22,7 @@ Norfair is built, used and maintained by [Tryolabs](https://tryolabs.com).
 
 Norfair currently supports Python 3.7+.
 
-For the pure python version, install as:
+For the pure Python version, install as:
 
 ```bash
 pip install norfair
@@ -36,7 +36,7 @@ pip install norfair[metrics]  # Supports running MOT metrics evaluation
 pip install norfair[metrics,video]  # Everything included
 ```
 
-If the needed dependencies are already present in the system, installing the pure python version of Norfair is enough for enabling the extra features. This is particuarly useful for embedded devices, where installing compiled dependencies can be difficult.
+If the needed dependencies are already present in the system, installing the pure Python version of Norfair is enough for enabling the extra features. This is particuarly useful for embedded devices, where installing compiled dependencies can be difficult.
 
 ## How it works
 
