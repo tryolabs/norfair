@@ -4,8 +4,9 @@ An example of how to integrate Norfair into the video inference loop of a pre ex
 
 ## Instructions
 
-1. [Follow the instructions](https://github.com/MVIG-SJTU/AlphaPose/tree/pytorch#installation) to install the Pytorch version of AlphaPose.
-2. Apply this diff to this [commit](https://github.com/MVIG-SJTU/AlphaPose/commit/ded84d450faf56227680f0527ff7e24ab7268754) on AlphaPose and use their [video_demo.py](https://github.com/MVIG-SJTU/AlphaPose/blob/ded84d450faf56227680f0527ff7e24ab7268754/video_demo.py) to process your video.
+1. Install Norfair with `pip install norfair[video]`.
+2. [Follow the instructions](https://github.com/MVIG-SJTU/AlphaPose/tree/pytorch#installation) to install the Pytorch version of AlphaPose.
+3. Apply this diff to this [commit](https://github.com/MVIG-SJTU/AlphaPose/commit/ded84d450faf56227680f0527ff7e24ab7268754) on AlphaPose and use their [video_demo.py](https://github.com/MVIG-SJTU/AlphaPose/blob/ded84d450faf56227680f0527ff7e24ab7268754/video_demo.py) to process your video.
 
     ```diff
     diff --git a/dataloader.py b/dataloader.py
