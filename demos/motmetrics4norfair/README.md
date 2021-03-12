@@ -22,3 +22,7 @@ Given that the ground truth files for the testing set are not publicly available
 ```bash
     python motmetrics4norfair.py --help 
 ``` 
+
+## Remarks
+
+Hyperparameters chosen on this demo are not optimal for every metric. If you want to decrease the ID switches (`IDs`), you may use a higher margin between `hit_inertia_min` and `hit_inertia_max`.

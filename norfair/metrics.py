@@ -210,14 +210,14 @@ class Accumulators:
         if metrics is None:
             metrics = list(mm.metrics.motchallenge_metrics)
 
-        self.summary = eval_motChallenge(
+        self.summary, self.summary_pd = eval_motChallenge(
             matrixes_predictions=self.matrixes_predictions,
             paths=self.paths,
             metrics=metrics,
             generate_overall=generate_overall,
         )
 
-        return self.summary
+        return self.summary_pd
 
     def save_metrics(self, save_path=".", file_name="metrics.txt"):
 
@@ -325,10 +325,10 @@ def eval_motChallenge(matrixes_predictions, paths, metrics=None, generate_overal
         metrics = list(mm.metrics.motchallenge_metrics)
     mm.lap.default_solver = "scipy"
     print("Computing metrics...")
-    summary = mh.compute_many(
+    summary_pd = mh.compute_many(
         accs, names=names, metrics=metrics, generate_overall=generate_overall
     )
     summary = mm.io.render_summary(
-        summary, formatters=mh.formatters, namemap=mm.io.motchallenge_metric_names
+        summary_pd, formatters=mh.formatters, namemap=mm.io.motchallenge_metric_names
     )
-    return summary
+    return summary, summary_pd
