@@ -28,4 +28,4 @@ Demo on how to evaluate a Norfair tracker on the [MOTChallenge](https://motchall
 
 ## Remarks
 
-Hyperparameters chosen on this demo are not optimal for every metric. If you want to decrease the ID switches (`IDs`), you may use a higher margin between `hit_inertia_min` and `hit_inertia_max`.
+Hyperparameters were tuned for reaching a high `MOTA` on this dataset. They may not be ideal for more general use cases, use the default hyperparameters for those. ID switches suffer specially due to this optimization. If you want to improve ID switches use a higher margin between `hit_inertia_min` and `hit_inertia_max`, or just use the default hyperparameters.
