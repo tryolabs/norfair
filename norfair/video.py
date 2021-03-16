@@ -1,11 +1,16 @@
 import os
 import time
-from typing import Optional, List, Union
+from typing import List, Optional, Union
 
-import cv2
+try:
+    import cv2
+except ImportError:
+    from .utils import DummyOpenCVImport
+
+    cv2 = DummyOpenCVImport()
 import numpy as np
 from rich import print
-from rich.progress import BarColumn, Progress, TimeRemainingColumn, ProgressColumn
+from rich.progress import BarColumn, Progress, ProgressColumn, TimeRemainingColumn
 
 from .utils import get_terminal_size
 

@@ -1,11 +1,21 @@
 import os
+
 import numpy as np
 from rich import print
 from rich.progress import track
+
 from norfair import Detection
-import motmetrics as mm
+
+try:
+    import motmetrics as mm
+    import pandas as pd
+except ImportError:
+    from .utils import DummyMOTMetricsImport
+
+    mm = DummyMOTMetricsImport()
+    pandas = DummyMOTMetricsImport()
 from collections import OrderedDict
-import pandas as pd
+
 
 
 class InformationFile:
@@ -157,6 +167,9 @@ class Accumulators:
         self.paths = []
 
     def create_accumulator(self, input_path, information_file=None):
+        # Check that motmetrics is installed here, so we don't have to process
+        # the whole dataset before failing out if we don't.
+        mm.metrics
 
         file_name = os.path.split(input_path)[1]
 
@@ -220,9 +233,9 @@ class Accumulators:
         return self.summary_pd
 
     def save_metrics(self, save_path=".", file_name="metrics.txt"):
-
         if not os.path.exists(save_path):
-            os.makedirs(save_folder)
+            os.makedirs(save_path)
+
         metrics_path = os.path.join(save_path, file_name)
         metrics_file = open(metrics_path, "w+")
         metrics_file.write(self.summary)
