@@ -21,8 +21,11 @@ Demo on how to evaluate a Norfair tracker on the [MOTChallenge](https://motchall
 
     Given that the ground truth files for the testing set are not publicly available, you will only be able to use motmetrics4norfair with the training set.
 
-3. Display the instructions:
+3. Display the motmetrics4norfair instructions: 
+```bash
+    python motmetrics4norfair.py --help 
+``` 
 
-    ```bash
-    python motmetrics4norfair.py --help
-    ```
+## Remarks
+
+Hyperparameters were tuned for reaching a high `MOTA` on this dataset. They may not be ideal for more general use cases, use the default hyperparameters for those. ID switches suffer specially due to this optimization. If you want to improve ID switches use a higher margin between `hit_inertia_min` and `hit_inertia_max`, or just use the default hyperparameters.
