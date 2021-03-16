@@ -223,14 +223,14 @@ class Accumulators:
         if metrics is None:
             metrics = list(mm.metrics.motchallenge_metrics)
 
-        self.summary, self.summary_pd = eval_motChallenge(
+        self.summary_text, self.summary_dataframe = eval_motChallenge(
             matrixes_predictions=self.matrixes_predictions,
             paths=self.paths,
             metrics=metrics,
             generate_overall=generate_overall,
         )
 
-        return self.summary_pd
+        return self.summary_dataframe
 
     def save_metrics(self, save_path=".", file_name="metrics.txt"):
         if not os.path.exists(save_path):
@@ -238,11 +238,11 @@ class Accumulators:
 
         metrics_path = os.path.join(save_path, file_name)
         metrics_file = open(metrics_path, "w+")
-        metrics_file.write(self.summary)
+        metrics_file.write(self.summary_text)
         metrics_file.close()
 
     def print_metrics(self):
-        print(self.summary)
+        print(self.summary_text)
 
 
 def load_motchallenge(matrix_data, min_confidence=-1):
@@ -338,10 +338,10 @@ def eval_motChallenge(matrixes_predictions, paths, metrics=None, generate_overal
         metrics = list(mm.metrics.motchallenge_metrics)
     mm.lap.default_solver = "scipy"
     print("Computing metrics...")
-    summary_pd = mh.compute_many(
+    summary_dataframe = mh.compute_many(
         accs, names=names, metrics=metrics, generate_overall=generate_overall
     )
-    summary = mm.io.render_summary(
-        summary_pd, formatters=mh.formatters, namemap=mm.io.motchallenge_metric_names
+    summary_text = mm.io.render_summary(
+        summary_dataframe, formatters=mh.formatters, namemap=mm.io.motchallenge_metric_names
     )
-    return summary, summary_pd
+    return summary_text, summary_dataframe
