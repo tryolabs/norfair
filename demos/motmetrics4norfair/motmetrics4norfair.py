@@ -7,7 +7,8 @@ from norfair import Tracker, drawing, metrics, video
 
 frame_skip_period = 1
 detection_threshold = 0.01
-distance_threshold = 0.4
+distance_threshold = 0.9
+diagonal_proportion_threshold = 1 / 18
 
 parser = argparse.ArgumentParser(
     description="Evaluate a basic tracker on MOTChallenge data. Display on terminal the MOTChallenge metrics results "
@@ -63,45 +64,43 @@ else:
 
 accumulator = metrics.Accumulators()
 
+
+def keypoints_distance(detected_pose, tracked_pose):
+    norm_orders = [1, 2, np.inf]
+    distances = 0
+    diagonal = 0
+
+    hor_min_pt = min(detected_pose.points[:, 0])
+    hor_max_pt = max(detected_pose.points[:, 0])
+    ver_min_pt = min(detected_pose.points[:, 1])
+    ver_max_pt = max(detected_pose.points[:, 1])
+
+    # Set keypoint_dist_threshold based on object size, and calculate
+    # distance between detections and tracker estimations
+    for p in norm_orders:
+        distances += np.linalg.norm(
+            detected_pose.points - tracked_pose.estimate, ord=p, axis=1
+        )
+        diagonal += np.linalg.norm(
+            [hor_max_pt - hor_min_pt, ver_max_pt - ver_min_pt], ord=p
+        )
+
+    distances = distances / len(norm_orders)
+
+    keypoint_dist_threshold = diagonal * diagonal_proportion_threshold
+
+    match_num = np.count_nonzero(
+        (distances < keypoint_dist_threshold)
+        * (detected_pose.scores > detection_threshold)
+        * (tracked_pose.last_detection.scores > detection_threshold)
+    )
+    return 1 / (1 + match_num)
+
+
 for input_path in sequences_paths:
     # Search vertical resolution in seqinfo.ini
     seqinfo_path = os.path.join(input_path, "seqinfo.ini")
     info_file = metrics.InformationFile(file_path=seqinfo_path)
-    vertical_resolution = info_file.search(variable_name="imHeight")
-
-    def keypoints_distance(detected_pose, tracked_pose):
-        norm_orders = [1, 2, np.inf]
-        distances = 0
-        diagonal = 0
-
-        hor_min_pt = min(detected_pose.points[:, 0])
-        hor_max_pt = max(detected_pose.points[:, 0])
-        ver_min_pt = min(detected_pose.points[:, 1])
-        ver_max_pt = max(detected_pose.points[:, 1])
-
-        # Set keypoint_dist_threshold based on object size, and calculate
-        # distance between detections and tracker estimations
-        for p in norm_orders:
-            distances += np.linalg.norm(
-                detected_pose.points - tracked_pose.estimate, ord=p, axis=1
-            )
-            diagonal += np.linalg.norm(
-                [hor_max_pt - hor_min_pt, ver_max_pt - ver_min_pt], ord=p
-            )
-
-        distances = distances / len(norm_orders)
-
-        keypoint_dist_threshold = (
-            vertical_resolution * (diagonal < vertical_resolution / 3) / 67
-            + diagonal * (diagonal >= vertical_resolution / 3) / 17
-        )
-
-        match_num = np.count_nonzero(
-            (distances < keypoint_dist_threshold)
-            * (detected_pose.scores > detection_threshold)
-            * (tracked_pose.last_detection.scores > detection_threshold)
-        )
-        return 1 / (1 + match_num)
 
     all_detections = metrics.DetectionFileParser(
         input_path=input_path, information_file=info_file
@@ -121,7 +120,9 @@ for input_path in sequences_paths:
         distance_function=keypoints_distance,
         distance_threshold=distance_threshold,
         detection_threshold=detection_threshold,
-        point_transience=2,
+        hit_inertia_min=10,
+        hit_inertia_max=12,
+        point_transience=4,
     )
 
     # Initialize accumulator for this video
