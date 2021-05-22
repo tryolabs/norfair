@@ -6,10 +6,25 @@ Simplest possible example of tracking. Based on [YOLOv5-pip](https://github.com/
 
 1. Install Norfair with `pip install norfair[video]`.
 2. Install YOLOv5 with `pip install yolov5`.
-3. Copy `yolov5demo.py` into your local clone of the repo and run `python yolov5demo.py <video file>`.
+3. Copy `yolov5demo.py` into your local and run `python yolov5demo.py <video file>`.
+4. Bonus: Use additional arguments `--detector_path`, `--img_size`, `--iou_thres`,`--conf_thres`, `--classes` as you wish.
 
 ## Explanation
 
-This example tracks objects using a single point per detection: the centroid of the bounding boxes around cars returned by YOLOv5.
+This example tracks objects using a single point per detection: the centroid of the bounding boxes around objects returned by YOLOv5.
 
-![Norfair YOLOv5 demo](../../docs/yolov5_cars.gif)
+<div style="text-align:center">
+
+Car tracking demo:
+
+<img src="https://github.com/fcakyon/public-files/raw/main/norfair/yolov5_cars.gif" width="800" >
+
+Pedestrian tracking demo:
+
+<img src="https://github.com/fcakyon/public-files/raw/main/norfair/yolov5_pedestrian.gif" width="800" >
+
+All tracking demo:
+
+<img src="https://github.com/fcakyon/public-files/raw/main/norfair/yolov5_all.gif" width="800" >
+
+</div>
