@@ -31,11 +31,12 @@ class YOLO:
 
         self.model.conf = conf_threshold
         self.model.iou = iou_threshold
-        detections_temp = self.model(img)
-        detections: list = []
-        for detection in detections_temp.xyxy[0]:
-            detections.append(detection.tolist())
-        return detections
+        detections = self.model(img)
+        bboxes: list = []
+        for detection in detections.xyxy[0]:
+            bbox = list(map(int, detection[:4].tolist()))
+            bboxes.append(bbox)
+        return bboxes
 
 
 def euclidean_distance(detection, tracked_object):
@@ -68,7 +69,6 @@ for input_path in args.files:
         detections = [
             Detection(get_centroid(box, frame.shape[0], frame.shape[1]), data=box)
             for box in detections
-            if box[-1] == 2
         ]
         tracked_objects = tracker.update(detections=detections)
         norfair.draw_points(frame, detections)
