@@ -3,7 +3,7 @@ import argparse
 import numpy as np
 import torch
 import yolov5
-from typing import Union
+from typing import Union, List, Optional
 
 import norfair
 from norfair import Detection, Tracker, Video
@@ -28,11 +28,14 @@ class YOLO:
         img: Union[str, np.ndarray],
         conf_threshold: float = 0.25,
         iou_threshold: float = 0.45,
-        image_size: int = 720
+        image_size: int = 720,
+        classes: Optional[List[int]] = None
     ):
 
         self.model.conf = conf_threshold
         self.model.iou = iou_threshold
+        if classes is not None:
+            self.model.classes = classes
         detections = self.model(img, size=image_size)
         detections_as_xyxy = detections.xyxy[0]
         return detections_as_xyxy
@@ -56,6 +59,7 @@ parser.add_argument("--detector_path", type=str, default="yolov5m6.pt", help="YO
 parser.add_argument("--img_size", type=int, default="640", help="YOLOv5 inference size (pixels)")
 parser.add_argument("--conf_thres", type=float, default="0.25", help="YOLOv5 object confidence threshold")
 parser.add_argument("--iou_thresh", type=float, default="0.45", help="YOLOv5 IOU threshold for NMS")
+parser.add_argument('--classes', nargs='+', type=int, help='filter by class: --classes 0, or --classes 0 2 3')
 args = parser.parse_args()
 
 model = YOLO(args.detector_path)  # set use_cuda=False if using CPU
@@ -72,7 +76,8 @@ for input_path in args.files:
             frame,
             conf_threshold=args.conf_thres,
             iou_threshold=args.conf_thres,
-            image_size=args.img_size
+            image_size=args.img_size,
+            classes=args.classes
         )
         detections = [
             Detection(
