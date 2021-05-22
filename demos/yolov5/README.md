@@ -1,4 +1,4 @@
-# YOLOv4 example
+# YOLOv5 example
 
 Simplest possible example of tracking. Based on [YOLOv5-pip](https://github.com/fcakyon/yolov5-pip).
 
