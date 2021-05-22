@@ -1,6 +1,5 @@
 import argparse
 
-import cv2
 import numpy as np
 import torch
 import yolov5
@@ -24,38 +23,42 @@ class YOLO:
         if self.use_cuda:
             self.model.cuda()
 
-    def __call__(self, img: Union[str, np.ndarray], conf_threshold: float  = 0.25, iou_threshold: float = 0.45):
-        width, height = 416, 416
-        sized = cv2.resize(img, (width, height))
-        sized = cv2.cvtColor(sized, cv2.COLOR_BGR2RGB)
+    def __call__(
+        self,
+        img: Union[str, np.ndarray],
+        conf_threshold: float = 0.25,
+        iou_threshold: float = 0.45,
+        image_size: int = 720
+    ):
 
         self.model.conf = conf_threshold
         self.model.iou = iou_threshold
-        detections = self.model(img)
-        bboxes: list = []
-        for detection in detections.xyxy[0]:
-            bbox = list(map(int, detection[:4].tolist()))
-            bboxes.append(bbox)
-        return bboxes
+        detections = self.model(img, size=image_size)
+        detections_as_xyxy = detections.xyxy[0]
+        return detections_as_xyxy
 
 
 def euclidean_distance(detection, tracked_object):
     return np.linalg.norm(detection.points - tracked_object.estimate)
 
 
-def get_centroid(yolo_box, img_height, img_width):
-    x1 = yolo_box[0] * img_width
-    y1 = yolo_box[1] * img_height
-    x2 = yolo_box[2] * img_width
-    y2 = yolo_box[3] * img_height
+def get_centroid(yolo_box):
+    x1 = yolo_box[0]
+    y1 = yolo_box[1]
+    x2 = yolo_box[2]
+    y2 = yolo_box[3]
     return np.array([(x1 + x2) / 2, (y1 + y2) / 2])
 
 
 parser = argparse.ArgumentParser(description="Track human poses in a video.")
 parser.add_argument("files", type=str, nargs="+", help="Video files to process")
+parser.add_argument("--detector_path", type=str, default="yolov5m6.pt", help="YOLOv5 model path")
+parser.add_argument("--img_size", type=int, default="640", help="YOLOv5 inference size (pixels)")
+parser.add_argument("--conf_thres", type=float, default="0.25", help="YOLOv5 object confidence threshold")
+parser.add_argument("--iou_thresh", type=float, default="0.45", help="YOLOv5 IOU threshold for NMS")
 args = parser.parse_args()
 
-model = YOLO("yolov5m6.pt")  # set use_cuda=False if using CPU
+model = YOLO(args.detector_path)  # set use_cuda=False if using CPU
 
 for input_path in args.files:
     video = Video(input_path=input_path)
@@ -65,10 +68,18 @@ for input_path in args.files:
     )
 
     for frame in video:
-        detections = model(frame)
+        detections = model(
+            frame,
+            conf_threshold=args.conf_thres,
+            iou_threshold=args.conf_thres,
+            image_size=args.img_size
+        )
         detections = [
-            Detection(get_centroid(box, frame.shape[0], frame.shape[1]), data=box)
-            for box in detections
+            Detection(
+                get_centroid(list(map(int, detection[:4].tolist()))),
+                data=detection
+                )
+            for detection in detections
         ]
         tracked_objects = tracker.update(detections=detections)
         norfair.draw_points(frame, detections)
