@@ -12,16 +12,16 @@ max_distance_between_points: int = 30
 
 
 class YOLO:
-    def __init__(self, model_path: str, use_cuda: bool = True):
-        if use_cuda and not torch.cuda.is_available():
+    def __init__(self, model_path: str, device: Optional[str] = None):
+        if "cuda" in device and not torch.cuda.is_available():
             raise Exception(
-                "Selected use_cuda=True, but cuda is not available to Pytorch"
+                "Selected device='cuda', but cuda is not available to Pytorch."
             )
-        self.use_cuda = use_cuda
-        self.model = yolov5.load(model_path, device="cuda" if use_cuda else "cpu")
-
-        if self.use_cuda:
-            self.model.cuda()
+        # automatically set device if its None
+        if device is None:
+            device = "cuda:0" if torch.cuda_is_available() else "cpu"
+        # load model
+        self.model = yolov5.load(model_path, device=device)
 
     def __call__(
         self,
@@ -53,16 +53,17 @@ def get_centroid(yolo_box):
     return np.array([(x1 + x2) / 2, (y1 + y2) / 2])
 
 
-parser = argparse.ArgumentParser(description="Track human poses in a video.")
+parser = argparse.ArgumentParser(description="Track objects in a video.")
 parser.add_argument("files", type=str, nargs="+", help="Video files to process")
 parser.add_argument("--detector_path", type=str, default="yolov5m6.pt", help="YOLOv5 model path")
 parser.add_argument("--img_size", type=int, default="640", help="YOLOv5 inference size (pixels)")
 parser.add_argument("--conf_thres", type=float, default="0.25", help="YOLOv5 object confidence threshold")
 parser.add_argument("--iou_thresh", type=float, default="0.45", help="YOLOv5 IOU threshold for NMS")
-parser.add_argument('--classes', nargs='+', type=int, help='filter by class: --classes 0, or --classes 0 2 3')
+parser.add_argument('--classes', nargs='+', type=int, help='Filter by class: --classes 0, or --classes 0 2 3')
+parser.add_argument("--device", type=str, default=None, help="Inference device: 'cpu' or 'cuda'")
 args = parser.parse_args()
 
-model = YOLO(args.detector_path)  # set use_cuda=False if using CPU
+model = YOLO(args.detector_path, device=args.device)
 
 for input_path in args.files:
     video = Video(input_path=input_path)
@@ -83,7 +84,7 @@ for input_path in args.files:
             Detection(
                 get_centroid(list(map(int, detection[:4].tolist()))),
                 data=detection
-                )
+            )
             for detection in detections
         ]
         tracked_objects = tracker.update(detections=detections)
