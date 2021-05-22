@@ -56,7 +56,7 @@ def get_centroid(yolo_box):
 parser = argparse.ArgumentParser(description="Track objects in a video.")
 parser.add_argument("files", type=str, nargs="+", help="Video files to process")
 parser.add_argument("--detector_path", type=str, default="yolov5m6.pt", help="YOLOv5 model path")
-parser.add_argument("--img_size", type=int, default="640", help="YOLOv5 inference size (pixels)")
+parser.add_argument("--img_size", type=int, default="720", help="YOLOv5 inference size (pixels)")
 parser.add_argument("--conf_thres", type=float, default="0.25", help="YOLOv5 object confidence threshold")
 parser.add_argument("--iou_thresh", type=float, default="0.45", help="YOLOv5 IOU threshold for NMS")
 parser.add_argument('--classes', nargs='+', type=int, help='Filter by class: --classes 0, or --classes 0 2 3')
