@@ -13,13 +13,13 @@ max_distance_between_points: int = 30
 
 class YOLO:
     def __init__(self, model_path: str, device: Optional[str] = None):
-        if "cuda" in device and not torch.cuda.is_available():
+        if device is not None and "cuda" in device and not torch.cuda.is_available():
             raise Exception(
                 "Selected device='cuda', but cuda is not available to Pytorch."
             )
         # automatically set device if its None
-        if device is None:
-            device = "cuda:0" if torch.cuda_is_available() else "cpu"
+        elif device is None:
+            device = "cuda:0" if torch.cuda.is_available() else "cpu"
         # load model
         self.model = yolov5.load(model_path, device=device)
 
@@ -37,20 +37,31 @@ class YOLO:
         if classes is not None:
             self.model.classes = classes
         detections = self.model(img, size=image_size)
-        detections_as_xyxy = detections.xyxy[0]
-        return detections_as_xyxy
+        detections_as_xywh = detections.xywh[0]
+        return detections_as_xywh
 
 
 def euclidean_distance(detection, tracked_object):
     return np.linalg.norm(detection.points - tracked_object.estimate)
 
 
-def get_centroid(yolo_box):
-    x1 = yolo_box[0]
-    y1 = yolo_box[1]
-    x2 = yolo_box[2]
-    y2 = yolo_box[3]
-    return np.array([(x1 + x2) / 2, (y1 + y2) / 2])
+def detections_as_xywh_to_norfair_detections(
+    detections_as_xywh: torch.tensor
+) -> List[Detection]:
+    """convert detections_as_xywh to norfair detections
+    """
+    norfair_detections: List[Detection] = []
+    for detection_as_xywh in detections_as_xywh:
+        centroid = np.array(
+            [
+                detection_as_xywh[0].item(),
+                detection_as_xywh[1].item()
+            ]
+        )
+        norfair_detections.append(
+            Detection(points=centroid, data=detection_as_xywh)
+        )
+    return norfair_detections
 
 
 parser = argparse.ArgumentParser(description="Track objects in a video.")
@@ -73,20 +84,14 @@ for input_path in args.files:
     )
 
     for frame in video:
-        detections = model(
+        detections_as_xywh = model(
             frame,
             conf_threshold=args.conf_thres,
             iou_threshold=args.conf_thres,
             image_size=args.img_size,
             classes=args.classes
         )
-        detections = [
-            Detection(
-                get_centroid(list(map(int, detection[:4].tolist()))),
-                data=detection
-            )
-            for detection in detections
-        ]
+        detections = detections_as_xywh_to_norfair_detections(detections_as_xywh)
         tracked_objects = tracker.update(detections=detections)
         norfair.draw_points(frame, detections)
         norfair.draw_tracked_objects(frame, tracked_objects)
