@@ -1,5 +1,6 @@
 import math
 from typing import Callable, List, Optional, Sequence
+from copy import deepcopy
 
 import numpy as np
 from filterpy.kalman import KalmanFilter
@@ -18,6 +19,7 @@ class Tracker:
         initialization_delay: Optional[int] = None,
         detection_threshold: float = 0,
         point_transience: int = 4,
+        predictive_filter = None,
     ):
         self.tracked_objects: Sequence["TrackedObject"] = []
         self.distance_function = distance_function
@@ -42,6 +44,7 @@ class Tracker:
         self.detection_threshold = detection_threshold
         self.point_transience = point_transience
         TrackedObject.count = 0
+        self.predictive_filter = predictive_filter
 
     def update(self, detections: Optional[List["Detection"]] = None, period: int = 1):
         self.period = period
@@ -74,6 +77,7 @@ class Tracker:
                     self.detection_threshold,
                     self.period,
                     self.point_transience,
+                    self.predictive_filter,
                 )
             )
 
@@ -197,6 +201,7 @@ class TrackedObject:
         detection_threshold: float,
         period: int,
         point_transience: int,
+        predictive_filter,
     ):
         try:
             self.num_points = validate_points(initial_detection.points).shape[0]
@@ -228,38 +233,41 @@ class TrackedObject:
             TrackedObject.initializing_count
         )  # Just for debugging
         TrackedObject.initializing_count += 1
-        self.setup_filter(initial_detection.points)
+        self.setup_filter(predictive_filter, initial_detection.points)
         self.detected_at_least_once_points = np.array([False] * self.num_points)
 
-    def setup_filter(self, initial_detection: np.array):
+    def setup_filter(self, predictive_filter, initial_detection: np.array):
         initial_detection = validate_points(initial_detection)
 
-        dim_x = 2 * 2 * self.num_points  # We need to accomodate for velocities
         dim_z = 2 * self.num_points
         self.dim_z = dim_z
-        self.filter = KalmanFilter(dim_x=dim_x, dim_z=dim_z)
+        if predictive_filter is None:
+            dim_x = 2 * 2 * self.num_points  # We need to accomodate for velocities
+            self.filter = KalmanFilter(dim_x=dim_x, dim_z=dim_z)
 
-        # State transition matrix (models physics): numpy.array()
-        self.filter.F = np.eye(dim_x)
-        dt = 1  # At each step we update pos with v * dt
-        for p in range(dim_z):
-            self.filter.F[p, p + dim_z] = dt
+            # State transition matrix (models physics): numpy.array()
+            self.filter.F = np.eye(dim_x)
+            dt = 1  # At each step we update pos with v * dt
 
-        # Measurement function: numpy.array(dim_z, dim_x)
-        self.filter.H = np.eye(
-            dim_z,
-            dim_x,
-        )
+            self.filter.F[:dim_z, dim_z:] = dt*np.eye(dim_z)
 
-        # Measurement uncertainty (sensor noise): numpy.array(dim_z, dim_z)
-        # TODO: maybe we should open this one to the users, as it lets them
-        #       chose between giving more/less importance to the detections
-        self.filter.R *= 4.0
+            # Measurement function: numpy.array(dim_z, dim_x)
+            self.filter.H = np.eye(
+                dim_z,
+                dim_x,
+            )
 
-        # Process uncertainty: numpy.array(dim_x, dim_x)
-        # Don't decrease it too much or trackers pay too little attention to detections
-        # self.filter.Q[:dim_z, :dim_z] /= 50
-        self.filter.Q[dim_z:, dim_z:] /= 10
+            # Measurement uncertainty (sensor noise): numpy.array(dim_z, dim_z)
+            # TODO: maybe we should open this one to the users, as it lets them
+            #       chose between giving more/less importance to the detections
+            self.filter.R *= 4.0
+
+            # Process uncertainty: numpy.array(dim_x, dim_x)
+            # Don't decrease it too much or trackers pay too little attention to detections
+            # self.filter.Q[:dim_z, :dim_z] /= 50
+            self.filter.Q[dim_z:, dim_z:] /= 10
+        else:
+            self.filter = deepcopy(predictive_filter)
 
         # Initial state: numpy.array(dim_x, 1)
         self.filter.x[:dim_z] = np.expand_dims(initial_detection.flatten(), 0).T
