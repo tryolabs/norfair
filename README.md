@@ -101,9 +101,10 @@ You can find the documentation for Norfair's API [here](docs/README.md).
 We provide several examples of how Norfair can be used to add tracking capabilities to several different detectors.
 
 1. [Simple tracking of cars](demos/detectron2) using [Detectron2](https://github.com/facebookresearch/detectron2).
-2. [Faster tracking of cars](demos/yolov4) using [YOLOv4](https://github.com/Tianxiaomo/pytorch-YOLOv4/tree/master). Try it on any youtube video on this [Google Colab notebook](https://colab.research.google.com/github/tryolabs/norfair/blob/master/demos/yolov4/yolov4_demo.ipynb).
-3. Inserting Norfair into an existing project: [Simple tracking of pedestrians](demos/alphapose) using [AlphaPose](https://github.com/MVIG-SJTU/AlphaPose).
-4. [Speed up pose estimation by extrapolating detections](demos/openpose) using [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose).
+2. [Faster tracking of cars/pedestrians and other 78 classes](demos/yolov5) using [YOLOv5](https://github.com/fcakyon/yolov5-pip). Try it on any YouTube video on this [Google Colab notebook](https://colab.research.google.com/github/tryolabs/norfair/blob/master/demos/yolov5/yolov5_demo.ipynb).
+3. [Faster tracking of cars](demos/yolov4) using [YOLOv4](https://github.com/Tianxiaomo/pytorch-YOLOv4/tree/master). Try it on any YouTube video on this [Google Colab notebook](https://colab.research.google.com/github/tryolabs/norfair/blob/master/demos/yolov4/yolov4_demo.ipynb).
+4. Inserting Norfair into an existing project: [Simple tracking of pedestrians](demos/alphapose) using [AlphaPose](https://github.com/MVIG-SJTU/AlphaPose).
+5. [Speed up pose estimation by extrapolating detections](demos/openpose) using [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose).
 
 ![Norfair OpenPose Demo](docs/openpose_skip_3_frames.gif)
 
@@ -119,6 +120,7 @@ If you are looking for a tracker, here are some other projects worth noting:
 - [**SORT**](https://github.com/abewley/sort) and [**Deep SORT**](https://github.com/nwojke/deep_sort) are similar to this repo in that they use Kalman filters (and a deep embedding for Deep SORT), but they are hardcoded to a fixed distance function and to tracking boxes. Norfair also adds some filtering when matching tracked objects with detections, and changes the Hungarian Algorithm for its own distance minimizer. Both these repos are also released under the GPL license, which might be an issue for some individuals or companies because the source code of derivative works needs to be published.
 
 ## Benchmarks
+
 [MOT17](https://motchallenge.net/data/MOT17/) results obtained using [motmetrics4norfair](https://github.com/tryolabs/norfair/tree/master/demos/motmetrics4norfair) demo script. Hyperparameters were tuned for reaching a high `MOTA` on this dataset. A more balanced set of hyperparameters, like the default ones used in the other demos, is recommended for production.
 
 |                | Rcll  | Prcn  | GT    MT   PT   ML  | FP     FN      IDs   FM   | MOTA   MOTP  |
