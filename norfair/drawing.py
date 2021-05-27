@@ -223,25 +223,29 @@ def draw_boxes(frame, detections, line_color=None, line_width=None, random_color
 def draw_tracked_boxes(
     frame,
     objects,
-    line_color=None,
-    line_width=None,
+    border_colors=None,
+    border_width=None,
     id_size=None,
     id_thickness=None,
     draw_box=True,
 ):
     frame_scale = frame.shape[0] / 100
-    if line_width is None:
-        line_width = int(frame_scale * 0.5)
+    if border_width is None:
+        border_width = int(frame_scale * 0.5)
     if id_size is None:
         id_size = frame_scale / 10
     if id_thickness is None:
         id_thickness = int(frame_scale / 5)
-    color_is_None = line_color == None
-    for obj in objects:
+    if isinstance(border_colors, tuple):
+        border_colors = [border_colors]
+
+    for n, obj in enumerate(objects):
         if not obj.live_points.any():
             continue
-        if color_is_None:
-            line_color = Color.random(obj.id)
+        if border_colors is None:
+            color = Color.random(obj.id)
+        else:
+            color = border_colors[n % len(border_colors)]
 
         if draw_box:
             points = obj.estimate
@@ -250,8 +254,8 @@ def draw_tracked_boxes(
                 frame,
                 tuple(points[0, :]),
                 tuple(points[1, :]),
-                color=line_color,
-                thickness=line_width,
+                color=color,
+                thickness=border_width,
             )
 
         if id_size > 0:
@@ -263,7 +267,7 @@ def draw_tracked_boxes(
                 tuple(id_draw_position),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 id_size,
-                line_color,
+                color,
                 id_thickness,
                 cv2.LINE_AA,
             )
