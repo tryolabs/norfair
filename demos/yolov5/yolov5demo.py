@@ -112,6 +112,9 @@ for input_path in args.files:
         )
         detections = yolo_detections_to_norfair_detections(yolo_detections, track_points=args.track_points)
         tracked_objects = tracker.update(detections=detections)
-        norfair.draw_points(frame, detections)
+        if args.track_points == 'centroid':
+            norfair.draw_points(frame, detections)
+        elif args.track_points == 'bbox':
+            norfair.draw_boxes(frame, detections)
         norfair.draw_tracked_objects(frame, tracked_objects)
         video.write(frame)
