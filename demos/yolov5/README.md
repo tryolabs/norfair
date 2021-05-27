@@ -7,7 +7,7 @@ Simplest possible example of tracking. Based on <a href="https://github.com/fcak
 1. Install Norfair with `pip install norfair[video]`.
 2. Install YOLOv5 with `pip install yolov5`.
 3. Copy `yolov5demo.py` into your local and run `python yolov5demo.py <video file>`.
-4. Bonus: Use additional arguments `--detector_path`, `--img_size`, `--iou_thres`,`--conf_thres`, `--classes` as you wish.
+4. Bonus: Use additional arguments `--detector_path`, `--img_size`, `--iou_thres`,`--conf_thres`, `--classes`, `--track_points` as you wish.
 
 ## Explanation
 

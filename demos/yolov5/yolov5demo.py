@@ -30,37 +30,55 @@ class YOLO:
         iou_threshold: float = 0.45,
         image_size: int = 720,
         classes: Optional[List[int]] = None
-    ):
+    ) -> torch.tensor:
 
         self.model.conf = conf_threshold
         self.model.iou = iou_threshold
         if classes is not None:
             self.model.classes = classes
         detections = self.model(img, size=image_size)
-        detections_as_xywh = detections.xywh[0]
-        return detections_as_xywh
+        return detections
 
 
 def euclidean_distance(detection, tracked_object):
     return np.linalg.norm(detection.points - tracked_object.estimate)
 
 
-def detections_as_xywh_to_norfair_detections(
-    detections_as_xywh: torch.tensor
+def yolo_detections_to_norfair_detections(
+    yolo_detections: torch.tensor,
+    track_points: str = 'centroid'  # bbox or centroid
 ) -> List[Detection]:
     """convert detections_as_xywh to norfair detections
     """
     norfair_detections: List[Detection] = []
-    for detection_as_xywh in detections_as_xywh:
-        centroid = np.array(
-            [
-                detection_as_xywh[0].item(),
-                detection_as_xywh[1].item()
-            ]
-        )
-        norfair_detections.append(
-            Detection(points=centroid, data=detection_as_xywh)
-        )
+
+    if track_points == 'centroid':
+        detections_as_xywh = yolo_detections.xywh[0]
+        for detection_as_xywh in detections_as_xywh:
+            centroid = np.array(
+                [
+                    detection_as_xywh[0].item(),
+                    detection_as_xywh[1].item()
+                ]
+            )
+            scores = np.array([detection_as_xywh[5].item()])
+            norfair_detections.append(
+                Detection(points=centroid, scores=scores)
+            )
+    elif track_points == 'bbox':
+        detections_as_xyxy = yolo_detections.xyxy[0]
+        for detection_as_xyxy in detections_as_xyxy:
+            bbox = np.array(
+                [
+                    [detection_as_xyxy[0].item(), detection_as_xyxy[1].item()],
+                    [detection_as_xyxy[2].item(), detection_as_xyxy[3].item()]
+                ]
+            )
+            scores = np.array([detection_as_xyxy[5].item(), detection_as_xyxy[5].item()])
+            norfair_detections.append(
+                Detection(points=bbox, scores=scores)
+            )
+
     return norfair_detections
 
 
@@ -72,6 +90,7 @@ parser.add_argument("--conf_thres", type=float, default="0.25", help="YOLOv5 obj
 parser.add_argument("--iou_thresh", type=float, default="0.45", help="YOLOv5 IOU threshold for NMS")
 parser.add_argument('--classes', nargs='+', type=int, help='Filter by class: --classes 0, or --classes 0 2 3')
 parser.add_argument("--device", type=str, default=None, help="Inference device: 'cpu' or 'cuda'")
+parser.add_argument("--track_points", type=str, default="centroid", help="Track points: 'centroid' or 'bbox'")
 args = parser.parse_args()
 
 model = YOLO(args.detector_path, device=args.device)
@@ -84,14 +103,14 @@ for input_path in args.files:
     )
 
     for frame in video:
-        detections_as_xywh = model(
+        yolo_detections = model(
             frame,
             conf_threshold=args.conf_thres,
             iou_threshold=args.conf_thres,
             image_size=args.img_size,
             classes=args.classes
         )
-        detections = detections_as_xywh_to_norfair_detections(detections_as_xywh)
+        detections = yolo_detections_to_norfair_detections(yolo_detections, track_points=args.track_points)
         tracked_objects = tracker.update(detections=detections)
         norfair.draw_points(frame, detections)
         norfair.draw_tracked_objects(frame, tracked_objects)
