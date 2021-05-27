@@ -1,6 +1,6 @@
 # YOLOv5 Example
 
-Simplest possible example of tracking. Based on <a href="https://github.com/fcakyon/yolov5-pip">YOLOv5-pip</a>.
+Simplest possible example of tracking. Based on [YOLOv5-pip](https://github.com/fcakyon/yolov5-pip).
 
 ## Instructions 
 
@@ -11,16 +11,16 @@ Simplest possible example of tracking. Based on <a href="https://github.com/fcak
 
 ## Explanation
 
-This example tracks objects using a single point per detection: the centroid of the bounding boxes around objects returned by YOLOv5.
+This example tracks objects using a single or double point per detection: the centroid or the two corners of the bounding boxes around objects returned by YOLOv5.
 
 ## Car tracking demo:
 
 <img src="https://github.com/fcakyon/public-files/raw/main/norfair/yolov5_cars.gif" width="800" >
 
-## Pedestrian tracking demo: </h2>
+## Pedestrian tracking demo:
 
 <img src="https://github.com/fcakyon/public-files/raw/main/norfair/yolov5_pedestrian.gif" width="800" >
 
-## All tracking demo: </h2>
+## All tracking demo:
 
 <img src="https://github.com/fcakyon/public-files/raw/main/norfair/yolov5_all.gif" width="800" >
