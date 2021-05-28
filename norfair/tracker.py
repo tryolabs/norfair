@@ -1,12 +1,11 @@
 import math
 from typing import Callable, List, Optional, Sequence
-from copy import deepcopy
 
 import numpy as np
-from filterpy.kalman import KalmanFilter
 from rich import print
 
 from .utils import validate_points
+from .filter import FilterSetup
 
 
 class Tracker:
@@ -19,13 +18,13 @@ class Tracker:
         initialization_delay: Optional[int] = None,
         detection_threshold: float = 0,
         point_transience: int = 4,
-        predictive_filter: KalmanFilter = None,
+        filter_setup: "FilterSetup" = FilterSetup(),
     ):
         self.tracked_objects: Sequence["TrackedObject"] = []
         self.distance_function = distance_function
         self.hit_inertia_min = hit_inertia_min
         self.hit_inertia_max = hit_inertia_max
-        self.predictive_filter = predictive_filter
+        self.filter_setup = filter_setup
 
         if initialization_delay is None:
             self.initialization_delay = int(
@@ -77,7 +76,7 @@ class Tracker:
                     self.detection_threshold,
                     self.period,
                     self.point_transience,
-                    self.predictive_filter,
+                    self.filter_setup,
                 )
             )
 
@@ -201,15 +200,16 @@ class TrackedObject:
         detection_threshold: float,
         period: int,
         point_transience: int,
-        predictive_filter: KalmanFilter = None,
+        filter_setup: "FilterSetup",
     ):
         try:
-            self.num_points = validate_points(initial_detection.points).shape[0]
+            initial_detection_points = validate_points(initial_detection.points)
         except AttributeError:
             print(
                 f"\n[red]ERROR[/red]: The detection list fed into `tracker.update()` should be composed of {Detection} objects not {type(initial_detection)}.\n"
             )
             exit()
+        self.num_points = initial_detection_points.shape[0]
         self.hit_inertia_min: int = hit_inertia_min
         self.hit_inertia_max: int = hit_inertia_max
         self.initialization_delay = initialization_delay
@@ -233,49 +233,11 @@ class TrackedObject:
             TrackedObject.initializing_count
         )  # Just for debugging
         TrackedObject.initializing_count += 1
-        self.setup_filter(initial_detection.points, predictive_filter)
         self.detected_at_least_once_points = np.array([False] * self.num_points)
 
-    def setup_filter(
-        self, initial_detection: np.array, predictive_filter: KalmanFilter = None
-    ):
-        initial_detection = validate_points(initial_detection)
-
-        dim_z = 2 * self.num_points
-        self.dim_z = dim_z
-        if predictive_filter is not None:
-            self.filter = deepcopy(predictive_filter)
-        else:
-            dim_x = 2 * 2 * self.num_points  # We need to accommodate for velocities
-            self.filter = KalmanFilter(dim_x=dim_x, dim_z=dim_z)
-
-            # State transition matrix (models physics): numpy.array()
-            self.filter.F = np.eye(dim_x)
-            dt = 1  # At each step we update pos with v * dt
-
-            self.filter.F[:dim_z, dim_z:] = dt * np.eye(dim_z)
-
-            # Measurement function: numpy.array(dim_z, dim_x)
-            self.filter.H = np.eye(
-                dim_z,
-                dim_x,
-            )
-
-            # Measurement uncertainty (sensor noise): numpy.array(dim_z, dim_z)
-            # TODO: maybe we should open this one to the users, as it lets them
-            #       chose between giving more/less importance to the detections
-            self.filter.R *= 4.0
-
-            # Process uncertainty: numpy.array(dim_x, dim_x)
-            # Don't decrease it too much or trackers pay too little attention to detections
-            # self.filter.Q[:dim_z, :dim_z] /= 50
-            self.filter.Q[dim_z:, dim_z:] /= 10
-
-        # Initial state: numpy.array(dim_x, 1)
-        self.filter.x[:dim_z] = np.expand_dims(initial_detection.flatten(), 0).T
-
-        # Estimation uncertainty: numpy.array(dim_x, dim_x)
-        self.filter.P[dim_z:, dim_z:] *= 10.0
+        # Create Kalman Filter
+        self.filter = filter_setup.create_filter(initial_detection_points)
+        self.dim_z = 2 * self.num_points
 
     def tracker_step(self):
         self.hit_counter -= 1
