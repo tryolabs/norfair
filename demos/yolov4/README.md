@@ -12,4 +12,4 @@ Simplest possible example of tracking. Based on [pytorch YOLOv4](https://github.
 
 This example tracks objects using a single point per detection: the centroid of the bounding boxes around cars returned by YOLOv4.
 
-![Norfair YOLOv4 demo](../../docs/yolo_cars.gif)
+![Norfair YOLOv4 demo](../../docs/yolov4_cars.gif)
