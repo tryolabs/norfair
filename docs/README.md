@@ -13,6 +13,7 @@ The class in charge of performing the tracking of the detections produced by the
 - `initialization_delay (optional)`: Each tracked object waits till its internal hit intertia counter goes over `hit_inertia_min` to be considered as a potential object to be returned to the user by the Tracker. The argument `initialization_delay` determines by how much the object's hit inertia counter must exceed `hit_inertia_min` to be considered as initialized and get returned to the user as a real object. Defaults to `(hit_inertia_min + hit_inertia_max) / 2`.
 - `detection_threshold (optional)`: Sets the threshold at which the scores of the points in a detection being fed into the tracker must dip below to be ignored by the tracker. Defaults to `0`.
 - `point_transience (optional)`: Each tracked object keeps track of how much often of the points its tracking has been getting matched. Points that are getting matches are said to be live, and points which aren't are said to not be live. This determines things like which points in a tracked object get drawn by [`draw_tracked_objects`](#draw_tracked_objects) and which don't. This argument determines how short lived points not getting matched are. Defaults to `4`.
+- `filter_setup (optional)`: This parameter can be used to change the parameters of the Kalman Filter that is used by [`TrackedObject`](#trackedobject) instances. Defaults to [`FilterSetup()`](#filtersetup).
 
 ### Tracker.update
 
@@ -36,6 +37,33 @@ Detections returned by the detector must be converted to a `Detection` object be
 - `points`: A numpy array of shape `(number of points per object, 2)`, with each row being a point expressed as `x, y` coordinates on the image. The number of points per detection must be constant for each particular tracker.
 - `scores`: An array of length `number of points per object` which assigns a score to each of the points defined in `points`. This is used to inform the tracker of which points to ignore; any point with a score below `detection_threshold` will be ignored. This useful for cases in which detections don't always have every point detected, as is often the case in pose estimators.
 - `data`: The place to store any extra data which may be useful when calculating the distance function. Anything stored here will be available to use inside the distance function. This enables the development of more interesting trackers which can do things like assign an appearance embedding to each detection to aid in its tracking.
+
+## FilterSetup
+
+This class can be used either to change some parameters of the [KalmanFilter](https://filterpy.readthedocs.io/en/latest/kalman/KalmanFilter.html) that the tracker uses, or to fully customize the predictive filter implementation to use (as long as the methods and properties are compatible).
+The former case only requires changing the default parameters upon tracker creation: `tracker = Tracker(..., filter_setup=FilterSetup(R=100))`, while the latter requires creating your own class extending `FilterSetup`, and rewriting its `create_filter` method to return your own customized filter.
+
+
+##### Arguments:
+
+Note that these arguments correspond to the same parameters of the [`filterpy.KalmanFilter` (see docs)](https://filterpy.readthedocs.io/en/latest/kalman/KalmanFilter.html) that this class returns.
+- `R`: Multiplier for the sensor measurement noise matrix. Defaults to `4.0`.
+- `Q`: Multiplier for the process uncertainty. Defaults to `0.1`.
+- `P`: Multiplier for the initial covariance matrix estimation, only in the entries that correspond to position (not speed) variables. Defaults to `10.0`.
+
+
+### FilterSetup.create_filter
+
+This function returns a new predictive filter instance with the current setup, to be used by each new [`TrackedObject`](#trackedobject) that is created. This predictive filter will be used to estimate speed and future positions of the object, to better match the detections during its trajectory.
+
+This method may be overwritten by a subclass of `FilterSetup`, in case that further customizations of the filter parameters or implementation are needed.
+
+##### Arguments:
+
+- `initial_detection`: numpy array of shape `(number of points per object, 2)`, corresponding to the [`Detection.points`](#detection) of the tracked object being born, which shall be used as initial position estimation for it.
+
+##### Returns:
+A new `filterpy.KalmanFilter` instance (or an API compatible object, since the class is not restricted by type checking).
 
 ## TrackedObject
 
