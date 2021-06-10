@@ -8,7 +8,7 @@ from typing import Union, List, Optional
 import norfair
 from norfair import Detection, Tracker, Video
 
-max_distance_between_points: int = 30
+max_distance_between_points: int = 200
 
 
 class YOLO:
@@ -61,7 +61,7 @@ def yolo_detections_to_norfair_detections(
                     detection_as_xywh[1].item()
                 ]
             )
-            scores = np.array([detection_as_xywh[5].item()])
+            scores = np.array([detection_as_xywh[4].item()])
             norfair_detections.append(
                 Detection(points=centroid, scores=scores)
             )
@@ -74,7 +74,7 @@ def yolo_detections_to_norfair_detections(
                     [detection_as_xyxy[2].item(), detection_as_xyxy[3].item()]
                 ]
             )
-            scores = np.array([detection_as_xyxy[5].item(), detection_as_xyxy[5].item()])
+            scores = np.array([detection_as_xyxy[4].item(), detection_as_xyxy[4].item()])
             norfair_detections.append(
                 Detection(points=bbox, scores=scores)
             )
@@ -100,6 +100,9 @@ for input_path in args.files:
     tracker = Tracker(
         distance_function=euclidean_distance,
         distance_threshold=max_distance_between_points,
+        point_transience=4,
+        initialization_delay=1,
+        hit_inertia_min=10,
     )
 
     for frame in video:
@@ -116,5 +119,8 @@ for input_path in args.files:
             norfair.draw_points(frame, detections)
         elif args.track_points == 'bbox':
             norfair.draw_boxes(frame, detections)
-        norfair.draw_tracked_objects(frame, tracked_objects)
+        for obj in tracked_objects:
+            print(obj)
+        #norfair.draw_tracked_objects(frame, tracked_objects)
+        norfair.draw_debug_metrics(frame, tracker.tracked_objects)
         video.write(frame)
