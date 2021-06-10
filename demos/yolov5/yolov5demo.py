@@ -8,7 +8,7 @@ from typing import Union, List, Optional
 import norfair
 from norfair import Detection, Tracker, Video
 
-max_distance_between_points: int = 200
+max_distance_between_points: int = 30
 
 
 class YOLO:
@@ -100,9 +100,6 @@ for input_path in args.files:
     tracker = Tracker(
         distance_function=euclidean_distance,
         distance_threshold=max_distance_between_points,
-        point_transience=4,
-        initialization_delay=1,
-        hit_inertia_min=10,
     )
 
     for frame in video:
@@ -119,8 +116,5 @@ for input_path in args.files:
             norfair.draw_points(frame, detections)
         elif args.track_points == 'bbox':
             norfair.draw_boxes(frame, detections)
-        for obj in tracked_objects:
-            print(obj)
-        #norfair.draw_tracked_objects(frame, tracked_objects)
-        norfair.draw_debug_metrics(frame, tracker.tracked_objects)
+        norfair.draw_tracked_objects(frame, tracked_objects)
         video.write(frame)
