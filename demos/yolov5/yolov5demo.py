@@ -61,7 +61,7 @@ def yolo_detections_to_norfair_detections(
                     detection_as_xywh[1].item()
                 ]
             )
-            scores = np.array([detection_as_xywh[5].item()])
+            scores = np.array([detection_as_xywh[4].item()])
             norfair_detections.append(
                 Detection(points=centroid, scores=scores)
             )
@@ -74,7 +74,7 @@ def yolo_detections_to_norfair_detections(
                     [detection_as_xyxy[2].item(), detection_as_xyxy[3].item()]
                 ]
             )
-            scores = np.array([detection_as_xyxy[5].item(), detection_as_xyxy[5].item()])
+            scores = np.array([detection_as_xyxy[4].item(), detection_as_xyxy[4].item()])
             norfair_detections.append(
                 Detection(points=bbox, scores=scores)
             )
