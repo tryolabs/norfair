@@ -1,6 +1,6 @@
 ![Norfair by Tryolabs logo](docs/logo.png)
 
-![Build status](https://github.com/tryolabs/norfair/workflows/CI/badge.svg?branch=master)
+![Build status](https://github.com/tryolabs/norfair/workflows/CI/badge.svg?branch=master) [![DOI](https://zenodo.org/badge/276473370.svg)](https://zenodo.org/badge/latestdoi/276473370)
 
 Norfair is a customizable lightweight Python library for real-time 2D object tracking.
 
