@@ -155,6 +155,10 @@ Tryolabs can provide commercial support, implement new features in Norfair or bu
 
 If you are interested, please [contact us](https://tryolabs.com/#contact).
 
+## Citing Norfair
+
+For citations in academic publications, please export your desired citation format (BibTeX or other) from [Zenodo](https://doi.org/10.5281/zenodo.5146253).
+
 ## License
 
 Copyright © 2021, [Tryolabs](https://tryolabs.com). Released under the [BSD 3-Clause](LICENSE).
