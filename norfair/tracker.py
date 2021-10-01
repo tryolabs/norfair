@@ -19,12 +19,17 @@ class Tracker:
         detection_threshold: float = 0,
         point_transience: int = 4,
         filter_setup: "FilterSetup" = FilterSetup(),
+        past_detections_length: int = 4
     ):
         self.tracked_objects: Sequence["TrackedObject"] = []
         self.distance_function = distance_function
         self.hit_inertia_min = hit_inertia_min
         self.hit_inertia_max = hit_inertia_max
         self.filter_setup = filter_setup
+        if past_detections_length >= 0:
+            self.past_detections_length = past_detections_length
+        else:
+            raise ValueError(f"Argument `past_detections_length` is {past_detections_length} and should be larger than 0.")
 
         if initialization_delay is None:
             self.initialization_delay = int(
@@ -77,6 +82,7 @@ class Tracker:
                     self.period,
                     self.point_transience,
                     self.filter_setup,
+                    self.past_detections_length
                 )
             )
 
@@ -201,6 +207,7 @@ class TrackedObject:
         period: int,
         point_transience: int,
         filter_setup: "FilterSetup",
+        past_detections_length: int
     ):
         try:
             initial_detection_points = validate_points(initial_detection.points)
@@ -234,6 +241,12 @@ class TrackedObject:
         )  # Just for debugging
         TrackedObject.initializing_count += 1
         self.detected_at_least_once_points = np.array([False] * self.num_points)
+        initial_detection.age = self.age
+        self.past_detections_length = past_detections_length
+        if past_detections_length > 0:
+            self.past_detections: Sequence["Detection"] = [initial_detection]
+        else:
+            self.past_detections: Sequence["Detection"] = []
 
         # Create Kalman Filter
         self.filter = filter_setup.create_filter(initial_detection_points)
@@ -273,6 +286,7 @@ class TrackedObject:
 
     def hit(self, detection: "Detection", period: int = 1):
         points = validate_points(detection.points)
+        self.conditionally_add_to_past_detections(detection)
 
         self.last_detection = detection
         if self.hit_counter < self.hit_inertia_max:
@@ -330,6 +344,22 @@ class TrackedObject:
             self.last_distance,
             self.initializing_id,
         )
+
+    def conditionally_add_to_past_detections(self, detection):
+        """Adds detections into (and pops detections away) from `past_detections`
+
+        It does so by keeping a fixed amount of past detections saved into each 
+        TrackedObject, while maintaining them distributed uniformly through the object's
+        lifetime.
+        """
+        if self.past_detections_length == 0: return
+        if len(self.past_detections) < self.past_detections_length:
+            detection.age = self.age
+            self.past_detections.append(detection)
+        elif self.age >= self.past_detections[0].age * self.past_detections_length:
+            self.past_detections.pop(0)
+            detection.age = self.age
+            self.past_detections.append(detection)
 
 
 class Detection:

@@ -14,6 +14,7 @@ The class in charge of performing the tracking of the detections produced by the
 - `detection_threshold (optional)`: Sets the threshold at which the scores of the points in a detection being fed into the tracker must dip below to be ignored by the tracker. Defaults to `0`.
 - `point_transience (optional)`: Each tracked object keeps track of how much often of the points its tracking has been getting matched. Points that are getting matches are said to be live, and points which aren't are said to not be live. This determines things like which points in a tracked object get drawn by [`draw_tracked_objects`](#draw_tracked_objects) and which don't. This argument determines how short lived points not getting matched are. Defaults to `4`.
 - `filter_setup (optional)`: This parameter can be used to change the parameters of the Kalman Filter that is used by [`TrackedObject`](#trackedobject) instances. Defaults to [`FilterSetup()`](#filtersetup).
+- `past_detections_length`: How many past detections to save for each tracked object. Norfair tries to distribute these past detections uniformly through the object's lifetime so they're more representative of it. Very useful if you want to add metric learning to your model, as you can associate an embedding to each detection and access them in your distance function. Defaults to `4`.
 
 ### Tracker.update
 
@@ -73,7 +74,7 @@ The objects returned by the tracker's `update` function on each iteration. They 
 
 - `estimate`: Where the tracker predicts the point will be in the current frame based on past detections. A numpy array with the same shape as the detections being fed to the tracker that produced it.
 - `id`: The unique identifier assigned to this object by the tracker.
-- `last_detection`: The last detection that matched with this tracked object.
+- `last_detection`: The last detection that matched with this tracked object. Useful if you are storing embeddings in your detections and want to do metric learning, or for debugging.
 - `last_distance`: The distance the tracker had with the last object it matched with.
 - `age`: The age of this object measured in number of frames.
 - `live_points`: A boolean mask with shape `(number of points per object)`. Points marked as `True` have recently been matched with detections. Points marked as `False` haven't and are to be considered as stale, and should be ignored. Functions like [`draw_tracked_objects`](#draw_tracked_objects) use this property to determine which points not to draw.
