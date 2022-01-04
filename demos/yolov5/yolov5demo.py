@@ -106,7 +106,7 @@ for input_path in args.files:
         yolo_detections = model(
             frame,
             conf_threshold=args.conf_thres,
-            iou_threshold=args.conf_thres,
+            iou_threshold=args.iou_thresh,
             image_size=args.img_size,
             classes=args.classes
         )
