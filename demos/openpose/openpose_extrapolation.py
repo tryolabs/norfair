@@ -27,31 +27,35 @@ HIT_INERTIA_MIN = 5
 INITIALIZATION_DELAY = 0
 POINT_TRANSIENCE = 2
 
+# Wrapper implementation for OpenPose detector
 class OpenposeDetector:
-    def __init__(self):
+    def __init__(self, num_gpu_start=None):
+        # Set OpenPose flags
         config = {}
-        config["dir"] = openpose_install_path
-        config["logging_level"] = 3
-        config["output_resolution"] = "-1x-1"  # 320x176
-        config["net_resolution"] = "-1x768"  # 320x176
+        config["model_folder"] = openpose_install_path + "/models/"
         config["model_pose"] = "BODY_25"
+        config["logging_level"] = 3
+        config["output_resolution"] = "-1x-1"
+        config["net_resolution"] = "-1x768"
+        config["num_gpu"] = 1
         config["alpha_pose"] = 0.6
-        config["scale_gap"] = 0.3
-        config["scale_number"] = 1
         config["render_threshold"] = 0.05
-        config[
-            "num_gpu_start"
-        ] = 0  # If GPU version is built, and multiple GPUs are available, set the ID here
+        config["scale_number"] = 1
+        config["scale_gap"] = 0.3
         config["disable_blending"] = False
-        openpose_dir = config["dir"]
-        sys.path.append(openpose_dir + "/build/python/openpose")
-        from openpose import OpenPose  # noqa
 
-        config["default_model_folder"] = openpose_dir + "/models/"
-        self.detector = OpenPose(config)
+        # If GPU version is built, and multiple GPUs are available,
+        # you can change the ID using the num_gpu_start parameter
+        if num_gpu_start is not None:
+            config["num_gpu_start"] = num_gpu_start
+
+        # Starting OpenPose
+        self.detector = op.WrapperPython()
+        self.detector.configure(config)
+        self.detector.start()
 
     def __call__(self, image):
-        return self.detector.forward(image, False)
+        return self.detector.emplaceAndPop(image)
 
 
 def keypoints_distance(detected_pose, tracked_pose):
