@@ -6,12 +6,26 @@ import numpy as np
 import norfair
 from norfair import Detection, Tracker, Video
 
-# Insert the path to your openpose instalation folder here
-openpose_install_path = "openpose/openpose"
-frame_skip_period = 3
-detection_threshold = 0.01
-distance_threshold = 0.4
+# Import openpose
+openpose_install_path = (
+    "/openpose"  # Insert the path to your openpose instalation folder here
+)
+try:
+    sys.path.append(openpose_install_path + "/build/python")
+    from openpose import pyopenpose as op
+except ImportError as e:
+    print(
+        "Error: OpenPose library could not be found. Did you enable `BUILD_PYTHON` in CMake and have this Python script in the right folder?"
+    )
+    raise e
 
+
+# Define constants
+DETECTION_THRESHOLD = 0.01
+DISTANCE_THRESHOLD = 0.4
+HIT_INERTIA_MIN = 5
+INITIALIZATION_DELAY = 0
+POINT_TRANSIENCE = 2
 
 class OpenposeDetector:
     def __init__(self):
