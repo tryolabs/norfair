@@ -17,6 +17,8 @@ If you just want to speed up inference on a detector, you can make your detector
 
 In this example, we are skipping 4 out of every 5 frames, which should make the video process 5 times faster. This is because the time added by running the Norfair itself is negligible when compared to not having to run 4 inferences on a deep neural network.
 
-This is how the results look like:
+This is how the results look like (original videos can be found at [Kaggle](https://www.kaggle.com/datasets/ashayajbani/oxford-town-centre?select=TownCentreXVID.mp4)):
 
-![openpose_skip_3_frames](../../docs/openpose_skip_3_frames.gif)
+![openposev17_1_skip_5_frames_short](https://user-images.githubusercontent.com/92468171/172702968-ae986ecc-9cfd-4cd2-9132-92c19ff36608.gif)
+
+![openposev17_2_skip_5_frames_short](https://user-images.githubusercontent.com/92468171/172703046-e769a9fa-4c0e-4111-9478-eb2d8ad2cead.gif)
