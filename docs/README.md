@@ -1,20 +1,22 @@
 # API
 
+This document is a description of the different elements of the Norfair API. For examples on how to use Norfair, please go to the [demos page](demos/).
+
 ## Tracker
 
 The class in charge of performing the tracking of the detections produced by the detector. The `Tracker` class first needs to get instantiated as an object, and then continuously updated inside a video processing loop by feeding new detections into its [`update`](#tracker.update) method.
 
 ##### Arguments:
 
-- `distance_function`: Function used by the tracker to determine the distance between newly detected objects and the objects the tracker is currently tracking. This function should take 2 arguments, the first being a detection of type [`Detection`](#detection), and the second a tracked object of type [`TrackedObject`](#trackedobject), and should return a `float` with the distance it calculates.
+- `distance_function`: Function used by the tracker to determine the distance between newly detected objects and the objects the tracker is currently tracking. This function should take 2 input arguments, the first being a detection of type [`Detection`](#detection), and the second a tracked object of type [`TrackedObject`](#trackedobject). It returns a `float` with the distance it calculates.
 - `distance_threshold`: Defines what is the maximum distance that can constitute a match. Detections and tracked objects whose distance are above this threshold won't be matched by the tracker.
-- `hit_inertia_min (optional)`: Each tracked objects keeps an internal hit inertia counter which tracks how often it's getting matched to a detection, each time it gets a match this counter goes up, and each time it doesn't it goes down. If it doesn't get any match for a certain amount of frames, and it then gets below the value set by this argument, the object is destroyed. Defaults to `10`.
-- `hit_inertia_max (optional)`: Each tracked objects keeps an internal hit inertia counter which tracks how often it's getting matched to a detection, each time it gets a match this counter goes up, and each time it doesn't it goes down. This argument defines how large this inertia can grow, and therefore defines how long an object can live without getting matched to any detections. Defaults to `25`.
-- `initialization_delay (optional)`: Each tracked object waits till its internal hit intertia counter goes over `hit_inertia_min` to be considered as a potential object to be returned to the user by the Tracker. The argument `initialization_delay` determines by how much the object's hit inertia counter must exceed `hit_inertia_min` to be considered as initialized and get returned to the user as a real object. Defaults to `(hit_inertia_max - hit_inertia_min) / 2`.
+- `hit_inertia_min (optional)`: Each tracked objects keeps an internal hit inertia counter which tracks how often it's getting matched to a detection, each time it gets a match this counter goes up, and each time it doesn't it goes down. If it doesn't get any match for a certain amount of frames, and it gets below the value set by this argument, the object is destroyed. Defaults to `10`.
+- `hit_inertia_max (optional)`: Each tracked objects keeps an internal hit inertia counter which tracks how often it's getting matched to a detection, each time it gets a match this counter goes up, and each time it doesn't it goes down. If it goes below `hit_inertia_min` the object gets destroyed. This argument (`hit_inertia_max`) defines how large this inertia can grow, and therefore defines how long an object can live without getting matched to any detections, before it is destroyed. Defaults to `25`.
+- `initialization_delay (optional)`: Each tracked object waits till its internal hit intertia counter goes over `hit_inertia_min` to be considered as a potential object to be returned to the user by the Tracker. The argument `initialization_delay` determines by how much the object's hit inertia counter must exceed `hit_inertia_min` to be considered as initialized, and get returned to the user as a real object. If set to 0, objects will get returned to the user as soon as they exceed their `hit_inertia_min`, which can be problematic as this is also the threshold for object destruction, and can result in objects appearing and immediately dissapearing. Defaults to `(hit_inertia_max - hit_inertia_min) / 2`.
 - `detection_threshold (optional)`: Sets the threshold at which the scores of the points in a detection being fed into the tracker must dip below to be ignored by the tracker. Defaults to `0`.
-- `point_transience (optional)`: Each tracked object keeps track of how much often of the points its tracking has been getting matched. Points that are getting matches are said to be live, and points which aren't are said to not be live. This determines things like which points in a tracked object get drawn by [`draw_tracked_objects`](#draw_tracked_objects) and which don't. This argument determines how short lived points not getting matched are. Defaults to `4`.
+- `point_transience (optional)`: Each tracked object keeps track of how often the points it's tracking have been getting matched. Points that are getting matched are said to be live, and points which aren't are said to not be live. This is used to determine things like which individual points in a tracked object get drawn by [`draw_tracked_objects`](#draw_tracked_objects) and which don't. This argument determines how short lived individual points (not tracked objects) not getting matched are. Defaults to `4`.
 - `filter_setup (optional)`: This parameter can be used to change the parameters of the Kalman Filter that is used by [`TrackedObject`](#trackedobject) instances. Defaults to [`FilterSetup()`](#filtersetup).
-- `past_detections_length`: How many past detections to save for each tracked object. Norfair tries to distribute these past detections uniformly through the object's lifetime so they're more representative of it. Very useful if you want to add metric learning to your model, as you can associate an embedding to each detection and access them in your distance function. Defaults to `4`.
+- `past_detections_length`: How many past detections to save for each tracked object. Norfair tries to distribute these past detections uniformly through the object's lifetime so they're more representative. Very useful if you want to add metric learning to your model, as you can associate an embedding to each detection and access them in your distance function. Defaults to `4`.
 
 ### Tracker.update
 
@@ -36,7 +38,7 @@ Detections returned by the detector must be converted to a `Detection` object be
 ##### Arguments and Properties:
 
 - `points`: A numpy array of shape `(number of points per object, 2)`, with each row being a point expressed as `x, y` coordinates on the image. The number of points per detection must be constant for each particular tracker.
-- `scores`: An array of length `number of points per object` which assigns a score to each of the points defined in `points`. This is used to inform the tracker of which points to ignore; any point with a score below `detection_threshold` will be ignored. This useful for cases in which detections don't always have every point detected, as is often the case in pose estimators.
+- `scores`: An array of length `number of points per object` which assigns a score to each of the points defined in `points`. This is used to inform the tracker of which points to ignore; any point with a score below `detection_threshold` will be ignored. This useful for cases in which detections don't always have every point present, as is often the case in pose estimators.
 - `data`: The place to store any extra data which may be useful when calculating the distance function. Anything stored here will be available to use inside the distance function. This enables the development of more interesting trackers which can do things like assign an appearance embedding to each detection to aid in its tracking.
 
 ## FilterSetup
@@ -77,8 +79,8 @@ The objects returned by the tracker's `update` function on each iteration. They 
 - `last_detection`: The last detection that matched with this tracked object. Useful if you are storing embeddings in your detections and want to do metric learning, or for debugging.
 - `last_distance`: The distance the tracker had with the last object it matched with.
 - `age`: The age of this object measured in number of frames.
-- `live_points`: A boolean mask with shape `(number of points per object)`. Points marked as `True` have recently been matched with detections. Points marked as `False` haven't and are to be considered as stale, and should be ignored. Functions like [`draw_tracked_objects`](#draw_tracked_objects) use this property to determine which points not to draw.
-- `initializing_id`: On top of `id`, objects also have an `initializing_id` which is the id they are given internally by the `Tracker`, which is used for debugging. Each new object created by the `Tracker` starts as an uninitialized `TrackedObject`, which needs to reach a certain match rate to be converted into a full blown `TrackedObject`. This is the id assigned to `TrackedObject` while they are getting initialized. 
+- `live_points`: A boolean mask with shape `(number of points per object)`. Points marked as `True` have recently been matched with detections. Points marked as `False` haven't and are to be considered stale, and should be ignored. Functions like [`draw_tracked_objects`](#draw_tracked_objects) use this property to determine which points not to draw.
+- `initializing_id`: On top of `id`, objects also have an `initializing_id` which is the id they are given internally by the `Tracker`, this id is used solely for debugging. Each new object created by the `Tracker` starts as an uninitialized `TrackedObject`, which needs to reach a certain match rate to be converted into a full blown `TrackedObject`. `initializing_id` is the id temporarily assigned to `TrackedObject` while they are getting initialized. 
 
 ## Video
 
@@ -89,7 +91,7 @@ A simple video inference loop can be defined with just:
 ```python
 video = Video(input_path="video.mp4")
 for frame in video:
-    # Your modifications to the frame
+    # << Your modifications to the frame would go here >>
     video.write(frame)
 ```
 
@@ -98,7 +100,7 @@ for frame in video:
 - `camera (optional)`: An integer representing the device id of the camera to be used as the video source. Webcams tend to have an id of `0`. Arguments `camera` and `input_path` can't be used at the same time, one must be chosen.
 - `input_path (optional)`: A string consisting of the path to the video file to be used as the video source. Arguments `camera` and `input_path` can't be used at the same time, one must be chosen.
 - `output_path (optional)`: The path to the output video to be generated. Can be a folder or a file name. Defaults to `"."`.
-- `output_fps (optional)`: The frames per second at which to encode the output video file. If not provided it is set to be equal to the input video source's fps. This argument is useful when using live video cameras as a video source, where the user may know the input fps, but where the frames are being fed to the output video at a rate that is lower than the video source's fps, due to the latency added by the detector. This can result in an output video that was fed frames at a certain fps, that consequently encodes them at a higher fps (the video source's fps), which results in a sped up video output.
+- `output_fps (optional)`: The frames per second at which to encode the output video file. If not provided it is set to be equal to the input video source's fps. This argument is useful when using live video cameras as a video source, where the user may know the input fps, but where the frames are being fed to the output video at a rate that is lower than the video source's fps, due to the latency added by the detector.
 - `label (optional)`: Label to add to the progress bar that appears when processing the current video.
 - `codec_fourcc (optional)`: OpenCV encoding for output video file.
 
