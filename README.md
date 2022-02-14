@@ -94,7 +94,7 @@ Norfair was born out of the need to quickly add a simple layer of tracking over 
 
 ## Documentation
 
-You can find the documentation for Norfair's API [here](docs/README.md).
+:blue_book: You can find the documentation for Norfair's API [here](docs/README.md).
 
 ## Examples
 
