@@ -1,6 +1,6 @@
 # API
 
-This document is a description of the different elements of the Norfair API. For examples on how to use Norfair, please go to the [demos page](demos/).
+This document is a description of the different elements of the Norfair API. For examples on how to use Norfair, please go to the [demos page](../demos/).
 
 ## Tracker
 
