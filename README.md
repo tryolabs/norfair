@@ -161,4 +161,4 @@ For citations in academic publications, please export your desired citation form
 
 ## License
 
-Copyright © 2021, [Tryolabs](https://tryolabs.com). Released under the [BSD 3-Clause](LICENSE).
+Copyright © 2022, [Tryolabs](https://tryolabs.com). Released under the [BSD 3-Clause](LICENSE).
