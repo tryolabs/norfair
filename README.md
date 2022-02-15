@@ -6,6 +6,8 @@ Norfair is a customizable lightweight Python library for real-time 2D object tra
 
 Using Norfair, you can add tracking capabilities to any detector with just a few lines of code.
 
+Try our simple colab demo on a youtube video ![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tryolabs/norfair/blob/master/demos/yolov4/yolov4_demo.ipynb)
+
 ## Features
 
 - Any detector expressing its detections as a series of `(x, y)` coordinates can be used with Norfair. This includes detectors performing object detection, pose estimation, and interest point detection.
@@ -102,7 +104,7 @@ We provide several examples of how Norfair can be used to add tracking capabilit
 
 1. [Simple tracking of cars](demos/detectron2) using [Detectron2](https://github.com/facebookresearch/detectron2).
 2. [Faster tracking of cars/pedestrians and other 78 classes](demos/yolov5) using [YOLOv5](https://github.com/fcakyon/yolov5-pip). Try it on any YouTube video on this [Google Colab notebook](https://colab.research.google.com/github/tryolabs/norfair/blob/master/demos/yolov5/yolov5_demo.ipynb).
-3. [Faster tracking of cars](demos/yolov4) using [YOLOv4](https://github.com/Tianxiaomo/pytorch-YOLOv4/tree/master). Try it on any YouTube video on this [Google Colab notebook](https://colab.research.google.com/github/tryolabs/norfair/blob/master/demos/yolov4/yolov4_demo.ipynb).
+3. [Faster tracking of cars](demos/yolov4) using [YOLOv4](https://github.com/Tianxiaomo/pytorch-YOLOv4/tree/master).
 4. Inserting Norfair into an existing project: [Simple tracking of pedestrians](demos/alphapose) using [AlphaPose](https://github.com/MVIG-SJTU/AlphaPose).
 5. [Speed up pose estimation by extrapolating detections](demos/openpose) using [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose).
 
