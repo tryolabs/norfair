@@ -375,6 +375,53 @@ def draw_tracked_boxes(
     return frame
 
 
+class Paths:
+    def __init__(self, points_of_interest=None, thickness=None, color=None, radius=None, attenuation=0.01):
+        if points_of_interest is None:
+            def points_of_interest(points):
+                return [np.mean(np.array(points), axis=0)]
+        
+        self.points_of_interest = points_of_interest
+
+        self.radius = radius
+        self.thickness = thickness
+        self.color = color
+        self.mask = None
+        self.attenuation_factor = 1-attenuation
+
+    def draw(self, frame, tracked_objects):
+        if self.mask is None:
+            frame_scale = frame.shape[0] / 100
+
+            if self.radius is None:
+                self.radius = int(max(frame_scale * 0.7, 1))
+            if self.thickness is None:
+                self.thickness = int(max(frame_scale / 7, 1))
+
+            self.mask = np.zeros(frame.shape, np.uint8)
+        
+        self.mask = (self.mask*self.attenuation_factor).astype('uint8') 
+
+        for obj in tracked_objects:
+            if self.color is None:
+                color = Color.random(obj.id)
+            else:
+                color = self.color
+
+            points_of_interest = self.points_of_interest(obj.estimate)
+
+            for point in points_of_interest:
+                cv2.circle(
+                    self.mask,
+                    tuple(point.astype(int)),
+                    radius=self.radius,
+                    color=color,
+                    thickness=self.thickness,
+                )
+
+        return cv2.addWeighted(self.mask, 1, frame, 1, 0, frame)
+
+
 class Color:
     green = (0, 128, 0)
     white = (255, 255, 255)
