@@ -98,6 +98,13 @@ class Tracker:
             distance_matrix *= self.distance_threshold + 1
             for d, detection in enumerate(detections):
                 for o, obj in enumerate(objects):
+                    if detection.label != obj.label:
+                        distance_matrix[d, o] = self.distance_threshold + 1
+                        if (detection.label is None) or (obj.label is None):
+                            print(
+                                "\nThere are detections with and without label!"
+                            )
+                        continue
                     distance = self.distance_function(detection, obj)
                     # Cap detections and objects with no chance of getting matched so we
                     # dont force the hungarian algorithm to minimize them and therefore
@@ -251,6 +258,7 @@ class TrackedObject:
         # Create Kalman Filter
         self.filter = filter_setup.create_filter(initial_detection_points)
         self.dim_z = 2 * self.num_points
+        self.label = initial_detection.label
 
     def tracker_step(self):
         self.hit_counter -= 1
@@ -363,7 +371,8 @@ class TrackedObject:
 
 
 class Detection:
-    def __init__(self, points: np.array, scores=None, data=None):
+    def __init__(self, points: np.array, scores=None, data=None, label=None):
         self.points = points
         self.scores = scores
         self.data = data
+        self.label = label
