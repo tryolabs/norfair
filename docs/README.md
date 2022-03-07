@@ -40,6 +40,7 @@ Detections returned by the detector must be converted to a `Detection` object be
 - `points`: A numpy array of shape `(number of points per object, 2)`, with each row being a point expressed as `x, y` coordinates on the image. The number of points per detection must be constant for each particular tracker.
 - `scores`: An array of length `number of points per object` which assigns a score to each of the points defined in `points`. This is used to inform the tracker of which points to ignore; any point with a score below `detection_threshold` will be ignored. This useful for cases in which detections don't always have every point present, as is often the case in pose estimators.
 - `data`: The place to store any extra data which may be useful when calculating the distance function. Anything stored here will be available to use inside the distance function. This enables the development of more interesting trackers which can do things like assign an appearance embedding to each detection to aid in its tracking.
+- `label`: When working with multiple classes the detection's label can be stored to be used as a matching condition when associating tracked objects with new detections.
 
 ## FilterSetup
 
