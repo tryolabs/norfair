@@ -19,6 +19,9 @@ def draw_points(
     radius: Optional[int] = None,
     thickness: Optional[int] = None,
     color: Optional[Tuple[int, int, int]] = None,
+    color_by_label: bool = False,
+    draw_labels: bool = False,
+    label_size: Optional[int] = None,
 ):
     if detections is None:
         return
@@ -27,9 +30,13 @@ def draw_points(
         radius = int(max(frame_scale * 0.7, 1))
     if thickness is None:
         thickness = int(max(frame_scale / 7, 1))
+    if label_size is None:
+        label_size = int(max(frame_scale / 100, 1))
     if color is None:
         color = Color.red
     for d in detections:
+        if color_by_label:
+            color = Color.random(abs(hash(d.label)))
         points = d.points
         points = validate_points(points)
         for point in points:
@@ -41,6 +48,20 @@ def draw_points(
                 thickness=thickness,
             )
 
+        if draw_labels:
+            label_draw_position = np.array([min(points[:, 0]), min(points[:, 1])])
+            label_draw_position -= radius
+            cv2.putText(
+                frame,
+                f"L: {d.label}",
+                tuple(label_draw_position.astype(int)),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                label_size,
+                color,
+                thickness,
+                cv2.LINE_AA,
+            )
+
 
 def draw_tracked_objects(
     frame: np.array,
@@ -50,6 +71,9 @@ def draw_tracked_objects(
     id_size: Optional[float] = None,
     id_thickness: Optional[int] = None,
     draw_points: bool = True,
+    color_by_label: bool = False,
+    draw_labels: bool = False,
+    label_size: Optional[int] = None,
 ):
     frame_scale = frame.shape[0] / 100
     if radius is None:
@@ -58,11 +82,16 @@ def draw_tracked_objects(
         id_size = frame_scale / 10
     if id_thickness is None:
         id_thickness = int(frame_scale / 5)
+    if label_size is None:
+        label_size = int(max(frame_scale / 100, 1))
 
     for obj in objects:
         if not obj.live_points.any():
             continue
-        if color is None:
+        if color_by_label:
+            point_color = Color.random(abs(hash(obj.label)))
+            id_color = point_color
+        elif color is None:
             object_id = obj.id if obj.id is not None else random.randint(0, 999)
             point_color = Color.random(object_id)
             id_color = point_color
@@ -80,6 +109,22 @@ def draw_tracked_objects(
                         color=point_color,
                         thickness=-1,
                     )
+
+            if draw_labels:
+                points = obj.estimate[obj.live_points]
+                points = points.astype(int)
+                label_draw_position = np.array([min(points[:, 0]), min(points[:, 1])])
+                label_draw_position -= radius
+                cv2.putText(
+                    frame,
+                    f"L: {obj.label}",
+                    tuple(label_draw_position),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    label_size,
+                    point_color,
+                    id_thickness,
+                    cv2.LINE_AA,
+                )
 
         if id_size > 0:
             id_draw_position = centroid(obj.estimate[obj.live_points])
@@ -104,6 +149,8 @@ def draw_debug_metrics(
     only_ids=None,
     only_initializing_ids=None,
     draw_score_threshold: float = 0,
+    color_by_label: bool = False,
+    draw_labels: bool = False,
 ):
     """Draw objects with their debug information
 
@@ -130,7 +177,9 @@ def draw_debug_metrics(
         if only_initializing_ids is not None:
             if obj.initializing_id not in only_initializing_ids:
                 continue
-        if color is None:
+        if color_by_label:
+            text_color = Color.random(abs(hash(obj.label)))
+        elif color is None:
             text_color = Color.random(obj.initializing_id)
         else:
             text_color = color
@@ -164,13 +213,16 @@ def draw_debug_metrics(
             current_min_dist = "{:.2f}".format(obj.current_min_distance)
 
         # No support for multiline text in opencv :facepalm:
-        lines_to_draw = (
+        lines_to_draw = [
             "{}|{}".format(obj.id, obj.initializing_id),
             "a:{}".format(obj.age),
             "h:{}".format(obj.hit_counter),
             "ld:{}".format(last_dist),
             "cd:{}".format(current_min_dist),
-        )
+        ]
+        if draw_labels:
+            lines_to_draw.append("l:{}".format(obj.label))
+
         for i, line in enumerate(lines_to_draw):
             draw_position = (
                 int(draw_position[0]),
@@ -195,17 +247,29 @@ def centroid(tracked_points: np.array) -> Tuple[int, int]:
     return int(sum_x / num_points), int(sum_y / num_points)
 
 
-def draw_boxes(frame, detections, line_color=None, line_width=None, random_color=False):
+def draw_boxes(
+    frame,
+    detections,
+    line_color=None,
+    line_width=None,
+    random_color=False,
+    color_by_label=False,
+    draw_labels=False,
+    label_size=None,
+):
     frame_scale = frame.shape[0] / 100
     if detections is None:
         return frame
-    frame_scale = frame_scale / 100
     if line_width is None:
         line_width = int(max(frame_scale / 7, 1))
     if line_color is None:
         line_color = Color.red
+    if label_size is None:
+        label_size = int(max(frame_scale / 100, 1))
     for d in detections:
-        if random_color:
+        if color_by_label:
+            line_color = Color.random(abs(hash(d.label)))
+        elif random_color:
             line_color = Color.random(random.randint(0, 20))
         points = d.points
         points = validate_points(points)
@@ -217,6 +281,20 @@ def draw_boxes(frame, detections, line_color=None, line_width=None, random_color
             color=line_color,
             thickness=line_width,
         )
+
+        if draw_labels:
+            label_draw_position = np.array(points[0, :])
+            cv2.putText(
+                frame,
+                f"L: {d.label}",
+                tuple(label_draw_position),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                label_size,
+                line_color,
+                line_width,
+                cv2.LINE_AA,
+            )
+
     return frame
 
 
@@ -228,10 +306,18 @@ def draw_tracked_boxes(
     id_size=None,
     id_thickness=None,
     draw_box=True,
+    color_by_label=False,
+    draw_labels=False,
+    label_size=None,
+    label_width=None,
 ):
     frame_scale = frame.shape[0] / 100
     if border_width is None:
         border_width = int(frame_scale * 0.5)
+    if label_width is None:
+        label_width = int(max(frame_scale / 7, 2))
+    if label_size is None:
+        label_size = int(max(frame_scale / 100, 1))
     if id_size is None:
         id_size = frame_scale / 10
     if id_thickness is None:
@@ -242,7 +328,9 @@ def draw_tracked_boxes(
     for n, obj in enumerate(objects):
         if not obj.live_points.any():
             continue
-        if border_colors is None:
+        if color_by_label:
+            color = Color.random(abs(hash(obj.label)))
+        elif border_colors is None:
             color = Color.random(obj.id)
         else:
             color = border_colors[n % len(border_colors)]
@@ -257,6 +345,19 @@ def draw_tracked_boxes(
                 color=color,
                 thickness=border_width,
             )
+
+            if draw_labels:
+                label_draw_position = np.array(points[0, :])
+                cv2.putText(
+                    frame,
+                    f"L: {obj.label}",
+                    tuple(label_draw_position),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    label_size,
+                    color,
+                    label_width,
+                    cv2.LINE_AA,
+                )
 
         if id_size > 0:
             id_draw_position = np.mean(points, axis=0)
