@@ -6,7 +6,7 @@ import yolov5
 from typing import Union, List, Optional
 
 import norfair
-from norfair import Detection, Tracker, Video
+from norfair import Detection, Tracker, Video, Paths
 
 max_distance_between_points: int = 30
 
@@ -42,6 +42,10 @@ class YOLO:
 
 def euclidean_distance(detection, tracked_object):
     return np.linalg.norm(detection.points - tracked_object.estimate)
+
+
+def center(points):
+    return [np.mean(np.array(points), axis=0)]
 
 
 def yolo_detections_to_norfair_detections(
@@ -101,6 +105,7 @@ for input_path in args.files:
         distance_function=euclidean_distance,
         distance_threshold=max_distance_between_points,
     )
+    paths_drawer = Paths(center, attenuation=0.01)
 
     for frame in video:
         yolo_detections = model(
@@ -117,4 +122,5 @@ for input_path in args.files:
         elif args.track_points == 'bbox':
             norfair.draw_boxes(frame, detections)
         norfair.draw_tracked_objects(frame, tracked_objects)
+        frame = paths_drawer.draw(frame, tracked_objects)
         video.write(frame)
