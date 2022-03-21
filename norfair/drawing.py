@@ -376,18 +376,18 @@ def draw_tracked_boxes(
 
 
 class Paths:
-    def __init__(self, points_of_interest=None, thickness=None, color=None, radius=None, attenuation=0.01):
+    def __init__(self, get_points_to_draw=None, thickness=None, color=None, radius=None, attenuation=0.01):
         if points_of_interest is None:
             def points_of_interest(points):
                 return [np.mean(np.array(points), axis=0)]
         
-        self.points_of_interest = points_of_interest
+        self.get_points_to_draw = get_points_to_draw
 
         self.radius = radius
         self.thickness = thickness
         self.color = color
         self.mask = None
-        self.attenuation_factor = 1-attenuation
+        self.attenuation_factor = 1 - attenuation
 
     def draw(self, frame, tracked_objects):
         if self.mask is None:
@@ -408,9 +408,9 @@ class Paths:
             else:
                 color = self.color
 
-            points_of_interest = self.points_of_interest(obj.estimate)
+            points_to_draw = self.get_points_to_draw(obj.estimate)
 
-            for point in points_of_interest:
+            for point in points_to_draw:
                 cv2.circle(
                     self.mask,
                     tuple(point.astype(int)),
