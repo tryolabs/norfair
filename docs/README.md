@@ -141,6 +141,28 @@ Function that draws a list of detections on a frame.
 - `draw_labels (optional)`: If `True` the detection's label will be drawn along with the detected points.
 - `label_size (optional)`: Size of the label being drawn along with the detected points.
 
+## Paths
+
+Class that draws the paths taken by a set of points of interest defined from the coordinates of each tracker estimation.
+
+##### Arguments:
+
+
+- `get_points_to_draw (optional)`: Function that takes a list of points (the `.estimate` attribute of a [`TrackedObject`](#trackedobject) instance) and returns a list of points for which we want to draw their paths (by default it is the mean point of all the points in the tracker).
+- `thickness (optional)`: Thickness of the circles representing the paths of interest.
+- `color (optional)`: [`Color`](#color) of the circles representing the paths of interest.
+- `radius (optional)`: Radius of the circles representing the paths of interest.
+- `attenuation (optional)`: A float number in [0, 1] that dictates the speed at which the path is erased (if it is `0` then the path is never erased). Defaults to `0.01`.
+
+### Paths.draw
+
+Function that draws the paths of the points interest on a frame.
+
+##### Arguments:
+
+- `frame`: The OpenCV frame to draw on.
+- `tracked_objects`: List of [`TrackedObject`](#trackedobject)s to get the points of interest in order to update the paths.
+
 ## draw_tracked_objects
 
 Function that draws a list of tracked objects on a frame.
@@ -157,6 +179,7 @@ Function that draws a list of tracked objects on a frame.
 - `color_by_label (optional)`: If `True` objects will be colored by label.
 - `draw_labels (optional)`: If `True` the objects's label will be drawn along with the tracked points.
 - `label_size (optional)`: Size of the label being drawn along with the tracked points.
+
 
 ##  draw_debug_metrics
 
