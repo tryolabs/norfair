@@ -148,11 +148,11 @@ Class that draws the paths taken by a set of points of interest defined from the
 ##### Arguments:
 
 
-- `points_of_interest (optional)`: Function that takes a list of points (the `.estimate` attribute of a [`TrackedObject`](#trackedobject) instance) and returns a list of points for which we want to draw their paths (by default it is the mean point of all the points in the tracker).
+- `get_points_to_draw (optional)`: Function that takes a list of points (the `.estimate` attribute of a [`TrackedObject`](#trackedobject) instance) and returns a list of points for which we want to draw their paths (by default it is the mean point of all the points in the tracker).
 - `thickness (optional)`: Thickness of the circles representing the paths of interest.
 - `color (optional)`: [`Color`](#color) of the circles representing the paths of interest.
 - `radius (optional)`: Radius of the circles representing the paths of interest.
-- `attenuation (optional)`: A float number in [0, 1] that dictates the speed at which the path is erased (if it is `0` then the path is never erased).
+- `attenuation (optional)`: A float number in [0, 1] that dictates the speed at which the path is erased (if it is `0` then the path is never erased). Defaults to `0.01`.
 
 ### Paths.draw
 
