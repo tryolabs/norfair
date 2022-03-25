@@ -377,8 +377,8 @@ def draw_tracked_boxes(
 
 class Paths:
     def __init__(self, get_points_to_draw=None, thickness=None, color=None, radius=None, attenuation=0.01):
-        if points_of_interest is None:
-            def points_of_interest(points):
+        if get_points_to_draw is None:
+            def get_points_to_draw(points):
                 return [np.mean(np.array(points), axis=0)]
         
         self.get_points_to_draw = get_points_to_draw
