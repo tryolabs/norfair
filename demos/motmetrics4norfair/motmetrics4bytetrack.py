@@ -3,14 +3,10 @@ import os.path
 
 import numpy as np
 
-from norfair import Tracker, drawing, metrics, video
-
-frame_skip_period = 1
-detection_threshold = 0.01
-distance_threshold = 0.9
-diagonal_proportion_threshold = 1 / 18
-pointwise_hit_counter_max=3
-hit_counter_max=2
+import sys
+sys.path.append('../../../ByteTrack')
+from yolox.tracker.byte_tracker import BYTETracker
+from norfair import drawing, metrics, video
 
 parser = argparse.ArgumentParser(
     description="Evaluate a basic tracker on MOTChallenge data. Display on terminal the MOTChallenge metrics results "
@@ -23,24 +19,28 @@ parser.add_argument(
 )
 parser.add_argument(
     "--make-video",
+    dest="make_video",
     action="store_true",
     help="Generate an output video, using the frames provided by the MOTChallenge dataset.",
 )
 parser.add_argument(
     "--save-pred",
+    dest="save_pred",
     action="store_true",
     help="Generate a text file with your predictions",
 )
 parser.add_argument(
     "--save-metrics",
+    dest="save_metrics",
     action="store_true",
     help="Generate a text file with your MOTChallenge metrics results",
 )
 parser.add_argument(
-    "--output-path", type=str, nargs="?", default=".", help="Output path"
+    "--output-path", dest="output_path", type=str, nargs="?", default=".", help="Output path"
 )
 parser.add_argument(
     "--select-sequences",
+    dest="select_sequences",
     type=str,
     nargs="+",
     help="If you want to select a subset of sequences in your dataset path. Insert the names of the sequences you want to process.",
@@ -66,37 +66,11 @@ else:
 
 accumulator = metrics.Accumulators()
 
-
-def keypoints_distance(detected_pose, tracked_pose):
-    norm_orders = [1, 2, np.inf]
-    distances = 0
-    diagonal = 0
-
-    hor_min_pt = min(detected_pose.points[:, 0])
-    hor_max_pt = max(detected_pose.points[:, 0])
-    ver_min_pt = min(detected_pose.points[:, 1])
-    ver_max_pt = max(detected_pose.points[:, 1])
-
-    # Set keypoint_dist_threshold based on object size, and calculate
-    # distance between detections and tracker estimations
-    for p in norm_orders:
-        distances += np.linalg.norm(
-            detected_pose.points - tracked_pose.estimate, ord=p, axis=1
-        )
-        diagonal += np.linalg.norm(
-            [hor_max_pt - hor_min_pt, ver_max_pt - ver_min_pt], ord=p
-        )
-
-    distances = distances / len(norm_orders)
-
-    keypoint_dist_threshold = diagonal * diagonal_proportion_threshold
-
-    match_num = np.count_nonzero(
-        (distances < keypoint_dist_threshold)
-        * (detected_pose.scores > detection_threshold)
-        * (tracked_pose.last_detection.scores > detection_threshold)
-    )
-    return 1 / (1 + match_num)
+class PartialStaticTracker:
+    def __init__(self, estimate, obj_id, live_points):
+        self.estimate = estimate
+        self.id = obj_id
+        self.live_points = live_points
 
 
 for input_path in sequences_paths:
@@ -116,27 +90,43 @@ for input_path in sequences_paths:
     if args.make_video:
         video_file = video.VideoFromFrames(
             input_path=input_path, save_path=output_path, information_file=info_file
-        )
+            )
+    
+    class ArgsByte:
+        def __init__(self, track_thresh=0.5, track_buffer=30, match_thresh=0.8):
+            self.mot20 = False
+            self.track_thresh = track_thresh
+            self.track_buffer = track_buffer
+            self.match_thresh = match_thresh
 
-    tracker = Tracker(
-        distance_function=keypoints_distance,
-        distance_threshold=distance_threshold,
-        detection_threshold=detection_threshold,
-        pointwise_hit_counter_max=pointwise_hit_counter_max,
-        hit_counter_max=hit_counter_max,
-    )
+    args_byte = ArgsByte(track_thresh=0.5, track_buffer=30, match_thresh=0.8)
+    tracker = BYTETracker(args_byte, info_file.search('frameRate'))
 
     # Initialize accumulator for this video
     accumulator.create_accumulator(input_path=input_path, information_file=info_file)
 
+    img_size = [info_file.search('imHeight'), info_file.search('imWidth')]
+
+    byte_tracked_objects = []
     for frame_number, detections in enumerate(all_detections):
-        if frame_number % frame_skip_period == 0:
-            tracked_objects = tracker.update(
-                detections=detections, period=frame_skip_period
+
+        byte_detections = []
+        for det in detections:
+            byte_det = np.append(det.points.reshape((1, -1)), det.scores[0])
+            byte_detections.append(byte_det)
+
+        # print(byte_detections)
+        if len(byte_detections)>0:
+            byte_tracked_objects = tracker.update(
+                np.array(byte_detections), img_size, tuple(img_size)
             )
-        else:
-            detections = []
-            tracked_objects = tracker.update()
+
+        tracked_objects= []
+        for obj in byte_tracked_objects:
+            box = obj.tlbr.reshape((2, 2))
+            tracked_objects.append(PartialStaticTracker(box, obj.track_id, np.array([True])))
+            # print(type(obj))
+
 
         # Draw detection and tracked object boxes on frame
         if args.make_video:
