@@ -150,7 +150,7 @@ Function that draws a list of detections as boxes on a frame. This function uses
 - `frame`: The OpenCV frame to draw on.
 - `detections`: List of [`Detection`](#detection)s to be drawn.
 - `line_color (optional)`: [`Color`](#color) of the boxes representing the detections.
-- `line_width (optional)`: Width of the lines consituting the sides of the boxes representing the detections. 
+- `line_width (optional)`: Width of the lines constituting the sides of the boxes representing the detections. 
 - `random_color (optional)`: If `True` each detection will be colored with a random color.
 - `color_by_label (optional)`: If `True` detections will be colored by label.
 - `draw_labels (optional)`: If `True` the detection's label will be drawn along with the detected boxes.
@@ -165,7 +165,7 @@ Function that draws a list of tracked objects on a frame. This function uses the
 - `frame`: The OpenCV frame to draw on.
 - `objects`: List of [`TrackedObject`](#trackedobject)s to be drawn.
 - `border_colors (optional)`: [`Color`](#color) of the boxes representing the tracked objects.
-- `border_width (optional)`: Width of the lines consituting the sides of the boxes representing the tracked objects.
+- `border_width (optional)`: Width of the lines constituting the sides of the boxes representing the tracked objects.
 - `id_size (optional)`: Size of the id number being drawn on each tracked object. The id wont get drawn if `id_size` is set to 0.
 - `id_thickness (optional)`: Thickness of the id number being drawn on each tracked object.
 - `draw_box (optional)`: Boolean determining if the function should draw the boxes estimated by the tracked objects. If set to `True` the boxes get drawn, if set to `False` only the id numbers get drawn. Defaults to `True`.
