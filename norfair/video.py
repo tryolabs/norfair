@@ -131,7 +131,7 @@ class Video:
         print(msg)
         exit()
 
-    def write(self, frame: np.array) -> int:
+    def write(self, frame: np.ndarray) -> int:
         if self.output_video is None:
             # The user may need to access the output file path on their code
             output_file_path = self.get_output_file_path()
@@ -151,7 +151,7 @@ class Video:
         self.output_video.write(frame)
         return cv2.waitKey(1)
 
-    def show(self, frame: np.array, downsample_ratio: float = 1.0) -> int:
+    def show(self, frame: np.ndarray, downsample_ratio: float = 1.0) -> int:
         # Resize to lower resolution for faster streaming over slow connections
         if downsample_ratio != 1.0:
             frame = cv2.resize(

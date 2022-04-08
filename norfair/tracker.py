@@ -164,7 +164,7 @@ class Tracker:
 
         return unmatched_detections
 
-    def match_dets_and_objs(self, distance_matrix: np.array):
+    def match_dets_and_objs(self, distance_matrix: np.ndarray):
         """Matches detections with tracked_objects from a distance matrix
 
         I used to match by minimizing the global distances, but found several
@@ -371,7 +371,7 @@ class TrackedObject:
 
 
 class Detection:
-    def __init__(self, points: np.array, scores=None, data=None, label=None):
+    def __init__(self, points: np.ndarray, scores=None, data=None, label=None):
         self.points = points
         self.scores = scores
         self.data = data

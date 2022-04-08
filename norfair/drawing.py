@@ -14,7 +14,7 @@ from .utils import validate_points
 
 
 def draw_points(
-    frame: np.array,
+    frame: np.ndarray,
     detections: Sequence["Detection"],
     radius: Optional[int] = None,
     thickness: Optional[int] = None,
@@ -64,7 +64,7 @@ def draw_points(
 
 
 def draw_tracked_objects(
-    frame: np.array,
+    frame: np.ndarray,
     objects: Sequence["TrackedObject"],
     radius: Optional[int] = None,
     color: Optional[Tuple[int, int, int]] = None,
@@ -141,7 +141,7 @@ def draw_tracked_objects(
 
 
 def draw_debug_metrics(
-    frame: np.array,
+    frame: np.ndarray,
     objects: Sequence["TrackedObject"],
     text_size: Optional[float] = None,
     text_thickness: Optional[int] = None,
@@ -240,7 +240,7 @@ def draw_debug_metrics(
             )
 
 
-def centroid(tracked_points: np.array) -> Tuple[int, int]:
+def centroid(tracked_points: np.ndarray) -> Tuple[int, int]:
     num_points = tracked_points.shape[0]
     sum_x = np.sum(tracked_points[:, 0])
     sum_y = np.sum(tracked_points[:, 1])

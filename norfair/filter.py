@@ -8,7 +8,7 @@ class FilterSetup:
         self.Q = Q
         self.P = P
 
-    def create_filter(self, initial_detection: np.array):
+    def create_filter(self, initial_detection: np.ndarray):
         num_points = initial_detection.shape[0]
         dim_z = 2 * num_points
         dim_x = 2 * 2 * num_points  # We need to accommodate for velocities
