@@ -22,7 +22,8 @@ def validate_points(points: np.ndarray) -> np.ndarray:
 def print_detection_error_message_and_exit(points):
     print("\n[red]INPUT ERROR:[/red]")
     print(
-        f"Each `Detection` object should have a property `points` of shape (num_of_points_to_track, 2), not {points.shape}. Check your `Detection` list creation code."
+        "Each `Detection` object should have a property `points` of shape (num_of_points_to_track, 2), "
+        f"not {points.shape}. Check your `Detection` list creation code."
     )
     print("You can read the documentation for the `Detection` class here:")
     print("https://github.com/tryolabs/norfair/tree/master/docs#detection\n")
@@ -73,9 +74,10 @@ def get_cutout(points, image):
 class DummyOpenCVImport:
     def __getattribute__(self, name):
         print(
-            """[bold red]Missing dependency:[/bold red] You are trying to use Norfair's video features. However, OpenCV is not installed.
-
-Please, make sure there is an existing installation of OpenCV or install Norfair with `pip install norfair\[video]`."""
+            "[bold red]Missing dependency:[/bold red] You are trying to use Norfair's video features."
+            "However, OpenCV is not installed."
+            "Please, make sure there is an existing installation of OpenCV or install Norfair with `pip"
+            "install norfair\[video]`."
         )
         exit()
 
@@ -83,8 +85,9 @@ Please, make sure there is an existing installation of OpenCV or install Norfair
 class DummyMOTMetricsImport:
     def __getattribute__(self, name):
         print(
-            """[bold red]Missing dependency:[/bold red] You are trying to use Norfair's metrics features without the required dependencies.
-
-Please, install Norfair with `pip install norfair\[metrics]`, or `pip install norfair\[metrics,video]` if you also want video features."""
+            "[bold red]Missing dependency:[/bold red] You are trying to use Norfair's metrics features "
+            "without the required dependencies."
+            "Please, install Norfair with `pip install norfair\[metrics]`, or `pip install "
+            "norfair\[metrics,video]` if you also want video features."
         )
         exit()

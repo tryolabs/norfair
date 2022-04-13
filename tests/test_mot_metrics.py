@@ -10,7 +10,13 @@ DATASET_PATH = "train"
 MOTA_ERROR_THRESHOLD = 0.05
 
 
-def test_mot_metrics():
+def test_mot_metrics() -> None:
+    """Tests that the new MOT metrics (on average) are at least 95% (configurable thropugh
+    MOTA_ERROR_THRESHOLD) as good as the previous metrics. Otherwise the test will fail.
+
+    Raises:
+        If the previous metrics file its not found.
+    """
     # Load previous metrics
     try:
         previous_metrics = pd.read_fwf("metrics.txt")

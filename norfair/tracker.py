@@ -4,8 +4,8 @@ from typing import Callable, List, Optional, Sequence
 import numpy as np
 from rich import print
 
-from .utils import validate_points
 from .filter import FilterSetup
+from .utils import validate_points
 
 
 class Tracker:
@@ -19,7 +19,7 @@ class Tracker:
         detection_threshold: float = 0,
         point_transience: int = 4,
         filter_setup: "FilterSetup" = FilterSetup(),
-        past_detections_length: int = 4
+        past_detections_length: int = 4,
     ):
         self.tracked_objects: Sequence["TrackedObject"] = []
         self.distance_function = distance_function
@@ -29,18 +29,17 @@ class Tracker:
         if past_detections_length >= 0:
             self.past_detections_length = past_detections_length
         else:
-            raise ValueError(f"Argument `past_detections_length` is {past_detections_length} and should be larger than 0.")
+            raise ValueError(
+                f"Argument `past_detections_length` is {past_detections_length} and should be larger than 0."
+            )
 
         if initialization_delay is None:
-            self.initialization_delay = int(
-                (self.hit_inertia_max - self.hit_inertia_min) / 2
-            )
-        elif (
-            initialization_delay < 0
-            or initialization_delay > self.hit_inertia_max - self.hit_inertia_min
-        ):
+            self.initialization_delay = int((self.hit_inertia_max - self.hit_inertia_min) / 2)
+        elif initialization_delay < 0 or initialization_delay > self.hit_inertia_max - self.hit_inertia_min:
             raise ValueError(
-                f"Argument 'initialization_delay' for 'Tracker' class should be an int between 0 and (hit_inertia_max - hit_inertia_min = {hit_inertia_max - hit_inertia_min}). The selected value is {initialization_delay}.\n"
+                "Argument 'initialization_delay' for 'Tracker' class should be an int between 0 and "
+                f"(hit_inertia_max - hit_inertia_min = {hit_inertia_max - hit_inertia_min}). The selected "
+                f"value is {initialization_delay}.\n"
             )
         else:
             self.initialization_delay = initialization_delay
@@ -82,7 +81,7 @@ class Tracker:
                     self.period,
                     self.point_transience,
                     self.filter_setup,
-                    self.past_detections_length
+                    self.past_detections_length,
                 )
             )
 
@@ -101,9 +100,7 @@ class Tracker:
                     if detection.label != obj.label:
                         distance_matrix[d, o] = self.distance_threshold + 1
                         if (detection.label is None) or (obj.label is None):
-                            print(
-                                "\nThere are detections with and without label!"
-                            )
+                            print("\nThere are detections with and without label!")
                         continue
                     distance = self.distance_function(detection, obj)
                     # Cap detections and objects with no chance of getting matched so we
@@ -117,38 +114,30 @@ class Tracker:
 
             if np.isnan(distance_matrix).any():
                 print(
-                    "\nReceived nan values from distance function, please check your distance function for errors!"
+                    "\nReceived nan values from distance function, please check your distance function for "
+                    "errors!"
                 )
                 exit()
             if np.isinf(distance_matrix).any():
                 print(
-                    "\nReceived inf values from distance function, please check your distance function for errors!"
+                    "\nReceived inf values from distance function, please check your distance function for "
+                    "errors!"
                 )
-                print(
-                    "If you want to explicitly ignore a certain detection - tracked object pair, just"
-                )
+                print("If you want to explicitly ignore a certain detection - tracked object pair, just")
                 print("return distance_threshold + 1 from your distance function.")
                 exit()
 
             # Used just for debugging distance function
             if distance_matrix.any():
                 for i, minimum in enumerate(distance_matrix.min(axis=0)):
-                    objects[i].current_min_distance = (
-                        minimum if minimum < self.distance_threshold else None
-                    )
+                    objects[i].current_min_distance = minimum if minimum < self.distance_threshold else None
 
-            matched_det_indices, matched_obj_indices = self.match_dets_and_objs(
-                distance_matrix
-            )
+            matched_det_indices, matched_obj_indices = self.match_dets_and_objs(distance_matrix)
             if len(matched_det_indices) > 0:
-                unmatched_detections = [
-                    d for i, d in enumerate(detections) if i not in matched_det_indices
-                ]
+                unmatched_detections = [d for i, d in enumerate(detections) if i not in matched_det_indices]
 
                 # Handle matched people/detections
-                for (match_det_idx, match_obj_idx) in zip(
-                    matched_det_indices, matched_obj_indices
-                ):
+                for (match_det_idx, match_obj_idx) in zip(matched_det_indices, matched_obj_indices):
                     match_distance = distance_matrix[match_det_idx, match_obj_idx]
                     matched_detection = detections[match_det_idx]
                     matched_object = objects[match_obj_idx]
@@ -214,13 +203,14 @@ class TrackedObject:
         period: int,
         point_transience: int,
         filter_setup: "FilterSetup",
-        past_detections_length: int
+        past_detections_length: int,
     ):
         try:
             initial_detection_points = validate_points(initial_detection.points)
         except AttributeError:
             print(
-                f"\n[red]ERROR[/red]: The detection list fed into `tracker.update()` should be composed of {Detection} objects not {type(initial_detection)}.\n"
+                "\n[red]ERROR[/red]: The detection list fed into `tracker.update()` should be composed of "
+                f"{Detection} objects not {type(initial_detection)}.\n"
             )
             exit()
         self.num_points = initial_detection_points.shape[0]
@@ -234,18 +224,14 @@ class TrackedObject:
         self.detection_threshold: float = detection_threshold
         self.initial_period: int = period
         self.hit_counter: int = hit_inertia_min + period
-        self.point_hit_counter: np.ndarray = (
-            np.ones(self.num_points) * self.point_hit_inertia_min
-        )
+        self.point_hit_counter: np.ndarray = np.ones(self.num_points) * self.point_hit_inertia_min
         self.last_distance: Optional[float] = None
         self.current_min_distance: Optional[float] = None
         self.last_detection: "Detection" = initial_detection
         self.age: int = 0
         self.is_initializing_flag: bool = True
         self.id: Optional[int] = None
-        self.initializing_id: int = (
-            TrackedObject.initializing_count
-        )  # Just for debugging
+        self.initializing_id: int = TrackedObject.initializing_count  # Just for debugging
         TrackedObject.initializing_count += 1
         self.detected_at_least_once_points = np.array([False] * self.num_points)
         initial_detection.age = self.age
@@ -269,10 +255,7 @@ class TrackedObject:
 
     @property
     def is_initializing(self):
-        if (
-            self.is_initializing_flag
-            and self.hit_counter > self.hit_inertia_min + self.initialization_delay
-        ):
+        if self.is_initializing_flag and self.hit_counter > self.hit_inertia_min + self.initialization_delay:
             self.is_initializing_flag = False
             TrackedObject.count += 1
             self.id = TrackedObject.count
@@ -307,12 +290,8 @@ class TrackedObject:
         if detection.scores is not None:
             assert len(detection.scores.shape) == 1
             points_over_threshold_mask = detection.scores > self.detection_threshold
-            matched_sensors_mask = np.array(
-                [[m, m] for m in points_over_threshold_mask]
-            ).flatten()
-            H_pos = np.diag(matched_sensors_mask).astype(
-                float
-            )  # We measure x, y positions
+            matched_sensors_mask = np.array([[m, m] for m in points_over_threshold_mask]).flatten()
+            H_pos = np.diag(matched_sensors_mask).astype(float)  # We measure x, y positions
             self.point_hit_counter[points_over_threshold_mask] += 2 * period
         else:
             points_over_threshold_mask = np.array([True] * self.num_points)
@@ -332,9 +311,7 @@ class TrackedObject:
         # real detection this creates a huge velocity vector in our KalmanFilter
         # and causes the tracker to start with wildly inaccurate estimations which
         # eventually coverge to the real detections.
-        detected_at_least_once_mask = np.array(
-            [[m, m] for m in self.detected_at_least_once_points]
-        ).flatten()
+        detected_at_least_once_mask = np.array([[m, m] for m in self.detected_at_least_once_points]).flatten()
         self.filter.x[self.dim_z :][np.logical_not(detected_at_least_once_mask)] = 0
         self.detected_at_least_once_points = np.logical_or(
             self.detected_at_least_once_points, points_over_threshold_mask
@@ -342,9 +319,13 @@ class TrackedObject:
 
     def __repr__(self):
         if self.last_distance is None:
-            placeholder_text = "\033[1mObject_{}\033[0m(age: {}, hit_counter: {}, last_distance: {}, init_id: {})"
+            placeholder_text = (
+                "\033[1mObject_{}\033[0m(age: {}, hit_counter: {}, last_distance: {}, init_id: {})"
+            )
         else:
-            placeholder_text = "\033[1mObject_{}\033[0m(age: {}, hit_counter: {}, last_distance: {:.2f}, init_id: {})"
+            placeholder_text = (
+                "\033[1mObject_{}\033[0m(age: {}, hit_counter: {}, last_distance: {:.2f}, init_id: {})"
+            )
         return placeholder_text.format(
             self.id,
             self.age,
@@ -356,11 +337,12 @@ class TrackedObject:
     def conditionally_add_to_past_detections(self, detection):
         """Adds detections into (and pops detections away) from `past_detections`
 
-        It does so by keeping a fixed amount of past detections saved into each 
+        It does so by keeping a fixed amount of past detections saved into each
         TrackedObject, while maintaining them distributed uniformly through the object's
         lifetime.
         """
-        if self.past_detections_length == 0: return
+        if self.past_detections_length == 0:
+            return
         if len(self.past_detections) < self.past_detections_length:
             detection.age = self.age
             self.past_detections.append(detection)

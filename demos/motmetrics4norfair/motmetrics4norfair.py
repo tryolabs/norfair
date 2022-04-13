@@ -13,12 +13,12 @@ parser.add_argument(
     "dataset_path",
     type=str,
     nargs="?",
-    help=("Path to the MOT Challenge train dataset folder (test dataset doesn't " "provide labels)"),
+    help=("Path to the MOT Challenge train dataset folder (test dataset doesn't provide labels)"),
 )
 parser.add_argument(
     "--make_video",
     action="store_true",
-    help=("Generate an output video, using the frames provided by the MOTChallenge " "dataset."),
+    help=("Generate an output video, using the frames provided by the MOTChallenge dataset."),
 )
 parser.add_argument(
     "--save_pred",

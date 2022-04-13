@@ -12,6 +12,8 @@ import numpy as np
 from rich import print
 from rich.progress import BarColumn, Progress, ProgressColumn, TimeRemainingColumn
 
+from norfair import metrics
+
 from .utils import get_terminal_size
 
 
@@ -33,15 +35,14 @@ class Video:
         self.output_video: Optional[cv2.VideoWriter] = None
 
         # Input validation
-        if (input_path is None and camera is None) or (
-            input_path is not None and camera is not None
-        ):
+        if (input_path is None and camera is None) or (input_path is not None and camera is not None):
             raise ValueError(
                 "You must set either 'camera' or 'input_path' arguments when setting 'Video' class"
             )
         if camera is not None and type(camera) is not int:
             raise ValueError(
-                "Argument 'camera' refers to the device-id of your camera, and must be an int. Setting it to 0 usually works if you don't know the id."
+                "Argument 'camera' refers to the device-id of your camera, and must be an int. Setting it to "
+                "0 usually works if you don't know the id."
             )
 
         # Read Input Video
@@ -49,25 +50,21 @@ class Video:
             if "~" in self.input_path:
                 self.input_path = os.path.expanduser(self.input_path)
             if not os.path.isfile(self.input_path):
-                self._fail(
-                    f"[bold red]Error:[/bold red] File '{self.input_path}' does not exist."
-                )
+                self._fail(f"[bold red]Error:[/bold red] File '{self.input_path}' does not exist.")
             self.video_capture = cv2.VideoCapture(self.input_path)
             total_frames = int(self.video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
             if total_frames == 0:
                 self._fail(
-                    f"[bold red]Error:[/bold red] '{self.input_path}' does not seem to be a video file supported by OpenCV. If the video file is not the problem, please check that your OpenCV installation is working correctly."
+                    f"[bold red]Error:[/bold red] '{self.input_path}' does not seem to be a video file "
+                    "supported by OpenCV. If the video file is not the problem, please check that your OpenCV"
+                    "installation is working correctly."
                 )
             description = os.path.basename(self.input_path)
         else:
             self.video_capture = cv2.VideoCapture(self.camera)
             total_frames = 0
             description = f"Camera({self.camera})"
-        self.output_fps = (
-            output_fps
-            if output_fps is not None
-            else self.video_capture.get(cv2.CAP_PROP_FPS)
-        )
+        self.output_fps = output_fps if output_fps is not None else self.video_capture.get(cv2.CAP_PROP_FPS)
         self.input_height = self.video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT)
         self.input_width = self.video_capture.get(cv2.CAP_PROP_FRAME_WIDTH)
         self.frame_counter = 0
@@ -81,9 +78,7 @@ class Video:
             "[yellow]{task.fields[process_fps]:.2f}fps[/yellow]",
         ]
         if self.input_path is not None:
-            progress_bar_fields.insert(
-                2, "[progress.percentage]{task.percentage:>3.0f}%"
-            )
+            progress_bar_fields.insert(2, "[progress.percentage]{task.percentage:>3.0f}%")
             progress_bar_fields.insert(
                 3,
                 TimeRemainingColumn(),
@@ -113,17 +108,13 @@ class Video:
                 if ret is False or frame is None:
                     break
                 process_fps = self.frame_counter / (time.time() - start)
-                progress_bar.update(
-                    self.task, advance=1, refresh=True, process_fps=process_fps
-                )
+                progress_bar.update(self.task, advance=1, refresh=True, process_fps=process_fps)
                 yield frame
 
         # Cleanup
         if self.output_video is not None:
             self.output_video.release()
-            print(
-                f"[white]Output video file saved to: {self.get_output_file_path()}[/white]"
-            )
+            print(f"[white]Output video file saved to: {self.get_output_file_path()}[/white]")
         self.video_capture.release()
         cv2.destroyAllWindows()
 
@@ -192,16 +183,12 @@ class Video:
                 f"[yellow]{filename}[/yellow]\n"
                 f"Please use '.mp4', '.avi', or provide a custom OpenCV fourcc codec name."
             )
-            return (
-                None  # Had to add this return to make mypya happy. I don't like this.
-            )
+            return None  # Had to add this return to make mypya happy. I don't like this.
 
     def abbreviate_description(self, description: str) -> str:
         """Conditionally abbreviate description so that progress bar fits in small terminals"""
         terminal_columns, _ = get_terminal_size()
-        space_for_description = (
-            int(terminal_columns) - 25
-        )  # Leave 25 space for progressbar
+        space_for_description = int(terminal_columns) - 25  # Leave 25 space for progressbar
         if len(description) < space_for_description:
             return description
         else:
@@ -215,9 +202,7 @@ class VideoFromFrames:
     def __init__(self, input_path, save_path=".", information_file=None):
 
         if information_file is None:
-            information_file = metrics.InformationFile(
-                file_path=os.path.join(input_path, "seqinfo.ini")
-            )
+            information_file = metrics.InformationFile(file_path=os.path.join(input_path, "seqinfo.ini"))
 
         file_name = os.path.split(input_path)[1]
 

@@ -4,7 +4,7 @@ import numpy as np
 from rich import print
 from rich.progress import track
 
-from norfair import Detection
+from norfair import Detection, TrackedObject
 
 try:
     import motmetrics as mm
@@ -334,13 +334,25 @@ def eval_motChallenge(matrixes_predictions, paths, metrics=None, generate_overal
 
 
 class MotParameters:
+    """Parameters used to train norfair to the MOT metrics challenge"""
+
     FRAME_SKIP_PERIOD = 1
     DETECTION_THRESHOLD = 0.01
     DISTANCE_THRESHOLD = 0.9
     DIAGONAL_PROPORTION_THRESHOLD = 1 / 18
 
 
-def mot_keypoints_distance(detected_pose, tracked_pose):
+def mot_keypoints_distance(detected_pose: Detection, tracked_pose: TrackedObject) -> float:
+    """Distance function used for the MOT metrics challenge.
+
+    Args:
+        detected_pose (Detection): Detected pose
+        tracked_pose (TrackedObject): Tracked pose to compare to the detected pose
+
+    Returns:
+        float: 1 / (1 + matched_points) where matched_points is the number of points between the detected pose
+            and the tracked pose that are below the selected threshold.
+    """
     norm_orders = [1, 2, np.inf]
     distances = 0
     diagonal = 0

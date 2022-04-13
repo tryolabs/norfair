@@ -378,9 +378,10 @@ def draw_tracked_boxes(
 class Paths:
     def __init__(self, get_points_to_draw=None, thickness=None, color=None, radius=None, attenuation=0.01):
         if get_points_to_draw is None:
+
             def get_points_to_draw(points):
                 return [np.mean(np.array(points), axis=0)]
-        
+
         self.get_points_to_draw = get_points_to_draw
 
         self.radius = radius
@@ -399,8 +400,8 @@ class Paths:
                 self.thickness = int(max(frame_scale / 7, 1))
 
             self.mask = np.zeros(frame.shape, np.uint8)
-        
-        self.mask = (self.mask*self.attenuation_factor).astype('uint8') 
+
+        self.mask = (self.mask * self.attenuation_factor).astype("uint8")
 
         for obj in tracked_objects:
             if self.color is None:
@@ -445,7 +446,6 @@ class Color:
         color_list = [
             c
             for c in Color.__dict__.keys()
-            if c[:2] != "__"
-            and c not in ("random", "red", "white", "grey", "black", "silver")
+            if c[:2] != "__" and c not in ("random", "red", "white", "grey", "black", "silver")
         ]
         return getattr(Color, color_list[obj_id % len(color_list)])
