@@ -9,46 +9,11 @@ DATASET_PATH = "train"
 # Set the percentage that the overall MOTA can decrease without being an error
 MOTA_ERROR_THRESHOLD = 0.05
 
-FRAME_SKIP_PERIOD = 1
-DETECTION_THRESHOLD = 0.01
-DISTANCE_THRESHOLD = 0.9
-DIAGONAL_PROPORTION_THRESHOLD = 1 / 18
-
-def keypoints_distance(detected_pose, tracked_pose):
-    norm_orders = [1, 2, np.inf]
-    distances = 0
-    diagonal = 0
-
-    hor_min_pt = min(detected_pose.points[:, 0])
-    hor_max_pt = max(detected_pose.points[:, 0])
-    ver_min_pt = min(detected_pose.points[:, 1])
-    ver_max_pt = max(detected_pose.points[:, 1])
-
-    # Set keypoint_dist_threshold based on object size, and calculate
-    # distance between detections and tracker estimations
-    for p in norm_orders:
-        distances += np.linalg.norm(
-            detected_pose.points - tracked_pose.estimate, ord=p, axis=1
-        )
-        diagonal += np.linalg.norm(
-            [hor_max_pt - hor_min_pt, ver_max_pt - ver_min_pt], ord=p
-        )
-
-    distances = distances / len(norm_orders)
-
-    keypoint_dist_threshold = diagonal * DIAGONAL_PROPORTION_THRESHOLD
-
-    match_num = np.count_nonzero(
-        (distances < keypoint_dist_threshold)
-        * (detected_pose.scores > DETECTION_THRESHOLD)
-        * (tracked_pose.last_detection.scores > DETECTION_THRESHOLD)
-    )
-    return 1 / (1 + match_num)
 
 def test_mot_metrics():
-    #Load previous metrics
+    # Load previous metrics
     try:
-        previous_metrics = pd.read_fwf('metrics.txt')
+        previous_metrics = pd.read_fwf("metrics.txt")
         previous_metrics.columns = [column_name.lower() for column_name in previous_metrics.columns]
         previous_metrics = previous_metrics.set_index(previous_metrics.columns[0])
     except FileNotFoundError as e:
@@ -61,14 +26,12 @@ def test_mot_metrics():
         seqinfo_path = os.path.join(input_path, "seqinfo.ini")
         info_file = metrics.InformationFile(file_path=seqinfo_path)
 
-        all_detections = metrics.DetectionFileParser(
-            input_path=input_path, information_file=info_file
-        )
+        all_detections = metrics.DetectionFileParser(input_path=input_path, information_file=info_file)
 
         tracker = Tracker(
-            distance_function=keypoints_distance,
-            distance_threshold=DISTANCE_THRESHOLD,
-            detection_threshold=DETECTION_THRESHOLD,
+            distance_function=metrics.mot_keypoints_distance,
+            distance_threshold=metrics.MotParameters.DISTANCE_THRESHOLD,
+            detection_threshold=metrics.MotParameters.DETECTION_THRESHOLD,
             hit_inertia_min=10,
             hit_inertia_max=12,
             point_transience=4,
@@ -78,9 +41,9 @@ def test_mot_metrics():
         accumulator.create_accumulator(input_path=input_path, information_file=info_file)
 
         for frame_number, detections in enumerate(all_detections):
-            if frame_number % FRAME_SKIP_PERIOD == 0:
+            if frame_number % metrics.MotParameters.FRAME_SKIP_PERIOD == 0:
                 tracked_objects = tracker.update(
-                    detections=detections, period=FRAME_SKIP_PERIOD
+                    detections=detections, period=metrics.MotParameters.FRAME_SKIP_PERIOD
                 )
             else:
                 detections = []
@@ -98,4 +61,7 @@ def test_mot_metrics():
     new_overall_mota = new_metrics.loc["OVERALL", "mota"] * 100
     previous_overall_mota = float(previous_metrics.loc["OVERALL", "mota"][:-1])
 
-    assert new_overall_mota >= previous_overall_mota * (1 - MOTA_ERROR_THRESHOLD), f"New overall MOTA score: {new_overall_mota} is too low, previous overall MOTA score: {previous_overall_mota}"
+    assert new_overall_mota >= previous_overall_mota * (1 - MOTA_ERROR_THRESHOLD), (
+        f"New overall MOTA score: {new_overall_mota} is too low, previous overall MOTA score: "
+        f"{previous_overall_mota}"
+    )

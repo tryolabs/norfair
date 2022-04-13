@@ -10,7 +10,7 @@ end_of_line = lf
 charset = utf-8
 
 [*.py]
-max_line_length = 88
+max_line_length = 110
 
 [*.{yml,yaml}]
 indent_size = 2
