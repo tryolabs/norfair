@@ -9,6 +9,8 @@ frame_skip_period = 1
 detection_threshold = 0.01
 distance_threshold = 0.9
 diagonal_proportion_threshold = 1 / 18
+pointwise_hit_counter_max=3
+hit_counter_max=2
 
 parser = argparse.ArgumentParser(
     description="Evaluate a basic tracker on MOTChallenge data. Display on terminal the MOTChallenge metrics results "
@@ -20,25 +22,29 @@ parser.add_argument(
     help="Path to the MOT Challenge train dataset folder (test dataset doesn't provide labels)",
 )
 parser.add_argument(
-    "--make_video",
+    "--make-video",
+    dest="make_video",
     action="store_true",
     help="Generate an output video, using the frames provided by the MOTChallenge dataset.",
 )
 parser.add_argument(
-    "--save_pred",
+    "--save-pred",
+    dest="save_pred",
     action="store_true",
     help="Generate a text file with your predictions",
 )
 parser.add_argument(
-    "--save_metrics",
+    "--save-metrics",
+    dest="save_metrics",
     action="store_true",
     help="Generate a text file with your MOTChallenge metrics results",
 )
 parser.add_argument(
-    "--output_path", type=str, nargs="?", default=".", help="Output path"
+    "--output-path", dest="output_path", type=str, nargs="?", default=".", help="Output path"
 )
 parser.add_argument(
-    "--select_sequences",
+    "--select-sequences",
+    dest="select_sequences",
     type=str,
     nargs="+",
     help="If you want to select a subset of sequences in your dataset path. Insert the names of the sequences you want to process.",
@@ -119,10 +125,9 @@ for input_path in sequences_paths:
     tracker = Tracker(
         distance_function=keypoints_distance,
         distance_threshold=distance_threshold,
-        detection_threshold=detection_threshold,
-        hit_inertia_min=10,
-        hit_inertia_max=12,
-        point_transience=4,
+        detection_threshold = detection_threshold,
+        pointwise_hit_counter_max=pointwise_hit_counter_max,
+        hit_counter_max=hit_counter_max,
     )
 
     # Initialize accumulator for this video
