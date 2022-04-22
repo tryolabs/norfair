@@ -26,10 +26,9 @@ except ImportError as e:
 # Define constants
 DETECTION_THRESHOLD = 0.6
 DISTANCE_THRESHOLD = 0.8
-HIT_INERTIA_MIN = 5
-HIT_INERTIA_MAX = 50
+HIT_COUNTER_MAX = 45
 INITIALIZATION_DELAY = 4
-POINT_TRANSIENCE = 2
+POINTWISE_HIT_COUNTER_MAX = 10
 
 ############### OPENPOSE ##################
 
@@ -186,10 +185,9 @@ if __name__ == "__main__":
             distance_function=keypoints_distance,
             distance_threshold=DISTANCE_THRESHOLD,
             detection_threshold=DETECTION_THRESHOLD,
-            hit_inertia_min=HIT_INERTIA_MIN,
-            hit_inertia_max=HIT_INERTIA_MAX,
+            hit_counter_max=HIT_COUNTER_MAX,
             initialization_delay=INITIALIZATION_DELAY,
-            point_transience=POINT_TRANSIENCE,
+            pointwise_hit_counter_max=POINTWISE_HIT_COUNTER_MAX,
         )
         KEYPOINT_DIST_THRESHOLD = video.input_height / 40
     
