@@ -15,7 +15,7 @@ class Tracker:
         distance_threshold: float,
         hit_counter_max: int = 15,
         initialization_delay: Optional[int] = None,
-        pointwise_hit_counter_max: int = 5,
+        pointwise_hit_counter_max: int = 4,
         detection_threshold: float = 0,
         filter_setup: "FilterSetup" = FilterSetup(),
         past_detections_length: int = 4
