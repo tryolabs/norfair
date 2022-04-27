@@ -3,7 +3,7 @@ import os.path
 
 import numpy as np
 
-from norfair import Tracker, drawing, metrics, video
+from norfair import Tracker, drawing, metrics, video, FilterSetup
 
 frame_skip_period = 1
 detection_threshold = 0.01
@@ -124,6 +124,7 @@ for input_path in sequences_paths:
         detection_threshold=detection_threshold,
         pointwise_hit_counter_max=pointwise_hit_counter_max,
         hit_counter_max=hit_counter_max,
+        filter_setup=FilterSetup(),
     )
 
     # Initialize accumulator for this video
