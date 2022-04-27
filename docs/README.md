@@ -14,7 +14,7 @@ The class in charge of performing the tracking of the detections produced by the
 - `initialization_delay (optional)`: The argument `initialization_delay` determines by how large the object's hit counter must be in order to be considered as initialized, and get returned to the user as a real object. It must be smaller than `hit_counter_max` or otherwise the object would never be initialized. If set to 0, objects will get returned to the user as soon as they are detected for the first time, which can be problematic as this can result in objects appearing and immediately dissapearing. Defaults to `hit_counter_max / 2`.
 - `pointwise_hit_counter_max (optional)`: Each tracked object keeps track of how often the points it's tracking have been getting matched. Points that are getting matched (`pointwise_hit_counter > 0`) are said to be live, and points which aren't (`pointwise_hit_counter = 0`) are said to not be live. This is used to determine things like which individual points in a tracked object get drawn by [`draw_tracked_objects`](#draw_tracked_objects) and which don't. This argument (`pointwise_hit_counter_max`) defines how large the inertia for each point of a tracker can grow. Defaults to `5`.
 - `detection_threshold (optional)`: Sets the threshold at which the scores of the points in a detection being fed into the tracker must dip below to be ignored by the tracker. Defaults to `0`.
-- `filter_setup (optional)`: This parameter can be used to change the parameters of the Kalman Filter that is used by [`TrackedObject`](#trackedobject) instances. Defaults to [`FilterSetup()`](#filtersetup).
+- `filter_setup (optional)`: This parameter can be used to change the parameters of the Kalman Filter that is used by [`TrackedObject`](#trackedobject) instances. Defaults to [`OptimizedKalmanFilterSetup()`](#optimizedkalmanfiltersetup).
 - `past_detections_length`: How many past detections to save for each tracked object. Norfair tries to distribute these past detections uniformly through the object's lifetime so they're more representative. Very useful if you want to add metric learning to your model, as you can associate an embedding to each detection and access them in your distance function. Defaults to `4`.
 
 ### Tracker.update
@@ -70,7 +70,7 @@ A new `filterpy.KalmanFilter` instance (or an API compatible object, since the c
 
 ## OptimizedKalmanFilterSetup
 
-This class is used in order to create a Kalman Filter that works faster than the one created with the `FilterSetup` class. It allows the user to create Kalman Filter optimized for tracking and set its parameters.
+This class is used in order to create a Kalman Filter that works faster than the one created with the [`FilterSetup`](#filtersetup) class. It allows the user to create Kalman Filter optimized for tracking and set its parameters.
 
 ##### Arguments:
 
@@ -93,9 +93,9 @@ A new `OptimizedKalmanFilter` instance.
 
 ## NoFilterSetup
 
-This class allows the user to try Norfair without any predictive filter or velocity estimation, and track only by comparing the position of the previous detections to the ones in the current frame. The throughput of this class in FPS is similar to the one achieved by the `OptimizedKalmanFilterSetup` class, so this class exists only for comparative purposes and it is not advised to use it for tracking on a real application.
+This class allows the user to try Norfair without any predictive filter or velocity estimation, and track only by comparing the position of the previous detections to the ones in the current frame. The throughput of this class in FPS is similar to the one achieved by the [`OptimizedKalmanFilterSetup`](#optimizedkalmanfiltersetup) class, so this class exists only for comparative purposes and it is not advised to use it for tracking on a real application.
 
-### OptimizedKalmanFilterSetup.create_filter
+### NoFilterSetup.create_filter
 
 This function returns a new `NoFilter` instance to be used by each new [`TrackedObject`](#trackedobject) that is created.
 
