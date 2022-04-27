@@ -61,7 +61,7 @@ for input_path in args.files:
         distance_function=keypoints_distance,
         distance_threshold=distance_threshold,
         detection_threshold=detection_threshold,
-        point_transience=2,
+        pointwise_hit_counter_max=2,
     )
     keypoint_dist_threshold = video.input_height / 25
 
