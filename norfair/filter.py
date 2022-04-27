@@ -84,7 +84,7 @@ class OptimizedKalmanFilter:
         dim_z,
         pos_variance=10,
         pos_vel_covariance=0,
-        vel_variance=10,
+        vel_variance=1,
         q=0.1,
         r=4,
     ):
@@ -151,9 +151,9 @@ class OptimizedKalmanFilterSetup:
         self,
         R: float = 4.0,
         Q: float = 0.1,
-        pos_variance: float = 1,
+        pos_variance: float = 10,
         pos_vel_covariance: float = 0,
-        vel_variance: float = 10,
+        vel_variance: float = 1,
     ):
         self.R = R
         self.Q = Q

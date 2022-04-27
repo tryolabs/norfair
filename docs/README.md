@@ -68,6 +68,44 @@ This method may be overwritten by a subclass of `FilterSetup`, in case that furt
 ##### Returns:
 A new `filterpy.KalmanFilter` instance (or an API compatible object, since the class is not restricted by type checking).
 
+## OptimizedKalmanFilterSetup
+
+This class is used in order to create a Kalman Filter that works faster than the one created with the `FilterSetup` class. It allows the user to create Kalman Filter optimized for tracking and set its parameters.
+
+##### Arguments:
+
+- `R`: Multiplier for the sensor measurement noise matrix. Defaults to `4.0`.
+- `Q`: Multiplier for the process uncertainty. Defaults to `0.1`.
+- `pos_variance`: Multiplier for the initial covariance matrix estimation, only in the entries that correspond to position (not speed) variables. Defaults to `10`.
+- `pos_vel_covariance`: Multiplier for the initial covariance matrix estimation, only in the entries that correspond to the covariance between position and speed. Defaults to `0`.
+- `vel_variance`: Multiplier for the initial covariance matrix estimation, only in the entries that correspond to velocity (not position) variables. Defaults to `1`.
+
+### OptimizedKalmanFilterSetup.create_filter
+
+This function returns a new predictive filter instance with the current setup, to be used by each new [`TrackedObject`](#trackedobject) that is created. This predictive filter will be used to estimate speed and future positions of the object, to better match the detections during its trajectory.
+
+##### Arguments:
+
+- `initial_detection`: numpy array of shape `(number of points per object, 2)`, corresponding to the [`Detection.points`](#detection) of the tracked object being born, which shall be used as initial position estimation for it.
+
+##### Returns:
+A new `OptimizedKalmanFilter` instance.
+
+## NoFilterSetup
+
+This class allows the user to try Norfair without any predictive filter or velocity estimation, and track only by comparing the position of the previous detections to the ones in the current frame. The throughput of this class in FPS is similar to the one achieved by the `OptimizedKalmanFilterSetup` class, so this class exists only for comparative purposes and it is not advised to use it for tracking on a real application.
+
+### OptimizedKalmanFilterSetup.create_filter
+
+This function returns a new `NoFilter` instance to be used by each new [`TrackedObject`](#trackedobject) that is created.
+
+##### Arguments:
+
+- `initial_detection`: numpy array of shape `(number of points per object, 2)`, corresponding to the [`Detection.points`](#detection) of the tracked object being born, which shall be used as initial position estimation for it.
+
+##### Returns:
+A new `NoFilter` instance.
+
 ## TrackedObject
 
 The objects returned by the tracker's `update` function on each iteration. They represent the objects currently being tracked by the tracker.
