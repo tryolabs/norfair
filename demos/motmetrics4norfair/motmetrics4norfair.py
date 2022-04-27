@@ -23,28 +23,24 @@ parser.add_argument(
 )
 parser.add_argument(
     "--make-video",
-    dest="make_video",
     action="store_true",
     help="Generate an output video, using the frames provided by the MOTChallenge dataset.",
 )
 parser.add_argument(
     "--save-pred",
-    dest="save_pred",
     action="store_true",
     help="Generate a text file with your predictions",
 )
 parser.add_argument(
     "--save-metrics",
-    dest="save_metrics",
     action="store_true",
     help="Generate a text file with your MOTChallenge metrics results",
 )
 parser.add_argument(
-    "--output-path", dest="output_path", type=str, nargs="?", default=".", help="Output path"
+    "--output-path", type=str, nargs="?", default=".", help="Output path"
 )
 parser.add_argument(
     "--select-sequences",
-    dest="select_sequences",
     type=str,
     nargs="+",
     help="If you want to select a subset of sequences in your dataset path. Insert the names of the sequences you want to process.",
@@ -125,7 +121,7 @@ for input_path in sequences_paths:
     tracker = Tracker(
         distance_function=keypoints_distance,
         distance_threshold=distance_threshold,
-        detection_threshold = detection_threshold,
+        detection_threshold=detection_threshold,
         pointwise_hit_counter_max=pointwise_hit_counter_max,
         hit_counter_max=hit_counter_max,
     )
