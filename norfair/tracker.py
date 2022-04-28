@@ -17,12 +17,7 @@ class Tracker:
         initialization_delay: Optional[int] = None,
         pointwise_hit_counter_max: int = 4,
         detection_threshold: float = 0,
-<<<<<<< HEAD
         filter_setup: "OptimizedKalmanFilterSetup" = OptimizedKalmanFilterSetup(),
-=======
-        point_transience: int = 4,
-        filter_setup: "OptimizedKalmanFilterSetup" = OptimizedKalmanFilterSetup(),
->>>>>>> 3b4174c (Fix documentation, and redefine default filter setup)
         past_detections_length: int = 4
     ):
         self.tracked_objects: Sequence["TrackedObject"] = []
