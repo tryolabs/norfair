@@ -1,0 +1,26 @@
+# dev
+black
+flake8
+ipdb
+boto3
+
+norfair >= 0.3.0
+numpy
+opencv-python
+torch
+torchvision
+graphviz
+
+tqdm 
+cython 
+pycocotools
+
+# pytorch2trt:
+onnx
+onnxruntime
+
+pycuda
+tensorrt
+
+# download weights
+gdown==4.4.0
