@@ -69,7 +69,7 @@ def process_video(
             video.write(frame)
 
     total_time = time.time() - start_time
-    fps = total_time / total_frames
+    fps = total_frames / total_time
     tracker_time_mean /= total_frames
     detector_time_mean /= total_frames
     return fps, tracker_time_mean, detector_time_mean
