@@ -22,7 +22,10 @@ class FilterSetup:
         filter.F[:dim_z, dim_z:] = dt * np.eye(dim_z)
 
         # Measurement function: numpy.array(dim_z, dim_x)
-        filter.H = np.eye(dim_z, dim_x,)
+        filter.H = np.eye(
+            dim_z,
+            dim_x,
+        )
 
         # Measurement uncertainty (sensor noise): numpy.array(dim_z, dim_z)
         filter.R *= self.R
@@ -71,7 +74,8 @@ class NoFilterSetup:
         dim_x = 2 * 2 * num_points  # We need to accommodate for velocities
 
         no_filter = NoFilter(
-            dim_x, dim_z,
+            dim_x,
+            dim_z,
         )
         no_filter.x[:dim_z] = np.expand_dims(initial_detection.flatten(), 0).T
         return no_filter
@@ -92,12 +96,14 @@ class OptimizedKalmanFilter:
         self.x = np.zeros((dim_x, 1))
 
         # matrix P from Kalman
-        self.pos_variance = pos_variance
-        self.pos_vel_covariance = pos_vel_covariance
-        self.vel_variance = vel_variance
+        self.pos_variance = np.zeros((dim_z, 1)) + pos_variance
+        self.pos_vel_covariance = np.zeros((dim_z, 1)) + pos_vel_covariance
+        self.vel_variance = np.zeros((dim_z, 1)) + vel_variance
 
         self.q_Q = q
         self.r_R = r
+
+        self.default_r = r * np.ones((dim_z, 1))
 
         self.kp_undetected = np.ones((dim_z, 1))
 
@@ -105,8 +111,10 @@ class OptimizedKalmanFilter:
         self.x[: self.dim_z] += self.x[self.dim_z :]
 
     def update(self, detection_points_flatten, R=None, H=None):
-        
+
         if H is not None:
+            # initialize keypoints observed for the first time with the observation
+
             diagonal = np.diagonal(H).reshape((self.dim_z, 1))
 
             kp_just_detected = np.logical_and(diagonal, self.kp_undetected)
@@ -119,8 +127,20 @@ class OptimizedKalmanFilter:
             ) + np.multiply(one_minus_diagonal, self.x[: self.dim_z])
 
             kp_just_detected = np.argwhere(kp_just_detected.flatten())
-            self.x[: self.dim_z][kp_just_detected] = detection_points_flatten[kp_just_detected]
+            self.x[: self.dim_z][kp_just_detected] = detection_points_flatten[
+                kp_just_detected
+            ]
+        else:
+            diagonal = np.ones((self.dim_z, 1))
+            one_minus_diagonal = np.zeros((self.dim_z, 1))
 
+        # for unseen keypoints, infinite variance will be used instead of the following
+        if R is not None:
+            kalman_r = np.diagonal(R).reshape((self.dim_z, 1))
+        else:
+            kalman_r = self.default_r
+
+        # error is 0 for unseen keypoints
         error = detection_points_flatten - self.x[: self.dim_z]
 
         vel_var_plus_pos_vel_cov = self.pos_vel_covariance + self.vel_variance
@@ -129,20 +149,41 @@ class OptimizedKalmanFilter:
             + self.pos_vel_covariance
             + vel_var_plus_pos_vel_cov
             + self.q_Q
-            + self.r_R
+            + kalman_r
         )
 
-        self.x[: self.dim_z] = (
-            detection_points_flatten - (self.r_R / added_variances) * error
+        # 1 for unseen keypoints
+        kalmar_r_over_added_variances = (
+            np.multiply(np.divide(kalman_r, added_variances), diagonal)
+            + one_minus_diagonal
         )
-        self.x[self.dim_z :] += (vel_var_plus_pos_vel_cov / added_variances) * error
 
-        self.pos_variance = self.r_R * (1 - self.r_R / added_variances)
-        self.pos_vel_covariance = (
-            (vel_var_plus_pos_vel_cov) * self.r_R / added_variances
+        self.x[: self.dim_z] = detection_points_flatten - np.multiply(
+            kalmar_r_over_added_variances, error
         )
-        self.vel_variance += (
-            self.q_Q - (vel_var_plus_pos_vel_cov ** 2) / added_variances
+        self.x[self.dim_z :] += np.multiply(
+            np.divide(error, added_variances), vel_var_plus_pos_vel_cov
+        )
+
+        self.pos_variance = np.multiply(
+            kalman_r, (1 - kalmar_r_over_added_variances)
+        ) + np.multiply(
+            self.pos_variance
+            + self.pos_vel_covariance
+            + vel_var_plus_pos_vel_cov
+            + self.q_Q,
+            one_minus_diagonal,
+        )
+        self.pos_vel_covariance = np.multiply(
+            vel_var_plus_pos_vel_cov, kalmar_r_over_added_variances
+        )
+
+        self.vel_variance += self.q_Q - np.multiply(
+            np.divide(
+                np.square(vel_var_plus_pos_vel_cov),
+                added_variances,
+            ),
+            diagonal,
         )
 
 
