@@ -115,7 +115,6 @@ for input_path in sequences_paths:
             byte_det = np.append(det.points.reshape((1, -1)), det.scores[0])
             byte_detections.append(byte_det)
 
-        # print(byte_detections)
         if len(byte_detections)>0:
             byte_tracked_objects = tracker.update(
                 np.array(byte_detections), img_size, tuple(img_size)
@@ -125,7 +124,6 @@ for input_path in sequences_paths:
         for obj in byte_tracked_objects:
             box = obj.tlbr.reshape((2, 2))
             tracked_objects.append(PartialStaticTracker(box, obj.track_id, np.array([True])))
-            # print(type(obj))
 
 
         # Draw detection and tracked object boxes on frame
