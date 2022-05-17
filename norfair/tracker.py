@@ -379,8 +379,9 @@ class TrackedObject:
 
 
 class Detection:
-    def __init__(self, points: np.array, scores=None, data=None, label=None):
+    def __init__(self, points: np.array, scores=None, data=None, label=None, embedding= None):
         self.points = points
         self.scores = scores
         self.data = data
         self.label = label
+        self.embedding = embedding
