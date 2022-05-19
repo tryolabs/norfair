@@ -14,7 +14,7 @@ The class in charge of performing the tracking of the detections produced by the
 - `initialization_delay (optional)`: The argument `initialization_delay` determines by how large the object's hit counter must be in order to be considered as initialized, and get returned to the user as a real object. It must be smaller than `hit_counter_max` or otherwise the object would never be initialized. If set to 0, objects will get returned to the user as soon as they are detected for the first time, which can be problematic as this can result in objects appearing and immediately dissapearing. Defaults to `hit_counter_max / 2`.
 - `pointwise_hit_counter_max (optional)`: Each tracked object keeps track of how often the points it's tracking have been getting matched. Points that are getting matched (`pointwise_hit_counter > 0`) are said to be live, and points which aren't (`pointwise_hit_counter = 0`) are said to not be live. This is used to determine things like which individual points in a tracked object get drawn by [`draw_tracked_objects`](#draw_tracked_objects) and which don't. This argument (`pointwise_hit_counter_max`) defines how large the inertia for each point of a tracker can grow. Defaults to `5`.
 - `detection_threshold (optional)`: Sets the threshold at which the scores of the points in a detection being fed into the tracker must dip below to be ignored by the tracker. Defaults to `0`.
-- `filter_setup (optional)`: This parameter can be used to change the parameters of the Kalman Filter that is used by [`TrackedObject`](#trackedobject) instances. Defaults to [`OptimizedKalmanFilterSetup()`](#optimizedkalmanfiltersetup).
+- `filter_setup (optional)`: This parameter can be used to change the parameters of the Kalman Filter that is used by [`TrackedObject`](#trackedobject) instances. Defaults to [`OptimizedKalmanFilterFactory()`](#optimizedkalmanfilterfactory).
 - `past_detections_length`: How many past detections to save for each tracked object. Norfair tries to distribute these past detections uniformly through the object's lifetime so they're more representative. Very useful if you want to add metric learning to your model, as you can associate an embedding to each detection and access them in your distance function. Defaults to `4`.
 
 ### Tracker.update
@@ -41,10 +41,10 @@ Detections returned by the detector must be converted to a `Detection` object be
 - `data`: The place to store any extra data which may be useful when calculating the distance function. Anything stored here will be available to use inside the distance function. This enables the development of more interesting trackers which can do things like assign an appearance embedding to each detection to aid in its tracking.
 - `label`: When working with multiple classes the detection's label can be stored to be used as a matching condition when associating tracked objects with new detections. Label's type must be hashable for drawing purposes.
 
-## FilterSetup
+## FilterPyKalmanFilterFactory
 
 This class can be used either to change some parameters of the [KalmanFilter](https://filterpy.readthedocs.io/en/latest/kalman/KalmanFilter.html) that the tracker uses, or to fully customize the predictive filter implementation to use (as long as the methods and properties are compatible).
-The former case only requires changing the default parameters upon tracker creation: `tracker = Tracker(..., filter_setup=FilterSetup(R=100))`, while the latter requires creating your own class extending `FilterSetup`, and rewriting its `create_filter` method to return your own customized filter.
+The former case only requires changing the default parameters upon tracker creation: `tracker = Tracker(..., filter_setup=FilterPyKalmanFilterFactory(R=100))`, while the latter requires creating your own class extending `FilterPyKalmanFilterFactory`, and rewriting its `create_filter` method to return your own customized filter.
 
 
 ##### Arguments:
@@ -55,11 +55,11 @@ Note that these arguments correspond to the same parameters of the [`filterpy.Ka
 - `P`: Multiplier for the initial covariance matrix estimation, only in the entries that correspond to position (not speed) variables. Defaults to `10.0`.
 
 
-### FilterSetup.create_filter
+### FilterPyKalmanFilterFactory.create_filter
 
 This function returns a new predictive filter instance with the current setup, to be used by each new [`TrackedObject`](#trackedobject) that is created. This predictive filter will be used to estimate speed and future positions of the object, to better match the detections during its trajectory.
 
-This method may be overwritten by a subclass of `FilterSetup`, in case that further customizations of the filter parameters or implementation are needed.
+This method may be overwritten by a subclass of `FilterPyKalmanFilterFactory`, in case that further customizations of the filter parameters or implementation are needed.
 
 ##### Arguments:
 
@@ -68,9 +68,9 @@ This method may be overwritten by a subclass of `FilterSetup`, in case that furt
 ##### Returns:
 A new `filterpy.KalmanFilter` instance (or an API compatible object, since the class is not restricted by type checking).
 
-## OptimizedKalmanFilterSetup
+## OptimizedKalmanFilterFactory
 
-This class is used in order to create a Kalman Filter that works faster than the one created with the [`FilterSetup`](#filtersetup) class. It allows the user to create Kalman Filter optimized for tracking and set its parameters.
+This class is used in order to create a Kalman Filter that works faster than the one created with the [`FilterPyKalmanFilterFactory`](#filterpykalmanfilterfactory) class. It allows the user to create Kalman Filter optimized for tracking and set its parameters.
 
 ##### Arguments:
 
@@ -80,7 +80,7 @@ This class is used in order to create a Kalman Filter that works faster than the
 - `pos_vel_covariance`: Multiplier for the initial covariance matrix estimation, only in the entries that correspond to the covariance between position and speed. Defaults to `0`.
 - `vel_variance`: Multiplier for the initial covariance matrix estimation, only in the entries that correspond to velocity (not position) variables. Defaults to `1`.
 
-### OptimizedKalmanFilterSetup.create_filter
+### OptimizedKalmanFilterFactory.create_filter
 
 This function returns a new predictive filter instance with the current setup, to be used by each new [`TrackedObject`](#trackedobject) that is created. This predictive filter will be used to estimate speed and future positions of the object, to better match the detections during its trajectory.
 
@@ -91,11 +91,11 @@ This function returns a new predictive filter instance with the current setup, t
 ##### Returns:
 A new `OptimizedKalmanFilter` instance.
 
-## NoFilterSetup
+## NoFilterFactory
 
-This class allows the user to try Norfair without any predictive filter or velocity estimation, and track only by comparing the position of the previous detections to the ones in the current frame. The throughput of this class in FPS is similar to the one achieved by the [`OptimizedKalmanFilterSetup`](#optimizedkalmanfiltersetup) class, so this class exists only for comparative purposes and it is not advised to use it for tracking on a real application.
+This class allows the user to try Norfair without any predictive filter or velocity estimation, and track only by comparing the position of the previous detections to the ones in the current frame. The throughput of this class in FPS is similar to the one achieved by the [`OptimizedKalmanFilterFactory`](#optimizedkalmanfilterfactory) class, so this class exists only for comparative purposes and it is not advised to use it for tracking on a real application.
 
-### NoFilterSetup.create_filter
+### NoFilterFactory.create_filter
 
 This function returns a new `NoFilter` instance to be used by each new [`TrackedObject`](#trackedobject) that is created.
 

@@ -2,7 +2,7 @@ import numpy as np
 from filterpy.kalman import KalmanFilter
 
 
-class FilterSetup:
+class FilterPyKalmanFilterFactory:
     def __init__(self, R: float = 4.0, Q: float = 0.1, P: float = 10.0):
         self.R = R
         self.Q = Q
@@ -67,7 +67,7 @@ class NoFilter:
         self.x[: self.dim_z] = detection_points_flatten
 
 
-class NoFilterSetup:
+class NoFilterFactory:
     def create_filter(self, initial_detection: np.array):
         num_points = initial_detection.shape[0]
         dim_z = 2 * num_points  # flattened positions
@@ -178,7 +178,7 @@ class OptimizedKalmanFilter:
         )
 
 
-class OptimizedKalmanFilterSetup:
+class OptimizedKalmanFilterFactory:
     def __init__(
         self,
         R: float = 4.0,
