@@ -5,7 +5,7 @@ import numpy as np
 from rich import print
 
 from .utils import validate_points
-from .filter import OptimizedKalmanFilterSetup
+from .filter import OptimizedKalmanFilterFactory
 
 
 class Tracker:
@@ -17,7 +17,7 @@ class Tracker:
         initialization_delay: Optional[int] = None,
         pointwise_hit_counter_max: int = 4,
         detection_threshold: float = 0,
-        filter_setup: "OptimizedKalmanFilterSetup" = OptimizedKalmanFilterSetup(),
+        filter_setup: "OptimizedKalmanFilterFactory" = OptimizedKalmanFilterFactory(),
         past_detections_length: int = 4
     ):
         self.tracked_objects: Sequence["TrackedObject"] = []
@@ -209,7 +209,7 @@ class TrackedObject:
         pointwise_hit_counter_max: int,
         detection_threshold: float,
         period: int,
-        filter_setup: "FilterSetup",
+        filter_setup: "FilterFactory",
         past_detections_length: int
     ):
         try:
