@@ -13,7 +13,7 @@ import trt_pose.models
 
 from norfair import Detection
 import numpy as np
-from norfair.filter import NoFilterSetup, FilterSetup, OptimizedKalmanFilterSetup
+from norfair.filter import NoFilterFactory, FilterPyKalmanFilterFactory, OptimizedKalmanFilterFactory
 
 mean = torch.Tensor([0.485, 0.456, 0.406]).cuda()
 std = torch.Tensor([0.229, 0.224, 0.225]).cuda()
@@ -197,11 +197,11 @@ def get_distance_function(distance_function, video_width=None, video_height=None
 
 def get_filter_setup(filter_setup):
     if filter_setup == "none":
-        return NoFilterSetup()
+        return NoFilterFactory()
     elif filter_setup == "filterpy":
-        return FilterSetup()
+        return FilterPyKalmanFilterFactory()
     elif filter_setup == "optimized":
-        return OptimizedKalmanFilterSetup()
+        return OptimizedKalmanFilterFactory()
     else:
         raise ValueError(
             "'filter_setup' argument should be either 'none', 'filterpy' or 'optimized'"

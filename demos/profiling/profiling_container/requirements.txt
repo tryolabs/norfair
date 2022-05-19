@@ -1,26 +1,26 @@
 # dev
-black
-flake8
-ipdb
-boto3
+black==22.3.0
+flake8==4.0.1
+ipdb==0.13.9
+boto3==1.22.3
 
 norfair >= 0.3.0
-numpy
-opencv-python
-torch
-torchvision
-graphviz
+numpy==1.22.3
+opencv-python==4.5.5.64
+torch==1.11.0
+torchvision==0.12.0
+graphviz==0.20
 
-tqdm 
-cython 
-pycocotools
+tqdm==4.64.0
+cython==0.29.28
+pycocotools==2.0.4
 
 # pytorch2trt:
-onnx
-onnxruntime
+onnx==1.11.0
+onnxruntime==1.11.1
 
-pycuda
-tensorrt
+pycuda==2020.1
+tensorrt==7.2.2.1
 
 # download weights
 gdown==4.4.0
