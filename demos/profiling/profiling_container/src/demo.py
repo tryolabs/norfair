@@ -78,7 +78,7 @@ def process_video(
 if __name__ == "__main__":
 
     # Flags
-    parser = argparse.ArgumentParser(description="Track human poses in a video and measure elapsed times.")
+    parser = argparse.ArgumentParser(description="profile various trackers and distance functions.")
     parser.add_argument("files", type=str, nargs="+", help="Video files to process")
     parser.add_argument(
         "--skip-frame", dest="skip_frame", type=int, default=1, help="Frame skip period"
