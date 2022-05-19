@@ -153,7 +153,6 @@ for input_path in sequences_paths:
             detections = []
             tracked_objects = tracker.update()
 
-        # convert tracked_objects back to [[corner1_x, corner1_y], [corner2_x, corner2_y]]
         x1y1x2y2_tracked_objects = []
         for n, obj in enumerate(tracked_objects):
             half_height = obj.estimate[1, 1]/2
