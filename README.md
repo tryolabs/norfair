@@ -1,6 +1,6 @@
 ![Norfair by Tryolabs logo](docs/logo.png)
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tryolabs/norfair/blob/master/demos/yolov4/yolov4_demo.ipynb) [![Documentation](https://img.shields.io/badge/api-reference-blue.svg)](https://github.com/tryolabs/norfair/blob/master/docs/README.md) ![Build status](https://github.com/tryolabs/norfair/workflows/CI/badge.svg?branch=master) [![DOI](https://zenodo.org/badge/276473370.svg)](https://zenodo.org/badge/latestdoi/276473370)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tryolabs/norfair/blob/master/demos/yolov4/yolov4_demo.ipynb) [![Documentation](https://img.shields.io/badge/api-reference-blue?logo=readthedocs)](https://github.com/tryolabs/norfair/blob/master/docs/README.md) [![Board](https://img.shields.io/badge/project-board-blue?logo=github)](https://github.com/tryolabs/norfair/projects/1) ![Build status](https://github.com/tryolabs/norfair/workflows/CI/badge.svg?branch=master) [![DOI](https://zenodo.org/badge/276473370.svg)](https://zenodo.org/badge/latestdoi/276473370)
 
 Norfair is a customizable lightweight Python library for real-time 2D object tracking.
 
