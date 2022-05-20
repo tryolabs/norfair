@@ -1,6 +1,6 @@
-# Filter setups and distances profiling
+# Filter and distance function profiling
 
-Measure elapsed time while updating the tracker and using a [TRT pose estimator](https://github.com/NVIDIA-AI-IOT/trt_pose) model, for different filter setups and distance functions.
+Measure inference speed for different filters and distance functions using a [TRT pose estimator](https://github.com/NVIDIA-AI-IOT/trt_pose) model.
 
 ## Instructions
 
