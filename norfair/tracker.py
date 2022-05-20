@@ -17,14 +17,14 @@ class Tracker:
         initialization_delay: Optional[int] = None,
         pointwise_hit_counter_max: int = 4,
         detection_threshold: float = 0,
-        filter_setup: "OptimizedKalmanFilterFactory" = OptimizedKalmanFilterFactory(),
+        filter_factory: "OptimizedKalmanFilterFactory" = OptimizedKalmanFilterFactory(),
         past_detections_length: int = 4
     ):
         self.tracked_objects: Sequence["TrackedObject"] = []
         self.distance_function = distance_function
         self.hit_counter_max = hit_counter_max
         self.pointwise_hit_counter_max = pointwise_hit_counter_max
-        self.filter_setup = filter_setup
+        self.filter_factory = filter_factory
         if past_detections_length >= 0:
             self.past_detections_length = past_detections_length
         else:
@@ -78,7 +78,7 @@ class Tracker:
                     self.pointwise_hit_counter_max,
                     self.detection_threshold,
                     self.period,
-                    self.filter_setup,
+                    self.filter_factory,
                     self.past_detections_length
                 )
             )
@@ -209,7 +209,7 @@ class TrackedObject:
         pointwise_hit_counter_max: int,
         detection_threshold: float,
         period: int,
-        filter_setup: "FilterFactory",
+        filter_factory: "FilterFactory",
         past_detections_length: int
     ):
         try:
@@ -248,7 +248,7 @@ class TrackedObject:
             self.past_detections: Sequence["Detection"] = []
 
         # Create Kalman Filter
-        self.filter = filter_setup.create_filter(initial_detection_points)
+        self.filter = filter_factory.create_filter(initial_detection_points)
         self.dim_z = 2 * self.num_points
         self.label = initial_detection.label
 
