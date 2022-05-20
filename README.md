@@ -101,7 +101,8 @@ We provide several examples of how Norfair can be used to add tracking capabilit
 3. [Faster tracking of cars](demos/yolov4) using [YOLOv4](https://github.com/Tianxiaomo/pytorch-YOLOv4/tree/master).
 4. Inserting Norfair into an existing project: [Simple tracking of pedestrians](demos/alphapose) using [AlphaPose](https://github.com/MVIG-SJTU/AlphaPose).
 5. [Speed up pose estimation by extrapolating detections](demos/openpose) using [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose).
-6. [Tracking objects from different classes using keypoints and bounding boxes](demos/keypoints_bounding_boxes) using [YOLOv5](https://github.com/fcakyon/yolov5-pip) and [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose/releases/tag/v1.7.0)
+6. [Tracking objects from different classes using keypoints and bounding boxes](demos/keypoints_bounding_boxes) using [YOLOv5](https://github.com/fcakyon/yolov5-pip) and [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose/releases/tag/v1.7.0).
+7. [Filter and distance function profiling](demos/profiling) using [TRT pose estimator](https://github.com/NVIDIA-AI-IOT/trt_pose).
 
 ![Norfair OpenPose Demo](docs/openpose_skip_3_frames.gif)
 
