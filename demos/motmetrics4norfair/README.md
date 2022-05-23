@@ -27,17 +27,16 @@ What does each script do?
 
     Given that the ground truth files for the testing set are not publicly available, you will only be able to use motmetrics4norfair with the training set.
 
-3. Clone the [ByteTrack](https://github.com/ifzhang/ByteTrack) repo and follow its installation guideline.
-
-4. Clone this repo and go to `demos/motmetrics4norfair/`.
+3. Clone repos and go to `demos/motmetrics4norfair/`.
     ```bash
     git clone git@github.com:tryolabs/norfair.git
+    # Optional: Clone ByteTrack repo and follow its install instructions
     cd norfair/demos/demos/motmetrics4norfair
     ```
 
-5. Display the motmetrics4norfair instructions: 
+4. Display the motmetrics4norfair instructions (replace `motmetrics4norfair.py` with `motmetrics4norfair_xyah.py` or `motmetrics4bytetrack.py` as needed):
     ```bash
-        python motmetrics4norfair.py --help 
+        python motmetrics4norfair.py --help
     ``` 
 
     or run the following for a quick test

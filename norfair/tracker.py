@@ -347,7 +347,7 @@ class TrackedObject:
 
     def conditionally_add_to_past_detections(self, detection):
         """Adds detections into (and pops detections away) from `past_detections`
-        
+
         It does so by keeping a fixed amount of past detections saved into each 
         TrackedObject, while maintaining them distributed uniformly through the object's
         lifetime.
