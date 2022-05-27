@@ -17,6 +17,7 @@ except ImportError:
 from collections import OrderedDict
 
 
+
 class InformationFile:
     def __init__(self, file_path):
         self.path = file_path
@@ -114,8 +115,12 @@ class DetectionFileParser:
         row_order = np.argsort(self.matrix_detections[:, 0])
         self.matrix_detections = self.matrix_detections[row_order]
         # Coordinates refer to box corners
-        self.matrix_detections[:, 4] = self.matrix_detections[:, 2] + self.matrix_detections[:, 4]
-        self.matrix_detections[:, 5] = self.matrix_detections[:, 3] + self.matrix_detections[:, 5]
+        self.matrix_detections[:, 4] = (
+            self.matrix_detections[:, 2] + self.matrix_detections[:, 4]
+        )
+        self.matrix_detections[:, 5] = (
+            self.matrix_detections[:, 3] + self.matrix_detections[:, 5]
+        )
 
         if information_file is None:
             seqinfo_path = os.path.join(input_path, "seqinfo.ini")
@@ -179,7 +184,9 @@ class Accumulators:
             seqinfo_path = os.path.join(input_path, "seqinfo.ini")
             information_file = InformationFile(file_path=seqinfo_path)
         length = information_file.search(variable_name="seqLength")
-        self.progress_bar_iter = track(range(length - 1), description=file_name, transient=False)
+        self.progress_bar_iter = track(
+            range(length - 1), description=file_name, transient=False
+        )
 
     def update(self, predictions=None):
         # Get the tracked boxes from this frame in an array
@@ -242,13 +249,11 @@ def load_motchallenge(matrix_data, min_confidence=-1):
     """Load MOT challenge data.
 
     This is a modification of the function load_motchallenge from the py-motmetrics library, defined in io.py
-    In this version, the pandas dataframe is generated from a numpy array (matrix_data) instead of a text
-    file.
+    In this version, the pandas dataframe is generated from a numpy array (matrix_data) instead of a text file.
 
     Params
     ------
-    matrix_data : array  of float that has [frame, id, X, Y, width, height, conf, cassId, visibility] in each
-        row, for each prediction on a particular video
+    matrix_data : array  of float that has [frame, id, X, Y, width, height, conf, cassId, visibility] in each row, for each prediction on a particular video
 
     min_confidence : float
         Rows with confidence less than this threshold are removed.
@@ -297,7 +302,9 @@ def compare_dataframes(gts, ts):
     for k, tsacc in ts.items():
         print("Comparing ", k, "...")
         if k in gts:
-            accs.append(mm.utils.compare_to_groundtruth(gts[k], tsacc, "iou", distth=0.5))
+            accs.append(
+                mm.utils.compare_to_groundtruth(gts[k], tsacc, "iou", distth=0.5)
+            )
             names.append(k)
 
     return accs, names
@@ -308,14 +315,19 @@ def eval_motChallenge(matrixes_predictions, paths, metrics=None, generate_overal
         [
             (
                 os.path.split(p)[1],
-                mm.io.loadtxt(os.path.join(p, "gt/gt.txt"), fmt="mot15-2D", min_confidence=1),
+                mm.io.loadtxt(
+                    os.path.join(p, "gt/gt.txt"), fmt="mot15-2D", min_confidence=1
+                ),
             )
             for p in paths
         ]
     )
 
     ts = OrderedDict(
-        [(os.path.split(paths[n])[1], load_motchallenge(matrixes_predictions[n])) for n in range(len(paths))]
+        [
+            (os.path.split(paths[n])[1], load_motchallenge(matrixes_predictions[n]))
+            for n in range(len(paths))
+        ]
     )
 
     mh = mm.metrics.create()
@@ -326,7 +338,9 @@ def eval_motChallenge(matrixes_predictions, paths, metrics=None, generate_overal
         metrics = list(mm.metrics.motchallenge_metrics)
     mm.lap.default_solver = "scipy"
     print("Computing metrics...")
-    summary_dataframe = mh.compute_many(accs, names=names, metrics=metrics, generate_overall=generate_overall)
+    summary_dataframe = mh.compute_many(
+        accs, names=names, metrics=metrics, generate_overall=generate_overall
+    )
     summary_text = mm.io.render_summary(
         summary_dataframe, formatters=mh.formatters, namemap=mm.io.motchallenge_metric_names
     )

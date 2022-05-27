@@ -1,24 +1,28 @@
 import argparse
 import os.path
 
+import numpy as np
+
 from norfair import Tracker, drawing, metrics, video
 
+frame_skip_period = 1
+detection_threshold = 0.01
+distance_threshold = 0.9
+diagonal_proportion_threshold = 1 / 18
+
 parser = argparse.ArgumentParser(
-    description=(
-        "Evaluate a basic tracker on MOTChallenge data. Display on terminal the "
-        "MOTChallenge metrics results "
-    )
+    description="Evaluate a basic tracker on MOTChallenge data. Display on terminal the MOTChallenge metrics results "
 )
 parser.add_argument(
     "dataset_path",
     type=str,
     nargs="?",
-    help=("Path to the MOT Challenge train dataset folder (test dataset doesn't provide labels)"),
+    help="Path to the MOT Challenge train dataset folder (test dataset doesn't provide labels)",
 )
 parser.add_argument(
     "--make_video",
     action="store_true",
-    help=("Generate an output video, using the frames provided by the MOTChallenge dataset."),
+    help="Generate an output video, using the frames provided by the MOTChallenge dataset.",
 )
 parser.add_argument(
     "--save_pred",
@@ -30,15 +34,14 @@ parser.add_argument(
     action="store_true",
     help="Generate a text file with your MOTChallenge metrics results",
 )
-parser.add_argument("--output_path", type=str, nargs="?", default=".", help="Output path")
+parser.add_argument(
+    "--output_path", type=str, nargs="?", default=".", help="Output path"
+)
 parser.add_argument(
     "--select_sequences",
     type=str,
     nargs="+",
-    help=(
-        "If you want to select a subset of sequences in your dataset path. Insert "
-        "the names of the sequences you want to process."
-    ),
+    help="If you want to select a subset of sequences in your dataset path. Insert the names of the sequences you want to process.",
 )
 
 args = parser.parse_args()
@@ -55,16 +58,53 @@ if args.make_video:
 if args.select_sequences is None:
     sequences_paths = [f.path for f in os.scandir(args.dataset_path) if f.is_dir()]
 else:
-    sequences_paths = [os.path.join(args.dataset_path, f) for f in args.select_sequences]
+    sequences_paths = [
+        os.path.join(args.dataset_path, f) for f in args.select_sequences
+    ]
 
 accumulator = metrics.Accumulators()
+
+
+def keypoints_distance(detected_pose, tracked_pose):
+    norm_orders = [1, 2, np.inf]
+    distances = 0
+    diagonal = 0
+
+    hor_min_pt = min(detected_pose.points[:, 0])
+    hor_max_pt = max(detected_pose.points[:, 0])
+    ver_min_pt = min(detected_pose.points[:, 1])
+    ver_max_pt = max(detected_pose.points[:, 1])
+
+    # Set keypoint_dist_threshold based on object size, and calculate
+    # distance between detections and tracker estimations
+    for p in norm_orders:
+        distances += np.linalg.norm(
+            detected_pose.points - tracked_pose.estimate, ord=p, axis=1
+        )
+        diagonal += np.linalg.norm(
+            [hor_max_pt - hor_min_pt, ver_max_pt - ver_min_pt], ord=p
+        )
+
+    distances = distances / len(norm_orders)
+
+    keypoint_dist_threshold = diagonal * diagonal_proportion_threshold
+
+    match_num = np.count_nonzero(
+        (distances < keypoint_dist_threshold)
+        * (detected_pose.scores > detection_threshold)
+        * (tracked_pose.last_detection.scores > detection_threshold)
+    )
+    return 1 / (1 + match_num)
+
 
 for input_path in sequences_paths:
     # Search vertical resolution in seqinfo.ini
     seqinfo_path = os.path.join(input_path, "seqinfo.ini")
     info_file = metrics.InformationFile(file_path=seqinfo_path)
 
-    all_detections = metrics.DetectionFileParser(input_path=input_path, information_file=info_file)
+    all_detections = metrics.DetectionFileParser(
+        input_path=input_path, information_file=info_file
+    )
 
     if args.save_pred:
         predictions_text_file = metrics.PredictionsTextFile(
@@ -77,9 +117,9 @@ for input_path in sequences_paths:
         )
 
     tracker = Tracker(
-        distance_function=metrics.mot_keypoints_distance,
-        distance_threshold=metrics.MotParameters.DISTANCE_THRESHOLD,
-        detection_threshold=metrics.MotParameters.DETECTION_THRESHOLD,
+        distance_function=keypoints_distance,
+        distance_threshold=distance_threshold,
+        detection_threshold=detection_threshold,
         hit_inertia_min=10,
         hit_inertia_max=12,
         point_transience=4,
@@ -89,9 +129,9 @@ for input_path in sequences_paths:
     accumulator.create_accumulator(input_path=input_path, information_file=info_file)
 
     for frame_number, detections in enumerate(all_detections):
-        if frame_number % metrics.MotParameters.FRAME_SKIP_PERIOD == 0:
+        if frame_number % frame_skip_period == 0:
             tracked_objects = tracker.update(
-                detections=detections, period=metrics.MotParameters.FRAME_SKIP_PERIOD
+                detections=detections, period=frame_skip_period
             )
         else:
             detections = []
