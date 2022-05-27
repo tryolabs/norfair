@@ -7,12 +7,14 @@ from norfair import Tracker, metrics
 
 DATASET_PATH = "train"
 # Set the percentage that the overall MOTA can decrease without being an error
-MOTA_ERROR_THRESHOLD = 0.05
+MOTA_ERROR_THRESHOLD = 0.0
 
 FRAME_SKIP_PERIOD = 1
 DETECTION_THRESHOLD = 0.01
 DISTANCE_THRESHOLD = 0.9
 DIAGONAL_PROPORTION_THRESHOLD = 1 / 18
+POINTWISE_HIT_COUNTER_MAX = 3
+HIT_COUNTER_MAX = 2
 
 def keypoints_distance(detected_pose, tracked_pose):
     norm_orders = [1, 2, np.inf]
@@ -46,7 +48,15 @@ def keypoints_distance(detected_pose, tracked_pose):
     return 1 / (1 + match_num)
 
 def test_mot_metrics():
-    #Load previous metrics
+    """Tests that Norfair's MOT metrics didn't get worse
+
+     Configurable so that it allows some margin on how much worse metrics could get before
+     the test fails. Margin configured through MOTA_ERROR_THRESHOLD.
+
+     Raises:
+         If the previous metrics file its not found.
+     """
+    # Load previous metrics
     try:
         previous_metrics = pd.read_fwf('metrics.txt')
         previous_metrics.columns = [column_name.lower() for column_name in previous_metrics.columns]
@@ -69,9 +79,8 @@ def test_mot_metrics():
             distance_function=keypoints_distance,
             distance_threshold=DISTANCE_THRESHOLD,
             detection_threshold=DETECTION_THRESHOLD,
-            hit_inertia_min=10,
-            hit_inertia_max=12,
-            point_transience=4,
+            pointwise_hit_counter_max=POINTWISE_HIT_COUNTER_MAX,
+            hit_counter_max=HIT_COUNTER_MAX,
         )
 
         # Initialize accumulator for this video
@@ -98,4 +107,5 @@ def test_mot_metrics():
     new_overall_mota = new_metrics.loc["OVERALL", "mota"] * 100
     previous_overall_mota = float(previous_metrics.loc["OVERALL", "mota"][:-1])
 
+    accumulator.print_metrics()
     assert new_overall_mota >= previous_overall_mota * (1 - MOTA_ERROR_THRESHOLD), f"New overall MOTA score: {new_overall_mota} is too low, previous overall MOTA score: {previous_overall_mota}"
