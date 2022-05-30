@@ -12,6 +12,8 @@ import numpy as np
 from rich import print
 from rich.progress import BarColumn, Progress, ProgressColumn, TimeRemainingColumn
 
+from norfair import metrics
+
 from .utils import get_terminal_size
 
 
