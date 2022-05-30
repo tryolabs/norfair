@@ -57,7 +57,7 @@ def test_mot_metrics():
      """
     # Load previous metrics
     try:
-        previous_metrics = pd.read_fwf('metrics.txt')
+        previous_metrics = pd.read_fwf('tests/metrics.txt')
         previous_metrics.columns = [column_name.lower() for column_name in previous_metrics.columns]
         previous_metrics = previous_metrics.set_index(previous_metrics.columns[0])
     except FileNotFoundError as e:

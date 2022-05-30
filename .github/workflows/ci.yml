@@ -36,7 +36,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install tox tox-gh-actions
 
-      - name: Test with tox
+      - name: Run tests
         run: |
           python3 -m venv ./venv
           source venv/bin/activate

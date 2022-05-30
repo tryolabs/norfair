@@ -13,10 +13,9 @@ filterpy = "^1.4.5"
 rich = "^9.10.0"
 opencv-python = {version = ">= 3.2.0, < 5.0.0", optional = true}
 motmetrics = {version = "1.2.0", optional = true}
-pandas = {version = "^1.1.0", optional = true}
 
 [tool.poetry.extras]
-metrics = ["motmetrics", "pandas"]
+metrics = ["motmetrics"]
 video = ["opencv-python"]
 
 [tool.poetry.dev-dependencies]
