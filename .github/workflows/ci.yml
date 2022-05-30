@@ -37,7 +37,15 @@ jobs:
           pip install tox tox-gh-actions
 
       - name: Test with tox
-        run: tox
+        run: |
+          python3 -m venv ./venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          python --version
+          poetry install -E metrics
+          curl -O https://motchallenge.net/data/MOT17Labels.zip
+          unzip MOT17Labels.zip
+          pytest -s tests/
 
   #
   # Build & upload release to PyPI.
