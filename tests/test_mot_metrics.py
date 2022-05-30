@@ -6,7 +6,6 @@ import pandas as pd
 from norfair import Tracker, metrics
 
 DATASET_PATH = "train"
-# Set the percentage that the overall MOTA can decrease without being an error
 MOTA_ERROR_THRESHOLD = 0.0
 
 FRAME_SKIP_PERIOD = 1
