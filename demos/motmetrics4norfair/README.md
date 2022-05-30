@@ -31,7 +31,7 @@ What does each script do?
     ```bash
     git clone git@github.com:tryolabs/norfair.git
     # Optional: Clone ByteTrack repo and follow its install instructions
-    cd norfair/demos/demos/motmetrics4norfair
+    cd norfair/demos/motmetrics4norfair
     ```
 
 4. Display the motmetrics4norfair instructions (replace `motmetrics4norfair.py` with `motmetrics4norfair_xyah.py` or `motmetrics4bytetrack.py` as needed):
