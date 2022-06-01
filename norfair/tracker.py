@@ -249,7 +249,7 @@ class TrackedObject:
 
         # Create Kalman Filter
         self.filter = filter_factory.create_filter(initial_detection_points)
-        self.dim_z = 2 * self.num_points
+        self.dim_z = 3 * self.num_points
         self.label = initial_detection.label
 
     def tracker_step(self):
@@ -276,8 +276,8 @@ class TrackedObject:
 
     @property
     def estimate(self):
-        positions = self.filter.x.T.flatten()[: self.dim_z].reshape(-1, 2)
-        velocities = self.filter.x.T.flatten()[self.dim_z :].reshape(-1, 2)
+        positions = self.filter.x.T.flatten()[: self.dim_z].reshape(-1, 3)
+        velocities = self.filter.x.T.flatten()[self.dim_z :].reshape(-1, 3)
         return positions
 
     @property
@@ -300,7 +300,7 @@ class TrackedObject:
             assert len(detection.scores.shape) == 1
             points_over_threshold_mask = detection.scores > self.detection_threshold
             matched_sensors_mask = np.array(
-                [[m, m] for m in points_over_threshold_mask]
+                [[m, m, m] for m in points_over_threshold_mask]
             ).flatten()
             H_pos = np.diag(matched_sensors_mask).astype(
                 float
@@ -325,7 +325,7 @@ class TrackedObject:
         # and causes the tracker to start with wildly inaccurate estimations which
         # eventually coverge to the real detections.
         detected_at_least_once_mask = np.array(
-            [[m, m] for m in self.detected_at_least_once_points]
+            [[m, m, m] for m in self.detected_at_least_once_points]
         ).flatten()
         self.filter.x[self.dim_z :][np.logical_not(detected_at_least_once_mask)] = 0
         self.detected_at_least_once_points = np.logical_or(

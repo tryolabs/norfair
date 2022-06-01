@@ -83,6 +83,12 @@ def yolo_detections_to_norfair_detections(
                 Detection(points=bbox, scores=scores)
             )
 
+    # Add a dummy z dimension so we can test out a basic version of 3D-Norfair
+    if norfair_detections:
+        point_count = norfair_detections[0].points.shape[1]
+        z_dim = np.expand_dims(np.ones(point_count), axis=1)
+        for det in norfair_detections:
+            det.points = np.hstack([det.points, z_dim])
     return norfair_detections
 
 

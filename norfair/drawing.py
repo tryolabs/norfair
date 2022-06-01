@@ -104,7 +104,7 @@ def draw_tracked_objects(
                 if live:
                     cv2.circle(
                         frame,
-                        tuple(point.astype(int)),
+                        tuple(point[:2].astype(int)),
                         radius=radius,
                         color=point_color,
                         thickness=-1,
@@ -276,8 +276,8 @@ def draw_boxes(
         points = points.astype(int)
         cv2.rectangle(
             frame,
-            tuple(points[0, :]),
-            tuple(points[1, :]),
+            tuple(points[0, :2]),
+            tuple(points[1, :2]),
             color=line_color,
             thickness=line_width,
         )
@@ -340,8 +340,8 @@ def draw_tracked_boxes(
             points = points.astype(int)
             cv2.rectangle(
                 frame,
-                tuple(points[0, :]),
-                tuple(points[1, :]),
+                tuple(points[0, :2]),
+                tuple(points[1, :2]),
                 color=color,
                 thickness=border_width,
             )
@@ -413,7 +413,7 @@ class Paths:
             for point in points_to_draw:
                 cv2.circle(
                     self.mask,
-                    tuple(point.astype(int)),
+                    tuple(point[:2].astype(int)),
                     radius=self.radius,
                     color=color,
                     thickness=self.thickness,

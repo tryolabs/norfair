@@ -9,12 +9,12 @@ from rich.table import Table
 
 def validate_points(points: np.array) -> np.array:
     # If the user is tracking only a single point, reformat it slightly.
-    if points.shape == (2,):
+    if points.shape == (3,):
         points = points[np.newaxis, ...]
     elif len(points.shape) == 1:
         print_detection_error_message_and_exit(points)
     else:
-        if points.shape[1] != 2 or len(points.shape) > 2:
+        if points.shape[1] != 3 or len(points.shape) > 2:
             print_detection_error_message_and_exit(points)
     return points
 

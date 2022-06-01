@@ -10,8 +10,8 @@ class FilterPyKalmanFilterFactory:
 
     def create_filter(self, initial_detection: np.array):
         num_points = initial_detection.shape[0]
-        dim_z = 2 * num_points
-        dim_x = 2 * 2 * num_points  # We need to accommodate for velocities
+        dim_z = 3 * num_points
+        dim_x = 2 * 3 * num_points  # We need to accommodate for velocities
 
         filter = KalmanFilter(dim_x=dim_x, dim_z=dim_z)
 
