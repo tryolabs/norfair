@@ -85,7 +85,7 @@ class Tracker:
 
         if self.reid_distance_function is not None:
             # Match unmatched initialized tracked objects with not yet initialized tracked objects
-            _, matched_reid, _ = self.update_objects_in_place(
+            _, _, _ = self.update_objects_in_place(
                 self.reid_distance_function,
                 self.reid_distance_threshold,
                 unmatched_init_trackers,
@@ -111,25 +111,27 @@ class Tracker:
 
     def _get_distances(
         self,
+        distance_function,
+        distance_threshold,
         objects: Sequence["TrackedObject"],
-        detections: Optional[List["Detection"]],
+        candidates: Optional[Union[List["Detection"], List["TrackedObject"]]],
     ):
-        distance_matrix = np.ones((len(detections), len(objects)), dtype=np.float32)
-        distance_matrix *= self.distance_threshold + 1
-        for d, detection in enumerate(detections):
+        distance_matrix = np.ones((len(candidates), len(objects)), dtype=np.float32)
+        distance_matrix *= distance_threshold + 1
+        for d, detection in enumerate(candidates):
             for o, obj in enumerate(objects):
                 if detection.label != obj.label:
-                    distance_matrix[d, o] = self.distance_threshold + 1
+                    distance_matrix[d, o] = distance_threshold + 1
                     if (detection.label is None) or (obj.label is None):
                         print("\nThere are detections with and without label!")
                     continue
-                distance = self.distance_function(detection, obj)
+                distance = distance_function(detection, obj)
                 # Cap detections and objects with no chance of getting matched so we
                 # dont force the hungarian algorithm to minimize them and therefore
                 # introduce the possibility of sub optimal results.
                 # Note: This is probably not needed with the new distance minimizing algorithm
-                if distance > self.distance_threshold:
-                    distance_matrix[d, o] = self.distance_threshold + 1
+                if distance > distance_threshold:
+                    distance_matrix[d, o] = distance_threshold + 1
                 else:
                     distance_matrix[d, o] = distance
         return distance_matrix
@@ -139,10 +141,10 @@ class Tracker:
         distance_function,
         distance_threshold,
         objects: Sequence["TrackedObject"],
-        detections: Optional[Union[List["Detection"], List["TrackedObject"]]],
+        candidates: Optional[Union[List["Detection"], List["TrackedObject"]]],
     ):
-        if detections is not None and len(detections) > 0:
-            distance_matrix = self._get_distances(objects, detections)
+        if candidates is not None and len(candidates) > 0:
+            distance_matrix = self._get_distances(distance_function, distance_threshold, objects, candidates)
             if np.isnan(distance_matrix).any():
                 print(
                     "\nReceived nan values from distance function, please check your distance function for errors!"
@@ -165,13 +167,13 @@ class Tracker:
                         minimum if minimum < distance_threshold else None
                     )
 
-            matched_det_indices, matched_obj_indices = self.match_dets_and_objs(
+            matched_cand_indices, matched_obj_indices = self.match_dets_and_objs(
                 distance_matrix,
                 distance_threshold
             )
-            if len(matched_det_indices) > 0:
-                unmatched_detections = [
-                    d for i, d in enumerate(detections) if i not in matched_det_indices
+            if len(matched_cand_indices) > 0:
+                unmatched_candidates = [
+                    d for i, d in enumerate(candidates) if i not in matched_cand_indices
                 ]
                 unmatched_objects = [
                     d for i, d in enumerate(objects) if i not in matched_obj_indices
@@ -179,32 +181,32 @@ class Tracker:
                 matched_objects = []
 
                 # Handle matched people/detections
-                for (match_det_idx, match_obj_idx) in zip(
-                    matched_det_indices, matched_obj_indices
+                for (match_cand_idx, match_obj_idx) in zip(
+                    matched_cand_indices, matched_obj_indices
                 ):
-                    match_distance = distance_matrix[match_det_idx, match_obj_idx]
-                    matched_detection = detections[match_det_idx]
+                    match_distance = distance_matrix[match_cand_idx, match_obj_idx]
+                    matched_candidate = candidates[match_cand_idx]
                     matched_object = objects[match_obj_idx]
                     if match_distance < distance_threshold:
-                        if isinstance(matched_detection, Detection):
-                            matched_object.hit(matched_detection, period=self.period)
+                        if isinstance(matched_candidate, Detection):
+                            matched_object.hit(matched_candidate, period=self.period)
                             matched_object.last_distance = match_distance
                             matched_objects.append(matched_object)
-                        elif isinstance(matched_detection, TrackedObject):
+                        elif isinstance(matched_candidate, TrackedObject):
                             # Merge new TrackedObject with the old one
-                            matched_object.merge(matched_detection)
+                            matched_object.merge(matched_candidate)
                             # If we are matching TrackedObject instances we want to get rid of the
                             # already matched candidate to avoid matching it again in future frames
-                            self.tracked_objects.remove(matched_detection)
+                            self.tracked_objects.remove(matched_candidate)
                     else:
-                        unmatched_detections.append(matched_detection)
+                        unmatched_candidates.append(matched_candidate)
                         unmatched_objects.append(matched_object)
             else:
-                unmatched_detections, matched_objects, unmatched_objects = detections, [], objects
+                unmatched_candidates, matched_objects, unmatched_objects = candidates, [], objects
         else:
-            unmatched_detections, matched_objects, unmatched_objects = [], [], objects
+            unmatched_candidates, matched_objects, unmatched_objects = [], [], objects
 
-        return unmatched_detections, matched_objects, unmatched_objects
+        return unmatched_candidates, matched_objects, unmatched_objects
 
     def match_dets_and_objs(self, distance_matrix: np.array, distance_threshold):
         """Matches detections with tracked_objects from a distance matrix
