@@ -1,14 +1,17 @@
 import argparse
+from typing import List, Optional, Union
 
 import numpy as np
 import torch
+import torchvision.ops.boxes as bops
 import yolov5
-from typing import Union, List, Optional
 
 import norfair
 from norfair import Detection, Tracker, Video, Paths
 
-max_distance_between_points: int = 30
+DISTANCE_THRESHOLD_BBOX: float = 3.33
+DISTANCE_THRESHOLD_CENTROID: int = 30
+MAX_DISTANCE: int = 10000
 
 
 class YOLO:
@@ -48,15 +51,62 @@ def center(points):
     return [np.mean(np.array(points), axis=0)]
 
 
+def iou_pytorch(detection, tracked_object):
+    # Slower but simplier version of iou
+
+    detection_points = np.concatenate([detection.points[0], detection.points[1]])
+    tracked_object_points = np.concatenate(
+        [tracked_object.estimate[0], tracked_object.estimate[1]]
+    )
+
+    box_a = torch.tensor([detection_points], dtype=torch.float)
+    box_b = torch.tensor([tracked_object_points], dtype=torch.float)
+    iou = bops.box_iou(box_a, box_b)
+
+    # Since 0 <= IoU <= 1, we define 1/IoU as a distance.
+    # Distance values will be in [1, inf)
+    return np.float(1 / iou if iou else MAX_DISTANCE)
+
+
+def iou(detection, tracked_object):
+    # Detection points will be box A
+    # Tracked objects point will be box B.
+
+    box_a = np.concatenate([detection.points[0], detection.points[1]])
+    box_b = np.concatenate([tracked_object.estimate[0], tracked_object.estimate[1]])
+
+    x_a = max(box_a[0], box_b[0])
+    y_a = max(box_a[1], box_b[1])
+    x_b = min(box_a[2], box_b[2])
+    y_b = min(box_a[3], box_b[3])
+
+    # Compute the area of intersection rectangle
+    inter_area = max(0, x_b - x_a + 1) * max(0, y_b - y_a + 1)
+
+    # Compute the area of both the prediction and tracker
+    # rectangles
+    box_a_area = (box_a[2] - box_a[0] + 1) * (box_a[3] - box_a[1] + 1)
+    box_b_area = (box_b[2] - box_b[0] + 1) * (box_b[3] - box_b[1] + 1)
+
+    # Compute the intersection over union by taking the intersection
+    # area and dividing it by the sum of prediction + tracker
+    # areas - the interesection area
+    iou = inter_area / float(box_a_area + box_b_area - inter_area)
+
+    # Since 0 <= IoU <= 1, we define 1/IoU as a distance.
+    # Distance values will be in [1, inf)
+    return 1 / iou if iou else (MAX_DISTANCE)
+
+
 def yolo_detections_to_norfair_detections(
     yolo_detections: torch.tensor,
-    track_points: str = 'centroid'  # bbox or centroid
+    track_points: str = "centroid"  # bbox or centroid
 ) -> List[Detection]:
     """convert detections_as_xywh to norfair detections
     """
     norfair_detections: List[Detection] = []
 
-    if track_points == 'centroid':
+    if track_points == "centroid":
         detections_as_xywh = yolo_detections.xywh[0]
         for detection_as_xywh in detections_as_xywh:
             centroid = np.array(
@@ -69,7 +119,7 @@ def yolo_detections_to_norfair_detections(
             norfair_detections.append(
                 Detection(points=centroid, scores=scores)
             )
-    elif track_points == 'bbox':
+    elif track_points == "bbox":
         detections_as_xyxy = yolo_detections.xyxy[0]
         for detection_as_xyxy in detections_as_xyxy:
             bbox = np.array(
@@ -92,7 +142,7 @@ parser.add_argument("--detector_path", type=str, default="yolov5m6.pt", help="YO
 parser.add_argument("--img_size", type=int, default="720", help="YOLOv5 inference size (pixels)")
 parser.add_argument("--conf_thres", type=float, default="0.25", help="YOLOv5 object confidence threshold")
 parser.add_argument("--iou_thresh", type=float, default="0.45", help="YOLOv5 IOU threshold for NMS")
-parser.add_argument('--classes', nargs='+', type=int, help='Filter by class: --classes 0, or --classes 0 2 3')
+parser.add_argument("--classes", nargs="+", type=int, help="Filter by class: --classes 0, or --classes 0 2 3")
 parser.add_argument("--device", type=str, default=None, help="Inference device: 'cpu' or 'cuda'")
 parser.add_argument("--track_points", type=str, default="centroid", help="Track points: 'centroid' or 'bbox'")
 args = parser.parse_args()
@@ -101,9 +151,17 @@ model = YOLO(args.detector_path, device=args.device)
 
 for input_path in args.files:
     video = Video(input_path=input_path)
+
+    distance_function = iou if args.track_points == "bbox" else euclidean_distance
+    distance_threshold = (
+        DISTANCE_THRESHOLD_BBOX
+        if args.track_points == "bbox"
+        else DISTANCE_THRESHOLD_CENTROID
+    )
+
     tracker = Tracker(
-        distance_function=euclidean_distance,
-        distance_threshold=max_distance_between_points,
+        distance_function=distance_function,
+        distance_threshold=distance_threshold,
     )
     paths_drawer = Paths(center, attenuation=0.01)
 
@@ -117,10 +175,11 @@ for input_path in args.files:
         )
         detections = yolo_detections_to_norfair_detections(yolo_detections, track_points=args.track_points)
         tracked_objects = tracker.update(detections=detections)
-        if args.track_points == 'centroid':
+        if args.track_points == "centroid":
             norfair.draw_points(frame, detections)
-        elif args.track_points == 'bbox':
+            norfair.draw_tracked_objects(frame, tracked_objects)
+        elif args.track_points == "bbox":
             norfair.draw_boxes(frame, detections)
-        norfair.draw_tracked_objects(frame, tracked_objects)
+            norfair.draw_tracked_boxes(frame, tracked_objects)
         frame = paths_drawer.draw(frame, tracked_objects)
         video.write(frame)
