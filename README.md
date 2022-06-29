@@ -84,7 +84,7 @@ for frame in video:
     video.write(frame)
 ```
 
-The video and drawing tools use OpenCV frames, so they are compatible with most Python video code available online. The point tracking is based on [SORT](https://arxiv.org/pdf/1602.00763.pdf) generalized to detections consisting of a dynamically changing amount of points per detection.
+The video and drawing tools use OpenCV frames, so they are compatible with most Python video code available online. The point tracking is based on [SORT](https://arxiv.org/pdf/1602.00763.pdf) generalized to detections consisting of a dynamically changing number of points per detection.
 
 ## Motivation
 
