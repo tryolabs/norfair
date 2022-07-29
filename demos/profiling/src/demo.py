@@ -1,24 +1,24 @@
 import argparse
-import sys
 import os
+import sys
 import time
 
 import norfair
 from norfair import Tracker, Video
 
-sys.path.append("/pose/src")
+sys.path.append("/norfair/demos/profiling/src")
 
 from utils import (
-    get_model,
-    get_preprocesser,
-    get_postprocesser,
-    get_distance_function,
-    get_filter_setup,
-    DISTANCE_THRESHOLD,
     DETECTION_THRESHOLD,
+    DISTANCE_THRESHOLD,
     HIT_COUNTER_MAX,
     INITIALIZATION_DELAY,
     POINTWISE_HIT_COUNTER_MAX,
+    get_distance_function,
+    get_filter_setup,
+    get_model,
+    get_postprocesser,
+    get_preprocesser,
     model_path,
     model_resolution,
 )

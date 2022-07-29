@@ -5,6 +5,7 @@ import numpy as np
 
 import norfair
 from norfair import Detection, Tracker, Video
+from norfair.distances import create_keypoints_voting_distance
 
 # Import openpose
 openpose_install_path = (
@@ -57,17 +58,6 @@ class OpenposeDetector:
         return self.detector.emplaceAndPop(image)
 
 
-# Distance function
-def keypoints_distance(detected_pose, tracked_pose):
-    distances = np.linalg.norm(detected_pose.points - tracked_pose.estimate, axis=1)
-    match_num = np.count_nonzero(
-        (distances < KEYPOINT_DIST_THRESHOLD)
-        * (detected_pose.scores > DETECTION_THRESHOLD)
-        * (tracked_pose.last_detection.scores > DETECTION_THRESHOLD)
-    )
-    return 1 / (1 + match_num)
-
-
 if __name__ == "__main__":
 
     # CLI configuration
@@ -92,14 +82,15 @@ if __name__ == "__main__":
     for input_path in args.files:
         print(f"Video: {input_path}")
         video = Video(input_path=input_path)
+        KEYPOINT_DIST_THRESHOLD = video.input_height / 25
+
         tracker = Tracker(
-            distance_function=keypoints_distance,
+            distance_function=create_keypoints_voting_distance(keypoint_distance_threshold=KEYPOINT_DIST_THRESHOLD, detection_threshold=DETECTION_THRESHOLD),
             distance_threshold=DISTANCE_THRESHOLD,
             detection_threshold=DETECTION_THRESHOLD,
             initialization_delay=INITIALIZATION_DELAY,
             pointwise_hit_counter_max=POINTWISE_HIT_COUNTER_MAX,
         )
-        KEYPOINT_DIST_THRESHOLD = video.input_height / 25
 
         for i, frame in enumerate(video):
             if i % args.skip_frame == 0:
