@@ -1,0 +1,38 @@
+FROM nvcr.io/nvidia/tensorrt:20.12-py3
+RUN apt-get update && apt-get install -y libgl1
+# RUN apt install -y ffmpeg libsm6 libxext6
+# RUN apt install -y libgl1-mesa-dri
+
+RUN pip install --upgrade pip 
+
+COPY demos/profiling/requirements.txt /tmp
+RUN pip install -r /tmp/requirements.txt
+
+# install torch2trt
+WORKDIR /
+RUN git clone https://github.com/NVIDIA-AI-IOT/torch2trt
+RUN cd /torch2trt/ && python setup.py install --plugins
+
+RUN git clone https://github.com/NVIDIA-AI-IOT/trt_pose
+RUN cd /trt_pose/ && python setup.py install
+
+# download the pose estimation models
+RUN gdown --id 13FkJkx7evQ1WwP54UmdiDXWyFMY1OxDU
+RUN gdown --id 1XYDdCUdiF2xxx4rznmLb62SdOUZuoNbd
+
+# for multiprocessing
+# RUN pip3 install multiprocess
+
+# install Norfair
+RUN pip install poetry
+RUN poetry config virtualenvs.create false 
+
+# cache deps
+COPY poetry.lock /tmp
+COPY pyproject.toml /tmp
+RUN cd /tmp && poetry install --no-interaction --no-ansi --no-root
+
+COPY . /norfair
+RUN cd /norfair && poetry install --no-interaction --no-ansi
+
+WORKDIR /norfair/demos/profiling/src
