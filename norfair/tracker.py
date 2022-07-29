@@ -1,27 +1,33 @@
 import math
-from typing import Callable, List, Optional, Sequence
+from typing import Callable, List, Optional, Sequence, Union
 
 import numpy as np
 from rich import print
 
-from .utils import validate_points
+from norfair.distances import get_distance_by_name
+
 from .filter import FilterPyKalmanFilterFactory
+from .utils import validate_points
 
 
 class Tracker:
     def __init__(
         self,
-        distance_function: Callable[["Detection", "TrackedObject"], float],
+        distance_function: Union[str, Callable[["Detection", "TrackedObject"], float]],
         distance_threshold: float,
         hit_counter_max: int = 15,
         initialization_delay: Optional[int] = None,
         pointwise_hit_counter_max: int = 4,
         detection_threshold: float = 0,
         filter_factory: "FilterPyKalmanFilterFactory" = FilterPyKalmanFilterFactory(),
-        past_detections_length: int = 4
+        past_detections_length: int = 4,
     ):
         self.tracked_objects: Sequence["TrackedObject"] = []
+
+        if isinstance(distance_function, str):
+            distance_function = get_distance_by_name(distance_function)
         self.distance_function = distance_function
+
         self.hit_counter_max = hit_counter_max
         self.pointwise_hit_counter_max = pointwise_hit_counter_max
         self.filter_factory = filter_factory
@@ -85,33 +91,38 @@ class Tracker:
 
         return [p for p in self.tracked_objects if not p.is_initializing]
 
+    def _get_distances(
+        self,
+        objects: Sequence["TrackedObject"],
+        detections: Optional[List["Detection"]],
+    ):
+        distance_matrix = np.ones((len(detections), len(objects)), dtype=np.float32)
+        distance_matrix *= self.distance_threshold + 1
+        for d, detection in enumerate(detections):
+            for o, obj in enumerate(objects):
+                if detection.label != obj.label:
+                    distance_matrix[d, o] = self.distance_threshold + 1
+                    if (detection.label is None) or (obj.label is None):
+                        print("\nThere are detections with and without label!")
+                    continue
+                distance = self.distance_function(detection, obj)
+                # Cap detections and objects with no chance of getting matched so we
+                # dont force the hungarian algorithm to minimize them and therefore
+                # introduce the possibility of sub optimal results.
+                # Note: This is probably not needed with the new distance minimizing algorithm
+                if distance > self.distance_threshold:
+                    distance_matrix[d, o] = self.distance_threshold + 1
+                else:
+                    distance_matrix[d, o] = distance
+        return distance_matrix
+
     def update_objects_in_place(
         self,
         objects: Sequence["TrackedObject"],
         detections: Optional[List["Detection"]],
     ):
         if detections is not None and len(detections) > 0:
-            distance_matrix = np.ones((len(detections), len(objects)), dtype=np.float32)
-            distance_matrix *= self.distance_threshold + 1
-            for d, detection in enumerate(detections):
-                for o, obj in enumerate(objects):
-                    if detection.label != obj.label:
-                        distance_matrix[d, o] = self.distance_threshold + 1
-                        if (detection.label is None) or (obj.label is None):
-                            print(
-                                "\nThere are detections with and without label!"
-                            )
-                        continue
-                    distance = self.distance_function(detection, obj)
-                    # Cap detections and objects with no chance of getting matched so we
-                    # dont force the hungarian algorithm to minimize them and therefore
-                    # introduce the possibility of sub optimal results.
-                    # Note: This is probably not needed with the new distance minimizing algorithm
-                    if distance > self.distance_threshold:
-                        distance_matrix[d, o] = self.distance_threshold + 1
-                    else:
-                        distance_matrix[d, o] = distance
-
+            distance_matrix = self._get_distances(objects, detections)
             if np.isnan(distance_matrix).any():
                 print(
                     "\nReceived nan values from distance function, please check your distance function for errors!"
