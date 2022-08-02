@@ -41,6 +41,7 @@ def draw_points(
             color = Color.random(abs(hash(d.label)))
         points = d.points
         points = validate_points(points)
+        points = points[:, :2]
         for point in points:
             cv2.circle(
                 frame,
@@ -101,8 +102,9 @@ def draw_tracked_objects(
             point_color = color
             id_color = color
 
+        points = obj.estimate[:, :2]
         if draw_points:
-            for point, live in zip(obj.estimate, obj.live_points):
+            for point, live in zip(points, obj.live_points):
                 if live:
                     cv2.circle(
                         frame,
@@ -113,9 +115,9 @@ def draw_tracked_objects(
                     )
 
             if draw_labels:
-                points = obj.estimate[obj.live_points]
-                points = points.astype(int)
-                label_draw_position = np.array([min(points[:, 0]), min(points[:, 1])])
+                live_points = points[obj.live_points]
+                live_points = live_points.astype(int)
+                label_draw_position = np.array([min(live_points[:, 0]), min(live_points[:, 1])])
                 label_draw_position -= radius
                 cv2.putText(
                     frame,
@@ -129,7 +131,7 @@ def draw_tracked_objects(
                 )
 
         if id_size > 0:
-            id_draw_position = centroid(obj.estimate[obj.live_points])
+            id_draw_position = centroid(points[obj.live_points])
             cv2.putText(
                 frame,
                 str(obj.id),
@@ -191,7 +193,7 @@ def draw_debug_metrics(
             else obj.estimate
         )
 
-        for point in obj.estimate:
+        for point in obj.estimate[:, :2]:
             cv2.circle(
                 frame,
                 tuple(point.astype(int)),
@@ -275,7 +277,7 @@ def draw_boxes(
             line_color = Color.random(random.randint(0, 20))
         points = d.points
         points = validate_points(points)
-        points = points.astype(int)
+        points = points[:, :2].astype(int)
         cv2.rectangle(
             frame,
             tuple(points[0, :]),
@@ -337,7 +339,7 @@ def draw_tracked_boxes(
         else:
             color = border_colors[n % len(border_colors)]
 
-        points = obj.estimate
+        points = obj.estimate[:, :2]
         if draw_box:
             points = points.astype(int)
             cv2.rectangle(
@@ -381,8 +383,7 @@ class Paths:
     def __init__(self, get_points_to_draw=None, thickness=None, color=None, radius=None, attenuation=0.01):
         if get_points_to_draw is None:
             def get_points_to_draw(points):
-                return [np.mean(np.array(points), axis=0)]
-
+                return [np.mean(np.array(points)[:2], axis=0)]
         self.get_points_to_draw = get_points_to_draw
 
         self.radius = radius
