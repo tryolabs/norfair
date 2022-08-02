@@ -4,7 +4,7 @@ flake8==4.0.1
 ipdb==0.13.9
 boto3==1.22.3
 
-norfair >= 0.3.0
+norfair >= 1.0.0
 numpy==1.22.3
 opencv-python==4.5.5.64
 torch==1.11.0

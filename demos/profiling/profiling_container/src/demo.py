@@ -210,7 +210,7 @@ if __name__ == "__main__":
                     hit_counter_max=HIT_COUNTER_MAX,
                     initialization_delay=INITIALIZATION_DELAY,
                     pointwise_hit_counter_max=POINTWISE_HIT_COUNTER_MAX,
-                    filter_setup=filter_setup,
+                    filter_factory=filter_setup,
                 )
 
                 preprocess = get_preprocesser(model_width, model_height)
