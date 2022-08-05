@@ -60,6 +60,7 @@ class Tracker:
         TrackedObject.count = 0
         self.reid_distance_function = reid_distance_function
         self.reid_distance_threshold = reid_distance_threshold
+        self.camera_pos = None
 
     def update(self, detections: Optional[List["Detection"]] = None, period: int = 1):
         self.period = period
@@ -86,6 +87,7 @@ class Tracker:
         # Update tracker
         for obj in self.tracked_objects:
             obj.tracker_step()
+            obj.camera_pos = self.camera_pos
 
         # Update initialized tracked objects with detections
         unmatched_detections, _, unmatched_init_trackers = self.update_objects_in_place(
@@ -128,7 +130,8 @@ class Tracker:
                     self.period,
                     self.filter_factory,
                     self.past_detections_length,
-                    self.reid_hit_counter_max,
+                    self.reid_hit_counter_max,,
+                    self.camera_pos
                 )
             )
 
@@ -283,10 +286,11 @@ class TrackedObject:
         period: int,
         filter_factory: "FilterFactory",
         past_detections_length: int,
-        reid_hit_counter_max: Optional[int],
+        reid_hit_counter_max: Optional[int],,
+        camera_pos: np.array
     ):
         try:
-            initial_detection_points = validate_points(initial_detection.points)
+            initial_detection_points = validate_points(initial_detection.absolute_points)
         except AttributeError:
             print(
                 f"\n[red]ERROR[/red]: The detection list fed into `tracker.update()` should be composed of {Detection} objects not {type(initial_detection)}.\n"
@@ -329,6 +333,7 @@ class TrackedObject:
         self.filter = filter_factory.create_filter(initial_detection_points)
         self.dim_z = 2 * self.num_points
         self.label = initial_detection.label
+        self.camera_pos = camera_pos
 
     def tracker_step(self):
         self.hit_counter -= 1
@@ -365,6 +370,8 @@ class TrackedObject:
     def estimate(self):
         positions = self.filter.x.T.flatten()[: self.dim_z].reshape(-1, 2)
         velocities = self.filter.x.T.flatten()[self.dim_z :].reshape(-1, 2)
+        if self.camera_pos is not None:
+            return positions + self.camera_pos
         return positions
 
     @property
@@ -372,7 +379,7 @@ class TrackedObject:
         return self.point_hit_counter > 0
 
     def hit(self, detection: "Detection", period: int = 1):
-        points = validate_points(detection.points)
+        points = validate_points(detection.absolute_points)
         self.conditionally_add_to_past_detections(detection)
 
         self.last_detection = detection
@@ -474,4 +481,5 @@ class Detection:
         self.scores = scores
         self.data = data
         self.label = label
+        self.absolute_points = points.copy()
         self.embedding = embedding
