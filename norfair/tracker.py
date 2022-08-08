@@ -60,9 +60,15 @@ class Tracker:
         TrackedObject.count = 0
         self.reid_distance_function = reid_distance_function
         self.reid_distance_threshold = reid_distance_threshold
-        self.camera_pos = None
+        self.abs_to_rel = None
 
-    def update(self, detections: Optional[List["Detection"]] = None, period: int = 1):
+    def update(self, detections: Optional[List["Detection"]] = None, period: int = 1, coord_transformations: tuple = None):
+
+        if coord_transformations is not None:
+            assert len(coord_transformations) == 2, "Argument 'coord_transformations' should provide abs_to_rel and rel_to_abs coordinate transformations"
+            for det in detections:
+                det.absolute_points = coord_transformations[1](det.absolute_points)
+            self.abs_to_rel = coord_transformations[0]
         self.period = period
 
         # Remove stale trackers and make candidate object real if the hit counter is positive
@@ -87,7 +93,7 @@ class Tracker:
         # Update tracker
         for obj in self.tracked_objects:
             obj.tracker_step()
-            obj.camera_pos = self.camera_pos
+            obj.abs_to_rel = self.abs_to_rel
 
         # Update initialized tracked objects with detections
         unmatched_detections, _, unmatched_init_trackers = self.update_objects_in_place(
@@ -131,7 +137,7 @@ class Tracker:
                     self.filter_factory,
                     self.past_detections_length,
                     self.reid_hit_counter_max,,
-                    self.camera_pos
+                    self.abs_to_rel,
                 )
             )
 
@@ -287,7 +293,7 @@ class TrackedObject:
         filter_factory: "FilterFactory",
         past_detections_length: int,
         reid_hit_counter_max: Optional[int],,
-        camera_pos: np.array
+        abs_to_rel: np.array
     ):
         try:
             initial_detection_points = validate_points(initial_detection.absolute_points)
@@ -333,7 +339,7 @@ class TrackedObject:
         self.filter = filter_factory.create_filter(initial_detection_points)
         self.dim_z = 2 * self.num_points
         self.label = initial_detection.label
-        self.camera_pos = camera_pos
+        self.abs_to_rel = abs_to_rel
 
     def tracker_step(self):
         self.hit_counter -= 1
@@ -367,11 +373,11 @@ class TrackedObject:
         return self.reid_hit_counter is None or self.reid_hit_counter >= 0
 
     @property
-    def estimate(self):
+    def estimate(self, absolute = False):
         positions = self.filter.x.T.flatten()[: self.dim_z].reshape(-1, 2)
         velocities = self.filter.x.T.flatten()[self.dim_z :].reshape(-1, 2)
-        if self.camera_pos is not None:
-            return positions + self.camera_pos
+        if (self.abs_to_rel is not None) and (not absolute):
+            return self.abs_to_rel(positions)
         return positions
 
     @property
