@@ -2,9 +2,11 @@ import argparse
 import os
 import sys
 import time
+import cv2
 
 import norfair
 from norfair import Tracker, Video
+from norfair.motion import MotionEstimator, get_translation_mode_transformations, get_homography_transformations
 
 sys.path.append("/demo/src")
 
@@ -32,6 +34,8 @@ def process_video(
     postprocesser,
     frame_skip_period=1,
     create_video=False,
+    motion_estimator=None,
+    motion_arguments=None,
 ):
 
     tracker_time_mean = 0
@@ -40,8 +44,11 @@ def process_video(
     start_time = time.time()
 
     total_frames = 0
+    coord_transformations = None
     for frame_number, frame in enumerate(video):
         total_frames += 1
+        if motion_estimator is not None:
+            coord_transformations = motion_estimator.update(frame, motion_arguments)
 
         if frame_number % frame_skip_period == 0:
 
@@ -52,7 +59,7 @@ def process_video(
             detector_time = time.time()
 
             tracked_objects = tracker.update(
-                detections=detections, period=frame_skip_period
+                detections=detections, period=frame_skip_period, coord_transformations=coord_transformations
             )
             tracker_time = time.time()
 
@@ -129,6 +136,12 @@ if __name__ == "__main__":
         action="store_true",
     )
     parser.add_argument(
+        "--motion-estimator",
+        dest="motion_estimator",
+        default="none",
+        help="Camera motion estimator ('none', 'translations', 'homographies')",
+    )
+    parser.add_argument(
         "--make-video",
         dest="make_video",
         help="Create output video files",
@@ -184,6 +197,16 @@ if __name__ == "__main__":
                     }
                 }
 
+    if args.motion_estimator == 'none':
+        motion_arguments = None
+        motion_estimator = None
+    elif args.motion_estimator == 'translations':
+        motion_arguments = {'bin_size': 0.2}
+        motion_estimator = MotionEstimator(max_points=200, min_distance=15, block_size=3, transformations_getter = get_translation_mode_transformations) 
+    elif args.motion_estimator == 'homographies':
+        motion_arguments = {'method': cv2.RANSAC, 'ransacReprojThreshold': 3, 'maxIters': 2000, 'confidence': 0.995}
+        motion_estimator = MotionEstimator(max_points=200, min_distance=15, block_size=3, transformations_getter = get_translation_mode_transformations)
+
     # Process Videos
     for fs in filter_setups:
         filter_setup = get_filter_setup(fs)
@@ -224,6 +247,8 @@ if __name__ == "__main__":
                     postprocesser=postprocess,
                     frame_skip_period=args.skip_frame,
                     create_video=args.make_video,
+                    motion_estimator=motion_estimator,
+                    motion_arguments=motion_arguments,
                 )
 
                 profiling[input_path][fs][df] = {
@@ -237,7 +262,7 @@ if __name__ == "__main__":
         print(input_path)
         for filter_setup, prof_ip_fs in prof_ip.items():
             for distance_function, prof_ip_fs_df in prof_ip_fs.items():
-                print(f"Filter: {filter_setup}, Distance: {distance_function}")
+                print(f"Filter: {filter_setup}, Distance: {distance_function}, Motion Estimator: {args.motion_estimator}")
                 print(
                     f"FPS: {prof_ip_fs_df['fps']:.3}, Tracker time: {prof_ip_fs_df['tracker time']:.2}, Detector time: {prof_ip_fs_df['detector time']:.2}"
                 )
