@@ -121,7 +121,7 @@ class MotionEstimator:
         max_points=200,
         min_distance=15,
         block_size=3,
-        transformations_getter=get_translation_mode_transformations,
+        transformations_getter=get_homography_transformations,
     ):
         self.max_points = max_points
         self.min_distance = min_distance
