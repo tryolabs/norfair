@@ -373,12 +373,25 @@ class TrackedObject:
         return self.reid_hit_counter is None or self.reid_hit_counter >= 0
 
     @property
-    def estimate(self, absolute = False):
+    def estimate(self):
         positions = self.filter.x.T.flatten()[: self.dim_z].reshape(-1, 2)
         velocities = self.filter.x.T.flatten()[self.dim_z :].reshape(-1, 2)
-        if (self.abs_to_rel is not None) and (not absolute):
+        if self.abs_to_rel is not None:
             return self.abs_to_rel(positions)
         return positions
+
+    def get_estimate(self, absolute = False):
+        positions = self.filter.x.T.flatten()[: self.dim_z].reshape(-1, 2)
+        if (self.abs_to_rel is None):
+            if not absolute:
+                return positions
+            else:
+                raise ValueError("You must provide 'coord_transformations' to the tracker to get absolute coordinates")
+        else:
+            if absolute:
+                return positions
+            else:
+                return self.abs_to_rel(positions)
 
     @property
     def live_points(self):
