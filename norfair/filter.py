@@ -36,6 +36,7 @@ class FilterPyKalmanFilterFactory:
 
         # Initial state: numpy.array(dim_x, 1)
         filter.x[:dim_z] = np.expand_dims(initial_detection.flatten(), 0).T
+        filter.x[dim_z:] = 0
 
         # Estimation uncertainty: numpy.array(dim_x, dim_x)
         filter.P[dim_z:, dim_z:] *= self.P
@@ -48,8 +49,6 @@ class NoFilter:
         self.dim_z = dim_z
         self.x = np.zeros((dim_x, 1))
 
-        self.kp_undetected = np.ones((dim_z, 1))
-
     def predict(self):
         return
 
@@ -58,7 +57,6 @@ class NoFilter:
         if H is not None:
             diagonal = np.diagonal(H).reshape((self.dim_z, 1))
             one_minus_diagonal = 1 - diagonal
-            self.kp_undetected = np.logical_and(one_minus_diagonal, self.kp_undetected)
 
             detection_points_flatten = np.multiply(
                 diagonal, detection_points_flatten
@@ -104,8 +102,6 @@ class OptimizedKalmanFilter:
 
         self.default_r = r * np.ones((dim_z, 1))
 
-        self.kp_undetected = np.ones((dim_z, 1))
-
     def predict(self):
         self.x[: self.dim_z] += self.x[self.dim_z :]
 
@@ -113,20 +109,7 @@ class OptimizedKalmanFilter:
 
         if H is not None:
             diagonal = np.diagonal(H).reshape((self.dim_z, 1))
-
-            kp_just_detected = np.logical_and(diagonal, self.kp_undetected)
-
             one_minus_diagonal = 1 - diagonal
-            self.kp_undetected = np.logical_and(one_minus_diagonal, self.kp_undetected)
-
-            detection_points_flatten = np.multiply(
-                diagonal, detection_points_flatten
-            ) + np.multiply(one_minus_diagonal, self.x[: self.dim_z])
-
-            kp_just_detected = np.argwhere(kp_just_detected.flatten())
-            self.x[: self.dim_z][kp_just_detected] = detection_points_flatten[
-                kp_just_detected
-            ]
         else:
             diagonal = np.ones((self.dim_z, 1))
             one_minus_diagonal = np.zeros((self.dim_z, 1))
@@ -136,7 +119,7 @@ class OptimizedKalmanFilter:
         else:
             kalman_r = self.default_r
 
-        error = detection_points_flatten - self.x[: self.dim_z]
+        error = np.multiply(detection_points_flatten - self.x[: self.dim_z], diagonal)
 
         vel_var_plus_pos_vel_cov = self.pos_vel_covariance + self.vel_variance
         added_variances = (
@@ -210,5 +193,7 @@ class OptimizedKalmanFilterFactory:
             r=self.R,
         )
         custom_filter.x[:dim_z] = np.expand_dims(initial_detection.flatten(), 0).T
+
+
 
         return custom_filter

@@ -228,7 +228,6 @@ class TrackedObject:
         self.detection_threshold: float = detection_threshold
         self.initial_period: int = period
         self.hit_counter: int = period
-        self.point_hit_counter: np.ndarray = np.ones(self.num_points)
         self.last_distance: Optional[float] = None
         self.current_min_distance: Optional[float] = None
         self.last_detection: "Detection" = initial_detection
@@ -239,7 +238,11 @@ class TrackedObject:
             TrackedObject.initializing_count
         )  # Just for debugging
         TrackedObject.initializing_count += 1
-        self.detected_at_least_once_points = np.array([False] * self.num_points)
+        if initial_detection.scores is None:
+            self.detected_at_least_once_points = np.array([True] * self.num_points)
+        else:
+            self.detected_at_least_once_points = initial_detection.scores > self.detection_threshold 
+        self.point_hit_counter: np.ndarray = self.detected_at_least_once_points.astype(int) 
         initial_detection.age = self.age
         self.past_detections_length = past_detections_length
         if past_detections_length > 0:
@@ -324,9 +327,12 @@ class TrackedObject:
         # real detection this creates a huge velocity vector in our KalmanFilter
         # and causes the tracker to start with wildly inaccurate estimations which
         # eventually coverge to the real detections.
-        detected_at_least_once_mask = np.array(
-            [[m, m] for m in self.detected_at_least_once_points]
-        ).flatten()
+
+        detected_at_least_once_mask = np.hstack((self.detected_at_least_once_points, self.detected_at_least_once_points)).flatten()
+        now_detected_mask = np.hstack((points_over_threshold_mask, points_over_threshold_mask)).flatten()
+        first_detection_mask = np.logical_and(now_detected_mask, np.logical_not(detected_at_least_once_mask))
+
+        self.filter.x[: self.dim_z][first_detection_mask] = np.expand_dims(points.flatten(), 0).T[first_detection_mask]
         self.filter.x[self.dim_z :][np.logical_not(detected_at_least_once_mask)] = 0
         self.detected_at_least_once_points = np.logical_or(
             self.detected_at_least_once_points, points_over_threshold_mask
