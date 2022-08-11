@@ -62,13 +62,12 @@ class Tracker:
         self.reid_distance_threshold = reid_distance_threshold
         self.abs_to_rel = None
 
-    def update(self, detections: Optional[List["Detection"]] = None, period: int = 1, coord_transformations: tuple = None):
+    def update(self, detections: Optional[List["Detection"]] = None, period: int = 1, coord_transformations: "CoordinatesTransformations" = None):
 
         if coord_transformations is not None:
-            assert len(coord_transformations) == 2, "Argument 'coord_transformations' should provide abs_to_rel and rel_to_abs coordinate transformations"
             for det in detections:
-                det.absolute_points = coord_transformations[1](det.absolute_points)
-            self.abs_to_rel = coord_transformations[0]
+                det.absolute_points = coord_transformations.rel_to_abs(det.absolute_points)
+            self.abs_to_rel = coord_transformations.abs_to_rel
         self.period = period
 
         # Remove stale trackers and make candidate object real if the hit counter is positive
