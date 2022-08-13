@@ -11,11 +11,11 @@ Simplest possible example of tracking. Based on [Yolov7](https://github.com/Wong
 
 ## Explanation
 
-This example tracks objects using a single or double point per detection: the centroid or the two corners of the bounding boxes around objects returned by YOLOv5.
+This example tracks objects using a single or double point per detection: the centroid or the two corners of the bounding boxes around objects returned by Yolov7.
 
 
 ## Explanation
 
-This example tracks objects using a single point per detection: the centroid of the bounding boxes around cars returned by YOLOv4.
+This example tracks objects using a single point per detection: the centroid of the bounding boxes around cars returned by Yolov7.
 
-![Norfair YOLOv4 demo](../../docs/yolov7_cars.gif)
+![Norfair Yolov7 demo](../../docs/yolov7_cars.gif)
