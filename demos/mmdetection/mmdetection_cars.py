@@ -4,6 +4,7 @@ from mmdet.core import get_classes
 
 from norfair import Detection, Tracker, Video, draw_tracked_objects
 from norfair.tracker import TrackedObject
+from norfair.distances import frobenius
 
 #
 # MMDetection setup
@@ -23,13 +24,10 @@ VEHICLE_CLASSES = [
 #
 # Norfair
 #
-# Distance function
-def euclidean_distance(detection: Detection, tracked_object: TrackedObject) -> float:
-    return np.linalg.norm(detection.points - tracked_object.estimate)
 
 
 tracker = Tracker(
-    distance_function=euclidean_distance, distance_threshold=20, detection_threshold=0.6
+    distance_function=frobenius, distance_threshold=20, detection_threshold=0.6
 )
 
 
