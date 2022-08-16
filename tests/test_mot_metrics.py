@@ -104,8 +104,8 @@ def test_mot_metrics():
     # Unify the scores to be able to compare them. new metrics is the percentage
     # expressed between 0 and 1, the previous metrics have the percentage as a string
     # with the % character at the end
-    new_overall_mota = new_metrics.loc["OVERALL", "mota"] * 100
-    previous_overall_mota = float(previous_metrics.loc["OVERALL", "mota"][:-1])
+    new_overall_mota = np.around(new_metrics.loc["OVERALL", "mota"] * 100, 1)
+    previous_overall_mota = np.around(float(previous_metrics.loc["OVERALL", "mota"][:-1]), 1)
 
     accumulator.print_metrics()
     assert new_overall_mota >= previous_overall_mota * (1 - MOTA_ERROR_THRESHOLD), f"New overall MOTA score: {new_overall_mota} is too low, previous overall MOTA score: {previous_overall_mota}"
