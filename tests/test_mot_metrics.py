@@ -3,7 +3,7 @@ import os.path
 import numpy as np
 import pandas as pd
 
-from norfair import Tracker, metrics
+from norfair import Tracker, metrics, FilterPyKalmanFilterFactory
 
 DATASET_PATH = "train"
 MOTA_ERROR_THRESHOLD = 0.0
@@ -80,6 +80,7 @@ def test_mot_metrics():
             detection_threshold=DETECTION_THRESHOLD,
             pointwise_hit_counter_max=POINTWISE_HIT_COUNTER_MAX,
             hit_counter_max=HIT_COUNTER_MAX,
+            filter_factory=FilterPyKalmanFilterFactory(),
         )
 
         # Initialize accumulator for this video
