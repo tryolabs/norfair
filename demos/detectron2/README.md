@@ -4,14 +4,15 @@ Simplest possible example of tracking. Based on [Detectron2](https://github.com/
 
 ## Instructions
 
-Assuming Norfair is installed:
 
-1. Install Norfair with `pip install norfair[video]`.
-2. [Follow the instructions](https://detectron2.readthedocs.io/tutorials/install.html) to install Detectron2.
-3. Run `python detectron2_cars.py`. For the demo, we are using [this traffic footage](https://www.youtube.com/watch?v=aio9g9_xVio).
+1. Build and run the docker container with:
+    ```bash
+        ./run_docker.sh
+    ``` 
 
-## Explanation
+4. In the container, display the demo instructions: 
+    ```bash
+        python demo.py --help 
+    ``` 
 
-This example tracks objects using a single point per detection: the centroid of the bounding boxes returned by Detectron2.
 
-![Norfair Detectron2 demo](../../docs/traffic.gif)

@@ -6,7 +6,7 @@ Measure inference speed for different filters and distance functions using a [TR
 
 1. Build and run the docker container with:
     ```bash
-        cd profiling_container && ./run_docker.sh
+        ./run_docker.sh
     ``` 
 
 4. In the container, display the demo instructions: 
