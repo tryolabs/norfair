@@ -38,10 +38,6 @@ class YOLO:
         return boxes[0]
 
 
-def euclidean_distance(detection, tracked_object):
-    return np.linalg.norm(detection.points - tracked_object.estimate)
-
-
 def get_centroid(yolo_box, img_height, img_width):
     x1 = yolo_box[0] * img_width
     y1 = yolo_box[1] * img_height
@@ -61,7 +57,7 @@ model = YOLO("yolov4_fixed_layer_names.pth")  # set use_cuda=False if using CPU
 for input_path in args.files:
     video = Video(input_path=input_path)
     tracker = Tracker(
-        distance_function=euclidean_distance,
+        distance_function="frobenius",
         distance_threshold=max_distance_between_points,
     )
 
