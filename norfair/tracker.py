@@ -4,9 +4,8 @@ from typing import Callable, List, Optional, Sequence, Union
 import numpy as np
 from rich import print
 
-from norfair.distances import get_distance_by_name
-
-from .filter import FilterPyKalmanFilterFactory
+from .distances import get_distance_by_name
+from .filter import OptimizedKalmanFilterFactory
 from .utils import validate_points
 
 
@@ -19,7 +18,7 @@ class Tracker:
         initialization_delay: Optional[int] = None,
         pointwise_hit_counter_max: int = 4,
         detection_threshold: float = 0,
-        filter_factory: "FilterPyKalmanFilterFactory" = FilterPyKalmanFilterFactory(),
+        filter_factory: "OptimizedKalmanFilterFactory" = OptimizedKalmanFilterFactory(),
         past_detections_length: int = 4,
     ):
         self.tracked_objects: Sequence["TrackedObject"] = []
