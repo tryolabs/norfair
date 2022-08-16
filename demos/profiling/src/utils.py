@@ -1,27 +1,34 @@
 import json
-import torch
 
 import cv2
-import torchvision.transforms as transforms
+import numpy as np
 import PIL.Image
-
+import torch
 import torch2trt
-from torch2trt import TRTModule
+import torchvision.transforms as transforms
 import trt_pose.coco
-from trt_pose.parse_objects import ParseObjects
 import trt_pose.models
+from torch2trt import TRTModule
+from trt_pose.parse_objects import ParseObjects
 
 from norfair import Detection
-import numpy as np
-from norfair.filter import NoFilterFactory, FilterPyKalmanFilterFactory, OptimizedKalmanFilterFactory
+from norfair.distances import (
+    create_keypoints_voting_distance,
+    create_normalized_mean_euclidean_distance,
+)
+from norfair.filter import (
+    FilterPyKalmanFilterFactory,
+    NoFilterFactory,
+    OptimizedKalmanFilterFactory,
+)
 
 mean = torch.Tensor([0.485, 0.456, 0.406]).cuda()
 std = torch.Tensor([0.229, 0.224, 0.225]).cuda()
 device = torch.device("cuda")
 
 model_path = {
-    "resnet": "/trt_pose/resnet18_baseline_att_224x224_A_epoch_249_trt.pth",
-    "densenet": "/trt_pose/densenet121_baseline_att_256x256_B_epoch_160_trt.pth",
+    "resnet": "/resnet18_baseline_att_224x224_A_epoch_249_trt.pth",
+    "densenet": "/densenet121_baseline_att_256x256_B_epoch_160_trt.pth",
 }
 
 model_resolution = {"resnet": [224, 224], "densenet": [256, 256]}
@@ -88,6 +95,15 @@ def get_postprocesser(video_width, video_height):
 
     return postprocess
 
+def get_distance_function(distance_function, video_width=None, video_height=None):
+    if distance_function == "keypoints_vote":
+        return rescaled_keypoints_vote
+    elif distance_function == "euclidean":
+        return create_normalized_mean_euclidean_distance(video_width, video_height)
+    else:
+        raise ValueError(
+            "'distance_function' argument should be either 'keypoints_vote' or 'euclidean'"
+        )
 
 def get_model(
     model_weights, model_height, model_width, optimize_model=None, pose_decriptor=None
@@ -146,30 +162,7 @@ def get_model(
 
     return model_trt
 
-
-def get_euclidean_distance(video_width, video_height):
-    def euclidean_distance(detected_pose, tracked_pose):
-        difference = detected_pose.points - tracked_pose.estimate
-        difference[:, 0] /= video_width
-        difference[:, 1] /= video_height
-        distances = np.linalg.norm(difference, axis=1)
-
-        track_points_to_use = tracked_pose.last_detection.scores > DETECTION_THRESHOLD
-        detections_to_use = detected_pose.scores > DETECTION_THRESHOLD
-
-        indices_to_use = np.argwhere(
-            np.logical_and(track_points_to_use, detections_to_use)
-        )
-
-        if len(indices_to_use) > 0:
-            return np.mean(distances[indices_to_use])
-        else:
-            return DISTANCE_THRESHOLD + 1
-
-    return euclidean_distance
-
-
-def keypoints_distance(detected_pose, tracked_pose):
+def rescaled_keypoints_vote(detected_pose, tracked_pose):
     distances = np.linalg.norm(detected_pose.points - tracked_pose.estimate, axis=1)
 
     match_num = np.count_nonzero(
@@ -182,18 +175,6 @@ def keypoints_distance(detected_pose, tracked_pose):
         * (tracked_pose.last_detection.scores > DETECTION_THRESHOLD)
     )
     return 1 / (1 + match_num)
-
-
-def get_distance_function(distance_function, video_width=None, video_height=None):
-    if distance_function == "keypoints_vote":
-        return keypoints_distance
-    elif distance_function == "euclidean":
-        return get_euclidean_distance(video_width, video_height)
-    else:
-        raise ValueError(
-            "'distance_function' argument should be either 'keypoints_vote' or 'euclidean'"
-        )
-
 
 def get_filter_setup(filter_setup):
     if filter_setup == "none":
