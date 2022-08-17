@@ -48,6 +48,9 @@ def get_centroid(yolo_box, img_height, img_width):
 
 parser = argparse.ArgumentParser(description="Track human poses in a video.")
 parser.add_argument("files", type=str, nargs="+", help="Video files to process")
+parser.add_argument(
+    "--output-path", type=str, nargs="?", default=".", help="Output path"
+)
 args = parser.parse_args()
 
 # The layer names in the official repo's checkpoints are wrong, they misspelled
@@ -55,7 +58,7 @@ args = parser.parse_args()
 model = YOLO("yolov4_fixed_layer_names.pth")  # set use_cuda=False if using CPU
 
 for input_path in args.files:
-    video = Video(input_path=input_path)
+    video = Video(input_path=input_path, output_path=args.output_path)
     tracker = Tracker(
         distance_function="frobenius",
         distance_threshold=max_distance_between_points,
