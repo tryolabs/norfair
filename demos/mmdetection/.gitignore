@@ -1,4 +1,0 @@
-*.mp4
-checkpoints/*
-!checkpoints/.gitkeep
-mmdetection
