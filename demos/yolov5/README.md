@@ -4,10 +4,16 @@ Simplest possible example of tracking. Based on [YOLOv5-pip](https://github.com/
 
 ## Instructions
 
-1. Install Norfair with `pip install norfair[video]`.
-2. Install YOLOv5 with `pip install yolov5`.
-3. Run `python yolov5demo.py <video file>`.
-4. Bonus: Use additional arguments `--detector_path`, `--img_size`, `--iou_thres`,`--conf_thres`, `--classes`, `--track_points` as you wish.
+
+1. Build and run the docker container with:
+    ```bash
+        ./run_docker.sh
+    ``` 
+
+4. In the container, display the demo instructions: 
+    ```bash
+        python demo.py --help 
+    ``` 
 
 ## Explanation
 
