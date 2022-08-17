@@ -1,4 +1,4 @@
-# Detectron2 example
+# Openpose example
 
 Demo for extrapolating detections through skipped frames. Based on [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose) version 1.7.
 
