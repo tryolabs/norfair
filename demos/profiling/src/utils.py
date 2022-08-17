@@ -27,8 +27,8 @@ std = torch.Tensor([0.229, 0.224, 0.225]).cuda()
 device = torch.device("cuda")
 
 model_path = {
-    "resnet": "/resnet18_baseline_att_224x224_A_epoch_249_trt.pth",
-    "densenet": "/densenet121_baseline_att_256x256_B_epoch_160_trt.pth",
+    "resnet": "/trt_pose/resnet18_baseline_att_224x224_A_epoch_249_trt.pth",
+    "densenet": "/trt_pose/densenet121_baseline_att_256x256_B_epoch_160_trt.pth",
 }
 
 model_resolution = {"resnet": [224, 224], "densenet": [256, 256]}
