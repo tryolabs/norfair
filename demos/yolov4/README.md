@@ -6,9 +6,20 @@ Simplest possible example of tracking. Based on [pytorch YOLOv4](https://github.
 
 ## Instructions
 
-1. Install Norfair with `pip install norfair[video]`.
-2. Clone [pytorch YOLOv4](https://github.com/Tianxiaomo/pytorch-YOLOv4/tree/master) and download the [weights](https://github.com/tryolabs/norfair/releases/download/v0.4.0/yolov4_fixed_layer_names.pth) published on the repo into your local clone of the repo.
-3. Copy `yolov4demo.py` into your local clone of the repo and run `python yolov4demo.py <video file>`.
+
+1. Build and run the docker container with:
+    ```bash
+        ./run_docker.sh
+    ``` 
+
+4. In the container, display the demo instructions: 
+    ```bash
+        python demo.py --help 
+    ``` 
+    In the container, use the `/demo` folder as a volume to share files with the container.
+    ```bash
+        python3 demo.py /demo/video.mp4 --output-path /demo/
+    ``` 
 
 ## Explanation
 
