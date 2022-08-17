@@ -3,6 +3,7 @@ import sys
 
 import numpy as np
 
+sys.path.append('/norfair/')
 import norfair
 from norfair import Detection, Tracker, Video
 from norfair.distances import create_keypoints_voting_distance
@@ -22,10 +23,11 @@ except ImportError as e:
 
 
 # Define constants
-DETECTION_THRESHOLD = 0.01
+DETECTION_THRESHOLD = 0.1
 DISTANCE_THRESHOLD = 0.4
-INITIALIZATION_DELAY = 0
-POINTWISE_HIT_COUNTER_MAX = 2
+INITIALIZATION_DELAY = 4
+HIT_COUNTER_MAX = 30
+POINTWISE_HIT_COUNTER_MAX = 10
 
 # Wrapper implementation for OpenPose detector
 class OpenposeDetector:
@@ -82,13 +84,14 @@ if __name__ == "__main__":
     for input_path in args.files:
         print(f"Video: {input_path}")
         video = Video(input_path=input_path)
-        KEYPOINT_DIST_THRESHOLD = video.input_height / 25
+        KEYPOINT_DIST_THRESHOLD = video.input_height / 40
 
         tracker = Tracker(
             distance_function=create_keypoints_voting_distance(keypoint_distance_threshold=KEYPOINT_DIST_THRESHOLD, detection_threshold=DETECTION_THRESHOLD),
             distance_threshold=DISTANCE_THRESHOLD,
             detection_threshold=DETECTION_THRESHOLD,
             initialization_delay=INITIALIZATION_DELAY,
+            hit_counter_max=HIT_COUNTER_MAX,
             pointwise_hit_counter_max=POINTWISE_HIT_COUNTER_MAX,
         )
 

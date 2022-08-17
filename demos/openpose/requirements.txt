@@ -1,0 +1,5 @@
+scikit-build==0.12.0
+numpy==1.19.5
+opencv-python==4.1.1.26
+rich==10.16.2
+filterpy==1.4.5
