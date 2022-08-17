@@ -7,13 +7,6 @@ from detectron2.engine import DefaultPredictor
 
 from norfair import Detection, Tracker, Video, draw_tracked_objects
 
-# Set up Detectron2 object detector
-cfg = get_cfg()
-cfg.merge_from_file("./detectron2_config.yaml")
-cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5
-cfg.MODEL.WEIGHTS = "detectron2://COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x/137849600/model_final_f10217.pkl"
-detector = DefaultPredictor(cfg)
-
 parser = argparse.ArgumentParser(
     description="Track centroid of vehicles in a video"
 )
@@ -22,6 +15,13 @@ parser.add_argument(
     "--output-path", type=str, nargs="?", default=".", help="Output path"
 )
 args = parser.parse_args()
+
+# Set up Detectron2 object detector
+cfg = get_cfg()
+cfg.merge_from_file("./detectron2_config.yaml")
+cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5
+cfg.MODEL.WEIGHTS = "detectron2://COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x/137849600/model_final_f10217.pkl"
+detector = DefaultPredictor(cfg)
 
 # Norfair
 for input_path in args.files:
