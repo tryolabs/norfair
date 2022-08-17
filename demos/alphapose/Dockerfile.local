@@ -1,0 +1,31 @@
+FROM python:3.8-slim-buster
+
+WORKDIR /demo
+RUN apt update
+# RUN apt install -y ffmpeg libsm6 libxext6
+RUN apt install -y libgl1 sudo gcc libglib2.0-0 git-all
+# RUN apt install -y libgl1-mesa-dri
+COPY requirements.txt requirements.txt
+RUN pip3 install --upgrade pip; \
+    pip3 install -r requirements.txt
+
+# download the pose estimation models
+WORKDIR /
+RUN git clone -b pytorch https://github.com/MVIG-SJTU/AlphaPose.git && cd ./AlphaPose/ && git checkout ded84d450faf56227680f0527ff7e24ab7268754
+
+# download the pose estimation models
+WORKDIR /AlphaPose/models/sppe
+RUN gdown --id 1OPORTWB2cwd5YTVBX-NE8fsauZJWsrtW
+WORKDIR /AlphaPose/models/yolo
+RUN gdown --id 1D47msNOOiJKvPOXlnpyzdKA3k6E97NTC
+
+# replace files to use norfair
+COPY dataloader.py /AlphaPose/
+COPY fn.py /AlphaPose/
+
+# install norfair
+WORKDIR /
+RUN git clone https://github.com/tryolabs/norfair.git ./norfair/
+RUN pip3 install ./norfair/
+
+WORKDIR /AlphaPose
