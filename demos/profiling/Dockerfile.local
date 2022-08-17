@@ -27,8 +27,8 @@ RUN gdown --id 13FkJkx7evQ1WwP54UmdiDXWyFMY1OxDU
 RUN gdown --id 1XYDdCUdiF2xxx4rznmLb62SdOUZuoNbd
 
 # install norfair
-WORKDIR /demo/
-RUN git clone https://github.com/tryolabs/norfair.git ./norfair/ && cd ./norfair/
+WORKDIR /
+RUN git clone https://github.com/tryolabs/norfair.git ./norfair/
 RUN pip3 install ./norfair/
 
 WORKDIR /demo/src/
