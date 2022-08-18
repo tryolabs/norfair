@@ -5,7 +5,7 @@ An example of how to use Norfair to track objects from multiple classes using bo
 ## Instructions
 
 
-1. Build and run the docker container with:
+1. Build and run the Docker container with:
     ```bash
         ./run_docker.sh
     ``` 

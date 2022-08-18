@@ -4,7 +4,7 @@ Measure inference speed for different filters and distance functions using a [TR
 
 ## Instructions
 
-1. Build and run the docker container with:
+1. Build and run the Docker container with:
     ```bash
         ./run_docker.sh
     ``` 

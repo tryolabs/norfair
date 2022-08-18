@@ -11,7 +11,7 @@ What does each script do?
 ## Instructions
 
 
-1. Build and run the docker container with:
+1. Build and run the Docker container with:
     ```bash
         ./run_docker.sh
     ``` 
@@ -24,8 +24,16 @@ What does each script do?
     or run the following for a quick test
 
     ```bash
-    python motmetrics4norfair.py /MOT17/train/
+        python motmetrics4norfair.py /MOT17/train/
     ```
+
+    To download Detections + Ground Truth + Images (5.5GB)
+
+    ```bash
+        curl -O https://motchallenge.net/data/MOT17.zip
+        unzip MOT17.zip
+    ```
+
 
 ## Important consideration
 

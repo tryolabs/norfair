@@ -5,7 +5,7 @@ An example of how to integrate Norfair into the video inference loop of a pre ex
 ## Instructions
 
 
-1. Build and run the docker container with:
+1. Build and run the Docker container with:
     ```bash
         ./run_docker.sh
     ``` 
