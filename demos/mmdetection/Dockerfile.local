@@ -1,27 +1,24 @@
 FROM python:3.8-slim-buster
 
 WORKDIR /demo
-RUN apt update
-# RUN apt install -y ffmpeg libsm6 libxext6
-RUN apt install -y libgl1 sudo gcc libglib2.0-0 git-all
-# RUN apt install -y libgl1-mesa-dri
 COPY requirements.txt requirements.txt
-RUN pip3 install --upgrade pip; \
-    pip3 install -r requirements.txt
 
-# download the model
+RUN apt update && \
+apt install -y libgl1 sudo gcc libglib2.0-0 git-all && \
+pip3 install --upgrade pip && \
+pip3 install -r requirements.txt
+
+# download the model and norfair
 WORKDIR /
-RUN pip install -U openmim
-RUN mim install mmcv-full
-RUN git clone https://github.com/open-mmlab/mmdetection.git
+RUN git clone https://github.com/tryolabs/norfair.git ./norfair/ && \
+pip3 install ./norfair && \
+pip install -U openmim && \
+mim install mmcv-full && \
+git clone https://github.com/open-mmlab/mmdetection.git
 WORKDIR /mmdetection
-RUN pip install -v -e .
-RUN pip install mmdet
-RUN apt-get update && apt-get install wget
-RUN wget https://download.openmmlab.com/mmdetection/v2.0/faster_rcnn/faster_rcnn_r50_fpn_1x_coco/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth
-
-# install norfair
-RUN git clone https://github.com/tryolabs/norfair.git ./norfair/
-RUN pip3 install ./norfair/
+RUN pip install -v -e . && \
+pip install mmdet && \
+apt-get update && apt-get install wget && \
+wget https://download.openmmlab.com/mmdetection/v2.0/faster_rcnn/faster_rcnn_r50_fpn_1x_coco/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth
 
 WORKDIR /demo/src/

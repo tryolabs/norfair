@@ -7,7 +7,7 @@ Simplest possible example of tracking. Based on [pytorch YOLOv4](https://github.
 ## Instructions
 
 
-1. Build and run the docker container with:
+1. Build and run the Docker container with:
     ```bash
         ./run_docker.sh
     ``` 

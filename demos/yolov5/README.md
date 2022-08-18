@@ -5,7 +5,7 @@ Simplest possible example of tracking. Based on [YOLOv5-pip](https://github.com/
 ## Instructions
 
 
-1. Build and run the docker container with:
+1. Build and run the Docker container with:
     ```bash
         ./run_docker.sh
     ``` 
