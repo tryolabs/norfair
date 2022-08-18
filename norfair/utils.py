@@ -1,4 +1,6 @@
 import os
+from functools import lru_cache
+from logging import warn
 from typing import Sequence, Tuple
 
 import numpy as np
@@ -88,3 +90,12 @@ class DummyMOTMetricsImport:
 Please, install Norfair with `pip install norfair\[metrics]`, or `pip install norfair\[metrics,video]` if you also want video features."""
         )
         exit()
+
+
+# lru_cache will prevent re-run the function if the message is the same
+@lru_cache(maxsize=None)
+def warn_once(message):
+    """
+    Write a warning message only once.
+    """
+    warn(message)
