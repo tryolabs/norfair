@@ -1,18 +1,39 @@
-import numpy as np
+from abc import ABC, abstractmethod
+
 import cv2
+import numpy as np
 
 
-class CoordinatesTransformations:
-    def __init__(self, data, abs_to_rel, rel_to_abs):
-        self.data = data
-        self.abs_to_rel = abs_to_rel 
-        self.rel_to_abs = rel_to_abs 
+#
+# Abstract interfaces
+#
+class CoordinatesTransformation(ABC):
+    @abstractmethod
+    def abs_to_rel(self, points: np.array):
+        pass
+
+    @abstractmethod
+    def rel_to_abs(self, points: np.array):
+        pass
 
 
-class TransformationGetter:
+class TransformationGetter(ABC):
+    @abstractmethod
     def __call__(self, curr_pts, prev_pts):
-        raise NotImplementedError
+        pass
 
+#
+# Translation
+#
+class TranslationTransformation(CoordinatesTransformation):
+    def __init__(self, movement_vector):
+        self.movement_vector = movement_vector
+
+    def abs_to_rel(self, points: np.array):
+        return points + self.movement_vector
+
+    def rel_to_abs(self, points: np.array):
+        return points - self.movement_vector
 
 class TranslationTransformationGetter(TransformationGetter):
     def __init__(self, bin_size=0.2, proportion_points_used_threshold=0.9) -> None:
@@ -39,17 +60,39 @@ class TranslationTransformationGetter(TransformationGetter):
             flow_mode += self.data
         except TypeError:
             pass
-        
+
         if update_prvs:
             self.data = flow_mode
 
-        def abs_to_rel(points: np.array):
-            return points + flow_mode
+        return update_prvs, TranslationTransformation(flow_mode)
 
-        def rel_to_abs(points: np.array):
-            return points - flow_mode
+#
+# Homography
+#
+class HomographyTransformation(CoordinatesTransformation):
+    def __init__(self, homography_matrix):
+        self.homography_matrix = homography_matrix
+        self.inverse_homography_matrix = np.linalg.inv(homography_matrix)
 
-        return update_prvs, CoordinatesTransformations(flow_mode, abs_to_rel, rel_to_abs)
+
+    def abs_to_rel(self, points: np.array):
+        ones = np.ones((len(points), 1))
+        points_with_ones = np.hstack((points, ones))
+        points_transformed = points_with_ones @ self.homography_matrix.T
+        points_transformed = points_transformed / points_transformed[:, -1].reshape(
+            -1, 1
+        )
+        return points_transformed[:, :2]
+
+    def rel_to_abs(self, points: np.array):
+        ones = np.ones((len(points), 1))
+        points_with_ones = np.hstack((points, ones))
+        points_transformed = points_with_ones @ self.inverse_homography_matrix.T
+        points_transformed = points_transformed / points_transformed[:, -1].reshape(
+            -1, 1
+        )
+        return points_transformed[:, :2]
+
 
 
 class HomographyTransformationGetter(TransformationGetter):
@@ -88,36 +131,17 @@ class HomographyTransformationGetter(TransformationGetter):
         except (TypeError, ValueError):
             pass
 
-        inverse_homography_matrix = np.linalg.inv(homography_matrix)
-
         if update_prvs:
             self.data = homography_matrix
 
-        def abs_to_rel(points: np.array):
-            ones = np.ones((len(points), 1))
-            points_with_ones = np.hstack((points, ones))
-            points_transformed = points_with_ones @ homography_matrix.T
-            points_transformed = points_transformed / points_transformed[:, -1].reshape(
-                -1, 1
-            )
-            return points_transformed[:, :2]
+        return update_prvs, HomographyTransformation(homography_matrix)
 
-        def rel_to_abs(points: np.array):
-            ones = np.ones((len(points), 1))
-            points_with_ones = np.hstack((points, ones))
-            points_transformed = points_with_ones @ inverse_homography_matrix.T
-            points_transformed = points_transformed / points_transformed[:, -1].reshape(
-                -1, 1
-            )
-            return points_transformed[:, :2]
-
-        return update_prvs, CoordinatesTransformations(homography_matrix, abs_to_rel, rel_to_abs)
-
-
+#
+# Motion estimation
+#
 def get_sparse_flow(
     gray_next, gray_prvs, prev_pts=None, max_points=300, min_distance=15, block_size=3
 ):
-
     if prev_pts is None:
         # get points
         prev_pts = cv2.goodFeaturesToTrack(

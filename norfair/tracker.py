@@ -62,8 +62,7 @@ class Tracker:
         self.reid_distance_threshold = reid_distance_threshold
         self.abs_to_rel = None
 
-    def update(self, detections: Optional[List["Detection"]] = None, period: int = 1, coord_transformations: "CoordinatesTransformations" = None):
-
+    def update(self, detections: Optional[List["Detection"]] = None, period: int = 1, coord_transformations: Optional[TranslationTransformation] = None):
         if coord_transformations is not None:
             for det in detections:
                 det.absolute_points = coord_transformations.rel_to_abs(det.absolute_points)
@@ -292,7 +291,7 @@ class TrackedObject:
         filter_factory: "FilterFactory",
         past_detections_length: int,
         reid_hit_counter_max: Optional[int],,
-        abs_to_rel: np.array
+        abs_to_rel: Callable[[np.array], np.array]
     ):
         try:
             initial_detection_points = validate_points(initial_detection.absolute_points)
