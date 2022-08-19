@@ -1,21 +1,25 @@
 FROM python:3.8-slim-buster
 
-WORKDIR /demo
-COPY requirements.txt requirements.txt
 RUN apt update && \
-apt install -y libgl1 sudo gcc libglib2.0-0 git-all && \
-pip3 install --upgrade pip && \
-pip3 install -r requirements.txt
+apt install -y libgl1 sudo gcc libglib2.0-0 git-all
 
 # download the model and norfair
 WORKDIR /
-RUN git clone https://github.com/tryolabs/norfair.git ./norfair/ && \
-pip3 install ./norfair/ && \
-git clone https://github.com/Tianxiaomo/pytorch-YOLOv4.git
+RUN git clone https://github.com/Tianxiaomo/pytorch-YOLOv4.git
 WORKDIR /pytorch-YOLOv4
 RUN apt-get update && apt-get install wget && \
 wget https://github.com/tryolabs/norfair/releases/download/v0.4.0/yolov4_fixed_layer_names.pth
 
 COPY src/demo.py /pytorch-YOLOv4/
+
+WORKDIR /demo
+COPY requirements.txt requirements.txt
+RUN pip3 install --upgrade pip && \
+pip3 install -r requirements.txt
+
+# install norfair
+WORKDIR /
+RUN git clone https://github.com/tryolabs/norfair.git ./norfair/ && \
+pip3 install ./norfair/
 
 WORKDIR /pytorch-YOLOv4
