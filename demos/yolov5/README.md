@@ -1,6 +1,6 @@
 # YOLOv5 Example
 
-Simplest possible example of tracking. Based on [YOLOv5-pip](https://github.com/fcakyon/yolov5-pip).
+Simplest possible example of tracking. Based on [YOLOv5](https://github.com/ultralytics/yolov5).
 
 ## Instructions
 

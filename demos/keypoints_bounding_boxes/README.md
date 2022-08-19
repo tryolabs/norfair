@@ -1,6 +1,6 @@
 # Track multiple classes
 
-An example of how to use Norfair to track objects from multiple classes using both keypoints and bounding boxes. This example is based on [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose) version 1.7 and [YOLOv5-pip](https://github.com/fcakyon/yolov5-pip).
+An example of how to use Norfair to track objects from multiple classes using both keypoints and bounding boxes. This example is based on [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose) version 1.7 and [YOLOv5](https://github.com/ultralytics/yolov5).
 
 ## Instructions
 
