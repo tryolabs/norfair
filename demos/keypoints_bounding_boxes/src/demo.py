@@ -4,7 +4,6 @@ import sys
 import cv2
 import numpy as np
 import torch
-import yolov5
 from typing import Union, List, Optional
 
 sys.path.append('/norfair/')
@@ -70,7 +69,7 @@ class OpenposeDetector:
 ############### YOLO ###################
 
 class YOLO:
-    def __init__(self, model_path: str, device: Optional[str] = None):
+    def __init__(self, model_name: str, device: Optional[str] = None):
         if device is not None and "cuda" in device and not torch.cuda.is_available():
             raise Exception(
                 "Selected device='cuda', but cuda is not available to Pytorch."
@@ -79,7 +78,7 @@ class YOLO:
         elif device is None:
             device = "cuda:0" if torch.cuda.is_available() else "cpu"
         # load model
-        self.model = yolov5.load(model_path, device=device)
+        self.model = torch.hub.load('ultralytics/yolov5', model_name)
 
     def __call__(
         self,
@@ -149,7 +148,7 @@ if __name__ == "__main__":
     # CLI configuration
     parser = argparse.ArgumentParser(description="Track objects in a video.")
     parser.add_argument("files", type=str, nargs="+", help="Video files to process")
-    parser.add_argument("--detector-path", type=str, default="yolov5m6.pt", help="YOLOv5 model path")
+    parser.add_argument("--model-name", type=str, default="yolov5m6", help="YOLOv5 model name")
     parser.add_argument("--img-size", type=int, default="720", help="YOLOv5 inference size (pixels)")
     parser.add_argument("--conf-thres", type=float, default="0.25", help="YOLOv5 object confidence threshold")
     parser.add_argument("--iou-thresh", type=float, default="0.45", help="YOLOv5 IOU threshold for NMS")
@@ -160,7 +159,7 @@ if __name__ == "__main__":
     # Process Videos
     detector = OpenposeDetector()
     datum = op.Datum()
-    model = YOLO(args.detector_path, device=args.device)
+    model = YOLO(args.model_name, device=args.device)
 
     for input_path in args.files:
         print(f"Video: {input_path}")
