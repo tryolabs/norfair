@@ -1,5 +1,6 @@
 import argparse
 from typing import List, Optional, Union
+import os
 
 import numpy as np
 import torch
@@ -22,6 +23,10 @@ class YOLO:
         # automatically set device if its None
         elif device is None:
             device = "cuda:0" if torch.cuda.is_available() else "cpu"
+
+        if not os.path.exists(model_path):
+            os.system(f'wget https://github.com/WongKinYiu/yolov7/releases/download/v0.1/{os.path.basename(model_path)} -O {model_path}')
+
         # load model
         try:
             self.model = torch.hub.load('WongKinYiu/yolov7', 'custom', model_path) 
@@ -139,13 +144,13 @@ def yolo_detections_to_norfair_detections(
 
 parser = argparse.ArgumentParser(description="Track objects in a video.")
 parser.add_argument("files", type=str, nargs="+", help="Video files to process")
-parser.add_argument("--detector_path", type=str, default="yolov7.pt", help="YOLOv5 model path")
-parser.add_argument("--img_size", type=int, default="720", help="YOLOv5 inference size (pixels)")
-parser.add_argument("--conf_thres", type=float, default="0.25", help="YOLOv5 object confidence threshold")
-parser.add_argument("--iou_thresh", type=float, default="0.45", help="YOLOv5 IOU threshold for NMS")
+parser.add_argument("--detector-path", type=str, default="/yolov7.pt", help="YOLOv7 model path")
+parser.add_argument("--img-size", type=int, default="720", help="YOLOv7 inference size (pixels)")
+parser.add_argument("--conf-thres", type=float, default="0.25", help="YOLOv7 object confidence threshold")
+parser.add_argument("--iou-thresh", type=float, default="0.45", help="YOLOv7 IOU threshold for NMS")
 parser.add_argument("--classes", nargs="+", type=int, help="Filter by class: --classes 0, or --classes 0 2 3")
 parser.add_argument("--device", type=str, default=None, help="Inference device: 'cpu' or 'cuda'")
-parser.add_argument("--track_points", type=str, default="centroid", help="Track points: 'centroid' or 'bbox'")
+parser.add_argument("--track-points", type=str, default="centroid", help="Track points: 'centroid' or 'bbox'")
 args = parser.parse_args()
 
 model = YOLO(args.detector_path, device=args.device)
