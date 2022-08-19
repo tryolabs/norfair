@@ -10,6 +10,3 @@ visdom==0.1.8.9
 nibabel==4.0.1
 pandas==1.4.3
 matplotlib==3.5.3
-
-# download weights
-gdown==4.4.0

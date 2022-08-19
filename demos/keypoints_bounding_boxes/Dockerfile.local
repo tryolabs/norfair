@@ -1,12 +1,6 @@
 # https://hub.docker.com/r/cwaffles/openpose
 FROM nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04
 
-# Set the working directory
-WORKDIR /demo
-
-# Copy the file from the local host to the filesystem of the container at the working directory.
-COPY requirements.txt requirements.txt 
-
 #get deps
 RUN rm /etc/apt/sources.list.d/cuda.list && \
 rm /etc/apt/sources.list.d/nvidia-ml.list && \
@@ -14,7 +8,6 @@ apt-get update && \
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 python3-dev python3-pip python3-setuptools git g++ wget make libprotobuf-dev protobuf-compiler libopencv-dev \
 libgoogle-glog-dev libboost-all-dev libcaffe-cuda-dev libhdf5-dev libatlas-base-dev && \
-pip3 install --no-cache-dir -r requirements.txt && \
 apt-get -y install sudo && \
 wget https://github.com/Kitware/CMake/releases/download/v3.16.0/cmake-3.16.0-Linux-x86_64.tar.gz && \
 tar xzf cmake-3.16.0-Linux-x86_64.tar.gz -C /opt && \
@@ -38,6 +31,12 @@ sed -ie 's/set(AMPERE "80 86")/#&/g'  ../cmake/Cuda.cmake && \
 sed -ie 's/set(AMPERE "80 86")/#&/g'  ../3rdparty/caffe/cmake/Cuda.cmake && \
 make -j`nproc` && \
 make install
+
+# Set the working directory
+WORKDIR /demo
+# Copy the file from the local host to the filesystem of the container at the working directory.
+COPY requirements.txt requirements.txt 
+RUN pip3 install --no-cache-dir -r requirements.txt
 
 # install norfair
 WORKDIR /
