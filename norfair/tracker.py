@@ -20,8 +20,11 @@ class Tracker:
         detection_threshold: float = 0,
         filter_factory: "OptimizedKalmanFilterFactory" = OptimizedKalmanFilterFactory(),
         past_detections_length: int = 4,
-        reid_distance_function: Optional[Callable[["TrackedObject", "TrackedObject"], float]] = None,
-        reid_distance_threshold: float = 0
+        reid_distance_function: Optional[
+            Callable[["TrackedObject", "TrackedObject"], float]
+        ] = None,
+        reid_distance_threshold: float = 0,
+        reid_hit_counter_max: Optional[int] = None,
     ):
         self.tracked_objects: Sequence["TrackedObject"] = []
 
@@ -30,6 +33,7 @@ class Tracker:
         self.distance_function = distance_function
 
         self.hit_counter_max = hit_counter_max
+        self.reid_hit_counter_max = reid_hit_counter_max
         self.pointwise_hit_counter_max = pointwise_hit_counter_max
         self.filter_factory = filter_factory
         if past_detections_length >= 0:
@@ -61,7 +65,23 @@ class Tracker:
         self.period = period
 
         # Remove stale trackers and make candidate object real if the hit counter is positive
-        self.tracked_objects = [o for o in self.tracked_objects if o.hit_counter_is_positive]
+        alive_objects = []
+        dead_objects = []
+        if self.reid_hit_counter_max is None:
+            self.tracked_objects = [
+                o for o in self.tracked_objects if o.hit_counter_is_positive
+            ]
+            alive_objects = self.tracked_objects
+        else:
+            tracked_objects = []
+            for o in self.tracked_objects:
+                if o.reid_hit_counter_is_positive:
+                    tracked_objects.append(o)
+                    if o.hit_counter_is_positive:
+                        alive_objects.append(o)
+                    else:
+                        dead_objects.append(o)
+            self.tracked_objects = tracked_objects
 
         # Update tracker
         for obj in self.tracked_objects:
@@ -71,15 +91,19 @@ class Tracker:
         unmatched_detections, _, unmatched_init_trackers = self.update_objects_in_place(
             self.distance_function,
             self.distance_threshold,
-            [o for o in self.tracked_objects if not o.is_initializing],
+            [o for o in alive_objects if not o.is_initializing],
             detections,
         )
 
         # Update not yet initialized tracked objects with yet unmatched detections
-        unmatched_detections, matched_not_init_trackers, _ = self.update_objects_in_place(
+        (
+            unmatched_detections,
+            matched_not_init_trackers,
+            _,
+        ) = self.update_objects_in_place(
             self.distance_function,
             self.distance_threshold,
-            [o for o in self.tracked_objects if o.is_initializing],
+            [o for o in alive_objects if o.is_initializing],
             unmatched_detections,
         )
 
@@ -88,7 +112,7 @@ class Tracker:
             _, _, _ = self.update_objects_in_place(
                 self.reid_distance_function,
                 self.reid_distance_threshold,
-                unmatched_init_trackers,
+                unmatched_init_trackers + dead_objects,
                 matched_not_init_trackers,
             )
 
@@ -103,7 +127,8 @@ class Tracker:
                     self.detection_threshold,
                     self.period,
                     self.filter_factory,
-                    self.past_detections_length
+                    self.past_detections_length,
+                    self.reid_hit_counter_max,
                 )
             )
 
@@ -118,22 +143,22 @@ class Tracker:
     ):
         distance_matrix = np.ones((len(candidates), len(objects)), dtype=np.float32)
         distance_matrix *= distance_threshold + 1
-        for d, detection in enumerate(candidates):
+        for c, candidate in enumerate(candidates):
             for o, obj in enumerate(objects):
-                if detection.label != obj.label:
-                    distance_matrix[d, o] = distance_threshold + 1
-                    if (detection.label is None) or (obj.label is None):
+                if candidate.label != obj.label:
+                    distance_matrix[c, o] = distance_threshold + 1
+                    if (candidate.label is None) or (obj.label is None):
                         print("\nThere are detections with and without label!")
                     continue
-                distance = distance_function(detection, obj)
+                distance = distance_function(candidate, obj)
                 # Cap detections and objects with no chance of getting matched so we
                 # dont force the hungarian algorithm to minimize them and therefore
                 # introduce the possibility of sub optimal results.
                 # Note: This is probably not needed with the new distance minimizing algorithm
                 if distance > distance_threshold:
-                    distance_matrix[d, o] = distance_threshold + 1
+                    distance_matrix[c, o] = distance_threshold + 1
                 else:
-                    distance_matrix[d, o] = distance
+                    distance_matrix[c, o] = distance
         return distance_matrix
 
     def update_objects_in_place(
@@ -257,7 +282,8 @@ class TrackedObject:
         detection_threshold: float,
         period: int,
         filter_factory: "FilterFactory",
-        past_detections_length: int
+        past_detections_length: int,
+        reid_hit_counter_max: Optional[int],
     ):
         try:
             initial_detection_points = validate_points(initial_detection.points)
@@ -275,6 +301,8 @@ class TrackedObject:
         self.detection_threshold: float = detection_threshold
         self.initial_period: int = period
         self.hit_counter: int = period
+        self.reid_hit_counter_max = reid_hit_counter_max
+        self.reid_hit_counter: Optional[int] = None
         self.last_distance: Optional[float] = None
         self.current_min_distance: Optional[float] = None
         self.last_detection: "Detection" = initial_detection
@@ -304,6 +332,11 @@ class TrackedObject:
 
     def tracker_step(self):
         self.hit_counter -= 1
+        if self.reid_hit_counter is None:
+            if self.hit_counter <= 0:
+                self.reid_hit_counter = self.reid_hit_counter_max
+        else:
+            self.reid_hit_counter -= 1
         self.point_hit_counter -= 1
         self.age += 1
         # Advances the tracker's state
@@ -323,6 +356,10 @@ class TrackedObject:
     @property
     def hit_counter_is_positive(self):
         return self.hit_counter >= 0
+
+    @property
+    def reid_hit_counter_is_positive(self):
+        return self.reid_hit_counter is None or self.reid_hit_counter >= 0
 
     @property
     def estimate(self):
@@ -414,9 +451,10 @@ class TrackedObject:
             detection.age = self.age
             self.past_detections.append(detection)
 
-
     def merge(self, tracked_object):
         """Merge with a not yet initialized TrackedObject instance"""
+        self.reid_hit_counter = None
+        self.hit_counter = self.initial_period * 2
         self.point_hit_counter = tracked_object.point_hit_counter
         self.last_distance = tracked_object.last_distance
         self.current_min_distance = tracked_object.current_min_distance
