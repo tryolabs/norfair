@@ -49,7 +49,8 @@ def draw_points(
             )
 
         if draw_labels:
-            label_draw_position = np.array([min(points[:, 0]), min(points[:, 1])])
+            label_draw_position = np.array(
+                [min(points[:, 0]), min(points[:, 1])])
             label_draw_position -= radius
             cv2.putText(
                 frame,
@@ -92,7 +93,8 @@ def draw_tracked_objects(
             point_color = Color.random(abs(hash(obj.label)))
             id_color = point_color
         elif color is None:
-            object_id = obj.id if obj.id is not None else random.randint(0, 999)
+            object_id = obj.id if obj.id is not None else random.randint(
+                0, 999)
             point_color = Color.random(object_id)
             id_color = point_color
         else:
@@ -113,7 +115,8 @@ def draw_tracked_objects(
             if draw_labels:
                 points = obj.estimate[obj.live_points]
                 points = points.astype(int)
-                label_draw_position = np.array([min(points[:, 0]), min(points[:, 1])])
+                label_draw_position = np.array(
+                    [min(points[:, 0]), min(points[:, 1])])
                 label_draw_position -= radius
                 cv2.putText(
                     frame,
@@ -360,6 +363,8 @@ def draw_tracked_boxes(
                 )
 
         if id_size > 0:
+            points = obj.estimate
+            points = points.astype(int)
             id_draw_position = np.mean(points, axis=0)
             id_draw_position = id_draw_position.astype(int)
             cv2.putText(
@@ -380,7 +385,7 @@ class Paths:
         if get_points_to_draw is None:
             def get_points_to_draw(points):
                 return [np.mean(np.array(points), axis=0)]
-        
+
         self.get_points_to_draw = get_points_to_draw
 
         self.radius = radius
@@ -399,8 +404,8 @@ class Paths:
                 self.thickness = int(max(frame_scale / 7, 1))
 
             self.mask = np.zeros(frame.shape, np.uint8)
-        
-        self.mask = (self.mask*self.attenuation_factor).astype('uint8') 
+
+        self.mask = (self.mask*self.attenuation_factor).astype('uint8')
 
         for obj in tracked_objects:
             if self.color is None:
