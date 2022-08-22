@@ -40,16 +40,15 @@ def _validate_bboxes(bbox: np.array):
     assert bbox[0, 0] < bbox[1, 0] and bbox[0, 1] < bbox[1,1], f"incorrect bbox {bbox}"
 
 
-def _iou(detection: "Detection", tracked_object: "TrackedObject") -> float:
+def _iou(box_a, box_b) -> float:
     """
     Underlying iou distance. See `Norfair.distances.iou`.
     """
 
     # Detection points will be box A
     # Tracked objects point will be box B.
-    box_a = np.concatenate([detection.points[0], detection.points[1]])
-    box_b = np.concatenate([tracked_object.estimate[0], tracked_object.estimate[1]])
-
+    box_a = np.concatenate(box_a)
+    box_b = np.concatenate(box_b)
     x_a = max(box_a[0], box_b[0])
     y_a = max(box_a[1], box_b[1])
     x_b = min(box_a[2], box_b[2])
@@ -79,9 +78,13 @@ def iou(detection: "Detection", tracked_object: "TrackedObject") -> float:
     Performs checks that the bounding boxes are valid to give better error messages.
     For a faster implementation without checks use `Norfar.distanses.iou_opt`.
     """
-    _validate_bboxes(detection.points)
-    _validate_bboxes(tracked_object.estimate)
-    return _iou(detection, tracked_object)
+    boxa = detection.absolute_points.copy()
+    boxa.sort(axis=0)
+    _validate_bboxes(boxa)
+    boxb = tracked_object.get_estimate(absolute=True).copy()
+    boxb.sort(axis=0)
+    _validate_bboxes(boxb)
+    return _iou(boxa, boxb)
 
 
 def iou_opt(detection: "Detection", tracked_object: "TrackedObject") -> float:
@@ -91,7 +94,7 @@ def iou_opt(detection: "Detection", tracked_object: "TrackedObject") -> float:
     Performs faster but errors might be crypted if the bounding boxes are not valid.
     See `Norfair.distances.iou`
     """
-    return _iou(detection, tracked_object)
+    return _iou(detection.points, tracked_object.estimate)
 
 
 _DISTANCE_FUNCTIONS = {
