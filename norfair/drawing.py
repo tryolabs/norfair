@@ -483,8 +483,8 @@ def _get_grid(size, w, h, polar=False):
 
     # First step is to get a grid of angles, theta and phi ∈ (-pi/2, pi/2)
     step = np.pi / size
-    start = -np.pi / 2 + step
-    end = np.pi / 2 - step
+    start = -np.pi / 2 + step / 2
+    end = np.pi / 2
     theta, fi = np.mgrid[start:end:step, start:end:step]
 
     if polar:
@@ -500,7 +500,7 @@ def _get_grid(size, w, h, polar=False):
         X = tan_theta * np.cos(fi)
         Y = tan_theta * np.sin(fi)
     else:
-        # otherwhise will show as if you were looking at the ecuator
+        # otherwhise will show as if you were looking at the equator
         X = np.tan(fi)
         Y = np.divide(np.tan(theta), np.cos(fi))
     # construct the points as x, y coordinates

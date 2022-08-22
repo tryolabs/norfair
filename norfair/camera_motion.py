@@ -1,7 +1,12 @@
 from abc import ABC, abstractmethod
 
-import cv2
 import numpy as np
+
+try:
+    import cv2
+except ImportError:
+    from .utils import DummyOpenCVImport
+    cv2 = DummyOpenCVImport()
 
 
 #
@@ -98,13 +103,15 @@ class HomographyTransformation(CoordinatesTransformation):
 class HomographyTransformationGetter(TransformationGetter):
     def __init__(
         self,
-        method=cv2.RANSAC,
+        method=None,
         ransacReprojThreshold=3,
         maxIters=2000,
         confidence=0.995,
         proportion_points_used_threshold=0.9,
     ) -> None:
         self.data = None
+        if method is None:
+            method = cv2.RANSAC
         self.method = method
         self.ransacReprojThreshold = ransacReprojThreshold
         self.maxIters = maxIters
