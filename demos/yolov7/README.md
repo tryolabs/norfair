@@ -13,7 +13,7 @@ Simplest possible example of tracking. Based on [Yolov7](https://github.com/Wong
     ```bash
         python demo.py --help 
     ``` 
-   Bonus: Use additional arguments `--detector-path`, `--img-size`, `--iou-thres`,`--conf-thres`, `--classes`, `--track-points` as you wish.
+   Bonus: Use additional arguments `--detector-path`, `--img-size`, `--iou-threshold`,`--conf-threshold`, `--classes`, `--track-points` as you wish.
 
 
 ## Explanation
