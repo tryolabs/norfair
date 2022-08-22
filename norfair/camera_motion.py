@@ -140,7 +140,7 @@ class HomographyTransformationGetter(TransformationGetter):
 # Motion estimation
 #
 def get_sparse_flow(
-    gray_next, gray_prvs, prev_pts=None, max_points=300, min_distance=15, block_size=3
+    gray_next, gray_prvs, prev_pts=None, max_points=300, min_distance=15, block_size=3, mask=None
 ):
     if prev_pts is None:
         # get points
@@ -150,6 +150,7 @@ def get_sparse_flow(
             qualityLevel=0.01,
             minDistance=min_distance,
             blockSize=block_size,
+            mask=mask
         )
 
     # compute optical flow
@@ -170,10 +171,17 @@ class MotionEstimator:
         min_distance=15,
         block_size=3,
         transformations_getter=None,
+        draw_flow=False,
+        flow_color=None
     ):
         self.max_points = max_points
         self.min_distance = min_distance
         self.block_size = block_size
+
+        self.draw_flow = draw_flow
+        if self.draw_flow and flow_color is None:
+            flow_color = [0, 0, 100]
+        self.flow_color = flow_color
 
         self.gray_prvs = None
         self.prev_pts = None
@@ -181,11 +189,13 @@ class MotionEstimator:
             transformations_getter = HomographyTransformationGetter()
 
         self.transformations_getter = transformations_getter
+        self.prev_mask = None
 
-    def update(self, frame):
+    def update(self, frame, mask=None):
         self.gray_next = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         if self.gray_prvs is None:
             self.gray_prvs = self.gray_next
+            self.prev_mask = mask
 
         curr_pts, self.prev_pts = get_sparse_flow(
             self.gray_next,
@@ -194,7 +204,14 @@ class MotionEstimator:
             self.max_points,
             self.min_distance,
             self.block_size,
+            mask=self.prev_mask
         )
+        if self.draw_flow:
+            for (curr, prev) in zip(curr_pts, self.prev_pts):
+                c = tuple(curr.astype(int).ravel())
+                p = tuple(prev.astype(int).ravel())
+                cv2.line(frame, c, p, self.flow_color, 2)
+                cv2.circle(frame, c, 3, self.flow_color, -1)
 
         update_prvs, coord_transformations = self.transformations_getter(
             curr_pts,
@@ -204,5 +221,6 @@ class MotionEstimator:
         if update_prvs:
             self.gray_prvs = self.gray_next
             self.prev_pts = None
+            self.prev_mask = mask
 
         return coord_transformations

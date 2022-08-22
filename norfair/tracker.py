@@ -4,6 +4,8 @@ from typing import Callable, List, Optional, Sequence, Union
 import numpy as np
 from rich import print
 
+from norfair.camera_motion import TranslationTransformation
+
 from .distances import get_distance_by_name
 from .filter import OptimizedKalmanFilterFactory
 from .utils import validate_points
