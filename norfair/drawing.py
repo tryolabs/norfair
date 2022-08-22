@@ -382,7 +382,7 @@ class Paths:
         if get_points_to_draw is None:
             def get_points_to_draw(points):
                 return [np.mean(np.array(points), axis=0)]
-        
+
         self.get_points_to_draw = get_points_to_draw
 
         self.radius = radius
@@ -401,8 +401,8 @@ class Paths:
                 self.thickness = int(max(frame_scale / 7, 1))
 
             self.mask = np.zeros(frame.shape, np.uint8)
-        
-        self.mask = (self.mask*self.attenuation_factor).astype('uint8') 
+
+        self.mask = (self.mask*self.attenuation_factor).astype('uint8')
 
         for obj in tracked_objects:
             if obj.abs_to_rel is not None:
@@ -595,3 +595,70 @@ class FixedCamera:
             background_x1 = max(background_x1, 0)
         self._background[background_y0:background_y1, background_x0:background_x1, :] = frame[frame_y0:frame_y1, frame_x0:frame_x1, :]
         return self._background
+
+
+
+from collections import defaultdict
+
+
+class SlowPaths:
+    def __init__(self, get_points_to_draw=None, thickness=None, color=None, radius=None, max_history=20):
+        if get_points_to_draw is None:
+            def get_points_to_draw(points):
+                return [np.mean(np.array(points), axis=0)]
+
+        self.get_points_to_draw = get_points_to_draw
+
+        self.radius = radius
+        self.thickness = thickness
+        self.color = color
+        self.past_points = defaultdict(lambda: [])
+        self.max_history = max_history
+        self.alphas = np.linspace(0.99, 0.01, max_history)
+
+    def draw(self, frame, tracked_objects, coord_transform=None):
+        frame_scale = frame.shape[0] / 100
+
+        if self.radius is None:
+            self.radius = int(max(frame_scale * 0.7, 1))
+        if self.thickness is None:
+            self.thickness = int(max(frame_scale / 7, 1))
+        for obj in tracked_objects:
+            # if obj.abs_to_rel is not None:
+            #     warn_once("It seems that your using the Path drawer together with MotionEstimator. This is not fully supported and the results will not be what's expected")
+            if self.color is None:
+                color = Color.random(obj.id)
+            else:
+                color = self.color
+
+            points_to_draw = self.get_points_to_draw(obj.get_estimate(absolute=True))
+
+            for point in coord_transform.abs_to_rel(points_to_draw):
+                cv2.circle(
+                    frame,
+                    tuple(point.astype(int)),
+                    radius=self.radius,
+                    color=color,
+                    thickness=self.thickness,
+                )
+
+            last = points_to_draw
+            for i, past_points in enumerate(self.past_points[obj.id]):
+                overlay = frame.copy()
+                last = coord_transform.abs_to_rel(last)
+                for j, point in enumerate(coord_transform.abs_to_rel(past_points)):
+                    cv2.line(
+                        overlay,
+                        tuple(last[j].astype(int)),
+                        tuple(point.astype(int)),
+                        # radius=self.radius,
+                        color=color,
+                        thickness=self.thickness,
+                    )
+                last = past_points
+
+                alpha = self.alphas[i]
+                frame = cv2.addWeighted(overlay, alpha, frame, 1 - alpha, 0)
+            self.past_points[obj.id].insert(0, points_to_draw)
+            self.past_points[obj.id] = self.past_points[obj.id][:self.max_history]
+        return frame
