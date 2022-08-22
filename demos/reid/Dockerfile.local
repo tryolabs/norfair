@@ -1,0 +1,12 @@
+FROM python:3.8-slim-buster
+
+WORKDIR /reid
+COPY requirements.txt requirements.txt
+RUN apt update && \
+    apt install -y libgl1 sudo gcc libglib2.0-0 git-all && \
+    pip3 install --upgrade pip && \
+    pip3 install -r requirements.txt && \
+    git clone https://github.com/tryolabs/norfair.git ./norfair/ && \
+    pip3 install ./norfair/
+
+WORKDIR /reid/src/
