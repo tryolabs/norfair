@@ -87,8 +87,8 @@ parser = argparse.ArgumentParser(description="Track objects in a video.")
 parser.add_argument("files", type=str, nargs="+", help="Video files to process")
 parser.add_argument("--model-name", type=str, default="yolov5m6", help="YOLOv5 model name")
 parser.add_argument("--img-size", type=int, default="720", help="YOLOv5 inference size (pixels)")
-parser.add_argument("--conf-thres", type=float, default="0.25", help="YOLOv5 object confidence threshold")
-parser.add_argument("--iou-thresh", type=float, default="0.45", help="YOLOv5 IOU threshold for NMS")
+parser.add_argument("--conf-threshold", type=float, default="0.25", help="YOLOv5 object confidence threshold")
+parser.add_argument("--iou-threshold", type=float, default="0.45", help="YOLOv5 IOU threshold for NMS")
 parser.add_argument("--classes", nargs="+", type=int, help="Filter by class: --classes 0, or --classes 0 2 3")
 parser.add_argument("--device", type=str, default=None, help="Inference device: 'cpu' or 'cuda'")
 parser.add_argument("--track-points", type=str, default="centroid", help="Track points: 'centroid' or 'bbox'")
@@ -115,8 +115,8 @@ for input_path in args.files:
     for frame in video:
         yolo_detections = model(
             frame,
-            conf_threshold=args.conf_thres,
-            iou_threshold=args.iou_thresh,
+            conf_threshold=args.conf_threshold,
+            iou_threshold=args.iou_threshold,
             image_size=args.img_size,
             classes=args.classes
         )
