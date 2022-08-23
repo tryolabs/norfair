@@ -22,8 +22,9 @@ class YOLO:
         # automatically set device if its None
         elif device is None:
             device = "cuda:0" if torch.cuda.is_available() else "cpu"
+
         # load model
-        self.model = torch.hub.load('ultralytics/yolov5', model_name)
+        self.model = torch.hub.load('ultralytics/yolov5', model_name, device=device)
 
     def __call__(
         self,
