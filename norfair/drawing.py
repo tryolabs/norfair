@@ -335,8 +335,8 @@ def draw_tracked_boxes(
         else:
             color = border_colors[n % len(border_colors)]
 
+        points = obj.estimate
         if draw_box:
-            points = obj.estimate
             points = points.astype(int)
             cv2.rectangle(
                 frame,
