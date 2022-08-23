@@ -1,5 +1,3 @@
 numpy==1.22.3
 opencv-python==4.5.5.64
-
-tqdm==4.64.0
 pycocotools==2.0.4

@@ -1,6 +1,6 @@
 # Compute MOTChallenge metrics
 
-Demos on how to evaluate different trackers on the [MOTChallenge](https://motchallenge.net). 
+Demos on how to evaluate different trackers on the [MOTChallenge](https://motchallenge.net).
 
 What does each script do?
 
@@ -10,31 +10,27 @@ What does each script do?
 
 ## Instructions
 
+Build and run the Docker container with `./run.sh`. This will generate the default metrics.
 
-1. Build and run the Docker container with:
-    ```bash
-        ./run_docker.sh
-    ``` 
+For more advanced use cases, you can display the motmetrics4norfair instructions (replace `motmetrics4norfair.py` with `motmetrics4norfair_xyah.py` or `motmetrics4bytetrack.py` as needed):
 
-4. Display the motmetrics4norfair instructions (replace `motmetrics4norfair.py` with `motmetrics4norfair_xyah.py` or `motmetrics4bytetrack.py` as needed):
-    ```bash
-        python motmetrics4norfair.py --help
-    ``` 
+```bash
+python motmetrics4norfair.py --help
+```
 
-    or run the following for a quick test
+or run the following for a quick test
 
-    ```bash
-        python motmetrics4norfair.py /MOT17/train/
-    ```
+```bash
+python motmetrics4norfair.py /MOT17/train/
+```
 
-    To download Detections + Ground Truth + Images (5.5GB)
+To download Detections + Ground Truth + Images (5.5GB)
 
-    ```bash
-        curl -O https://motchallenge.net/data/MOT17.zip
-        unzip MOT17.zip
-    ```
-
+```bash
+curl -O https://motchallenge.net/data/MOT17.zip
+unzip MOT17.zip
+```
 
 ## Important consideration
 
-Hyperparameters were tuned for reaching a high `MOTA` on this dataset. They may not be ideal for more general use cases, use the default hyperparameters for those. ID switches suffer specially due to this optimization. If you want to improve ID switches use a higher `hit_counter_max`, or just use the default hyperparameters.
+Hyperparameters were tuned for reaching a high `MOTA` on this dataset. They may not be ideal for more general use cases. Id switches suffer especially due to this optimization. If you want to improve Id switches, use a higher `hit_counter_max`, or just use the default hyperparameters.
