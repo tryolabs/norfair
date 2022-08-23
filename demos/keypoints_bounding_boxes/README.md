@@ -22,4 +22,4 @@ Alternatively, the example can be executed entirely within `keypoints_bounding_b
 
 This example aims at showing the possibilities that Norfair offers to track objects from multiple classes using a single `Tracker` instance. Also the example shows Norfair's ability to draw keypoints and bounding boxes for different types of objects.
 
-![keypoints_bounding_boxes_demo](../../docs/keypoints_bounding_boxes_demo.gif)
+![keypoints_bounding_boxes_demo](../../docs/videos/keypoints_bounding_boxes_demo.gif)

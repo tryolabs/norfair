@@ -1,0 +1,80 @@
+site_name: Norfair
+theme:
+  name: material
+  favicon: img/logo.ico
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+  # palette:
+    # accent: red
+    # primary: purple
+  icon:
+    repo: fontawesome/brands/git-alt
+  logo: img/logo-neg.png
+  language: en
+repo_name: tryolabs/norfair
+repo_url: https://github.com/tryolabs/norfair
+edit_uri: ""
+
+extra_css:
+  - css/custom.css
+extra_javascript:
+  - js/math.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+nav:
+  - Reference:
+    - Tracker: reference/tracker.md
+    - Drawing: reference/drawing.md
+    - Video: reference/video.md
+    - Distances: reference/distances.md
+    - Camera Motion: reference/camera_motion.md
+    # - Metrics: reference/metrics.md
+    - Filter: reference/filter.md
+    - Utils: reference/utils.md
+
+plugins:
+  - search
+  - mkdocstrings:
+      custom_templates: templates
+      default_handler: python
+      handlers:
+          python:
+              options:
+                  show_source: true
+                  docstring_style: numpy
+                  show_root_heading: false
+                  show_root_full_path: false
+                  merge_init_into_class: false
+                  show_if_no_docstring: false
+                  members_order: source
+  - autorefs
+  # - gen-files:
+  #     scripts:
+  #     - docs/gen_ref_pages.py
+
+markdown_extensions:
+    - toc:
+        permalink: "#"  # adds link anchors to all titles (default char is ¶)
+    - pymdownx.tabbed:
+        alternate_style: true
+    - admonition
+    - pymdownx.details
+    - pymdownx.superfences:
+        custom_fences:
+          - name: mermaid
+            class: mermaid
+            format: !!python/name:pymdownx.superfences.fence_code_format
+    - pymdownx.highlight:
+        linenums: true
+    - pymdownx.superfences:
+        custom_fences:
+          - name: mermaid
+            class: mermaid
+            format: !!python/name:pymdownx.superfences.fence_code_format
+    - pymdownx.arithmatex:
+        generic: true
+
+watch:
+  - norfair
