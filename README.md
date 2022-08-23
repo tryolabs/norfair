@@ -1,14 +1,14 @@
-![Norfair by Tryolabs logo](docs/logo.png)
+![Norfair by Tryolabs logo](docs/img/logo.png)
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tryolabs/norfair/blob/master/demos/yolov7/src/yolov7_demo.ipynb) [![Documentation](https://img.shields.io/badge/api-reference-blue?logo=readthedocs)](https://github.com/tryolabs/norfair/blob/master/docs/README.md) [![Board](https://img.shields.io/badge/project-board-blue?logo=github)](https://github.com/tryolabs/norfair/projects/1) ![Build status](https://github.com/tryolabs/norfair/workflows/CI/badge.svg?branch=master) [![DOI](https://zenodo.org/badge/276473370.svg)](https://zenodo.org/badge/latestdoi/276473370)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tryolabs/norfair/blob/master/demos/yolov7/src/yolov7_demo.ipynb) [![Documentation](https://img.shields.io/badge/api-reference-blue?logo=readthedocs)](https://tryolabs.github.io/norfair/) [![Board](https://img.shields.io/badge/project-board-blue?logo=github)](https://github.com/tryolabs/norfair/projects/1) ![Build status](https://github.com/tryolabs/norfair/workflows/CI/badge.svg?branch=master) [![DOI](https://zenodo.org/badge/276473370.svg)](https://zenodo.org/badge/latestdoi/276473370)
 
 Norfair is a customizable lightweight Python library for real-time multi-object tracking.
 
 Using Norfair, you can add tracking capabilities to any detector with just a few lines of code.
 
 <p float="left">
-  <img src="/docs/soccer.gif" alt="Tracking soccer players with Norfair and a moving camera." width="400px" />
-  <img src="/docs/3d.gif" alt="Tracking 3D objects." width="400px" />
+  <img src="/docs/videos/soccer.gif" alt="Tracking soccer players with Norfair and a moving camera." width="400px" />
+  <img src="/docs/videos/3d.gif" alt="Tracking 3D objects." width="400px" />
 </p>
 
 ## Features
@@ -77,7 +77,7 @@ Most tracking demos are showcased with vehicles and pedestrians, but the detecto
 1. [Kalman filter and distance function profiling](demos/profiling) using [TRT pose estimator](https://github.com/NVIDIA-AI-IOT/trt_pose).
 2. Computation of [MOT17](https://motchallenge.net/data/MOT17/) scores using [motmetrics4norfair](demos/motmetrics4norfair).
 
-![Norfair OpenPose Demo](docs/openpose_skip_3_frames.gif)
+![Norfair OpenPose Demo](docs/videos/openpose_skip_3_frames.gif)
 
 ## How it works
 
@@ -92,7 +92,7 @@ The following is an example of a particularly simple distance function calculati
 
 As an example we use [Detectron2](https://github.com/facebookresearch/detectron2) to get the single point detections to use with this distance function. We just use the centroids of the bounding boxes it produces around cars as our detections, and get the following results.
 
-![Tracking cars with Norfair](docs/traffic.gif)
+![Tracking cars with Norfair](docs/videos/traffic.gif)
 
 On the left you can see the points we get from Detectron2, and on the right how Norfair tracks them assigning a unique identifier through time. Even a straightforward distance function like this one can work when the tracking needed is simple.
 
