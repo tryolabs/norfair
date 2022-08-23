@@ -4,16 +4,9 @@ Simplest possible example of tracking. Based on [YOLOv5](https://github.com/ultr
 
 ## Instructions
 
+Build and run the Docker container with `./run_gpu.sh`.
 
-1. Build and run the Docker container with:
-    ```bash
-        ./run_docker.sh
-    ``` 
-
-4. In the container, display the demo instructions: 
-    ```bash
-        python demo.py --help 
-    ``` 
+For more advanced use cases, you can manually run the Docker container and display the demo instructions using `python demo.py --help`.
 
 ## Explanation
 
