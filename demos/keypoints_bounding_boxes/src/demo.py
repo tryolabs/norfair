@@ -112,7 +112,7 @@ def yolo_detections_to_norfair_detections(
             ]
         )
         scores = np.array([detection_as_xyxy[4].item(), detection_as_xyxy[4].item()])
-        label = int(detection_as_xyxy[5].item())            
+        label = int(detection_as_xyxy[5].item())
         norfair_detections.append(
             Detection(points=bbox, scores=scores, label=label)
         )
@@ -173,7 +173,7 @@ if __name__ == "__main__":
             pointwise_hit_counter_max=POINTWISE_HIT_COUNTER_MAX,
         )
         KEYPOINT_DIST_THRESHOLD = video.input_height / 40
-    
+
         for frame in video:
             datum.cvInputData = frame
             detector(op.VectorDatum([datum]))
@@ -207,5 +207,5 @@ if __name__ == "__main__":
 
             norfair.draw_tracked_objects(frame, [person for person in tracked_objects if person.label == -1], color_by_label=True)
             norfair.draw_tracked_boxes(frame, [obj for obj in tracked_objects if obj.label >= 0], color_by_label=True)
-            
+
             video.write(frame)
