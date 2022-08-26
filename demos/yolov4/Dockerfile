@@ -4,9 +4,9 @@ ARG CUDNN="8"
 
 FROM pytorch/pytorch:${PYTORCH}-cuda${CUDA}-cudnn${CUDNN}-runtime
 
-RUN apt update && \
-    apt install -y libgl1 libglib2.0-0 git && \
-    apt clean && \
+RUN apt-get update && \
+    apt-get install -y libgl1 libglib2.0-0 git && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 RUN git clone https://github.com/Tianxiaomo/pytorch-YOLOv4.git /pytorch-YOLOv4
