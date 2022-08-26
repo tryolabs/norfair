@@ -4,16 +4,17 @@ Simplest possible example of tracking. Based on [Detectron2](https://github.com/
 
 ## Instructions
 
-
 1. Build and run the Docker container with:
-    ```bash
-        ./run_docker.sh
-    ``` 
 
-4. In the container, display the demo instructions: 
     ```bash
-        python demo.py --help 
-    ``` 
+    ./run_docker.sh
+    ```
+
+2. In the container, display the demo instructions:
+
+    ```bash
+    python demo.py --help
+    ```
 
 ## Explanation
 
