@@ -48,7 +48,7 @@ def keypoints_distance(detected_pose, tracked_pose):
     return 1 / (1 + match_num)
 
 
-def test_mot_metrics():
+def mot_metrics():
     """Tests that Norfair's MOT metrics didn't get worse
 
     Configurable so that it allows some margin on how much worse metrics could get before
@@ -121,3 +121,7 @@ def test_mot_metrics():
     assert new_overall_mota >= previous_overall_mota * (
         1 - MOTA_ERROR_THRESHOLD
     ), f"New overall MOTA score: {new_overall_mota} is too low, previous overall MOTA score: {previous_overall_mota}"
+
+
+if __name__ == "__main__":
+    mot_metrics()
