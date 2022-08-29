@@ -46,3 +46,5 @@ ADD https://download.openmmlab.com/mmdetection/v2.0/faster_rcnn/faster_rcnn_r50_
 
 WORKDIR /demo
 RUN pip install git+https://github.com/tryolabs/norfair.git@master
+
+WORKDIR /demo/src
