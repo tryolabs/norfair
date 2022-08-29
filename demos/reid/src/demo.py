@@ -1,0 +1,83 @@
+import random
+
+random.seed(1337)
+
+import cv2
+import typer
+import numpy as np
+
+from norfair import Video, get_cutout, draw_tracked_objects, Tracker, draw_points
+
+from norfair.filter import OptimizedKalmanFilterFactory
+
+from utils import get_hist
+from video_generator import generate_video
+
+
+def distance_func(detection, tracked_object):
+    return np.linalg.norm(detection.points - tracked_object.estimate)
+
+
+def embedding_distance(matched_not_init_trackers, unmatched_trackers):
+    snd_embedding = unmatched_trackers.last_detection.embedding
+
+    if snd_embedding is None:
+        for detection in reversed(unmatched_trackers.past_detections):
+            if detection.embedding is not None:
+                snd_embedding = detection.embedding
+                break
+        else:
+            return 1
+
+    for detection_fst in matched_not_init_trackers.past_detections:
+        if detection_fst.embedding is None:
+            continue
+
+        distance = 1 - cv2.compareHist(
+            snd_embedding, detection_fst.embedding, cv2.HISTCMP_CORREL
+        )
+        if distance < 0.5:
+            return distance
+    return 1
+
+
+def main(
+    output_path: str = "./out.mp4",
+    skip_period: int = 1,
+):
+    video_path, _, video_predictions = generate_video()
+
+    tracker = Tracker(
+        initialization_delay=1,
+        distance_function=distance_func,
+        hit_counter_max=10,
+        filter_factory=OptimizedKalmanFilterFactory(),
+        distance_threshold=50,
+        past_detections_length=5,
+        reid_distance_function=embedding_distance,
+        reid_distance_threshold=0.5,
+        reid_hit_counter_max=500,
+    )
+
+    video = Video(input_path=video_path, output_path=output_path)
+    for i, cv2_frame in enumerate(video):
+        if i % skip_period == 0:
+            detections = video_predictions[i]
+            frame = cv2_frame.copy()
+            for detection in detections:
+                cut = get_cutout(detection.points, frame)
+                if cut.shape[0] > 0 and cut.shape[1] > 0:
+                    detection.embedding = get_hist(cut)
+                else:
+                    detection.embedding = None
+
+            tracked_objects = tracker.update(detections=detections, period=skip_period)
+        else:
+            tracked_objects = tracker.update()
+        draw_points(cv2_frame, detections)
+        draw_tracked_objects(cv2_frame, tracked_objects)
+        video.write(cv2_frame)
+
+
+if __name__ == "__main__":
+    typer.run(main)
