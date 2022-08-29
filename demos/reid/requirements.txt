@@ -1,0 +1,3 @@
+opencv-python==4.5.5.64
+typer==0.4.1
+numpy==1.22.3
