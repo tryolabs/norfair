@@ -3,7 +3,6 @@ import sys
 
 import numpy as np
 
-sys.path.append('/norfair/')
 import norfair
 from norfair import Detection, Tracker, Video
 from norfair.distances import create_keypoints_voting_distance
