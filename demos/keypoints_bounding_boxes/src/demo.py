@@ -6,7 +6,6 @@ import numpy as np
 import torch
 from typing import Union, List, Optional
 
-sys.path.append('/norfair/')
 import norfair
 from norfair import Detection, Tracker, Video
 
