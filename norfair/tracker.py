@@ -136,7 +136,7 @@ class Tracker:
                     self.period,
                     self.filter_factory,
                     self.past_detections_length,
-                    self.reid_hit_counter_max,,
+                    self.reid_hit_counter_max,
                     self.abs_to_rel,
                 )
             )
@@ -292,8 +292,8 @@ class TrackedObject:
         period: int,
         filter_factory: "FilterFactory",
         past_detections_length: int,
-        reid_hit_counter_max: Optional[int],,
-        abs_to_rel: Callable[[np.array], np.array]
+        reid_hit_counter_max: Optional[int],
+        abs_to_rel: Callable[[np.array], np.array],
     ):
         try:
             initial_detection_points = validate_points(initial_detection.absolute_points)
