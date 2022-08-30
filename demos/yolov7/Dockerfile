@@ -1,4 +1,4 @@
-#  https://catalog.ngc.nvidia.com/orgs/nvidia/containers/pytorch/tags
+# https://catalog.ngc.nvidia.com/orgs/nvidia/containers/pytorch/tags
 FROM nvcr.io/nvidia/pytorch:22.08-py3
 
 RUN apt-get update && \
