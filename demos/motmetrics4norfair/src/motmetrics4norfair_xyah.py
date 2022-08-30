@@ -3,10 +3,7 @@ import os.path
 
 import numpy as np
 
-import sys
-sys.path.append('../../norfair')
-from tracker import Tracker
-from norfair import drawing, metrics, video, Detection
+from norfair import Tracker, drawing, metrics, video, Detection
 from norfair.filter import FilterPyKalmanFilterFactory
 
 frame_skip_period = 1
@@ -123,7 +120,7 @@ for input_path in sequences_paths:
         video_file = video.VideoFromFrames(
             input_path=input_path, save_path=output_path, information_file=info_file
             )
-    
+
     tracker = Tracker(
         distance_function=iou_xyah,
         distance_threshold=distance_threshold,
@@ -137,7 +134,7 @@ for input_path in sequences_paths:
     accumulator.create_accumulator(input_path=input_path, information_file=info_file)
 
     for frame_number, detections in enumerate(all_detections):
-        
+
         # convert detections to ByteTrack format: (center_x, center_y, asp_ratio, height)
         xyah_detections = []
         for det in detections:
