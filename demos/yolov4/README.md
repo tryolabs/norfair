@@ -1,6 +1,6 @@
 # YOLOv4 example
 
-Simplest possible example of tracking. Based on [pytorch YOLOv4](https://github.com/Tianxiaomo/pytorch-YOLOv4/tree/master).
+Simplest possible example of tracking. Based on [pytorch-YOLOv4](https://github.com/Tianxiaomo/pytorch-YOLOv4).
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tryolabs/norfair/blob/master/demos/yolov4/yolov4_demo.ipynb)
 
