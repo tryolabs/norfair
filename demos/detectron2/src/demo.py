@@ -33,7 +33,8 @@ for frame in video:
             detections["instances"].pred_boxes.get_centers().cpu().numpy(),
             detections["instances"].pred_classes,
         )
-        if c == 2
+        # Restrict to cars only
+        # if c == 2
     ]
     tracked_objects = tracker.update(detections=detections)
     draw_tracked_objects(frame, tracked_objects)
