@@ -1,8 +1,9 @@
-FROM nvcr.io/nvidia/pytorch:22.07-py3
+# https://catalog.ngc.nvidia.com/orgs/nvidia/containers/pytorch/tags
+FROM nvcr.io/nvidia/pytorch:22.08-py3
 
 WORKDIR /root
 
-ARG DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
 
 RUN apt-get update && \

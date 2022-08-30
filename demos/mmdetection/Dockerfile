@@ -10,6 +10,7 @@ ARG CUDNN="8"
 #
 FROM pytorch/pytorch:${PYTORCH}-cuda${CUDA}-cudnn${CUDNN}-devel
 
+ENV DEBIAN_FRONTEND=noninteractive
 ENV MMDET_MMCV_VERSION="1.6.1"
 ENV MMDET_CUDA="cu113"
 ENV MMDET_PYTORCH="1.11.0"

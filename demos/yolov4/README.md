@@ -6,9 +6,15 @@ Simplest possible example of tracking. Based on [pytorch YOLOv4](https://github.
 
 ## Instructions
 
-Build and run the Docker container with `./run_gpu.sh`.
+1. Build and run the Docker container with `./run_gpu.sh`.
+2. Copy a video to the `src` folder.
+3. Within the container, run with the default parameters:
 
-For more advanced use cases, you can manually run the Docker container and display the demo instructions using `python demo.py --help`.
+    ```bash
+    python demo.py <video>.mp4
+    ```
+
+For additional settings, you may display the instructions using `python demo.py --help`.
 
 ## Explanation
 

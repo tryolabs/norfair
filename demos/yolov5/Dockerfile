@@ -1,4 +1,3 @@
-
 FROM ultralytics/yolov5:v6.2
 
 # Install Norfair
