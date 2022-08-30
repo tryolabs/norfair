@@ -4,14 +4,12 @@ Measure inference speed for different filters and distance functions using a [TR
 
 ## Instructions
 
-1. Build and run the Docker container with:
+1. Build and run the Docker container with `./run_gpu.sh`.
+2. Copy a video to the `src` folder.
+3. Within the container, run with the default parameters:
+
     ```bash
-        ./run_docker.sh
-    ``` 
+    python demo.py <video>.mp4
+    ```
 
-4. In the container, display the demo instructions: 
-    ```bash
-        python demo.py --help 
-    ``` 
-
-
+For additional settings, you may display the instructions using `python demo.py --help`.
