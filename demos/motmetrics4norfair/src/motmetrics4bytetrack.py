@@ -3,8 +3,6 @@ import os.path
 
 import numpy as np
 
-import sys
-sys.path.append('../../../ByteTrack')
 from yolox.tracker.byte_tracker import BYTETracker
 from norfair import drawing, metrics, video
 
@@ -91,7 +89,7 @@ for input_path in sequences_paths:
         video_file = video.VideoFromFrames(
             input_path=input_path, save_path=output_path, information_file=info_file
             )
-    
+
     class ArgsByte:
         def __init__(self, track_thresh=0.5, track_buffer=30, match_thresh=0.8):
             self.mot20 = False

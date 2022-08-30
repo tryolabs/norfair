@@ -10,9 +10,9 @@ What does each script do?
 
 ## Instructions
 
-Build and run the Docker container with `./run.sh`. This will generate the default metrics.
-
-For more advanced use cases, within the container you can display the motmetrics4norfair instructions (replace `motmetrics4norfair.py` with `motmetrics4norfair_xyah.py` or `motmetrics4bytetrack.py` as needed):
+1. Build and run the Docker container with `./run.sh`.
+2. Within the container, run `python motmetrics4norfair.py /MOT17/train/`.
+3. For more advanced use cases, within the container you can display the motmetrics4norfair instructions (replace `motmetrics4norfair.py` with `motmetrics4norfair_xyah.py` or `motmetrics4bytetrack.py` as needed):
 
 ```bash
 python motmetrics4norfair.py --help
