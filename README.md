@@ -90,6 +90,8 @@ The video and drawing tools use OpenCV frames, so they are compatible with most 
 
 We provide several examples of how Norfair can be used to add tracking capabilities to different detectors, and also showcase more advanced features.
 
+For ease of reproducibility, we provide Dockerfiles for all the demos. As most require a GPU to run the detectors, make sure you install [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) so that you GPU can be shared with Docker.
+
 ### Adding tracking to different detectors
 
 Most tracking demos are showcased with vehicles and pedestrians, but the detectors are generally trained with many more classes from the [COCO dataset](https://cocodataset.org/).
@@ -104,6 +106,7 @@ Most tracking demos are showcased with vehicles and pedestrians, but the detecto
 ### Advanced features
 
 1. [Speed up pose estimation by extrapolating detections](demos/openpose) using [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose).
+2. [Re-identification (ReID) ](demos/reid) of tracked objects using appearance embeddings. This is a good starting point for scenarios with a lot of occlusion, in which the Kalman filter alone would struggle.
 
 ### Benchmarking and profiling
 
