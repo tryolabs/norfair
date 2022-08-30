@@ -86,12 +86,6 @@ for frame in video:
 
 The video and drawing tools use OpenCV frames, so they are compatible with most Python video code available online. The point tracking is based on [SORT](https://arxiv.org/pdf/1602.00763.pdf) generalized to detections consisting of a dynamically changing number of points per detection.
 
-## Motivation
-
-Trying out the latest state-of-the-art detectors normally requires running repositories that weren't intended to be easy to use. These tend to be repositories associated with a research paper describing a novel new way of doing detection, and they are therefore intended to be run as a one-off evaluation script to get some result metric to publish on a particular research paper. This explains why they tend to not be easy to run as inference scripts, or why extracting the core model to use in another standalone script isn't always trivial.
-
-Norfair was born out of the need to quickly add a simple layer of tracking over a wide range of newly released SOTA detectors. It was designed to seamlessly be plugged into a complex, highly coupled code base, with minimum effort. Norfair provides a series of modular but compatible tools, which you can pick and choose to use in your project.
-
 ## Examples & demos
 
 We provide several examples of how Norfair can be used to add tracking capabilities to different detectors, and also showcase more advanced features.
@@ -117,6 +111,12 @@ Most tracking demos are showcased with vehicles and pedestrians, but the detecto
 2. Computation of [MOT17](https://motchallenge.net/data/MOT17/) scores using [motmetrics4norfair](demos/motmetrics4norfair).
 
 ![Norfair OpenPose Demo](docs/openpose_skip_3_frames.gif)
+
+## Motivation
+
+Trying out the latest state-of-the-art detectors normally requires running repositories that weren't intended to be easy to use. These tend to be repositories associated with a research paper describing a novel new way of doing detection, and they are therefore intended to be run as a one-off evaluation script to get some result metric to publish on a particular research paper. This explains why they tend to not be easy to run as inference scripts, or why extracting the core model to use in another standalone script isn't always trivial.
+
+Norfair was born out of the need to quickly add a simple layer of tracking over a wide range of newly released SOTA detectors. It was designed to seamlessly be plugged into a complex, highly coupled code base, with minimum effort. Norfair provides a series of modular but compatible tools, which you can pick and choose to use in your project.
 
 ## Comparison to other trackers
 
