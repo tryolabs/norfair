@@ -14,10 +14,10 @@
     python demo.py video.mp4
     ```
 
-For additional settings, you may display the instructions using `python demo.py --help`. For the demo, we are using [this footage](https://www.pexels.com/video/city-landmark-faceless-architecture-4929210/).
+For additional settings, you may display the instructions using `python demo.py --help`. For the demo, we are using [this footage](https://www.pexels.com/video/man-showing-the-steps-in-hip-hop-dancing-2795737/).
 
 ## Explanation
 
 This example tracks objects using 3D bounding boxes.
 
-![3D Tracking demo](../../docs/skate3d.gif)
+![3D Tracking demo](../../docs/dance_3d.gif)

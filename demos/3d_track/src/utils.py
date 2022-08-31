@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 from norfair import Color
 
+
 CONNECTED_INDEXES = [1, 2, 4, 3, 1, 5, 7, 3, 7, 8, 6, 5, 6, 2, 4, 8]
 
 class PixelCoordinatesProjecter:
@@ -113,6 +114,7 @@ def draw_3d_tracked_boxes(
     id_size=None,
     id_thickness=None,
     draw_box=True,
+    draw_only_alive=False,
 ):
     frame_scale = frame.shape[0] / 100
     if border_width is None:
@@ -125,7 +127,7 @@ def draw_3d_tracked_boxes(
         border_colors = [border_colors]
 
     for n, obj in enumerate(objects):
-        if not obj.live_points.any():
+        if draw_only_alive and not obj.live_points.any():
             continue
         if border_colors is None:
             color = Color.random(obj.id)
@@ -136,7 +138,7 @@ def draw_3d_tracked_boxes(
         pixel_points = projecter(obj.estimate)
 
         # sort the points to draw the lines
-        sorted_points = np.array([pixel_points[n] for n in CONNECTED_INDEXES])
+        sorted_points = np.array([pixel_points[index] for index in CONNECTED_INDEXES])
 
         # draw box
         if draw_box:
@@ -155,3 +157,13 @@ def draw_3d_tracked_boxes(
                 cv2.LINE_AA,
             )
     return frame
+
+
+def scaled_euclidean(detection: "Detection", tracked_object: "TrackedObject") -> float:
+    """
+    Average euclidean distance between the points in detection and estimates in tracked_object, rescaled by the object diagonal
+    See `np.linalg.norm`.
+    """
+    obj_estimate = tracked_object.estimate
+    diagonal = np.linalg.norm(obj_estimate[1] - obj_estimate[8])
+    return np.linalg.norm(detection.points - obj_estimate, axis=1).mean() / diagonal
