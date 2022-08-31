@@ -6,7 +6,7 @@ import time
 import norfair
 from norfair import Tracker, Video
 
-sys.path.append("/norfair/demos/profiling/src")
+sys.path.append("/demo/src")
 
 from utils import (
     DETECTION_THRESHOLD,

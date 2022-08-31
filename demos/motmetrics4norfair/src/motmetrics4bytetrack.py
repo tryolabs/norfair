@@ -3,18 +3,8 @@ import os.path
 
 import numpy as np
 
-import sys
-sys.path.append('../../norfair')
-from tracker import Tracker
-from norfair import drawing, metrics, video, Detection
-from norfair.filter import FilterPyKalmanFilterFactory
-
-frame_skip_period = 1
-detection_threshold = 0.01
-distance_threshold = 0.9
-diagonal_proportion_threshold = 1 / 18
-pointwise_hit_counter_max=3
-hit_counter_max=2
+from yolox.tracker.byte_tracker import BYTETracker
+from norfair import drawing, metrics, video
 
 parser = argparse.ArgumentParser(
     description="Evaluate a basic tracker on MOTChallenge data. Display on terminal the MOTChallenge metrics results "
@@ -74,35 +64,11 @@ else:
 
 accumulator = metrics.Accumulators()
 
-class CartesianTrack:
+class PartialStaticTracker:
     def __init__(self, estimate, obj_id, live_points):
         self.estimate = estimate
         self.id = obj_id
         self.live_points = live_points
-
-# distance function for ByteTrack format
-def iou_xyah(detected_pose, tracked_pose):
-    height = tracked_pose.estimate[1, 1]
-    width = tracked_pose.estimate[1, 0]*height
-    area_tracked_pose = height*width
-    half_size = np.array([width, height])/2
-
-    top_left_corner_tracked_pose = tracked_pose.estimate[0] - half_size
-    bottom_right_corner_tracked_pose = tracked_pose.estimate[0] + half_size
-
-
-    height = detected_pose.points[1, 1]
-    width = detected_pose.points[1, 0]*height
-    area_detected_pose = height*width
-    half_size = np.array([width, height])/2
-
-    top_left_corner_detected_pose = detected_pose.points[0] - half_size
-    bottom_right_corner_detected_pose = detected_pose.points[0] + half_size
-
-    intersection = max(min(bottom_right_corner_detected_pose[1], bottom_right_corner_tracked_pose[1])-max(top_left_corner_tracked_pose[1], top_left_corner_detected_pose[1]), 0)*max(min(bottom_right_corner_detected_pose[0], bottom_right_corner_tracked_pose[0])-max(top_left_corner_tracked_pose[0], top_left_corner_detected_pose[0]), 0)
-    union = area_detected_pose + area_tracked_pose - intersection
-
-    return 1 - intersection/union
 
 
 for input_path in sequences_paths:
@@ -123,61 +89,53 @@ for input_path in sequences_paths:
         video_file = video.VideoFromFrames(
             input_path=input_path, save_path=output_path, information_file=info_file
             )
-    
-    tracker = Tracker(
-        distance_function=iou_xyah,
-        distance_threshold=distance_threshold,
-        detection_threshold=detection_threshold,
-        pointwise_hit_counter_max=pointwise_hit_counter_max,
-        hit_counter_max=hit_counter_max,
-        filter_factory=FilterPyKalmanFilterFactory(),
-    )
+
+    class ArgsByte:
+        def __init__(self, track_thresh=0.5, track_buffer=30, match_thresh=0.8):
+            self.mot20 = False
+            self.track_thresh = track_thresh
+            self.track_buffer = track_buffer
+            self.match_thresh = match_thresh
+
+    args_byte = ArgsByte(track_thresh=0.5, track_buffer=30, match_thresh=0.8)
+    tracker = BYTETracker(args_byte, info_file.search('frameRate'))
 
     # Initialize accumulator for this video
     accumulator.create_accumulator(input_path=input_path, information_file=info_file)
 
+    img_size = [info_file.search('imHeight'), info_file.search('imWidth')]
+
+    byte_tracked_objects = []
     for frame_number, detections in enumerate(all_detections):
-        
-        # convert detections to ByteTrack format: (center_x, center_y, asp_ratio, height)
-        xyah_detections = []
+
+        byte_detections = []
         for det in detections:
-            center = np.mean(det.points, axis=0)
-            width = det.points[1, 0] - det.points[0, 0]
-            height = det.points[1, 1] - det.points[0, 1]
-            xyah_state_det = np.vstack((center, [width/height, height]))
-            xyah_detections.append(Detection(xyah_state_det, scores = det.scores))
+            byte_det = np.append(det.points.reshape((1, -1)), det.scores[0])
+            byte_detections.append(byte_det)
 
-        if frame_number % frame_skip_period == 0:
-            tracked_objects = tracker.update(
-                detections=xyah_detections, period=frame_skip_period
+        if len(byte_detections)>0:
+            byte_tracked_objects = tracker.update(
+                np.array(byte_detections), img_size, tuple(img_size)
             )
-        else:
-            detections = []
-            tracked_objects = tracker.update()
 
-        x1y1x2y2_tracked_objects = []
-        for n, obj in enumerate(tracked_objects):
-            half_height = obj.estimate[1, 1]/2
-            half_width = obj.estimate[1, 0]*half_height
-            half_size = np.array([half_width, half_height])
+        tracked_objects= []
+        for obj in byte_tracked_objects:
+            box = obj.tlbr.reshape((2, 2))
+            tracked_objects.append(PartialStaticTracker(box, obj.track_id, np.array([True])))
 
-            top_left_corner = obj.estimate[0] - half_size
-            bottom_right_corner = obj.estimate[0] + half_size
-
-            x1y1x2y2_tracked_objects.append(CartesianTrack(np.vstack((top_left_corner, bottom_right_corner)), obj.id, obj.live_points))
 
         # Draw detection and tracked object boxes on frame
         if args.make_video:
             frame = next(video_file)
             frame = drawing.draw_boxes(frame, detections=detections)
-            frame = drawing.draw_tracked_boxes(frame=frame, objects=x1y1x2y2_tracked_objects)
+            frame = drawing.draw_tracked_boxes(frame=frame, objects=tracked_objects)
             video_file.update(frame=frame)
 
         # Update output text file
         if args.save_pred:
-            predictions_text_file.update(predictions=x1y1x2y2_tracked_objects)
+            predictions_text_file.update(predictions=tracked_objects)
 
-        accumulator.update(predictions=x1y1x2y2_tracked_objects)
+        accumulator.update(predictions=tracked_objects)
 
 accumulator.compute_metrics()
 accumulator.print_metrics()
