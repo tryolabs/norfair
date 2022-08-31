@@ -8,7 +8,7 @@ Using Norfair, you can add tracking capabilities to any detector with just a few
 
 ## Features
 
--   Any detector expressing its detections as a series of `(x, y)` coordinates can be used with Norfair. This includes detectors performing object detection, pose estimation, and interest point detection.
+-   Any detector expressing its detections as a series of `(x, y)` coordinates can be used with Norfair. This includes detectors performing object detection, pose estimation, and keypoint detection (see [examples](#examples--demos)).
 
 -   The function used to calculate the distance between tracked objects and detections is defined by the user, making the tracker extremely customizable. This function can make use of any extra information, such as appearance embeddings, which can heavily improve tracking performance.
 
@@ -90,7 +90,9 @@ The video and drawing tools use OpenCV frames, so they are compatible with most 
 
 We provide several examples of how Norfair can be used to add tracking capabilities to different detectors, and also showcase more advanced features.
 
-For ease of reproducibility, we provide Dockerfiles for all the demos. As most require a GPU to run the detectors, make sure you install [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) so that you GPU can be shared with Docker.
+> Note: for ease of reproducibility, we provide Dockerfiles for all the demos. Even though Norfair does not need a GPU, the default configuration of most demos requires a GPU to be able to run the detectors. For this, make sure you install [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) so that you GPU can be shared with Docker.
+>
+> It is possible to run several demos with a CPU, but you will have to modify the scripts or tinker with the installation of their dependencies.
 
 ### Adding tracking to different detectors
 
