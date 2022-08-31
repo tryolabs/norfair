@@ -601,7 +601,7 @@ class FixedCamera:
 from collections import defaultdict
 
 
-class SlowPaths:
+class AbsolutePaths:
     def __init__(self, get_points_to_draw=None, thickness=None, color=None, radius=None, max_history=20):
         if get_points_to_draw is None:
             def get_points_to_draw(points):
