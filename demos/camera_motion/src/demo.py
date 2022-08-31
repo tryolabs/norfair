@@ -5,9 +5,9 @@ import numpy as np
 import torch
 
 from norfair import (
+    AbsolutePaths,
     Detection,
     FixedCamera,
-    SlowPaths,
     Tracker,
     Video,
     draw_absolute_grid,
@@ -208,7 +208,7 @@ def run():
             fixed_camera = FixedCamera(scale=args.fixed_camera_scale)
 
         if args.draw_paths:
-            path_drawer = SlowPaths(max_history=args.path_history, thickness=2)
+            path_drawer = AbsolutePaths(max_history=args.path_history, thickness=2)
 
         video = Video(input_path=input_path)
         show_or_write = (
