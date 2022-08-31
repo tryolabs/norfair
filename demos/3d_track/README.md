@@ -20,4 +20,4 @@ For additional settings, you may display the instructions using `python demo.py 
 
 This example tracks objects using 3D bounding boxes.
 
-![3D Tracking demo](../../docs/dance_3d.gif)
+https://user-images.githubusercontent.com/70915567/187745152-7c0b173a-a6b1-49bb-849d-29605ecb17a4.mp4
