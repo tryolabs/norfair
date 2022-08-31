@@ -1,6 +1,6 @@
 # Compute MOTChallenge metrics
 
-Demos on how to evaluate different trackers on the [MOTChallenge](https://motchallenge.net). 
+Demos on how to evaluate different trackers on the [MOTChallenge](https://motchallenge.net).
 
 What does each script do?
 
@@ -10,41 +10,27 @@ What does each script do?
 
 ## Instructions
 
-1. Install Norfair with `pip install norfair[metrics,video]`.
-2. Download the [MOT17](https://motchallenge.net/data/MOT17/) dataset running:
+1. Build and run the Docker container with `./run.sh`.
+2. Within the container, run `python motmetrics4norfair.py /MOT17/train/`.
+3. For more advanced use cases, within the container you can display the motmetrics4norfair instructions (replace `motmetrics4norfair.py` with `motmetrics4norfair_xyah.py` or `motmetrics4bytetrack.py` as needed):
 
-    ```bash
-    curl -O https://motchallenge.net/data/MOT17Labels.zip  # To download Detections + Ground Truth (9.7 MB)
-    unzip MOT17Labels.zip
-    ```
+```bash
+python motmetrics4norfair.py --help
+```
 
-    or the following if you want to download the images as well (much larger download):
+or run the following for a quick test
 
-    ```bash
-    curl -O https://motchallenge.net/data/MOT17.zip  # To download Detections + Ground Truth + Images (5.5GB)
-    unzip MOT17.zip
-    ```
+```bash
+python motmetrics4norfair.py /MOT17/train/
+```
 
-    Given that the ground truth files for the testing set are not publicly available, you will only be able to use motmetrics4norfair with the training set.
+To download Detections + Ground Truth + Images (5.5GB)
 
-3. Clone repos and go to `demos/motmetrics4norfair/`.
-    ```bash
-    git clone git@github.com:tryolabs/norfair.git
-    # Optional: Clone ByteTrack repo and follow its install instructions
-    cd norfair/demos/motmetrics4norfair
-    ```
-
-4. Display the motmetrics4norfair instructions (replace `motmetrics4norfair.py` with `motmetrics4norfair_xyah.py` or `motmetrics4bytetrack.py` as needed):
-    ```bash
-        python motmetrics4norfair.py --help
-    ``` 
-
-    or run the following for a quick test
-
-    ```bash
-    python motmetrics4norfair.py ../../train/
-    ```
+```bash
+curl -O https://motchallenge.net/data/MOT17.zip
+unzip MOT17.zip
+```
 
 ## Important consideration
 
-Hyperparameters were tuned for reaching a high `MOTA` on this dataset. They may not be ideal for more general use cases, use the default hyperparameters for those. ID switches suffer specially due to this optimization. If you want to improve ID switches use a higher `hit_counter_max`, or just use the default hyperparameters.
+Hyperparameters were tuned for reaching a high `MOTA` on this dataset. They may not be ideal for more general use cases. Id switches suffer especially due to this optimization. If you want to improve Id switches, use a higher `hit_counter_max`, or just use the default hyperparameters.

@@ -4,11 +4,15 @@ Simplest possible example of tracking. Based on [Detectron2](https://github.com/
 
 ## Instructions
 
-Assuming Norfair is installed:
+1. Build and run the Docker container with `./run_gpu.sh`.
+2. Copy a video to the `src` folder.
+3. Within the container, run with the default parameters:
 
-1. Install Norfair with `pip install norfair[video]`.
-2. [Follow the instructions](https://detectron2.readthedocs.io/tutorials/install.html) to install Detectron2.
-3. Run `python detectron2_cars.py`. For the demo, we are using [this traffic footage](https://www.youtube.com/watch?v=aio9g9_xVio).
+    ```bash
+    python demo.py <video>.mp4
+    ```
+
+For additional settings, you may display the instructions using `python demo.py --help`.
 
 ## Explanation
 

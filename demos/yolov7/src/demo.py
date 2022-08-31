@@ -29,9 +29,10 @@ class YOLO:
 
         # load model
         try:
-            self.model = torch.hub.load('WongKinYiu/yolov7', 'custom', model_path) 
+            self.model = torch.hub.load('WongKinYiu/yolov7', 'custom', model_path)
         except:
             raise Exception("Failed to load model from {}".format(model_path))
+
     def __call__(
         self,
         img: Union[str, np.ndarray],

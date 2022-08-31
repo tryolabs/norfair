@@ -1,14 +1,20 @@
 # YOLOv4 example
 
-Simplest possible example of tracking. Based on [pytorch YOLOv4](https://github.com/Tianxiaomo/pytorch-YOLOv4/tree/master).
+Simplest possible example of tracking. Based on [pytorch-YOLOv4](https://github.com/Tianxiaomo/pytorch-YOLOv4).
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tryolabs/norfair/blob/master/demos/yolov4/yolov4_demo.ipynb)
 
 ## Instructions
 
-1. Install Norfair with `pip install norfair[video]`.
-2. Clone [pytorch YOLOv4](https://github.com/Tianxiaomo/pytorch-YOLOv4/tree/master) and download the [weights](https://github.com/tryolabs/norfair/releases/download/v0.4.0/yolov4_fixed_layer_names.pth) published on the repo into your local clone of the repo.
-3. Copy `yolov4demo.py` into your local clone of the repo and run `python yolov4demo.py <video file>`.
+1. Build and run the Docker container with `./run_gpu.sh`.
+2. Copy a video to the `src` folder.
+3. Within the container, run with the default parameters:
+
+    ```bash
+    python demo.py <video>.mp4
+    ```
+
+For additional settings, you may display the instructions using `python demo.py --help`.
 
 ## Explanation
 

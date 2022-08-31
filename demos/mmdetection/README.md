@@ -4,10 +4,15 @@ Simplest possible example of tracking using [MMDetection](https://github.com/ope
 
 ## Instructions
 
-1. Install Norfair with `pip install norfair[video]`.
-2. [Follow the instructions](https://github.com/open-mmlab/mmdetection/blob/master/docs/en/get_started.md/#Installation) to install mmdet using mim and cloning the repo inside `demo/mmdetection`.
-3. Download the [checkpoint](https://download.openmmlab.com/mmdetection/v2.0/faster_rcnn/faster_rcnn_r50_fpn_1x_coco/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth) inside `demo/mmdetection/checkpoints`
-3. Run `python mmdetection_cars.py`. For the demo, we are using [this traffic footage](https://www.youtube.com/watch?v=aio9g9_xVio).
+1. Build and run the Docker container with `./run_gpu.sh`.
+2. Copy a video to the `src` folder.
+3. Within the container, run with the default parameters:
+
+    ```bash
+    python demo.py <video>.mp4
+    ```
+
+For additional settings, you may display the instructions using `python demo.py --help`.
 
 ## Explanation
 
