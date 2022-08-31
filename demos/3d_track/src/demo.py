@@ -6,16 +6,18 @@ import mediapipe as mp
 
 from norfair import Video, Detection, Tracker
 from norfair.drawing import Paths
-from norfair.distances import mean_euclidean
 
-from utils import PixelCoordinatesProjecter, draw_3d_tracked_boxes
+from utils import PixelCoordinatesProjecter, draw_3d_tracked_boxes, scaled_euclidean
+
 
 parser = argparse.ArgumentParser(description="3d-Track objects in a video.")
 parser.add_argument("files", type=str, nargs="+", help="Video files to process")
 parser.add_argument("--model-name", type=str, default="Shoe", help="model name ('Shoe', 'Chair', 'Cup', 'Camera')")
 parser.add_argument("--max-objects", type=int, default="2", help="Maximum number of objects at a time")
+parser.add_argument("--hit-counter-max", type=int, default="40", help="Maximum value that hit counters may take")
+parser.add_argument("--initialization-delay", type=int, default="10", help="Initialization delay")
 parser.add_argument("--conf-threshold", type=float, default="0.1", help="Detector threshold") 
-parser.add_argument("--distance-threshold", type=float, default="0.5", help="Detector threshold")
+parser.add_argument("--distance-threshold", type=float, default="0.5", help="Distance threshold")
 parser.add_argument("--output-path", type=str, default=".", help="Output path")
 parser.add_argument("--draw-paths", action="store_true", help="Draw path of the centroid")
 args = parser.parse_args()
@@ -31,8 +33,10 @@ with mp_objectron.Objectron(static_image_mode=True,
         video = Video(input_path = input_path, output_path = args.output_path)
 
         tracker = Tracker(
-            distance_function=mean_euclidean,
+            distance_function=scaled_euclidean,
             distance_threshold=args.distance_threshold,
+            hit_counter_max=args.hit_counter_max,
+            initialization_delay=args.initialization_delay,
         )
         projecter = None
         for frame in video:
@@ -59,7 +63,6 @@ with mp_objectron.Objectron(static_image_mode=True,
             for detected_object in results.detected_objects:
                 points = np.array([[p.x, p.y, p.z] for p in detected_object.landmarks_3d.landmark])
                 detections.append(Detection(points=points))
-
 
             tracked_objects = tracker.update(detections)
 
