@@ -18,7 +18,7 @@ The class in charge of performing the tracking of the detections produced by the
 - `past_detections_length`: How many past detections to save for each tracked object. Norfair tries to distribute these past detections uniformly through the object's lifetime so they're more representative. Very useful if you want to add metric learning to your model, as you can associate an embedding to each detection and access them in your distance function. Defaults to `4`.
 - `reid_distance_function (optional)`: Function used by the tracker to determine the ReID distance between newly detected trackers and unmatched trackers by the distance function. This function should take 2 input arguments, the first being tracked objects in the initialization phase of type [`TrackedObject`](#trackedobject), and the second being tracked objects that have been unmatched of type [`TrackedObject`](#trackedobject). It returns a `float` with the distance it calculates. Defaults to `None`.
 - `reid_distance_threshold (optional)`: Defines what is the maximum ReID distance that can constitute a match. Tracked objects whose distance is above this threshold won't be merged, if they are the oldest tracked object will be maintained with the position of the new tracked object. Defaults to `0`.
-- `reid_hit_counter_max (optional)`:  Each tracked object keeps an internal ReID hit counter which tracks how often it's getting recognized by another tracker, each time it gets a match this counter goes up, and each time it doesn't it goes down. If it goes below 0 the object gets destroyed. If used, this argument (`reid_hit_counter_max`) defines how long an object can live without getting matched to any detections, before it is destroyed. Defaults to `None`.
+- `reid_hit_counter_max (optional)`: Each tracked object keeps an internal ReID hit counter which tracks how often it's getting recognized by another tracker, each time it gets a match this counter goes up, and each time it doesn't it goes down. If it goes below 0 the object gets destroyed. If used, this argument (`reid_hit_counter_max`) defines how long an object can live without getting matched to any detections, before it is destroyed. Defaults to `None`.
 
 ### Tracker.update
 
@@ -26,7 +26,7 @@ The function through which the detections found in each frame must be passed to 
 
 ##### Arguments:
 
-- `detections (optional)`:  A list of [`Detection`](#detection)s which represent the detections found in the current frame being processed. If no detections have been found in the current frame, or the user is purposely skipping frames to improve video processing time, this argument should be set to None or ignored, as the update function is needed to advance the state of the Kalman Filters inside the tracker. Defaults to `None`.
+- `detections (optional)`: A list of [`Detection`](#detection)s which represent the detections found in the current frame being processed. If no detections have been found in the current frame, or the user is purposely skipping frames to improve video processing time, this argument should be set to None or ignored, as the update function is needed to advance the state of the Kalman Filters inside the tracker. Defaults to `None`.
 - `period (optional)`: The user can chose not to run their detector on all frames, so as to process video faster. This parameter sets every how many frames the detector is getting ran, so that the tracker is aware of this situation and can handle it properly. This argument can be reset on each frame processed, which is useful if the user is dynamically changing how many frames the detector is skipping on a video when working in real-time. Defaults to `1`.
 
 ##### Returns:
@@ -49,14 +49,13 @@ Detections returned by the detector must be converted to a `Detection` object be
 This class can be used either to change some parameters of the [KalmanFilter](https://filterpy.readthedocs.io/en/latest/kalman/KalmanFilter.html) that the tracker uses, or to fully customize the predictive filter implementation to use (as long as the methods and properties are compatible).
 The former case only requires changing the default parameters upon tracker creation: `tracker = Tracker(..., filter_factory=FilterPyKalmanFilterFactory(R=100))`, while the latter requires creating your own class extending `FilterPyKalmanFilterFactory`, and rewriting its `create_filter` method to return your own customized filter.
 
-
 ##### Arguments:
 
 Note that these arguments correspond to the same parameters of the [`filterpy.KalmanFilter` (see docs)](https://filterpy.readthedocs.io/en/latest/kalman/KalmanFilter.html) that this class returns.
+
 - `R`: Multiplier for the sensor measurement noise matrix. Defaults to `4.0`.
 - `Q`: Multiplier for the process uncertainty. Defaults to `0.1`.
 - `P`: Multiplier for the initial covariance matrix estimation, only in the entries that correspond to position (not speed) variables. Defaults to `10.0`.
-
 
 ### FilterPyKalmanFilterFactory.create_filter
 
@@ -69,6 +68,7 @@ This method may be overwritten by a subclass of `FilterPyKalmanFilterFactory`, i
 - `initial_detection`: numpy array of shape `(number of points per object, 2)`, corresponding to the [`Detection.points`](#detection) of the tracked object being born, which shall be used as initial position estimation for it.
 
 ##### Returns:
+
 A new `filterpy.KalmanFilter` instance (or an API compatible object, since the class is not restricted by type checking).
 
 ## OptimizedKalmanFilterFactory
@@ -92,6 +92,7 @@ This function returns a new predictive filter instance with the current setup, t
 - `initial_detection`: numpy array of shape `(number of points per object, 2)`, corresponding to the [`Detection.points`](#detection) of the tracked object being born, which shall be used as initial position estimation for it.
 
 ##### Returns:
+
 A new `OptimizedKalmanFilter` instance.
 
 ## NoFilterFactory
@@ -107,6 +108,7 @@ This function returns a new `NoFilter` instance to be used by each new [`Tracked
 - `initial_detection`: numpy array of shape `(number of points per object, 2)`, corresponding to the [`Detection.points`](#detection) of the tracked object being born, which shall be used as initial position estimation for it.
 
 ##### Returns:
+
 A new `NoFilter` instance.
 
 ## TrackedObject
@@ -183,14 +185,14 @@ Function that draws a list of detections on a frame.
 
 ## draw_boxes
 
-Function that draws a list of detections as boxes on a frame. This function uses the first 2 points of your [`Detection`](#detection) instances to draw a box with those points as its corners. 
+Function that draws a list of detections as boxes on a frame. This function uses the first 2 points of your [`Detection`](#detection) instances to draw a box with those points as its corners.
 
 ##### Arguments:
 
 - `frame`: The OpenCV frame to draw on.
 - `detections`: List of [`Detection`](#detection)s to be drawn.
 - `line_color (optional)`: [`Color`](#color) of the boxes representing the detections.
-- `line_width (optional)`: Width of the lines constituting the sides of the boxes representing the detections. 
+- `line_width (optional)`: Width of the lines constituting the sides of the boxes representing the detections.
 - `random_color (optional)`: If `True` each detection will be colored with a random color.
 - `color_by_label (optional)`: If `True` detections will be colored by label.
 - `draw_labels (optional)`: If `True` the detection's label will be drawn along with the detected boxes.
@@ -198,7 +200,7 @@ Function that draws a list of detections as boxes on a frame. This function uses
 
 ## draw_tracked_boxes
 
-Function that draws a list of tracked objects on a frame. This function uses the first 2 points of your [`TrackedObject`](#trackedobject) instances to draw a box with those points as its corners. 
+Function that draws a list of tracked objects on a frame. This function uses the first 2 points of your [`TrackedObject`](#trackedobject) instances to draw a box with those points as its corners.
 
 ##### Arguments:
 
@@ -219,7 +221,6 @@ Function that draws a list of tracked objects on a frame. This function uses the
 Class that draws the paths taken by a set of points of interest defined from the coordinates of each tracker estimation.
 
 ##### Arguments:
-
 
 - `get_points_to_draw (optional)`: Function that takes a list of points (the `.estimate` attribute of a [`TrackedObject`](#trackedobject) instance) and returns a list of points for which we want to draw their paths (by default it is the mean point of all the points in the tracker).
 - `thickness (optional)`: Thickness of the circles representing the paths of interest.
@@ -253,15 +254,14 @@ Function that draws a list of tracked objects on a frame.
 - `draw_labels (optional)`: If `True` the objects's label will be drawn along with the tracked points.
 - `label_size (optional)`: Size of the label being drawn along with the tracked points.
 
-
-##  draw_debug_metrics
+## draw_debug_metrics
 
 Function that draws debug information about the tracked objects on a frame. Usefull while developing your distance function.
 
 ##### Arguments:
 
 - `frame`: The OpenCV frame to draw on. Modified in place.
-- `objects`:  List of [`TrackedObject`](#trackedobject)s to be drawn.
+- `objects`: List of [`TrackedObject`](#trackedobject)s to be drawn.
 - `text_size (optional)`: Size of the text displaying the debug information.
 - `text_thickness (optional)`: Thickness of the text displaying the debug information.
 - `color (optional)`: [`Color`](#color) of the text displaying the debug information.

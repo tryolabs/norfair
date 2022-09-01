@@ -10,9 +10,9 @@ Simplest possible example of tracking. Based on [pytorch-YOLOv4](https://github.
 2. Copy a video to the `src` folder.
 3. Within the container, run with the default parameters:
 
-    ```bash
-    python demo.py <video>.mp4
-    ```
+   ```bash
+   python demo.py <video>.mp4
+   ```
 
 For additional settings, you may display the instructions using `python demo.py --help`.
 
