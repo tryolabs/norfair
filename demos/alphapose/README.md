@@ -8,15 +8,15 @@ An example of how to integrate Norfair into the video inference loop of a pre-ex
 
 2. In the container, display the demo instructions:
 
-    ```bash
-     python3 scripts/demo_inference.py --help
-    ```
+   ```bash
+    python3 scripts/demo_inference.py --help
+   ```
 
-    In the container, use the `/demo` folder as a volume to share files with the container.
+   In the container, use the `/demo` folder as a volume to share files with the container.
 
-    ```bash
-    python3 scripts/demo_inference.py --detector yolo --cfg configs/coco/resnet/256x192_res50_lr1e-3_1x.yaml --checkpoint pretrained_models/fast_res50_256x192.pth --video /demo/video.mp4 --save_video --outdir /demo/
-    ```
+   ```bash
+   python3 scripts/demo_inference.py --detector yolo --cfg configs/coco/resnet/256x192_res50_lr1e-3_1x.yaml --checkpoint pretrained_models/fast_res50_256x192.pth --video /demo/video.mp4 --save_video --outdir /demo/
+   ```
 
 ## Explanation
 

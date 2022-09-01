@@ -11,7 +11,7 @@ An example of how to use Norfair to perform re-identification using appearance e
 1. Build and run the Docker container with `./run.sh`
 2. In the container, run the demo with `python demo.py`.
 
-    This will generate two videos, `demo.avi` which is the original simulation video, and `output.mp4` which is the result of the tracking with ReID.
+   This will generate two videos, `demo.avi` which is the original simulation video, and `output.mp4` which is the result of the tracking with ReID.
 
 ## Explanation
 
