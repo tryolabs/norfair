@@ -19,7 +19,7 @@ The following video shows on the left we lost the person 4 times while on the ri
 
 ![camera_stabilization](/docs/camera_stabilization.gif)
 
-> videos generated using command `python demos/camera_motion/demo.py --transformation none --draw-objects --track-boxes --id-size 1.8 --distance-threshold 200 --save video.mp4` and `python demos/camera_motion/demo.py --transformation translation --fixed-camera-scale 2 --draw-objects --track-boxes --id-size 1.8 --distance-threshold 200 --save video.mp4`
+> videos generated using command `python demo.py --transformation none --draw-objects --track-boxes --id-size 1.8 --distance-threshold 200 --save video.mp4` and `python demo.py --transformation translation --fixed-camera-scale 2 --draw-objects --track-boxes --id-size 1.8 --distance-threshold 200 --save video.mp4`
 
 ## Second Example - Homographies
 
@@ -29,11 +29,17 @@ In the following video, the correct trajectory of the players is drawn even as t
 
 ![soccer](/docs/soccer.gif)
 
-> video generated using command `python demos/camera_motion/demo.py --transformation homography --draw-paths --path-history 150 --distance-threshold 200 --track-boxes --max-points=900 --min-distance=14 --save --model yolov5x --hit-counter-max 3 video.mp4` on a snippet of this [video](https://www.youtube.com/watch?v=CGFgHjeEkbY&t=1200s)
+> video generated using command `python demo.py --transformation homography --draw-paths --path-history 150 --distance-threshold 200 --track-boxes --max-points=900 --min-distance=14 --save --model yolov5x --hit-counter-max 3 video.mp4` on a snippet of this [video](https://www.youtube.com/watch?v=CGFgHjeEkbY&t=1200s)
 
 
 ## Setup
 
-1. Install norfair with `pip install norfair[video]`
-2. Install YOLOv5 with `pip install yolov5`.
-3. Download and run the [demo.py](./demo.py) on any video
+Build and run the Docker container with ./run_gpu.sh.
+
+Copy a video to the src folder.
+
+Within the container, run with the default parameters:
+
+`python demo.py <video>.mp4`
+
+For additional settings, you may display the instructions using `python demo.py --help`.
