@@ -15,11 +15,11 @@ This method only works for camera pans and tilts.
 
 ![Pan and Tilt](/docs/pan_tilt.png)
 
-The following video shows on the left we lost the person 2 times while on the right we were able to maintain the tracked object throughout the video:
+The following video shows on the left we lost the person 4 times while on the right we were able to maintain the tracked object throughout the video:
 
 ![camera_stabilization](/docs/camera_stabilization.gif)
 
-> videos generated using command `python demos/camera_motion/demo.py --transformation none --draw-boxes --downsample-ratio 2 --distance-threshold 200 --save vidoe.mp4` and `python demos/camera_motion/demo.py --transformation translation --fixed-camera-scale 2 --draw-boxes --downsample-ratio 2 --distance-threshold 200 --save vidoe.mp4`
+> videos generated using command `python demos/camera_motion/demo.py --transformation none --draw-objects --track-boxes --id-size 1.8 --distance-threshold 200 --save video.mp4` and `python demos/camera_motion/demo.py --transformation translation --fixed-camera-scale 2 --draw-objects --track-boxes --id-size 1.8 --distance-threshold 200 --save video.mp4`
 
 ## Second Example - Homographies
 
@@ -29,7 +29,7 @@ In the following video, the correct trajectory of the players is drawn even as t
 
 ![soccer](/docs/soccer.gif)
 
-> video generated using command `python demos/camera_motion/demo.py --transformation homography --draw-paths --path-history 150 --downsample-ratio 2 --distance-threshold 200 --track-boxes --max-points=900 --min-distance=14 --save --model yolov5x --hit-counter-max 3 video.mp4` on a snippet of this [video](https://www.youtube.com/watch?v=CGFgHjeEkbY&t=1200s)
+> video generated using command `python demos/camera_motion/demo.py --transformation homography --draw-paths --path-history 150 --distance-threshold 200 --track-boxes --max-points=900 --min-distance=14 --save --model yolov5x --hit-counter-max 3 video.mp4` on a snippet of this [video](https://www.youtube.com/watch?v=CGFgHjeEkbY&t=1200s)
 
 
 ## Setup
