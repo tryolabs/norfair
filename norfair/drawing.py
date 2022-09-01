@@ -1,5 +1,7 @@
 from typing import Optional, Sequence, Tuple
 
+from .camera_motion import TranslationTransformation
+
 try:
     import cv2
 except ImportError:
@@ -10,7 +12,7 @@ import random
 
 import numpy as np
 
-from .utils import validate_points
+from .utils import validate_points, warn_once
 
 
 def draw_points(
@@ -380,7 +382,7 @@ class Paths:
         if get_points_to_draw is None:
             def get_points_to_draw(points):
                 return [np.mean(np.array(points), axis=0)]
-        
+
         self.get_points_to_draw = get_points_to_draw
 
         self.radius = radius
@@ -399,10 +401,13 @@ class Paths:
                 self.thickness = int(max(frame_scale / 7, 1))
 
             self.mask = np.zeros(frame.shape, np.uint8)
-        
-        self.mask = (self.mask*self.attenuation_factor).astype('uint8') 
+
+        self.mask = (self.mask*self.attenuation_factor).astype('uint8')
 
         for obj in tracked_objects:
+            if obj.abs_to_rel is not None:
+                warn_once("It seems that your using the Path drawer together with MotionEstimator. This is not fully supported and the results will not be what's expected")
+
             if self.color is None:
                 color = Color.random(obj.id)
             else:
@@ -420,6 +425,18 @@ class Paths:
                 )
 
         return cv2.addWeighted(self.mask, 1, frame, 1, 0, frame)
+
+
+def _draw_cross(frame, center, radius, color, thickness):
+    middle_x, middle_y = center
+    left, top = center - radius
+    right, bottom = center + radius
+    cv2.line(
+        frame, (middle_x, top), (middle_x, bottom), color=color, thickness=thickness
+    )
+    cv2.line(
+        frame, (left, middle_y), (right, middle_y), color=color, thickness=thickness
+    )
 
 
 class Color:
@@ -449,3 +466,199 @@ class Color:
             and c not in ("random", "red", "white", "grey", "black", "silver")
         ]
         return getattr(Color, color_list[obj_id % len(color_list)])
+
+
+from functools import lru_cache
+
+
+@lru_cache(maxsize=4)
+def _get_grid(size, w, h, polar=False):
+    """
+    Construct the grid of points.
+
+    Points are choosen
+    Results are cached since the grid in absolute coordinates doesn't change.
+    """
+    # We need to get points on a semi-sphere of radious 1 centered around (0, 0)
+
+    # First step is to get a grid of angles, theta and phi ∈ (-pi/2, pi/2)
+    step = np.pi / size
+    start = -np.pi / 2 + step / 2
+    end = np.pi / 2
+    theta, fi = np.mgrid[start:end:step, start:end:step]
+
+    if polar:
+        # if polar=True the first frame will show points as if
+        # you are on the center of the earth looking at one of the poles.
+        # Points on the sphere are defined as [sin(theta) * cos(fi), sin(theta) * sin(fi), cos(theta)]
+        # Then we need to intersect the line defined by the point above with the
+        # plane z=1 which is the "absolute plane", we do so by dividing by cos(theta), the result becomes
+        # [tan(theta) * cos(fi), tan(theta) * sin(phi), 1]
+        # note that the z=1 is implied by the coord_transformation so there is no need to add it.
+        tan_theta = np.tan(theta)
+
+        X = tan_theta * np.cos(fi)
+        Y = tan_theta * np.sin(fi)
+    else:
+        # otherwhise will show as if you were looking at the equator
+        X = np.tan(fi)
+        Y = np.divide(np.tan(theta), np.cos(fi))
+    # construct the points as x, y coordinates
+    points = np.vstack((X.flatten(), Y.flatten())).T
+    # scale and center the points
+    return  points * max(h, w) + np.array([w // 2, h // 2])
+
+
+def draw_absolute_grid(frame, coord_transformations, grid_size=20, radius=2, thickness=1, color=Color.black, polar=False):
+    h, w, _ = frame.shape
+
+    # get absolute points grid
+    points = _get_grid(grid_size, w, h, polar=polar)
+
+    # transform the points to relative coordinates
+    if coord_transformations is None:
+        points_transformed = points
+    else:
+        points_transformed = coord_transformations.abs_to_rel(points)
+
+    # filter points that are not visible
+    visible_points = points_transformed[
+        (points_transformed <= np.array([w, h])).all(axis=1)
+        & (points_transformed >= 0).all(axis=1)
+    ]
+    for point in visible_points:
+        _draw_cross(
+            frame, point.astype(int), radius=radius, thickness=thickness, color=color
+        )
+
+
+class FixedCamera:
+    def __init__(self, scale: float=2, attenuation: float=0.05):
+        self.scale = scale
+        self._background = None
+        self._attenuation_factor = 1 - attenuation
+
+    def adjust_frame(self, frame, coord_transformation: TranslationTransformation):
+        # initialize background if necessary
+        if self._background is None:
+            original_size = (frame.shape[1], frame.shape[0])  # OpenCV format is (width, height)
+
+            scaled_size = tuple(
+                (np.array(original_size) * np.array(self.scale))
+                .round()
+                .astype(int)
+            )
+            self._background = np.zeros(
+                [scaled_size[1], scaled_size[0], frame.shape[-1]],
+                frame.dtype,
+            )
+        else:
+            self._background = (self._background * self._attenuation_factor).astype(frame.dtype)
+
+        # top_left is the anchor coordinate from where we start drawing the fame on top of the background
+        # aim to draw it in the center of the background but transformations will move this point
+        top_left = (
+            np.array(self._background.shape[:2]) // 2
+            - np.array(frame.shape[:2]) // 2
+        )
+        top_left = (
+            coord_transformation.rel_to_abs(top_left[::-1]).round().astype(int)[::-1]
+        )
+        # box of the background that will be updated and the limits of it
+        background_y0, background_y1 = (top_left[0], top_left[0] + frame.shape[0])
+        background_x0, background_x1 = (top_left[1], top_left[1] + frame.shape[1])
+        background_size_y, background_size_x = self._background.shape[:2]
+
+        # define box of the frame that will be used
+        # if the scale is not enough to support the movement, warn the user but keep drawing
+        # cropping the frame so that the operation doesn't fail
+        frame_y0, frame_y1, frame_x0, frame_x1 = (0, frame.shape[0], 0, frame.shape[1])
+        if (
+            background_y0 < 0
+            or background_x0 < 0
+            or background_y1 > background_size_y
+            or background_x1 > background_size_x
+        ):
+            warn_once(
+                "moving_camera_scale is not enough to cover the range of camera movement, frame will be cropped"
+            )
+            # crop left or top of the frame if necessary
+            frame_y0 = max(-background_y0, 0)
+            frame_x0 = max(-background_x0, 0)
+            # crop right or bottom of the frame if necessary
+            frame_y1 = max(min(background_size_y - background_y0, background_y1 - background_y0), 0)
+            frame_x1 = max(min(background_size_x - background_x0, background_x1 - background_x0), 0)
+            # handle cases where the limits of the background become negative which numpy will interpret incorrectly
+            background_y0 = max(background_y0, 0)
+            background_x0 = max(background_x0, 0)
+            background_y1 = max(background_y1, 0)
+            background_x1 = max(background_x1, 0)
+        self._background[background_y0:background_y1, background_x0:background_x1, :] = frame[frame_y0:frame_y1, frame_x0:frame_x1, :]
+        return self._background
+
+
+
+from collections import defaultdict
+
+
+class AbsolutePaths:
+    def __init__(self, get_points_to_draw=None, thickness=None, color=None, radius=None, max_history=20):
+        if get_points_to_draw is None:
+            def get_points_to_draw(points):
+                return [np.mean(np.array(points), axis=0)]
+
+        self.get_points_to_draw = get_points_to_draw
+
+        self.radius = radius
+        self.thickness = thickness
+        self.color = color
+        self.past_points = defaultdict(lambda: [])
+        self.max_history = max_history
+        self.alphas = np.linspace(0.99, 0.01, max_history)
+
+    def draw(self, frame, tracked_objects, coord_transform=None):
+        frame_scale = frame.shape[0] / 100
+
+        if self.radius is None:
+            self.radius = int(max(frame_scale * 0.7, 1))
+        if self.thickness is None:
+            self.thickness = int(max(frame_scale / 7, 1))
+        for obj in tracked_objects:
+            # if obj.abs_to_rel is not None:
+            #     warn_once("It seems that your using the Path drawer together with MotionEstimator. This is not fully supported and the results will not be what's expected")
+            if self.color is None:
+                color = Color.random(obj.id)
+            else:
+                color = self.color
+
+            points_to_draw = self.get_points_to_draw(obj.get_estimate(absolute=True))
+
+            for point in coord_transform.abs_to_rel(points_to_draw):
+                cv2.circle(
+                    frame,
+                    tuple(point.astype(int)),
+                    radius=self.radius,
+                    color=color,
+                    thickness=self.thickness,
+                )
+
+            last = points_to_draw
+            for i, past_points in enumerate(self.past_points[obj.id]):
+                overlay = frame.copy()
+                last = coord_transform.abs_to_rel(last)
+                for j, point in enumerate(coord_transform.abs_to_rel(past_points)):
+                    cv2.line(
+                        overlay,
+                        tuple(last[j].astype(int)),
+                        tuple(point.astype(int)),
+                        # radius=self.radius,
+                        color=color,
+                        thickness=self.thickness,
+                    )
+                last = past_points
+
+                alpha = self.alphas[i]
+                frame = cv2.addWeighted(overlay, alpha, frame, 1 - alpha, 0)
+            self.past_points[obj.id].insert(0, points_to_draw)
+            self.past_points[obj.id] = self.past_points[obj.id][:self.max_history]
+        return frame
