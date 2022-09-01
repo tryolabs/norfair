@@ -55,123 +55,129 @@ def run():
         "--model",
         type=str,
         default="yolov5n",
-        help="yolo model to use, possible values are yolov5n, yolov5s, yolov5m, yolov5l, yolov5x",
+        help="YOLO model to use, possible values are yolov5n, yolov5s, yolov5m, yolov5l, yolov5x",
     )
     parser.add_argument(
         "--confidence-threshold",
         type=float,
-        help="confidence threshold of detections",
+        help="Confidence threshold of detections",
         default=0.15,
     )
     parser.add_argument(
         "--distance-threshold",
         type=float,
         default=0.8,
-        help="max distance to consider when matching detections and tracked objects",
+        help="Max distance to consider when matching detections and tracked objects",
     )
     parser.add_argument(
         "--initialization-delay",
         type=float,
         default=3,
-        help="min detections needed to start the tracked object",
+        help="Min detections needed to start the tracked object",
     )
     parser.add_argument(
         "--track-boxes",
         dest="track_boxes",
         action="store_true",
-        help="pass it to track bounding boxes instead of just the centroids",
+        help="Pass it to track bounding boxes instead of just the centroids",
     )
     parser.add_argument(
         "--hit-counter-max",
         type=int,
         default=30,
-        help="max iteration the tracked object is kept after when there are no detections",
+        help="Max iteration the tracked object is kept after when there are no detections",
     )
     parser.add_argument(
-        "--iou-threshold", type=float, help="iou threshold for detector", default=0.15
+        "--iou-threshold", type=float, help="Iou threshold for detector", default=0.15
     )
     parser.add_argument(
-        "--image-size", type=int, help="size of the images for detector", default=480
+        "--image-size", type=int, help="Size of the images for detector", default=480
     )
     parser.add_argument(
-        "--classes", type=int, nargs="+", default=[0], help="classes to track"
+        "--classes", type=int, nargs="+", default=[0], help="Classes to track"
     )
     parser.add_argument(
         "--transformation",
         default="homography",
-        help="type of transformation, possible values are homography, translation, none",
+        help="Type of transformation, possible values are homography, translation, none",
     )
     parser.add_argument(
         "--max-points",
         type=int,
         default=500,
-        help="max points sampled to calculate camera motion",
+        help="Max points sampled to calculate camera motion",
     )
     parser.add_argument(
         "--min-distance",
         type=float,
         default=7,
-        help="min distance between points sampled to calculate camera motion",
+        help="Min distance between points sampled to calculate camera motion",
     )
     parser.add_argument(
         "--no-mask-detections",
         dest="mask_detections",
         action="store_false",
         default=True,
-        help="pass it to avoid sample objects to calculate camera motion where detections and tracked objects where found",
+        help="By default we don't sample regions where objects were detected when estimating camera motion. Pass this flag to disable this behavior",
     )
     parser.add_argument(
         "--save",
         dest="save",
         action="store_true",
-        help="pass it to save the video instead of showing the frames",
+        help="Pass this flag to save the video instead of showing the frames",
     )
     parser.add_argument(
         "--output-name",
         default=None,
-        help="name of the output file",
+        help="Name of the output file",
     )
     parser.add_argument(
         "--downsample-ratio",
         type=int,
         default=1,
-        help="downsample ratio when showing frames",
+        help="Downsample ratio when showing frames",
     )
     parser.add_argument(
         "--fixed-camera-scale",
         type=float,
         default=0,
-        help="scale of the fixed camera, set to 0 to disable. Note that tis only works for translation",
+        help="Scale of the fixed camera, set to 0 to disable. Note that this only works for translation",
     )
     parser.add_argument(
         "--draw-absolute-grid",
         dest="absolute_grid",
         action="store_true",
-        help="Pass it to draw absolute grid for reference",
+        help="Pass this flag to draw absolute grid for reference",
     )
     parser.add_argument(
-        "--draw-boxes",
-        dest="draw_boxes",
+        "--draw-objects",
+        dest="draw_objects",
         action="store_true",
-        help="Pass it to draw tracked object boxes",
+        help="Pass this flag to draw tracked object as points or as boxes if --track-boxes is used.",
     )
     parser.add_argument(
         "--draw-paths",
         dest="draw_paths",
         action="store_true",
-        help="Pass it to draw the paths of the objects (SLOW)",
+        help="Pass this flag to draw the paths of the objects (SLOW)",
     )
     parser.add_argument(
         "--path-history",
         type=int,
         default=20,
-        help="lenght of the paths",
+        help="Length of the paths",
+    )
+    parser.add_argument(
+        "--id-size",
+        type=float,
+        default=None,
+        help="Size multiplier of the ids when drawing. Thikness will addapt to size",
     )
     parser.add_argument(
         "--draw-flow",
         dest="draw_flow",
         action="store_true",
-        help="Pass it to draw the optical flow of the selected points",
+        help="Pass this flag to draw the optical flow of the selected points",
     )
 
     args = parser.parse_args()
@@ -250,8 +256,15 @@ def run():
                 detections=detections, coord_transformations=coord_transformations
             )
 
-            if args.draw_boxes:
-                draw_tracked_objects(frame, tracked_objects)
+            if args.draw_objects:
+                draw_tracked_objects(
+                    frame,
+                    tracked_objects,
+                    id_size=args.id_size,
+                    id_thickness=None
+                    if args.id_size is None
+                    else int(args.id_size * 2),
+                )
 
             if args.absolute_grid:
                 draw_absolute_grid(frame, coord_transformations)
