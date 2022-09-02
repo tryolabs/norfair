@@ -6,9 +6,9 @@ import torch
 
 import norfair
 from norfair import Detection, Paths, Tracker, Video
-from norfair.distances import frobenius, iou_opt
+from norfair.distances import frobenius, iou
 
-DISTANCE_THRESHOLD_BBOX: float = 3.33
+DISTANCE_THRESHOLD_BBOX: float = 0.7
 DISTANCE_THRESHOLD_CENTROID: int = 30
 MAX_DISTANCE: int = 10000
 
@@ -65,7 +65,7 @@ def yolo_detections_to_norfair_detections(
             )
             scores = np.array([detection_as_xywh[4].item()])
             norfair_detections.append(
-                Detection(points=centroid, scores=scores)
+                Detection(points=centroid, scores=scores, label=int(detection_as_xywh[-1].item()))
             )
     elif track_points == "bbox":
         detections_as_xyxy = yolo_detections.xyxy[0]
@@ -78,7 +78,7 @@ def yolo_detections_to_norfair_detections(
             )
             scores = np.array([detection_as_xyxy[4].item(), detection_as_xyxy[4].item()])
             norfair_detections.append(
-                Detection(points=bbox, scores=scores)
+                Detection(points=bbox, scores=scores, label=int(detection_as_xyxy[-1].item()))
             )
 
     return norfair_detections
@@ -100,7 +100,7 @@ model = YOLO(args.model_name, device=args.device)
 for input_path in args.files:
     video = Video(input_path=input_path)
 
-    distance_function = iou_opt if args.track_points == "bbox" else frobenius
+    distance_function = iou if args.track_points == "bbox" else frobenius
     distance_threshold = (
         DISTANCE_THRESHOLD_BBOX
         if args.track_points == "bbox"
