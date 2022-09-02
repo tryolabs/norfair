@@ -20,7 +20,12 @@ parser.add_argument("--conf-threshold", type=float, default="0.1", help="Detecto
 parser.add_argument("--distance-threshold", type=float, default="0.5", help="Distance threshold")
 parser.add_argument("--output-path", type=str, default=".", help="Output path")
 parser.add_argument("--draw-paths", action="store_true", help="Draw path of the centroid")
-parser.add_argument("--draw-only-alive", action="store_true", help="Draw only the recently matched trackers")
+parser.add_argument(
+    "--draw-unalive",
+    dest="draw_only_alive",
+    action="store_false",
+    help="By default we don't draw objects that were not recently matched. Pass this argument to draw them.",
+)
 args = parser.parse_args()
 
 mp_objectron = mp.solutions.objectron
