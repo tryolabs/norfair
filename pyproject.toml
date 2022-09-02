@@ -10,7 +10,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.6.1"
 filterpy = "^1.4.5"
-rich = "^9.10.0"
+rich = ">=9.10.0, <13.0.0"
 opencv-python = {version = ">= 3.2.0, < 5.0.0", optional = true}
 motmetrics = {version = "1.2.0", optional = true}
 
