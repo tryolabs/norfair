@@ -110,8 +110,9 @@ Most tracking demos are showcased with vehicles and pedestrians, but the detecto
 ### Advanced features
 
 1. [Speed up pose estimation by extrapolating detections](demos/openpose) using [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose).
-2. [Re-identification (ReID)](demos/reid) of tracked objects using appearance embeddings. This is a good starting point for scenarios with a lot of occlusion, in which the Kalman filter alone would struggle.
-3. [Accurately track objects even if the camera is moving](demos/camera_motion), by estimating camera motion potentially accounting for pan, tilt, rotation, movement in any direction, and zoom.
+2. [Track both bounding boxes and human keypoints](demos/keypoints_bounding_boxes) (multi-class), unifying the detections from a YOLO model and OpenPose.
+3. [Re-identification (ReID)](demos/reid) of tracked objects using appearance embeddings. This is a good starting point for scenarios with a lot of occlusion, in which the Kalman filter alone would struggle.
+4. [Accurately track objects even if the camera is moving](demos/camera_motion), by estimating camera motion potentially accounting for pan, tilt, rotation, movement in any direction, and zoom.
 
 ### Benchmarking and profiling
 
