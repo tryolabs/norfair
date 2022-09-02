@@ -10,8 +10,9 @@ class FilterPyKalmanFilterFactory:
 
     def create_filter(self, initial_detection: np.array):
         num_points = initial_detection.shape[0]
-        dim_z = 2 * num_points
-        dim_x = 2 * 2 * num_points  # We need to accommodate for velocities
+        dim_points = initial_detection.shape[1]
+        dim_z = dim_points * num_points
+        dim_x = 2 * dim_z # We need to accommodate for velocities
 
         filter = KalmanFilter(dim_x=dim_x, dim_z=dim_z)
 
@@ -68,8 +69,9 @@ class NoFilter:
 class NoFilterFactory:
     def create_filter(self, initial_detection: np.array):
         num_points = initial_detection.shape[0]
-        dim_z = 2 * num_points  # flattened positions
-        dim_x = 2 * 2 * num_points  # We need to accommodate for velocities
+        dim_points = initial_detection.shape[1]
+        dim_z = dim_points * num_points  # flattened positions
+        dim_x = 2 * dim_z  # We need to accommodate for velocities
 
         no_filter = NoFilter(
             dim_x,
@@ -180,8 +182,9 @@ class OptimizedKalmanFilterFactory:
 
     def create_filter(self, initial_detection: np.array):
         num_points = initial_detection.shape[0]
-        dim_z = 2 * num_points  # flattened positions
-        dim_x = 2 * 2 * num_points  # We need to accommodate for velocities
+        dim_points = initial_detection.shape[1]
+        dim_z = dim_points * num_points  # flattened positions
+        dim_x = 2 * dim_z  # We need to accommodate for velocities
 
         custom_filter = OptimizedKalmanFilter(
             dim_x,

@@ -302,6 +302,8 @@ class TrackedObject:
                 f"\n[red]ERROR[/red]: The detection list fed into `tracker.update()` should be composed of {Detection} objects not {type(initial_detection)}.\n"
             )
             exit()
+
+        self.dim_points = initial_detection_points.shape[1]
         self.num_points = initial_detection_points.shape[0]
         self.hit_counter_max: int = hit_counter_max
         self.pointwise_hit_counter_max: int = pointwise_hit_counter_max
@@ -337,7 +339,7 @@ class TrackedObject:
 
         # Create Kalman Filter
         self.filter = filter_factory.create_filter(initial_detection_points)
-        self.dim_z = 2 * self.num_points
+        self.dim_z = self.dim_points * self.num_points
         self.label = initial_detection.label
         self.abs_to_rel = abs_to_rel
 
@@ -374,8 +376,8 @@ class TrackedObject:
 
     @property
     def estimate(self):
-        positions = self.filter.x.T.flatten()[: self.dim_z].reshape(-1, 2)
-        velocities = self.filter.x.T.flatten()[self.dim_z :].reshape(-1, 2)
+        positions = self.filter.x.T.flatten()[: self.dim_z].reshape(-1, self.dim_points)
+        velocities = self.filter.x.T.flatten()[self.dim_z :].reshape(-1, self.dim_points)
         if self.abs_to_rel is not None:
             return self.abs_to_rel(positions)
         return positions
@@ -413,7 +415,7 @@ class TrackedObject:
             assert len(detection.scores.shape) == 1
             points_over_threshold_mask = detection.scores > self.detection_threshold
             matched_sensors_mask = np.array(
-                [[m, m] for m in points_over_threshold_mask]
+                [(m,)*self.dim_points for m in points_over_threshold_mask]
             ).flatten()
             H_pos = np.diag(matched_sensors_mask).astype(
                 float
@@ -421,7 +423,7 @@ class TrackedObject:
             self.point_hit_counter[points_over_threshold_mask] += 2 * period
         else:
             points_over_threshold_mask = np.array([True] * self.num_points)
-            H_pos = np.identity(points.size)
+            H_pos = np.identity(self.num_points * self.dim_points)
             self.point_hit_counter += 2 * period
         self.point_hit_counter[
             self.point_hit_counter >= self.pointwise_hit_counter_max
@@ -438,11 +440,15 @@ class TrackedObject:
         # and causes the tracker to start with wildly inaccurate estimations which
         # eventually coverge to the real detections.
 
-        detected_at_least_once_mask = np.hstack((self.detected_at_least_once_points, self.detected_at_least_once_points)).flatten()
-        now_detected_mask = np.hstack((points_over_threshold_mask, points_over_threshold_mask)).flatten()
+
+        detected_at_least_once_mask = np.array(
+            [(m,)*self.dim_points for m in self.detected_at_least_once_points]
+        ).flatten()
+        now_detected_mask = np.hstack((points_over_threshold_mask,)*self.dim_points).flatten()
         first_detection_mask = np.logical_and(now_detected_mask, np.logical_not(detected_at_least_once_mask))
 
         self.filter.x[: self.dim_z][first_detection_mask] = np.expand_dims(points.flatten(), 0).T[first_detection_mask]
+
         self.filter.x[self.dim_z :][np.logical_not(detected_at_least_once_mask)] = 0
         self.detected_at_least_once_points = np.logical_or(
             self.detected_at_least_once_points, points_over_threshold_mask
