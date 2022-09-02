@@ -78,10 +78,10 @@ def iou(detection: "Detection", tracked_object: "TrackedObject") -> float:
     Performs checks that the bounding boxes are valid to give better error messages.
     For a faster implementation without checks use `Norfar.distanses.iou_opt`.
     """
-    boxa = detection.absolute_points.copy()
+    boxa = detection.points.copy()
     boxa.sort(axis=0)
     _validate_bboxes(boxa)
-    boxb = tracked_object.get_estimate(absolute=True).copy()
+    boxb = tracked_object.estimate.copy()
     boxb.sort(axis=0)
     _validate_bboxes(boxb)
     return _iou(boxa, boxb)
