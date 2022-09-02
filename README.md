@@ -2,7 +2,7 @@
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tryolabs/norfair/blob/master/demos/yolov7/src/yolov7_demo.ipynb) [![Documentation](https://img.shields.io/badge/api-reference-blue?logo=readthedocs)](https://github.com/tryolabs/norfair/blob/master/docs/README.md) [![Board](https://img.shields.io/badge/project-board-blue?logo=github)](https://github.com/tryolabs/norfair/projects/1) ![Build status](https://github.com/tryolabs/norfair/workflows/CI/badge.svg?branch=master) [![DOI](https://zenodo.org/badge/276473370.svg)](https://zenodo.org/badge/latestdoi/276473370)
 
-Norfair is a customizable lightweight Python library for real-time 2D object tracking.
+Norfair is a customizable lightweight Python library for real-time multi-object tracking.
 
 Using Norfair, you can add tracking capabilities to any detector with just a few lines of code.
 
@@ -10,11 +10,13 @@ Using Norfair, you can add tracking capabilities to any detector with just a few
 
 ## Features
 
-- Any detector expressing its detections as a series of `(x, y)` coordinates can be used with Norfair. This includes detectors performing object detection, pose estimation, and keypoint detection (see [examples](#examples--demos)).
-
-- The function used to calculate the distance between tracked objects and detections is defined by the user, making the tracker extremely customizable. This function can make use of any extra information, such as appearance embeddings, which can heavily improve tracking performance.
+- Any detector expressing its detections as a series of `(x, y)` coordinates can be used with Norfair. This includes detectors performing tasks such as object or keypoint detection (see [examples](#examples--demos)).
 
 - Modular. It can easily be inserted into complex video processing pipelines to add tracking to existing projects. At the same time, it is possible to build a video inference loop from scratch using just Norfair and a detector.
+
+- Supports moving camera, re-identification with appearance embeddings, and n-dimensional object tracking (see [Advanced features](#advanced-features)).
+
+- The function used to calculate the distance between tracked objects and detections is defined by the user, enabling the implementation of different tracking strategies.
 
 - Fast. The only thing bounding inference speed will be the detection network feeding detections to Norfair.
 
@@ -38,7 +40,40 @@ pip install norfair[metrics]  # Supports running MOT metrics evaluation
 pip install norfair[metrics,video]  # Everything included
 ```
 
-If the needed dependencies are already present in the system, installing the minimal version of Norfair is enough for enabling the extra features. This is particuarly useful for embedded devices, where installing compiled dependencies can be difficult, but they can sometimes come preinstalled with the system.
+If the needed dependencies are already present in the system, installing the minimal version of Norfair is enough for enabling the extra features. This is particularly useful for embedded devices, where installing compiled dependencies can be difficult, but they can sometimes come preinstalled with the system.
+
+## Examples & demos
+
+We provide several examples of how Norfair can be used to add tracking capabilities to different detectors, and also showcase more advanced features.
+
+> Note: for ease of reproducibility, we provide Dockerfiles for all the demos. Even though Norfair does not need a GPU, the default configuration of most demos requires a GPU to be able to run the detectors. For this, make sure you install [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) so that your GPU can be shared with Docker.
+>
+> It is possible to run several demos with a CPU, but you will have to modify the scripts or tinker with the installation of their dependencies.
+
+### Adding tracking to different detectors
+
+Most tracking demos are showcased with vehicles and pedestrians, but the detectors are generally trained with many more classes from the [COCO dataset](https://cocodataset.org/).
+
+1. [YOLOv7](demos/yolov7): tracking object centroids or bounding boxes.
+2. [YOLOv5](demos/yolov5): tracking object centroids or bounding boxes.
+3. [YOLOv4](demos/yolov4): tracking object centroids.
+4. [Detectron2](demos/detectron2): tracking object centroids.
+5. [AlphaPose](demos/alphapose): tracking human keypoints (pose estimation) and inserting Norfair into a complex existing pipeline using.
+6. [OpenPose](demos/openpose): tracking human keypoints.
+
+### Advanced features
+
+1. [Speed up pose estimation by extrapolating detections](demos/openpose) using [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose).
+2. [Track both bounding boxes and human keypoints](demos/keypoints_bounding_boxes) (multi-class), unifying the detections from a YOLO model and OpenPose.
+3. [Re-identification (ReID)](demos/reid) of tracked objects using appearance embeddings. This is a good starting point for scenarios with a lot of occlusion, in which the Kalman filter alone would struggle.
+4. [Accurately track objects even if the camera is moving](demos/camera_motion), by estimating camera motion potentially accounting for pan, tilt, rotation, movement in any direction, and zoom.
+
+### Benchmarking and profiling
+
+1. [Kalman filter and distance function profiling](demos/profiling) using [TRT pose estimator](https://github.com/NVIDIA-AI-IOT/trt_pose).
+2. Computation of [MOT17](https://motchallenge.net/data/MOT17/) scores using [motmetrics4norfair](demos/motmetrics4norfair).
+
+![Norfair OpenPose Demo](docs/openpose_skip_3_frames.gif)
 
 ## How it works
 
@@ -86,40 +121,7 @@ for frame in video:
     video.write(frame)
 ```
 
-The video and drawing tools use OpenCV frames, so they are compatible with most Python video code available online. The point tracking is based on [SORT](https://arxiv.org/pdf/1602.00763.pdf) generalized to detections consisting of a dynamically changing number of points per detection.
-
-## Examples & demos
-
-We provide several examples of how Norfair can be used to add tracking capabilities to different detectors, and also showcase more advanced features.
-
-> Note: for ease of reproducibility, we provide Dockerfiles for all the demos. Even though Norfair does not need a GPU, the default configuration of most demos requires a GPU to be able to run the detectors. For this, make sure you install [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) so that you GPU can be shared with Docker.
->
-> It is possible to run several demos with a CPU, but you will have to modify the scripts or tinker with the installation of their dependencies.
-
-### Adding tracking to different detectors
-
-Most tracking demos are showcased with vehicles and pedestrians, but the detectors are generally trained with many more classes from the [COCO dataset](https://cocodataset.org/).
-
-1. [YOLOv7](demos/yolov7): tracking object centroids.
-2. [YOLOv5](demos/yolov5): tracking object centroids.
-3. [YOLOv4](demos/yolov4): tracking object centroids.
-4. [Detectron2](demos/detectron2): tracking object centroids.
-5. [AlphaPose](demos/alphapose): tracking human keypoints (pose estimation) and inserting Norfair into a complex existing pipeline using.
-6. [OpenPose](demos/openpose): tracking human keypoints.
-
-### Advanced features
-
-1. [Speed up pose estimation by extrapolating detections](demos/openpose) using [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose).
-2. [Track both bounding boxes and human keypoints](demos/keypoints_bounding_boxes) (multi-class), unifying the detections from a YOLO model and OpenPose.
-3. [Re-identification (ReID)](demos/reid) of tracked objects using appearance embeddings. This is a good starting point for scenarios with a lot of occlusion, in which the Kalman filter alone would struggle.
-4. [Accurately track objects even if the camera is moving](demos/camera_motion), by estimating camera motion potentially accounting for pan, tilt, rotation, movement in any direction, and zoom.
-
-### Benchmarking and profiling
-
-1. [Kalman filter and distance function profiling](demos/profiling) using [TRT pose estimator](https://github.com/NVIDIA-AI-IOT/trt_pose).
-2. Computation of [MOT17](https://motchallenge.net/data/MOT17/) scores using [motmetrics4norfair](demos/motmetrics4norfair).
-
-![Norfair OpenPose Demo](docs/openpose_skip_3_frames.gif)
+The video and drawing tools use OpenCV frames, so they are compatible with most Python video code available online. The point tracking is based on [SORT](https://arxiv.org/abs/1602.00763) generalized to detections consisting of a dynamically changing number of points per detection.
 
 ## Motivation
 
