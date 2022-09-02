@@ -6,7 +6,10 @@ Norfair is a customizable lightweight Python library for real-time multi-object 
 
 Using Norfair, you can add tracking capabilities to any detector with just a few lines of code.
 
-<img src="/docs/soccer.gif" alt="Tracking soccer players with Norfair and a moving camera." width="500px" />
+<p float="left">
+  <img src="/docs/soccer.gif" alt="Tracking soccer players with Norfair and a moving camera." width="400px" />
+  <img src="/docs/3d.gif" alt="Tracking 3D objects." width="400px" />
+</p>
 
 ## Features
 
@@ -67,6 +70,7 @@ Most tracking demos are showcased with vehicles and pedestrians, but the detecto
 2. [Track both bounding boxes and human keypoints](demos/keypoints_bounding_boxes) (multi-class), unifying the detections from a YOLO model and OpenPose.
 3. [Re-identification (ReID)](demos/reid) of tracked objects using appearance embeddings. This is a good starting point for scenarios with a lot of occlusion, in which the Kalman filter alone would struggle.
 4. [Accurately track objects even if the camera is moving](demos/camera_motion), by estimating camera motion potentially accounting for pan, tilt, rotation, movement in any direction, and zoom.
+5. [Track points in 3D](demos/3d_track), using [MediaPipe Objectron](https://google.github.io/mediapipe/solutions/objectron.html).
 
 ### Benchmarking and profiling
 
