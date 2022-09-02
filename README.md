@@ -6,8 +6,10 @@ Norfair is a customizable lightweight Python library for real-time multi-object 
 
 Using Norfair, you can add tracking capabilities to any detector with just a few lines of code.
 
-<img src="/docs/soccer.gif" alt="Tracking soccer players with Norfair and a moving camera." width="500px" />
-<img src="/docs/3d.gif" alt="Tracking soccer players with Norfair and a moving camera." width="500px" />
+<p float="left">
+  <img src="/docs/soccer.gif" alt="Tracking soccer players with Norfair and a moving camera." width="400px" />
+  <img src="/docs/3d.gif" alt="Tracking 3D objects." width="400px" />
+</p>
 
 ## Features
 
