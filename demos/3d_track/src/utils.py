@@ -114,7 +114,7 @@ def draw_3d_tracked_boxes(
     id_size=None,
     id_thickness=None,
     draw_box=True,
-    draw_only_alive=False,
+    draw_only_alive=True,
 ):
     frame_scale = frame.shape[0] / 100
     if border_width is None:
