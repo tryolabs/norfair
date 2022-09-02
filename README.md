@@ -6,6 +6,8 @@ Norfair is a customizable lightweight Python library for real-time 2D object tra
 
 Using Norfair, you can add tracking capabilities to any detector with just a few lines of code.
 
+<img src="/docs/soccer.gif" alt="Tracking soccer players with Norfair and a moving camera." width="500px" />
+
 ## Features
 
 - Any detector expressing its detections as a series of `(x, y)` coordinates can be used with Norfair. This includes detectors performing object detection, pose estimation, and keypoint detection (see [examples](#examples--demos)).
@@ -108,7 +110,8 @@ Most tracking demos are showcased with vehicles and pedestrians, but the detecto
 ### Advanced features
 
 1. [Speed up pose estimation by extrapolating detections](demos/openpose) using [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose).
-2. [Re-identification (ReID) ](demos/reid) of tracked objects using appearance embeddings. This is a good starting point for scenarios with a lot of occlusion, in which the Kalman filter alone would struggle.
+2. [Re-identification (ReID)](demos/reid) of tracked objects using appearance embeddings. This is a good starting point for scenarios with a lot of occlusion, in which the Kalman filter alone would struggle.
+3. [Accurately track objects even if the camera is moving](demos/camera_motion), by estimating camera motion potentially accounting for pan, tilt, rotation, movement in any direction, and zoom.
 
 ### Benchmarking and profiling
 
