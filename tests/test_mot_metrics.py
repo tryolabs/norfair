@@ -3,7 +3,7 @@ import os.path
 import numpy as np
 import pandas as pd
 
-from norfair import Tracker, metrics, FilterPyKalmanFilterFactory
+from norfair import FilterPyKalmanFilterFactory, Tracker, metrics
 
 DATASET_PATH = "train"
 MOTA_ERROR_THRESHOLD = 0.0
@@ -14,6 +14,7 @@ DISTANCE_THRESHOLD = 0.9
 DIAGONAL_PROPORTION_THRESHOLD = 1 / 18
 POINTWISE_HIT_COUNTER_MAX = 3
 HIT_COUNTER_MAX = 2
+
 
 def keypoints_distance(detected_pose, tracked_pose):
     norm_orders = [1, 2, np.inf]
@@ -46,25 +47,30 @@ def keypoints_distance(detected_pose, tracked_pose):
     )
     return 1 / (1 + match_num)
 
+
 def test_mot_metrics():
     """Tests that Norfair's MOT metrics didn't get worse
 
-     Configurable so that it allows some margin on how much worse metrics could get before
-     the test fails. Margin configured through MOTA_ERROR_THRESHOLD.
+    Configurable so that it allows some margin on how much worse metrics could get before
+    the test fails. Margin configured through MOTA_ERROR_THRESHOLD.
 
-     Raises:
-         If the previous metrics file its not found.
-     """
+    Raises:
+        If the previous metrics file its not found.
+    """
     # Load previous metrics
     try:
-        previous_metrics = pd.read_fwf('tests/metrics.txt')
-        previous_metrics.columns = [column_name.lower() for column_name in previous_metrics.columns]
+        previous_metrics = pd.read_fwf("tests/metrics.txt")
+        previous_metrics.columns = [
+            column_name.lower() for column_name in previous_metrics.columns
+        ]
         previous_metrics = previous_metrics.set_index(previous_metrics.columns[0])
     except FileNotFoundError as e:
         raise e
 
     accumulator = metrics.Accumulators()
-    sequences_paths = [element.path for element in os.scandir(DATASET_PATH) if element.is_dir()]
+    sequences_paths = [
+        element.path for element in os.scandir(DATASET_PATH) if element.is_dir()
+    ]
     for input_path in sequences_paths:
         # Search vertical resolution in seqinfo.ini
         seqinfo_path = os.path.join(input_path, "seqinfo.ini")
@@ -84,7 +90,9 @@ def test_mot_metrics():
         )
 
         # Initialize accumulator for this video
-        accumulator.create_accumulator(input_path=input_path, information_file=info_file)
+        accumulator.create_accumulator(
+            input_path=input_path, information_file=info_file
+        )
 
         for frame_number, detections in enumerate(all_detections):
             if frame_number % FRAME_SKIP_PERIOD == 0:
@@ -105,7 +113,11 @@ def test_mot_metrics():
     # expressed between 0 and 1, the previous metrics have the percentage as a string
     # with the % character at the end
     new_overall_mota = np.around(new_metrics.loc["OVERALL", "mota"] * 100, 1)
-    previous_overall_mota = np.around(float(previous_metrics.loc["OVERALL", "mota"][:-1]), 1)
+    previous_overall_mota = np.around(
+        float(previous_metrics.loc["OVERALL", "mota"][:-1]), 1
+    )
 
     accumulator.print_metrics()
-    assert new_overall_mota >= previous_overall_mota * (1 - MOTA_ERROR_THRESHOLD), f"New overall MOTA score: {new_overall_mota} is too low, previous overall MOTA score: {previous_overall_mota}"
+    assert new_overall_mota >= previous_overall_mota * (
+        1 - MOTA_ERROR_THRESHOLD
+    ), f"New overall MOTA score: {new_overall_mota} is too low, previous overall MOTA score: {previous_overall_mota}"

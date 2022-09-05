@@ -26,14 +26,14 @@ SOFTWARE.
 """
 
 
-import random
 import math
+import random
 
 import cv2
 import numpy as np
-from norfair import Detection
+from utils import collision_detected, get_color
 
-from utils import get_color, collision_detected
+from norfair import Detection
 
 
 class Actor:

@@ -55,7 +55,9 @@ args = parser.parse_args()
 
 # The layer names in the official repo's checkpoints are wrong, they misspelled
 # neck as 'neek'. This checkpoint fixes that.
-model = YOLO("/checkpoint/yolov4_fixed_layer_names.pth")  # set use_cuda=False if using CPU
+model = YOLO(
+    "/checkpoint/yolov4_fixed_layer_names.pth"
+)  # set use_cuda=False if using CPU
 
 for input_path in args.files:
     video = Video(input_path=input_path, output_path=args.output_path)

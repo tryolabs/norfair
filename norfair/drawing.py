@@ -378,8 +378,16 @@ def draw_tracked_boxes(
 
 
 class Paths:
-    def __init__(self, get_points_to_draw=None, thickness=None, color=None, radius=None, attenuation=0.01):
+    def __init__(
+        self,
+        get_points_to_draw=None,
+        thickness=None,
+        color=None,
+        radius=None,
+        attenuation=0.01,
+    ):
         if get_points_to_draw is None:
+
             def get_points_to_draw(points):
                 return [np.mean(np.array(points), axis=0)]
 
@@ -402,11 +410,13 @@ class Paths:
 
             self.mask = np.zeros(frame.shape, np.uint8)
 
-        self.mask = (self.mask*self.attenuation_factor).astype('uint8')
+        self.mask = (self.mask * self.attenuation_factor).astype("uint8")
 
         for obj in tracked_objects:
             if obj.abs_to_rel is not None:
-                warn_once("It seems that your using the Path drawer together with MotionEstimator. This is not fully supported and the results will not be what's expected")
+                warn_once(
+                    "It seems that your using the Path drawer together with MotionEstimator. This is not fully supported and the results will not be what's expected"
+                )
 
             if self.color is None:
                 color = Color.random(obj.id)
@@ -506,10 +516,18 @@ def _get_grid(size, w, h, polar=False):
     # construct the points as x, y coordinates
     points = np.vstack((X.flatten(), Y.flatten())).T
     # scale and center the points
-    return  points * max(h, w) + np.array([w // 2, h // 2])
+    return points * max(h, w) + np.array([w // 2, h // 2])
 
 
-def draw_absolute_grid(frame, coord_transformations, grid_size=20, radius=2, thickness=1, color=Color.black, polar=False):
+def draw_absolute_grid(
+    frame,
+    coord_transformations,
+    grid_size=20,
+    radius=2,
+    thickness=1,
+    color=Color.black,
+    polar=False,
+):
     h, w, _ = frame.shape
 
     # get absolute points grid
@@ -533,7 +551,7 @@ def draw_absolute_grid(frame, coord_transformations, grid_size=20, radius=2, thi
 
 
 class FixedCamera:
-    def __init__(self, scale: float=2, attenuation: float=0.05):
+    def __init__(self, scale: float = 2, attenuation: float = 0.05):
         self.scale = scale
         self._background = None
         self._attenuation_factor = 1 - attenuation
@@ -541,25 +559,27 @@ class FixedCamera:
     def adjust_frame(self, frame, coord_transformation: TranslationTransformation):
         # initialize background if necessary
         if self._background is None:
-            original_size = (frame.shape[1], frame.shape[0])  # OpenCV format is (width, height)
+            original_size = (
+                frame.shape[1],
+                frame.shape[0],
+            )  # OpenCV format is (width, height)
 
             scaled_size = tuple(
-                (np.array(original_size) * np.array(self.scale))
-                .round()
-                .astype(int)
+                (np.array(original_size) * np.array(self.scale)).round().astype(int)
             )
             self._background = np.zeros(
                 [scaled_size[1], scaled_size[0], frame.shape[-1]],
                 frame.dtype,
             )
         else:
-            self._background = (self._background * self._attenuation_factor).astype(frame.dtype)
+            self._background = (self._background * self._attenuation_factor).astype(
+                frame.dtype
+            )
 
         # top_left is the anchor coordinate from where we start drawing the fame on top of the background
         # aim to draw it in the center of the background but transformations will move this point
         top_left = (
-            np.array(self._background.shape[:2]) // 2
-            - np.array(frame.shape[:2]) // 2
+            np.array(self._background.shape[:2]) // 2 - np.array(frame.shape[:2]) // 2
         )
         top_left = (
             coord_transformation.rel_to_abs(top_left[::-1]).round().astype(int)[::-1]
@@ -586,24 +606,37 @@ class FixedCamera:
             frame_y0 = max(-background_y0, 0)
             frame_x0 = max(-background_x0, 0)
             # crop right or bottom of the frame if necessary
-            frame_y1 = max(min(background_size_y - background_y0, background_y1 - background_y0), 0)
-            frame_x1 = max(min(background_size_x - background_x0, background_x1 - background_x0), 0)
+            frame_y1 = max(
+                min(background_size_y - background_y0, background_y1 - background_y0), 0
+            )
+            frame_x1 = max(
+                min(background_size_x - background_x0, background_x1 - background_x0), 0
+            )
             # handle cases where the limits of the background become negative which numpy will interpret incorrectly
             background_y0 = max(background_y0, 0)
             background_x0 = max(background_x0, 0)
             background_y1 = max(background_y1, 0)
             background_x1 = max(background_x1, 0)
-        self._background[background_y0:background_y1, background_x0:background_x1, :] = frame[frame_y0:frame_y1, frame_x0:frame_x1, :]
+        self._background[
+            background_y0:background_y1, background_x0:background_x1, :
+        ] = frame[frame_y0:frame_y1, frame_x0:frame_x1, :]
         return self._background
-
 
 
 from collections import defaultdict
 
 
 class AbsolutePaths:
-    def __init__(self, get_points_to_draw=None, thickness=None, color=None, radius=None, max_history=20):
+    def __init__(
+        self,
+        get_points_to_draw=None,
+        thickness=None,
+        color=None,
+        radius=None,
+        max_history=20,
+    ):
         if get_points_to_draw is None:
+
             def get_points_to_draw(points):
                 return [np.mean(np.array(points), axis=0)]
 
@@ -660,5 +693,5 @@ class AbsolutePaths:
                 alpha = self.alphas[i]
                 frame = cv2.addWeighted(overlay, alpha, frame, 1 - alpha, 0)
             self.past_points[obj.id].insert(0, points_to_draw)
-            self.past_points[obj.id] = self.past_points[obj.id][:self.max_history]
+            self.past_points[obj.id] = self.past_points[obj.id][: self.max_history]
         return frame

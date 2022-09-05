@@ -41,16 +41,13 @@ class Tracker:
         if past_detections_length >= 0:
             self.past_detections_length = past_detections_length
         else:
-            raise ValueError(f"Argument `past_detections_length` is {past_detections_length} and should be larger than 0.")
+            raise ValueError(
+                f"Argument `past_detections_length` is {past_detections_length} and should be larger than 0."
+            )
 
         if initialization_delay is None:
-            self.initialization_delay = int(
-                self.hit_counter_max / 2
-            )
-        elif (
-            initialization_delay < 0
-            or initialization_delay > self.hit_counter_max
-        ):
+            self.initialization_delay = int(self.hit_counter_max / 2)
+        elif initialization_delay < 0 or initialization_delay > self.hit_counter_max:
             raise ValueError(
                 f"Argument 'initialization_delay' for 'Tracker' class should be an int between 0 and (hit_counter_max = {hit_counter_max}). The selected value is {initialization_delay}.\n"
             )
@@ -64,10 +61,17 @@ class Tracker:
         self.reid_distance_threshold = reid_distance_threshold
         self.abs_to_rel = None
 
-    def update(self, detections: Optional[List["Detection"]] = None, period: int = 1, coord_transformations: Optional[TranslationTransformation] = None):
+    def update(
+        self,
+        detections: Optional[List["Detection"]] = None,
+        period: int = 1,
+        coord_transformations: Optional[TranslationTransformation] = None,
+    ):
         if coord_transformations is not None:
             for det in detections:
-                det.absolute_points = coord_transformations.rel_to_abs(det.absolute_points)
+                det.absolute_points = coord_transformations.rel_to_abs(
+                    det.absolute_points
+                )
             self.abs_to_rel = coord_transformations.abs_to_rel
         self.period = period
 
@@ -178,7 +182,9 @@ class Tracker:
         candidates: Optional[Union[List["Detection"], List["TrackedObject"]]],
     ):
         if candidates is not None and len(candidates) > 0:
-            distance_matrix = self._get_distances(distance_function, distance_threshold, objects, candidates)
+            distance_matrix = self._get_distances(
+                distance_function, distance_threshold, objects, candidates
+            )
             if np.isnan(distance_matrix).any():
                 print(
                     "\nReceived nan values from distance function, please check your distance function for errors!"
@@ -202,8 +208,7 @@ class Tracker:
                     )
 
             matched_cand_indices, matched_obj_indices = self.match_dets_and_objs(
-                distance_matrix,
-                distance_threshold
+                distance_matrix, distance_threshold
             )
             if len(matched_cand_indices) > 0:
                 unmatched_candidates = [
@@ -236,7 +241,11 @@ class Tracker:
                         unmatched_candidates.append(matched_candidate)
                         unmatched_objects.append(matched_object)
             else:
-                unmatched_candidates, matched_objects, unmatched_objects = candidates, [], objects
+                unmatched_candidates, matched_objects, unmatched_objects = (
+                    candidates,
+                    [],
+                    objects,
+                )
         else:
             unmatched_candidates, matched_objects, unmatched_objects = [], [], objects
 
@@ -296,7 +305,9 @@ class TrackedObject:
         abs_to_rel: Callable[[np.array], np.array],
     ):
         try:
-            initial_detection_points = validate_points(initial_detection.absolute_points)
+            initial_detection_points = validate_points(
+                initial_detection.absolute_points
+            )
         except AttributeError:
             print(
                 f"\n[red]ERROR[/red]: The detection list fed into `tracker.update()` should be composed of {Detection} objects not {type(initial_detection)}.\n"
@@ -328,8 +339,12 @@ class TrackedObject:
         if initial_detection.scores is None:
             self.detected_at_least_once_points = np.array([True] * self.num_points)
         else:
-            self.detected_at_least_once_points = initial_detection.scores > self.detection_threshold 
-        self.point_hit_counter: np.ndarray = self.detected_at_least_once_points.astype(int) 
+            self.detected_at_least_once_points = (
+                initial_detection.scores > self.detection_threshold
+            )
+        self.point_hit_counter: np.ndarray = self.detected_at_least_once_points.astype(
+            int
+        )
         initial_detection.age = self.age
         self.past_detections_length = past_detections_length
         if past_detections_length > 0:
@@ -357,10 +372,7 @@ class TrackedObject:
 
     @property
     def is_initializing(self):
-        if (
-            self.is_initializing_flag
-            and self.hit_counter > self.initialization_delay
-        ):
+        if self.is_initializing_flag and self.hit_counter > self.initialization_delay:
             self.is_initializing_flag = False
             TrackedObject.count += 1
             self.id = TrackedObject.count
@@ -377,18 +389,22 @@ class TrackedObject:
     @property
     def estimate(self):
         positions = self.filter.x.T.flatten()[: self.dim_z].reshape(-1, self.dim_points)
-        velocities = self.filter.x.T.flatten()[self.dim_z :].reshape(-1, self.dim_points)
+        velocities = self.filter.x.T.flatten()[self.dim_z :].reshape(
+            -1, self.dim_points
+        )
         if self.abs_to_rel is not None:
             return self.abs_to_rel(positions)
         return positions
 
-    def get_estimate(self, absolute = False):
+    def get_estimate(self, absolute=False):
         positions = self.filter.x.T.flatten()[: self.dim_z].reshape(-1, 2)
-        if (self.abs_to_rel is None):
+        if self.abs_to_rel is None:
             if not absolute:
                 return positions
             else:
-                raise ValueError("You must provide 'coord_transformations' to the tracker to get absolute coordinates")
+                raise ValueError(
+                    "You must provide 'coord_transformations' to the tracker to get absolute coordinates"
+                )
         else:
             if absolute:
                 return positions
@@ -415,7 +431,7 @@ class TrackedObject:
             assert len(detection.scores.shape) == 1
             points_over_threshold_mask = detection.scores > self.detection_threshold
             matched_sensors_mask = np.array(
-                [(m,)*self.dim_points for m in points_over_threshold_mask]
+                [(m,) * self.dim_points for m in points_over_threshold_mask]
             ).flatten()
             H_pos = np.diag(matched_sensors_mask).astype(
                 float
@@ -440,14 +456,19 @@ class TrackedObject:
         # and causes the tracker to start with wildly inaccurate estimations which
         # eventually coverge to the real detections.
 
-
         detected_at_least_once_mask = np.array(
-            [(m,)*self.dim_points for m in self.detected_at_least_once_points]
+            [(m,) * self.dim_points for m in self.detected_at_least_once_points]
         ).flatten()
-        now_detected_mask = np.hstack((points_over_threshold_mask,)*self.dim_points).flatten()
-        first_detection_mask = np.logical_and(now_detected_mask, np.logical_not(detected_at_least_once_mask))
+        now_detected_mask = np.hstack(
+            (points_over_threshold_mask,) * self.dim_points
+        ).flatten()
+        first_detection_mask = np.logical_and(
+            now_detected_mask, np.logical_not(detected_at_least_once_mask)
+        )
 
-        self.filter.x[: self.dim_z][first_detection_mask] = np.expand_dims(points.flatten(), 0).T[first_detection_mask]
+        self.filter.x[: self.dim_z][first_detection_mask] = np.expand_dims(
+            points.flatten(), 0
+        ).T[first_detection_mask]
 
         self.filter.x[self.dim_z :][np.logical_not(detected_at_least_once_mask)] = 0
         self.detected_at_least_once_points = np.logical_or(
@@ -470,11 +491,12 @@ class TrackedObject:
     def conditionally_add_to_past_detections(self, detection):
         """Adds detections into (and pops detections away) from `past_detections`
 
-        It does so by keeping a fixed amount of past detections saved into each 
+        It does so by keeping a fixed amount of past detections saved into each
         TrackedObject, while maintaining them distributed uniformly through the object's
         lifetime.
         """
-        if self.past_detections_length == 0: return
+        if self.past_detections_length == 0:
+            return
         if len(self.past_detections) < self.past_detections_length:
             detection.age = self.age
             self.past_detections.append(detection)
@@ -501,7 +523,9 @@ class TrackedObject:
 
 
 class Detection:
-    def __init__(self, points: np.array, scores=None, data=None, label=None, embedding=None):
+    def __init__(
+        self, points: np.array, scores=None, data=None, label=None, embedding=None
+    ):
         self.points = points
         self.scores = scores
         self.data = data
