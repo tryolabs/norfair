@@ -3,15 +3,15 @@ import os.path
 
 import numpy as np
 
-from norfair import Tracker, drawing, metrics, video, Detection
+from norfair import Detection, Tracker, drawing, metrics, video
 from norfair.filter import FilterPyKalmanFilterFactory
 
 frame_skip_period = 1
 detection_threshold = 0.01
 distance_threshold = 0.9
 diagonal_proportion_threshold = 1 / 18
-pointwise_hit_counter_max=3
-hit_counter_max=2
+pointwise_hit_counter_max = 3
+hit_counter_max = 2
 
 parser = argparse.ArgumentParser(
     description="Evaluate a basic tracker on MOTChallenge data. Display on terminal the MOTChallenge metrics results "
@@ -41,7 +41,12 @@ parser.add_argument(
     help="Generate a text file with your MOTChallenge metrics results",
 )
 parser.add_argument(
-    "--output-path", dest="output_path", type=str, nargs="?", default=".", help="Output path"
+    "--output-path",
+    dest="output_path",
+    type=str,
+    nargs="?",
+    default=".",
+    help="Output path",
 )
 parser.add_argument(
     "--select-sequences",
@@ -71,35 +76,44 @@ else:
 
 accumulator = metrics.Accumulators()
 
+
 class CartesianTrack:
     def __init__(self, estimate, obj_id, live_points):
         self.estimate = estimate
         self.id = obj_id
         self.live_points = live_points
 
+
 # distance function for ByteTrack format
 def iou_xyah(detected_pose, tracked_pose):
     height = tracked_pose.estimate[1, 1]
-    width = tracked_pose.estimate[1, 0]*height
-    area_tracked_pose = height*width
-    half_size = np.array([width, height])/2
+    width = tracked_pose.estimate[1, 0] * height
+    area_tracked_pose = height * width
+    half_size = np.array([width, height]) / 2
 
     top_left_corner_tracked_pose = tracked_pose.estimate[0] - half_size
     bottom_right_corner_tracked_pose = tracked_pose.estimate[0] + half_size
 
-
     height = detected_pose.points[1, 1]
-    width = detected_pose.points[1, 0]*height
-    area_detected_pose = height*width
-    half_size = np.array([width, height])/2
+    width = detected_pose.points[1, 0] * height
+    area_detected_pose = height * width
+    half_size = np.array([width, height]) / 2
 
     top_left_corner_detected_pose = detected_pose.points[0] - half_size
     bottom_right_corner_detected_pose = detected_pose.points[0] + half_size
 
-    intersection = max(min(bottom_right_corner_detected_pose[1], bottom_right_corner_tracked_pose[1])-max(top_left_corner_tracked_pose[1], top_left_corner_detected_pose[1]), 0)*max(min(bottom_right_corner_detected_pose[0], bottom_right_corner_tracked_pose[0])-max(top_left_corner_tracked_pose[0], top_left_corner_detected_pose[0]), 0)
+    intersection = max(
+        min(bottom_right_corner_detected_pose[1], bottom_right_corner_tracked_pose[1])
+        - max(top_left_corner_tracked_pose[1], top_left_corner_detected_pose[1]),
+        0,
+    ) * max(
+        min(bottom_right_corner_detected_pose[0], bottom_right_corner_tracked_pose[0])
+        - max(top_left_corner_tracked_pose[0], top_left_corner_detected_pose[0]),
+        0,
+    )
     union = area_detected_pose + area_tracked_pose - intersection
 
-    return 1 - intersection/union
+    return 1 - intersection / union
 
 
 for input_path in sequences_paths:
@@ -119,7 +133,7 @@ for input_path in sequences_paths:
     if args.make_video:
         video_file = video.VideoFromFrames(
             input_path=input_path, save_path=output_path, information_file=info_file
-            )
+        )
 
     tracker = Tracker(
         distance_function=iou_xyah,
@@ -141,8 +155,8 @@ for input_path in sequences_paths:
             center = np.mean(det.points, axis=0)
             width = det.points[1, 0] - det.points[0, 0]
             height = det.points[1, 1] - det.points[0, 1]
-            xyah_state_det = np.vstack((center, [width/height, height]))
-            xyah_detections.append(Detection(xyah_state_det, scores = det.scores))
+            xyah_state_det = np.vstack((center, [width / height, height]))
+            xyah_detections.append(Detection(xyah_state_det, scores=det.scores))
 
         if frame_number % frame_skip_period == 0:
             tracked_objects = tracker.update(
@@ -154,20 +168,28 @@ for input_path in sequences_paths:
 
         x1y1x2y2_tracked_objects = []
         for n, obj in enumerate(tracked_objects):
-            half_height = obj.estimate[1, 1]/2
-            half_width = obj.estimate[1, 0]*half_height
+            half_height = obj.estimate[1, 1] / 2
+            half_width = obj.estimate[1, 0] * half_height
             half_size = np.array([half_width, half_height])
 
             top_left_corner = obj.estimate[0] - half_size
             bottom_right_corner = obj.estimate[0] + half_size
 
-            x1y1x2y2_tracked_objects.append(CartesianTrack(np.vstack((top_left_corner, bottom_right_corner)), obj.id, obj.live_points))
+            x1y1x2y2_tracked_objects.append(
+                CartesianTrack(
+                    np.vstack((top_left_corner, bottom_right_corner)),
+                    obj.id,
+                    obj.live_points,
+                )
+            )
 
         # Draw detection and tracked object boxes on frame
         if args.make_video:
             frame = next(video_file)
             frame = drawing.draw_boxes(frame, detections=detections)
-            frame = drawing.draw_tracked_boxes(frame=frame, objects=x1y1x2y2_tracked_objects)
+            frame = drawing.draw_tracked_boxes(
+                frame=frame, objects=x1y1x2y2_tracked_objects
+            )
             video_file.update(frame=frame)
 
         # Update output text file

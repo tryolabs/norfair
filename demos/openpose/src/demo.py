@@ -86,7 +86,10 @@ if __name__ == "__main__":
         KEYPOINT_DIST_THRESHOLD = video.input_height / 40
 
         tracker = Tracker(
-            distance_function=create_keypoints_voting_distance(keypoint_distance_threshold=KEYPOINT_DIST_THRESHOLD, detection_threshold=DETECTION_THRESHOLD),
+            distance_function=create_keypoints_voting_distance(
+                keypoint_distance_threshold=KEYPOINT_DIST_THRESHOLD,
+                detection_threshold=DETECTION_THRESHOLD,
+            ),
             distance_threshold=DISTANCE_THRESHOLD,
             detection_threshold=DETECTION_THRESHOLD,
             initialization_delay=INITIALIZATION_DELAY,

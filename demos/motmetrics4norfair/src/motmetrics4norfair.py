@@ -10,8 +10,8 @@ frame_skip_period = 1
 detection_threshold = 0.01
 distance_threshold = 0.9
 diagonal_proportion_threshold = 1 / 18
-pointwise_hit_counter_max=3
-hit_counter_max=2
+pointwise_hit_counter_max = 3
+hit_counter_max = 2
 
 parser = argparse.ArgumentParser(
     description="Evaluate a basic tracker on MOTChallenge data. Display on terminal the MOTChallenge metrics results "

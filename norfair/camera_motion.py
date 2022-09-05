@@ -6,6 +6,7 @@ try:
     import cv2
 except ImportError:
     from .utils import DummyOpenCVImport
+
     cv2 = DummyOpenCVImport()
 
 
@@ -27,6 +28,7 @@ class TransformationGetter(ABC):
     def __call__(self, curr_pts, prev_pts):
         pass
 
+
 #
 # Translation
 #
@@ -39,6 +41,7 @@ class TranslationTransformation(CoordinatesTransformation):
 
     def rel_to_abs(self, points: np.array):
         return points - self.movement_vector
+
 
 class TranslationTransformationGetter(TransformationGetter):
     def __init__(self, bin_size=0.2, proportion_points_used_threshold=0.9) -> None:
@@ -71,6 +74,7 @@ class TranslationTransformationGetter(TransformationGetter):
 
         return update_prvs, TranslationTransformation(flow_mode)
 
+
 #
 # Homography
 #
@@ -78,7 +82,6 @@ class HomographyTransformation(CoordinatesTransformation):
     def __init__(self, homography_matrix):
         self.homography_matrix = homography_matrix
         self.inverse_homography_matrix = np.linalg.inv(homography_matrix)
-
 
     def abs_to_rel(self, points: np.array):
         ones = np.ones((len(points), 1))
@@ -97,7 +100,6 @@ class HomographyTransformation(CoordinatesTransformation):
             -1, 1
         )
         return points_transformed[:, :2]
-
 
 
 class HomographyTransformationGetter(TransformationGetter):
@@ -143,11 +145,18 @@ class HomographyTransformationGetter(TransformationGetter):
 
         return update_prvs, HomographyTransformation(homography_matrix)
 
+
 #
 # Motion estimation
 #
 def get_sparse_flow(
-    gray_next, gray_prvs, prev_pts=None, max_points=300, min_distance=15, block_size=3, mask=None
+    gray_next,
+    gray_prvs,
+    prev_pts=None,
+    max_points=300,
+    min_distance=15,
+    block_size=3,
+    mask=None,
 ):
     if prev_pts is None:
         # get points
@@ -157,7 +166,7 @@ def get_sparse_flow(
             qualityLevel=0.01,
             minDistance=min_distance,
             blockSize=block_size,
-            mask=mask
+            mask=mask,
         )
 
     # compute optical flow
@@ -179,7 +188,7 @@ class MotionEstimator:
         block_size=3,
         transformations_getter=None,
         draw_flow=False,
-        flow_color=None
+        flow_color=None,
     ):
         self.max_points = max_points
         self.min_distance = min_distance
@@ -211,7 +220,7 @@ class MotionEstimator:
             self.max_points,
             self.min_distance,
             self.block_size,
-            mask=self.prev_mask
+            mask=self.prev_mask,
         )
         if self.draw_flow:
             for (curr, prev) in zip(curr_pts, self.prev_pts):

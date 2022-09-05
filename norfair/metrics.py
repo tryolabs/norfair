@@ -17,7 +17,6 @@ except ImportError:
 from collections import OrderedDict
 
 
-
 class InformationFile:
     def __init__(self, file_path):
         self.path = file_path
@@ -342,6 +341,8 @@ def eval_motChallenge(matrixes_predictions, paths, metrics=None, generate_overal
         accs, names=names, metrics=metrics, generate_overall=generate_overall
     )
     summary_text = mm.io.render_summary(
-        summary_dataframe, formatters=mh.formatters, namemap=mm.io.motchallenge_metric_names
+        summary_dataframe,
+        formatters=mh.formatters,
+        namemap=mm.io.motchallenge_metric_names,
     )
     return summary_text, summary_dataframe

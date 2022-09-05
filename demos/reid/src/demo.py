@@ -3,15 +3,13 @@ import random
 random.seed(1337)
 
 import cv2
-import typer
 import numpy as np
-
-from norfair import Video, get_cutout, draw_tracked_objects, Tracker, draw_points
-
-from norfair.filter import OptimizedKalmanFilterFactory
-
+import typer
 from utils import get_hist
 from video_generator import generate_video
+
+from norfair import Tracker, Video, draw_points, draw_tracked_objects, get_cutout
+from norfair.filter import OptimizedKalmanFilterFactory
 
 
 def distance_func(detection, tracked_object):

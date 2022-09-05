@@ -12,7 +12,7 @@ class FilterPyKalmanFilterFactory:
         num_points = initial_detection.shape[0]
         dim_points = initial_detection.shape[1]
         dim_z = dim_points * num_points
-        dim_x = 2 * dim_z # We need to accommodate for velocities
+        dim_x = 2 * dim_z  # We need to accommodate for velocities
 
         filter = KalmanFilter(dim_x=dim_x, dim_z=dim_z)
 
@@ -196,7 +196,5 @@ class OptimizedKalmanFilterFactory:
             r=self.R,
         )
         custom_filter.x[:dim_z] = np.expand_dims(initial_detection.flatten(), 0).T
-
-
 
         return custom_filter
