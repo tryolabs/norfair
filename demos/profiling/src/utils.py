@@ -95,6 +95,7 @@ def get_postprocesser(video_width, video_height):
 
     return postprocess
 
+
 def get_distance_function(distance_function, video_width=None, video_height=None):
     if distance_function == "keypoints_vote":
         return rescaled_keypoints_vote
@@ -104,6 +105,7 @@ def get_distance_function(distance_function, video_width=None, video_height=None
         raise ValueError(
             "'distance_function' argument should be either 'keypoints_vote' or 'euclidean'"
         )
+
 
 def get_model(
     model_weights, model_height, model_width, optimize_model=None, pose_decriptor=None
@@ -162,6 +164,7 @@ def get_model(
 
     return model_trt
 
+
 def rescaled_keypoints_vote(detected_pose, tracked_pose):
     distances = np.linalg.norm(detected_pose.points - tracked_pose.estimate, axis=1)
 
@@ -175,6 +178,7 @@ def rescaled_keypoints_vote(detected_pose, tracked_pose):
         * (tracked_pose.last_detection.scores > DETECTION_THRESHOLD)
     )
     return 1 / (1 + match_num)
+
 
 def get_filter_setup(filter_setup):
     if filter_setup == "none":

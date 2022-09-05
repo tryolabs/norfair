@@ -1,10 +1,10 @@
 import argparse
 import sys
+from typing import List, Optional, Union
 
 import cv2
 import numpy as np
 import torch
-from typing import Union, List, Optional
 
 import norfair
 from norfair import Detection, Tracker, Video
@@ -61,11 +61,12 @@ class OpenposeDetector:
     def __call__(self, image):
         return self.detector.emplaceAndPop(image)
 
+
 ########################################
 
 
-
 ############### YOLO ###################
+
 
 class YOLO:
     def __init__(self, model_name: str, device: Optional[str] = None):
@@ -77,7 +78,7 @@ class YOLO:
         elif device is None:
             device = "cuda:0" if torch.cuda.is_available() else "cpu"
         # load model
-        self.model = torch.hub.load('ultralytics/yolov5', model_name)
+        self.model = torch.hub.load("ultralytics/yolov5", model_name)
 
     def __call__(
         self,
@@ -85,7 +86,7 @@ class YOLO:
         conf_threshold: float = 0.25,
         iou_threshold: float = 0.45,
         image_size: int = 720,
-        classes: Optional[List[int]] = None
+        classes: Optional[List[int]] = None,
     ) -> torch.tensor:
 
         self.model.conf = conf_threshold
@@ -95,11 +96,11 @@ class YOLO:
         detections = self.model(img, size=image_size)
         return detections
 
+
 def yolo_detections_to_norfair_detections(
     yolo_detections: torch.tensor,
 ) -> List[Detection]:
-    """convert detections_as_xywh to norfair detections
-    """
+    """convert detections_as_xywh to norfair detections"""
     norfair_detections: List[Detection] = []
 
     detections_as_xyxy = yolo_detections.xyxy[0]
@@ -107,28 +108,29 @@ def yolo_detections_to_norfair_detections(
         bbox = np.array(
             [
                 [detection_as_xyxy[0].item(), detection_as_xyxy[1].item()],
-                [detection_as_xyxy[2].item(), detection_as_xyxy[3].item()]
+                [detection_as_xyxy[2].item(), detection_as_xyxy[3].item()],
             ]
         )
         scores = np.array([detection_as_xyxy[4].item(), detection_as_xyxy[4].item()])
         label = int(detection_as_xyxy[5].item())
-        norfair_detections.append(
-            Detection(points=bbox, scores=scores, label=label)
-        )
+        norfair_detections.append(Detection(points=bbox, scores=scores, label=label))
 
     return norfair_detections
 
+
 ########################################
-
-
 
 
 # Distance function
 def keypoints_distance(detected_pose, tracked_pose):
     # Use different distances for bounding boxes and keypoints
     if detected_pose.label != 0:
-        detection_centroid = np.sum(detected_pose.points, axis=0)/len(detected_pose.points)
-        tracked_centroid = np.sum(tracked_pose.estimate, axis=0)/len(detected_pose.points)
+        detection_centroid = np.sum(detected_pose.points, axis=0) / len(
+            detected_pose.points
+        )
+        tracked_centroid = np.sum(tracked_pose.estimate, axis=0) / len(
+            detected_pose.points
+        )
         distances = np.linalg.norm(detection_centroid - tracked_centroid, axis=0)
         return distances / (KEYPOINT_DIST_THRESHOLD + distances)
 
@@ -147,12 +149,33 @@ if __name__ == "__main__":
     # CLI configuration
     parser = argparse.ArgumentParser(description="Track objects in a video.")
     parser.add_argument("files", type=str, nargs="+", help="Video files to process")
-    parser.add_argument("--model-name", type=str, default="yolov5m6", help="YOLOv5 model name")
-    parser.add_argument("--img-size", type=int, default="720", help="YOLOv5 inference size (pixels)")
-    parser.add_argument("--conf-threshold", type=float, default="0.25", help="YOLOv5 object confidence threshold")
-    parser.add_argument("--iou-threshold", type=float, default="0.45", help="YOLOv5 IOU threshold for NMS")
-    parser.add_argument('--classes', nargs='+', type=int, help='Filter by class: --classes 0, or --classes 0 2 3')
-    parser.add_argument("--device", type=str, default=None, help="Inference device: 'cpu' or 'cuda'")
+    parser.add_argument(
+        "--model-name", type=str, default="yolov5m6", help="YOLOv5 model name"
+    )
+    parser.add_argument(
+        "--img-size", type=int, default="720", help="YOLOv5 inference size (pixels)"
+    )
+    parser.add_argument(
+        "--conf-threshold",
+        type=float,
+        default="0.25",
+        help="YOLOv5 object confidence threshold",
+    )
+    parser.add_argument(
+        "--iou-threshold",
+        type=float,
+        default="0.45",
+        help="YOLOv5 IOU threshold for NMS",
+    )
+    parser.add_argument(
+        "--classes",
+        nargs="+",
+        type=int,
+        help="Filter by class: --classes 0, or --classes 0 2 3",
+    )
+    parser.add_argument(
+        "--device", type=str, default=None, help="Inference device: 'cpu' or 'cuda'"
+    )
     args = parser.parse_args()
 
     # Process Videos
@@ -197,14 +220,22 @@ if __name__ == "__main__":
                 conf_threshold=args.conf_threshold,
                 iou_threshold=args.iou_threshold,
                 image_size=args.img_size,
-                classes=args.classes
+                classes=args.classes,
             )
             yolo_detections = yolo_detections_to_norfair_detections(yolo_out)
             detections = openpose_detections + yolo_detections
 
             tracked_objects = tracker.update(detections=detections)
 
-            norfair.draw_tracked_objects(frame, [person for person in tracked_objects if person.label == -1], color_by_label=True)
-            norfair.draw_tracked_boxes(frame, [obj for obj in tracked_objects if obj.label >= 0], color_by_label=True)
+            norfair.draw_tracked_objects(
+                frame,
+                [person for person in tracked_objects if person.label == -1],
+                color_by_label=True,
+            )
+            norfair.draw_tracked_boxes(
+                frame,
+                [obj for obj in tracked_objects if obj.label >= 0],
+                color_by_label=True,
+            )
 
             video.write(frame)

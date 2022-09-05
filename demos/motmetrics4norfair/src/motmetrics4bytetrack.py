@@ -2,8 +2,8 @@ import argparse
 import os.path
 
 import numpy as np
-
 from yolox.tracker.byte_tracker import BYTETracker
+
 from norfair import drawing, metrics, video
 
 parser = argparse.ArgumentParser(
@@ -34,7 +34,12 @@ parser.add_argument(
     help="Generate a text file with your MOTChallenge metrics results",
 )
 parser.add_argument(
-    "--output-path", dest="output_path", type=str, nargs="?", default=".", help="Output path"
+    "--output-path",
+    dest="output_path",
+    type=str,
+    nargs="?",
+    default=".",
+    help="Output path",
 )
 parser.add_argument(
     "--select-sequences",
@@ -64,6 +69,7 @@ else:
 
 accumulator = metrics.Accumulators()
 
+
 class PartialStaticTracker:
     def __init__(self, estimate, obj_id, live_points):
         self.estimate = estimate
@@ -88,7 +94,7 @@ for input_path in sequences_paths:
     if args.make_video:
         video_file = video.VideoFromFrames(
             input_path=input_path, save_path=output_path, information_file=info_file
-            )
+        )
 
     class ArgsByte:
         def __init__(self, track_thresh=0.5, track_buffer=30, match_thresh=0.8):
@@ -98,12 +104,12 @@ for input_path in sequences_paths:
             self.match_thresh = match_thresh
 
     args_byte = ArgsByte(track_thresh=0.5, track_buffer=30, match_thresh=0.8)
-    tracker = BYTETracker(args_byte, info_file.search('frameRate'))
+    tracker = BYTETracker(args_byte, info_file.search("frameRate"))
 
     # Initialize accumulator for this video
     accumulator.create_accumulator(input_path=input_path, information_file=info_file)
 
-    img_size = [info_file.search('imHeight'), info_file.search('imWidth')]
+    img_size = [info_file.search("imHeight"), info_file.search("imWidth")]
 
     byte_tracked_objects = []
     for frame_number, detections in enumerate(all_detections):
@@ -113,16 +119,17 @@ for input_path in sequences_paths:
             byte_det = np.append(det.points.reshape((1, -1)), det.scores[0])
             byte_detections.append(byte_det)
 
-        if len(byte_detections)>0:
+        if len(byte_detections) > 0:
             byte_tracked_objects = tracker.update(
                 np.array(byte_detections), img_size, tuple(img_size)
             )
 
-        tracked_objects= []
+        tracked_objects = []
         for obj in byte_tracked_objects:
             box = obj.tlbr.reshape((2, 2))
-            tracked_objects.append(PartialStaticTracker(box, obj.track_id, np.array([True])))
-
+            tracked_objects.append(
+                PartialStaticTracker(box, obj.track_id, np.array([True]))
+            )
 
         # Draw detection and tracked object boxes on frame
         if args.make_video:

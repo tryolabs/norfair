@@ -37,7 +37,7 @@ def _validate_bboxes(bbox: np.array):
         2,
     ), f"incorrect bbox, expecting shape (2, 2) but received {bbox.shape}"
 
-    assert bbox[0, 0] < bbox[1, 0] and bbox[0, 1] < bbox[1,1], f"incorrect bbox {bbox}"
+    assert bbox[0, 0] < bbox[1, 0] and bbox[0, 1] < bbox[1, 1], f"incorrect bbox {bbox}"
 
 
 def _iou(box_a, box_b) -> float:
