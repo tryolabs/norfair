@@ -7,9 +7,7 @@ from detectron2.engine import DefaultPredictor
 
 from norfair import Detection, Tracker, Video, draw_tracked_objects
 
-parser = argparse.ArgumentParser(
-    description="Track centroid of vehicles in a video"
-)
+parser = argparse.ArgumentParser(description="Track centroid of vehicles in a video")
 parser.add_argument("file", type=str, help="Input video file")
 args = parser.parse_args()
 

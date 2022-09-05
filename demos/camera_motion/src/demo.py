@@ -35,7 +35,7 @@ def yolo_detections_to_norfair_detections(yolo_detections, track_boxes):
         )
         boxes.append(bbox)
         if track_boxes:
-            points = bbox 
+            points = bbox
             scores = np.array([detection_as_xyxy[4], detection_as_xyxy[4]])
         else:
             points = bbox.mean(axis=0, keepdims=True)
@@ -205,7 +205,7 @@ def run():
                 max_points=args.max_points,
                 min_distance=args.min_distance,
                 transformations_getter=transformations_getter,
-                draw_flow=args.draw_flow
+                draw_flow=args.draw_flow,
             )
         else:
             motion_estimator = None
@@ -232,7 +232,9 @@ def run():
         )
         for frame in video:
             detections = model(frame)
-            detections, boxes = yolo_detections_to_norfair_detections(detections, args.track_boxes)
+            detections, boxes = yolo_detections_to_norfair_detections(
+                detections, args.track_boxes
+            )
 
             mask = None
             if args.mask_detections:
