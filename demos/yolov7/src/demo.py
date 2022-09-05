@@ -7,9 +7,10 @@ import torch
 import torchvision.ops.boxes as bops
 
 import norfair
-from norfair import Detection, Tracker, Video, Paths
+from norfair import Detection, Paths, Tracker, Video
+from norfair.distances import frobenius, iou
 
-DISTANCE_THRESHOLD_BBOX: float = 3.33
+DISTANCE_THRESHOLD_BBOX: float = 0.7
 DISTANCE_THRESHOLD_CENTROID: int = 30
 MAX_DISTANCE: int = 10000
 
@@ -50,59 +51,8 @@ class YOLO:
         return detections
 
 
-def euclidean_distance(detection, tracked_object):
-    return np.linalg.norm(detection.points - tracked_object.estimate)
-
-
 def center(points):
     return [np.mean(np.array(points), axis=0)]
-
-
-def iou_pytorch(detection, tracked_object):
-    # Slower but simplier version of iou
-
-    detection_points = np.concatenate([detection.points[0], detection.points[1]])
-    tracked_object_points = np.concatenate(
-        [tracked_object.estimate[0], tracked_object.estimate[1]]
-    )
-
-    box_a = torch.tensor([detection_points], dtype=torch.float)
-    box_b = torch.tensor([tracked_object_points], dtype=torch.float)
-    iou = bops.box_iou(box_a, box_b)
-
-    # Since 0 <= IoU <= 1, we define 1/IoU as a distance.
-    # Distance values will be in [1, inf)
-    return np.float(1 / iou if iou else MAX_DISTANCE)
-
-
-def iou(detection, tracked_object):
-    # Detection points will be box A
-    # Tracked objects point will be box B.
-
-    box_a = np.concatenate([detection.points[0], detection.points[1]])
-    box_b = np.concatenate([tracked_object.estimate[0], tracked_object.estimate[1]])
-
-    x_a = max(box_a[0], box_b[0])
-    y_a = max(box_a[1], box_b[1])
-    x_b = min(box_a[2], box_b[2])
-    y_b = min(box_a[3], box_b[3])
-
-    # Compute the area of intersection rectangle
-    inter_area = max(0, x_b - x_a + 1) * max(0, y_b - y_a + 1)
-
-    # Compute the area of both the prediction and tracker
-    # rectangles
-    box_a_area = (box_a[2] - box_a[0] + 1) * (box_a[3] - box_a[1] + 1)
-    box_b_area = (box_b[2] - box_b[0] + 1) * (box_b[3] - box_b[1] + 1)
-
-    # Compute the intersection over union by taking the intersection
-    # area and dividing it by the sum of prediction + tracker
-    # areas - the interesection area
-    iou = inter_area / float(box_a_area + box_b_area - inter_area)
-
-    # Since 0 <= IoU <= 1, we define 1/IoU as a distance.
-    # Distance values will be in [1, inf)
-    return 1 / iou if iou else (MAX_DISTANCE)
 
 
 def yolo_detections_to_norfair_detections(
@@ -124,7 +74,7 @@ def yolo_detections_to_norfair_detections(
             )
             scores = np.array([detection_as_xywh[4].item()])
             norfair_detections.append(
-                Detection(points=centroid, scores=scores)
+                Detection(points=centroid, scores=scores, label=int(detection_as_xywh[-1].item()))
             )
     elif track_points == "bbox":
         detections_as_xyxy = yolo_detections.xyxy[0]
@@ -137,7 +87,7 @@ def yolo_detections_to_norfair_detections(
             )
             scores = np.array([detection_as_xyxy[4].item(), detection_as_xyxy[4].item()])
             norfair_detections.append(
-                Detection(points=bbox, scores=scores)
+                Detection(points=bbox, scores=scores, label=int(detection_as_xyxy[-1].item()))
             )
 
     return norfair_detections
@@ -159,7 +109,8 @@ model = YOLO(args.detector_path, device=args.device)
 for input_path in args.files:
     video = Video(input_path=input_path)
 
-    distance_function = iou if args.track_points == "bbox" else euclidean_distance
+    distance_function = iou if args.track_points == "bbox" else frobenius
+
     distance_threshold = (
         DISTANCE_THRESHOLD_BBOX
         if args.track_points == "bbox"
