@@ -27,7 +27,9 @@ def mean_euclidean(detection: "Detection", tracked_object: "TrackedObject") -> f
 
 def mean_manhattan(detection: "Detection", tracked_object: "TrackedObject") -> float:
     """Manhattan distance between the points in detection and the estimates in tracked_object"""
-    return np.linalg.norm(detection.points - tracked_object.estimate, ord=1, axis=1).mean()
+    return np.linalg.norm(
+        detection.points - tracked_object.estimate, ord=1, axis=1
+    ).mean()
 
 
 def _validate_bboxes(bbox: np.array):
