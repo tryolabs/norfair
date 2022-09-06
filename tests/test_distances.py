@@ -187,17 +187,15 @@ def test_iou(mock_det, mock_obj):
     with pytest.raises(AssertionError):
         iou(det, obj)
 
-    # invalid det bbox, this will be fixed soon
+    # invalid box should be corrected
     det = mock_det([[4, 4], [0, 0]])
-    obj = mock_obj([[1, 1], [2, 2]])
-    with pytest.raises(AssertionError):
-        iou(det, obj)
+    obj = mock_obj([[0, 0], [4, 4]])
+    np.testing.assert_almost_equal(iou(det, obj), 0)
 
-    # invalid obj bbox, this will be fixed soon
+    # invalid box should be corrected
     det = mock_det([[0, 0], [4, 4]])
     obj = mock_obj([[4, 4], [0, 0]])
-    with pytest.raises(AssertionError):
-        iou(det, obj)
+    np.testing.assert_almost_equal(iou(det, obj), 0)
 
 
 def test_keypoint_vote(mock_obj, mock_det):
