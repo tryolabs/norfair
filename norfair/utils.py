@@ -9,7 +9,7 @@ from rich.console import Console
 from rich.table import Table
 
 
-def validate_points(points: np.array) -> np.array:
+def validate_points(points: np.ndarray) -> np.array:
     # If the user is tracking only a single point, reformat it slightly.
     if len(points.shape) == 1:
         points = points[np.newaxis, ...]

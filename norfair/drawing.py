@@ -1,6 +1,12 @@
-from typing import Optional, Sequence, Tuple
+"""Drawing utils"""
+import random
+from optparse import Option
+from typing import TYPE_CHECKING, Callable, Optional, Sequence, Tuple
+
+import numpy as np
 
 from .camera_motion import TranslationTransformation
+from .utils import validate_points, warn_once
 
 try:
     import cv2
@@ -8,15 +14,14 @@ except ImportError:
     from .utils import DummyOpenCVImport
 
     cv2 = DummyOpenCVImport()
-import random
 
-import numpy as np
 
-from .utils import validate_points, warn_once
+if TYPE_CHECKING:
+    from norfair.tracker import Detection, TrackedObject
 
 
 def draw_points(
-    frame: np.array,
+    frame: np.ndarray,
     detections: Sequence["Detection"],
     radius: Optional[int] = None,
     thickness: Optional[int] = None,
@@ -25,6 +30,28 @@ def draw_points(
     draw_labels: bool = False,
     label_size: Optional[int] = None,
 ):
+    """
+    Draw a list of detections on a frame.
+
+    Parameters
+    ----------
+    frame : np.ndarray
+        The OpenCV frame to draw on. Modified in place.
+    detections : Sequence[Detection]
+        List of [`Detection`][norfair.tracker.Detection] to be drawn.
+    radius : Optional[int], optional
+        Radius of the circles representing the detected points.
+    thickness : Optional[int], optional
+        Thickness of the circles representing the detected points.
+    color : Optional[Tuple[int, int, int]], optional
+        [Color][norfair.drawing.Color] of the circles representing the detected points.
+    color_by_label : bool, optional
+        If `True` detections will be colored by label.
+    draw_labels : bool, optional
+        If `True` the detection's label will be drawn along with the detected points.
+    label_size : Optional[int], optional
+        Size of the label being drawn along with the detected points.
+    """
     if detections is None:
         return
     frame_scale = frame.shape[0] / 100
@@ -66,7 +93,7 @@ def draw_points(
 
 
 def draw_tracked_objects(
-    frame: np.array,
+    frame: np.ndarray,
     objects: Sequence["TrackedObject"],
     radius: Optional[int] = None,
     color: Optional[Tuple[int, int, int]] = None,
@@ -77,6 +104,33 @@ def draw_tracked_objects(
     draw_labels: bool = False,
     label_size: Optional[int] = None,
 ):
+    """
+    Draw a list of tracked objects on a frame.
+
+    Parameters
+    ----------
+    frame : np.ndarray
+        The OpenCV frame to draw on. Modified in place.
+    objects : Sequence[TrackedObject]
+        List of [`TrackedObject`][norfair.tracker.TrackedObject] to be drawn.
+    radius : Optional[int], optional
+        Radius of the circles representing the points estimated by the tracked objects.
+    color : Optional[Tuple[int, int, int]], optional
+        [Color][norfair.drawing.Color] of the circles representing the points estimated by the tracked objects.
+    id_size : Optional[float], optional
+        Size of the id number being drawn on each tracked object. The id wont get drawn if `id_size` is set to 0.
+    id_thickness : Optional[int], optional
+        Thickness of the id number being drawn on each tracked object.
+    draw_points : bool, optional
+        Boolean determining if the function should draw the points estimated by the tracked objects.
+        If set to `True` the points get drawn, if set to `False` only the id numbers get drawn.
+    color_by_label : bool, optional
+        If `True` objects will be colored by label.
+    draw_labels : bool, optional
+        If `True` the objects's label will be drawn along with the tracked points.
+    label_size : Optional[int], optional
+        Size of the label being drawn along with the tracked points.
+    """
     frame_scale = frame.shape[0] / 100
     if radius is None:
         radius = int(frame_scale * 0.5)
@@ -129,7 +183,7 @@ def draw_tracked_objects(
                 )
 
         if id_size > 0:
-            id_draw_position = centroid(obj.estimate[obj.live_points])
+            id_draw_position = _centroid(obj.estimate[obj.live_points])
             cv2.putText(
                 frame,
                 str(obj.id),
@@ -143,7 +197,7 @@ def draw_tracked_objects(
 
 
 def draw_debug_metrics(
-    frame: np.array,
+    frame: np.ndarray,
     objects: Sequence["TrackedObject"],
     text_size: Optional[float] = None,
     text_thickness: Optional[int] = None,
@@ -185,7 +239,7 @@ def draw_debug_metrics(
             text_color = Color.random(obj.initializing_id)
         else:
             text_color = color
-        draw_position = centroid(
+        draw_position = _centroid(
             obj.estimate[obj.last_detection.scores > draw_score_threshold]
             if obj.last_detection.scores is not None
             else obj.estimate
@@ -242,7 +296,7 @@ def draw_debug_metrics(
             )
 
 
-def centroid(tracked_points: np.array) -> Tuple[int, int]:
+def _centroid(tracked_points: np.ndarray) -> Tuple[int, int]:
     num_points = tracked_points.shape[0]
     sum_x = np.sum(tracked_points[:, 0])
     sum_y = np.sum(tracked_points[:, 1])
@@ -250,15 +304,45 @@ def centroid(tracked_points: np.array) -> Tuple[int, int]:
 
 
 def draw_boxes(
-    frame,
-    detections,
-    line_color=None,
-    line_width=None,
-    random_color=False,
-    color_by_label=False,
-    draw_labels=False,
-    label_size=None,
+    frame: np.ndarray,
+    detections: Sequence["Detection"],
+    line_color: Optional[Tuple[int, int, int]] = None,
+    line_width: Optional[int] = None,
+    random_color: bool = False,
+    color_by_label: bool = False,
+    draw_labels: bool = False,
+    label_size: Optional[int] = None,
 ):
+    """
+    Draw draws a list of detections as boxes on a frame.
+
+    This function uses the first 2 points of your [`Detection`][norfair.tracker.Detection]
+    instances to draw a box with those points as its corners.
+
+    Parameters
+    ----------
+    frame : np.ndarray
+        The OpenCV frame to draw on.
+    detections : Sequence[Detection]
+        List of [`Detection`](#detection)s to be drawn.
+    line_color : Optional[Tuple[int, int, int]], optional
+        [Color][norfair.drawing.Color] of the boxes representing the detections.
+    line_width : Optional[int], optional
+        Width of the lines constituting the sides of the boxes representing the detections.
+    random_color : bool, optional
+        If `True` each detection will be colored with a random color.
+    color_by_label : bool, optional
+        If `True` detections will be colored by label.
+    draw_labels : bool, optional
+        If `True` the detection's label will be drawn along with the detected boxes.
+    label_size : Optional[int], optional
+        Size of the label being drawn along with the detected boxes.
+
+    Returns
+    -------
+    np.array
+        The frame.
+    """
     frame_scale = frame.shape[0] / 100
     if detections is None:
         return frame
@@ -301,18 +385,57 @@ def draw_boxes(
 
 
 def draw_tracked_boxes(
-    frame,
-    objects,
-    border_colors=None,
-    border_width=None,
-    id_size=None,
-    id_thickness=None,
-    draw_box=True,
-    color_by_label=False,
-    draw_labels=False,
-    label_size=None,
-    label_width=None,
-):
+    frame: np.ndarray,
+    objects: Sequence["TrackedObject"],
+    border_colors: Optional[Tuple[int, int, int]] = None,
+    border_width: Optional[int] = None,
+    id_size: Optional[int] = None,
+    id_thickness: Optional[int] = None,
+    draw_box: bool = True,
+    color_by_label: bool = False,
+    draw_labels: bool = False,
+    label_size: Optional[int] = None,
+    label_width: Optional[int] = None,
+) -> np.array:
+    """
+    Draw draws a list of tracked objects on a frame.
+
+    This function uses the first 2 points of your [`TrackedObject`][norfair.tracker.TrackedObject]
+    instances to draw a box with those points as its corners.
+
+    Parameters
+    ----------
+    frame : np.ndarray
+        The OpenCV frame to draw on.
+    objects : Sequence[TrackedObject]
+        List of [`TrackedObject`][norfair.tracker.TrackedObject] to be drawn.
+    border_colors : Optional[Tuple[int, int, int]], optional
+        [Color][norfair.drawing.Color] of the boxes representing the tracked objects.
+    border_width : Optional[int], optional
+        Width of the lines constituting the sides of the boxes representing the tracked objects.
+    id_size : Optional[int], optional
+        Size of the id number being drawn on each tracked object. The id wont get drawn if `id_size` is set to 0.
+    id_thickness : Optional[int], optional
+        Thickness of the id number being drawn on each tracked object.
+    draw_box : bool, optional
+        Boolean determining if the function should draw the boxes estimated by the tracked objects.
+
+        If set to `True` the boxes get drawn, if set to `False` only the id numbers get drawn.
+    color_by_label : bool, optional
+        If `True` objects will be colored by label.
+    draw_labels : bool, optional
+        If `True` the objects's label will be drawn along with the tracked boxes.
+    label_size : Optional[int], optional
+        Size of the label being drawn along with the tracked boxes.
+    label_width : Optional[int], optional
+        Thickness of the label being drawn along with the tracked boxes.
+
+    Returns
+    -------
+    np.array
+        The frame
+    """
+
     frame_scale = frame.shape[0] / 100
     if border_width is None:
         border_width = int(frame_scale * 0.5)
@@ -378,13 +501,46 @@ def draw_tracked_boxes(
 
 
 class Paths:
+    """
+    Class that draws the paths taken by a set of points of interest defined from the coordinates of each tracker estimation.
+
+    Parameters
+    ----------
+    get_points_to_draw : Optional[Callable[[np.array], np.array]], optional
+        Function that takes a list of points (the `.estimate` attribute of a [`TrackedObject`][norfair.tracker.TrackedObject])
+        and returns a list of points for which we want to draw their paths.
+
+        By default it is the mean point of all the points in the tracker.
+    thickness : Optional[int], optional
+        Thickness of the circles representing the paths of interest.
+    color : Optional[Tuple[int, int, int]], optional
+        [Color][norfair.drawing.Color] of the circles representing the paths of interest.
+    radius : Optional[int], optional
+        Radius of the circles representing the paths of interest.
+    attenuation : float, optional
+        A float number in [0, 1] that dictates the speed at which the path is erased.
+        if it is `0` then the path is never erased.
+
+    Examples
+    --------
+    >>> from norfair import Tracker, Video, Path
+    >>> video = Video("video.mp4")
+    >>> tracker = Tracker(...)
+    >>> path_drawer = Path()
+    >>> for frame in video:
+    >>>    detections = get_detections(frame)  # runs detector and returns Detections
+    >>>    tracked_objects = tracker.update(detections)
+    >>>    frame = path_drawer.draw(frame, tracked_objects)
+    >>>    video.write(frame)
+    """
+
     def __init__(
         self,
-        get_points_to_draw=None,
-        thickness=None,
-        color=None,
-        radius=None,
-        attenuation=0.01,
+        get_points_to_draw: Optional[Callable[[np.array], np.array]] = None,
+        thickness: Optional[int] = None,
+        color: Optional[Tuple[int, int, int]] = None,
+        radius: Optional[int] = None,
+        attenuation: float = 0.01,
     ):
         if get_points_to_draw is None:
 
@@ -399,7 +555,27 @@ class Paths:
         self.mask = None
         self.attenuation_factor = 1 - attenuation
 
-    def draw(self, frame, tracked_objects):
+    def draw(
+        self, frame: np.ndarray, tracked_objects: Sequence["TrackedObject"]
+    ) -> np.array:
+        """
+        Draw the paths of the points interest on a frame.
+
+        !!! warning
+            This method does **not** draw frames in place use the returned one.
+
+        Parameters
+        ----------
+        frame : np.ndarray
+            The OpenCV frame to draw on.
+        tracked_objects : Sequence[TrackedObject]
+            List of [`TrackedObject`][norfair.tracker.TrackedObject] to get the points of interest in order to update the paths.
+
+        Returns
+        -------
+        np.array
+            The resulting frame.
+        """
         if self.mask is None:
             frame_scale = frame.shape[0] / 100
 
@@ -450,6 +626,13 @@ def _draw_cross(frame, center, radius, color, thickness):
 
 
 class Color:
+    """
+    Object which represents an OpenCV color.
+
+    Its properties are the colors which it can represent.
+    For example, set `Color.blue` to get the OpenCV tuple representing the color blue.
+    """
+
     green = (0, 128, 0)
     white = (255, 255, 255)
     olive = (0, 128, 128)

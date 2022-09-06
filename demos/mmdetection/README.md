@@ -18,4 +18,4 @@ For additional settings, you may display the instructions using `python demo.py 
 
 This example tracks objects using a single point per detection: the centroid of the bounding boxes returned by MMDetection.
 
-![Norfair MMDetection demo](../../docs/traffic_mmdet.gif)
+![Norfair MMDetection demo](../../docs/videos/traffic_mmdet.gif)
