@@ -11,7 +11,7 @@ class FilterFactory(ABC):
     """
 
     @abstractmethod
-    def create_filter(self, initial_detection: np.array):
+    def create_filter(self, initial_detection: np.ndarray):
         pass
 
 
@@ -42,14 +42,14 @@ class FilterPyKalmanFilterFactory(FilterFactory):
         self.Q = Q
         self.P = P
 
-    def create_filter(self, initial_detection: np.array) -> KalmanFilter:
+    def create_filter(self, initial_detection: np.ndarray) -> KalmanFilter:
         """
         This method returns a new predictive filter instance with the current setup, to be used by each new [`TrackedObject`][norfair.tracker.TrackedObject] that is created.
         This predictive filter will be used to estimate speed and future positions of the object, to better match the detections during its trajectory.
 
         Parameters
         ----------
-        initial_detection : np.array
+        initial_detection : np.ndarray
             numpy array of shape `(number of points per object, 2)`, corresponding to the [`Detection.points`][norfair.tracker.Detection] of the tracked object being born,
             which shall be used as initial position estimation for it.
 
@@ -131,7 +131,7 @@ class NoFilterFactory(FilterFactory):
         _description_
     """
 
-    def create_filter(self, initial_detection: np.array):
+    def create_filter(self, initial_detection: np.ndarray):
         num_points = initial_detection.shape[0]
         dim_points = initial_detection.shape[1]
         dim_z = dim_points * num_points  # flattened positions
@@ -263,7 +263,7 @@ class OptimizedKalmanFilterFactory(FilterFactory):
         self.pos_vel_covariance = pos_vel_covariance
         self.vel_variance = vel_variance
 
-    def create_filter(self, initial_detection: np.array):
+    def create_filter(self, initial_detection: np.ndarray):
         num_points = initial_detection.shape[0]
         dim_points = initial_detection.shape[1]
         dim_z = dim_points * num_points  # flattened positions
