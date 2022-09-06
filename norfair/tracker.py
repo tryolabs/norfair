@@ -47,7 +47,7 @@ class Tracker:
 
         if initialization_delay is None:
             self.initialization_delay = int(self.hit_counter_max / 2)
-        elif initialization_delay < 0 or initialization_delay > self.hit_counter_max:
+        elif initialization_delay < 0 or initialization_delay >= self.hit_counter_max:
             raise ValueError(
                 f"Argument 'initialization_delay' for 'Tracker' class should be an int between 0 and (hit_counter_max = {hit_counter_max}). The selected value is {initialization_delay}.\n"
             )
@@ -145,7 +145,11 @@ class Tracker:
                 )
             )
 
-        return [p for p in self.tracked_objects if not p.is_initializing]
+        return [
+            o
+            for o in self.tracked_objects
+            if not o.is_initializing and o.hit_counter_is_positive
+        ]
 
     def _get_distances(
         self,
@@ -420,8 +424,7 @@ class TrackedObject:
         self.conditionally_add_to_past_detections(detection)
 
         self.last_detection = detection
-        if self.hit_counter < self.hit_counter_max:
-            self.hit_counter += 2 * period
+        self.hit_counter = min(self.hit_counter + 2 * period, self.hit_counter_max)
 
         # We use a kalman filter in which we consider each coordinate on each point as a sensor.
         # This is a hacky way to update only certain sensors (only x, y coordinates for
