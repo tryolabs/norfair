@@ -62,7 +62,7 @@ jobs:
           poetry install -E metrics
           curl -O https://motchallenge.net/data/MOT17Labels.zip
           unzip MOT17Labels.zip
-          pyton tests/mot_metrics.py
+          python3 tests/mot_metrics.py
 
   #
   # Build & upload release to PyPI.
@@ -71,7 +71,7 @@ jobs:
   #
   release:
     runs-on: ubuntu-latest
-    needs: [build-test]
+    needs: [unit-test, mot-metric]
     if: github.event_name == 'release'
     env:
       PYTHON_VERSION: 3.8
