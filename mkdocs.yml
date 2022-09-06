@@ -50,9 +50,9 @@ plugins:
                   show_if_no_docstring: false
                   members_order: source
   - autorefs
-  # - gen-files:
-  #     scripts:
-  #     - docs/gen_ref_pages.py
+  - gen-files:
+      scripts:
+      - docs/gen_index.py
 
 markdown_extensions:
     - toc:
