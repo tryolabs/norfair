@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
 
 def draw_points(
-    frame: np.array,
+    frame: np.ndarray,
     detections: Sequence["Detection"],
     radius: Optional[int] = None,
     thickness: Optional[int] = None,
@@ -31,11 +31,11 @@ def draw_points(
     label_size: Optional[int] = None,
 ):
     """
-    Function that draws a list of detections on a frame.
+    Draw a list of detections on a frame.
 
     Parameters
     ----------
-    frame : np.array
+    frame : np.ndarray
         The OpenCV frame to draw on. Modified in place.
     detections : Sequence[Detection]
         List of [`Detection`][norfair.tracker.Detection] to be drawn.
@@ -93,7 +93,7 @@ def draw_points(
 
 
 def draw_tracked_objects(
-    frame: np.array,
+    frame: np.ndarray,
     objects: Sequence["TrackedObject"],
     radius: Optional[int] = None,
     color: Optional[Tuple[int, int, int]] = None,
@@ -105,11 +105,11 @@ def draw_tracked_objects(
     label_size: Optional[int] = None,
 ):
     """
-    Function that draws a list of tracked objects on a frame.
+    Draw a list of tracked objects on a frame.
 
     Parameters
     ----------
-    frame : np.array
+    frame : np.ndarray
         The OpenCV frame to draw on. Modified in place.
     objects : Sequence[TrackedObject]
         List of [`TrackedObject`][norfair.tracker.TrackedObject] to be drawn.
@@ -197,7 +197,7 @@ def draw_tracked_objects(
 
 
 def draw_debug_metrics(
-    frame: np.array,
+    frame: np.ndarray,
     objects: Sequence["TrackedObject"],
     text_size: Optional[float] = None,
     text_thickness: Optional[int] = None,
@@ -296,7 +296,7 @@ def draw_debug_metrics(
             )
 
 
-def _centroid(tracked_points: np.array) -> Tuple[int, int]:
+def _centroid(tracked_points: np.ndarray) -> Tuple[int, int]:
     num_points = tracked_points.shape[0]
     sum_x = np.sum(tracked_points[:, 0])
     sum_y = np.sum(tracked_points[:, 1])
@@ -304,7 +304,7 @@ def _centroid(tracked_points: np.array) -> Tuple[int, int]:
 
 
 def draw_boxes(
-    frame: np.array,
+    frame: np.ndarray,
     detections: Sequence["Detection"],
     line_color: Optional[Tuple[int, int, int]] = None,
     line_width: Optional[int] = None,
@@ -314,14 +314,14 @@ def draw_boxes(
     label_size: Optional[int] = None,
 ):
     """
-    Function that draws a list of detections as boxes on a frame.
+    Draw draws a list of detections as boxes on a frame.
 
     This function uses the first 2 points of your [`Detection`][norfair.tracker.Detection]
     instances to draw a box with those points as its corners.
 
     Parameters
     ----------
-    frame : np.array
+    frame : np.ndarray
         The OpenCV frame to draw on.
     detections : Sequence[Detection]
         List of [`Detection`](#detection)s to be drawn.
@@ -385,7 +385,7 @@ def draw_boxes(
 
 
 def draw_tracked_boxes(
-    frame: np.array,
+    frame: np.ndarray,
     objects: Sequence["TrackedObject"],
     border_colors: Optional[Tuple[int, int, int]] = None,
     border_width: Optional[int] = None,
@@ -398,14 +398,14 @@ def draw_tracked_boxes(
     label_width: Optional[int] = None,
 ) -> np.array:
     """
-    Function that draws a list of tracked objects on a frame.
+    Draw draws a list of tracked objects on a frame.
 
     This function uses the first 2 points of your [`TrackedObject`][norfair.tracker.TrackedObject]
     instances to draw a box with those points as its corners.
 
     Parameters
     ----------
-    frame : np.array
+    frame : np.ndarray
         The OpenCV frame to draw on.
     objects : Sequence[TrackedObject]
         List of [`TrackedObject`][norfair.tracker.TrackedObject] to be drawn.
@@ -556,17 +556,17 @@ class Paths:
         self.attenuation_factor = 1 - attenuation
 
     def draw(
-        self, frame: np.array, tracked_objects: Sequence["TrackedObject"]
+        self, frame: np.ndarray, tracked_objects: Sequence["TrackedObject"]
     ) -> np.array:
         """
-        Function that draws the paths of the points interest on a frame.
+        Draw the paths of the points interest on a frame.
 
         !!! warning
             This method does **not** draw frames in place use the returned one.
 
         Parameters
         ----------
-        frame : np.array
+        frame : np.ndarray
             The OpenCV frame to draw on.
         tracked_objects : Sequence[TrackedObject]
             List of [`TrackedObject`][norfair.tracker.TrackedObject] to get the points of interest in order to update the paths.

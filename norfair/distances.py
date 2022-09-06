@@ -100,7 +100,7 @@ def mean_manhattan(detection: "Detection", tracked_object: "TrackedObject") -> f
     ).mean()
 
 
-def _validate_bboxes(bbox: np.array):
+def _validate_bboxes(bbox: np.ndarray):
     """Validates that the numpy array a is a valid bounding box"""
     assert bbox.shape == (
         2,

@@ -127,7 +127,11 @@ class Tracker:
         coord_transformations: Optional[CoordinatesTransformation] = None,
     ) -> List["TrackedObject"]:
         """
-        The function through which the detections found in each frame must be passed to the tracker.
+        Process detections found in each frame.
+
+        The detections can be matched to previous tracked objects or new ones will be created
+        according to the configuration of the Tracker.
+        The currently alive and initialized tracked objects are returned
 
         Parameters
         ----------
@@ -343,7 +347,7 @@ class Tracker:
 
         return unmatched_candidates, matched_objects, unmatched_objects
 
-    def match_dets_and_objs(self, distance_matrix: np.array, distance_threshold):
+    def match_dets_and_objs(self, distance_matrix: np.ndarray, distance_threshold):
         """Matches detections with tracked_objects from a distance matrix
 
         I used to match by minimizing the global distances, but found several
@@ -390,7 +394,7 @@ class TrackedObject:
 
     Attributes
     ----------
-    estimate : np.array
+    estimate : np.ndarray
         Where the tracker predicts the point will be in the current frame based on past detections.
 
         A numpy array with the same shape as the detections being fed to the tracker that produced it.
@@ -656,9 +660,9 @@ class Detection:
 
     Parameters
     ----------
-    points : np.array
+    points : np.ndarray
         Points detected. Must be a rank 2 array with shape `(n_points, n_dimensions)` where n_dimensions is 2 or 3.
-    scores : np.array, optional
+    scores : np.ndarray, optional
         An array of length `n_points` which assigns a score to each of the points defined in `points`.
 
         This is used to inform the tracker of which points to ignore;
@@ -680,8 +684,8 @@ class Detection:
 
     def __init__(
         self,
-        points: np.array,
-        scores: np.array = None,
+        points: np.ndarray,
+        scores: np.ndarray = None,
         data: Any = None,
         label: Hashable = None,
         embedding=None,
