@@ -14,7 +14,7 @@ jobs:
   # Builds our package and runs the tests under supported
   # versions of Python.
   #
-  build-test:
+  unit-test:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
@@ -37,10 +37,32 @@ jobs:
           source venv/bin/activate
           pip install --upgrade pip
           python --version
+          poetry install
+          pytest -s tests/
+  
+  mot-metric:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1.1.1
+
+      - name: Run tests
+        run: |
+          python3 -m venv ./venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          python --version
           poetry install -E metrics
           curl -O https://motchallenge.net/data/MOT17Labels.zip
           unzip MOT17Labels.zip
-          pytest -s tests/
+          pyton tests/mot_metrics.py
 
   #
   # Build & upload release to PyPI.

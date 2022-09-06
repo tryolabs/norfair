@@ -25,9 +25,11 @@ def mean_euclidean(detection: "Detection", tracked_object: "TrackedObject") -> f
     return np.linalg.norm(detection.points - tracked_object.estimate, axis=1).mean()
 
 
-def manhattan(detection: "Detection", tracked_object: "TrackedObject") -> float:
+def mean_manhattan(detection: "Detection", tracked_object: "TrackedObject") -> float:
     """Manhattan distance between the points in detection and the estimates in tracked_object"""
-    return np.linalg.norm(detection.points - tracked_object.estimate, ord=1)
+    return np.linalg.norm(
+        detection.points - tracked_object.estimate, ord=1, axis=1
+    ).mean()
 
 
 def _validate_bboxes(bbox: np.array):
@@ -55,12 +57,12 @@ def _iou(box_a, box_b) -> float:
     y_b = min(box_a[3], box_b[3])
 
     # Compute the area of intersection rectangle
-    inter_area = max(0, x_b - x_a + 1) * max(0, y_b - y_a + 1)
+    inter_area = max(0, x_b - x_a) * max(0, y_b - y_a)
 
     # Compute the area of both the prediction and tracker
     # rectangles
-    box_a_area = (box_a[2] - box_a[0] + 1) * (box_a[3] - box_a[1] + 1)
-    box_b_area = (box_b[2] - box_b[0] + 1) * (box_b[3] - box_b[1] + 1)
+    box_a_area = (box_a[2] - box_a[0]) * (box_a[3] - box_a[1])
+    box_b_area = (box_b[2] - box_b[0]) * (box_b[3] - box_b[1])
 
     # Compute the intersection over union by taking the intersection
     # area and dividing it by the sum of prediction + tracker
@@ -99,7 +101,7 @@ def iou_opt(detection: "Detection", tracked_object: "TrackedObject") -> float:
 
 _DISTANCE_FUNCTIONS = {
     "frobenius": frobenius,
-    "manhattan": manhattan,
+    "mean_manhattan": mean_manhattan,
     "mean_euclidean": mean_euclidean,
     "iou": iou,
     "iou_opt": iou_opt,
@@ -163,7 +165,7 @@ def create_normalized_mean_euclidean_distance(
     ) -> float:
         """Normalized mean euclidean distance"""
         # caclucalate distances and normalized it by width and height
-        difference = detection.points - tracked_object.estimate
+        difference = (detection.points - tracked_object.estimate).astype(float)
         difference[:, 0] /= width
         difference[:, 1] /= height
 
@@ -175,7 +177,7 @@ def create_normalized_mean_euclidean_distance(
 
 __all__ = [
     "frobenius",
-    "manhattan",
+    "mean_manhattan",
     "mean_euclidean",
     "iou",
     "iou_opt",
