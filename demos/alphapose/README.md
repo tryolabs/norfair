@@ -26,4 +26,4 @@ This example modifies AlphaPose's original `writer.py` file, integrating a few l
 
 This produces the following results:
 
-![Norfair AlphaPose demo](../../docs/alphapose.gif)
+![Norfair AlphaPose demo](../../docs/videos/alphapose.gif)

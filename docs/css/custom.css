@@ -1,0 +1,7 @@
+:root > * {
+    --md-primary-fg-color: #300925;
+  }
+
+.md-header__topic{
+  opacity: 0;
+}

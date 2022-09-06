@@ -13,11 +13,11 @@ Keep in mind that the estimation of the camera movement works best with a static
 
 This method only works for camera pans and tilts.
 
-<img src="/docs/pan_tilt.png" alt="Pan and tilt" width="350px">
+<img src="/docs/videos/pan_tilt.png" alt="Pan and tilt" width="350px">
 
 For an example of results, see the following videos. On the left, the tracker lost the person 4 times (as seen by the increasing id, and the color of the bounding box changing). However, on the right the tracker is able to maintain the tracked object throughout the video:
 
-![Tracking an object with Norfair, with and without camera stabilization.](/docs/camera_stabilization.gif)
+![Tracking an object with Norfair, with and without camera stabilization.](/docs/videos/camera_stabilization.gif)
 
 > Videos generated using command `python demo.py --transformation none --draw-objects --track-boxes --id-size 1.8 --distance-threshold 200 --save <video>.mp4` and `python demo.py --transformation translation --fixed-camera-scale 2 --draw-objects --track-boxes --id-size 1.8 --distance-threshold 200 --save <video>.mp4`
 
@@ -27,7 +27,7 @@ This method can work with any camera movement, including pan, tilt, rotation, mo
 
 In the following video, the players are tracked and their trajectories are drawn, even as the camera moves:
 
-![Tracking soccer players with Norfair and a moving camera.](/docs/soccer.gif)
+![Tracking soccer players with Norfair and a moving camera.](/docs/videos/soccer.gif)
 
 > Video generated using command `python demo.py --transformation homography --draw-paths --path-history 150 --distance-threshold 200 --track-boxes --max-points=900 --min-distance=14 --save --model yolov5x --hit-counter-max 3 <video>.mp4` on a snippet of this [video](https://www.youtube.com/watch?v=CGFgHjeEkbY&t=1200s).
 
