@@ -840,8 +840,9 @@ class AbsolutePaths:
         if self.thickness is None:
             self.thickness = int(max(frame_scale / 7, 1))
         for obj in tracked_objects:
-            # if obj.abs_to_rel is not None:
-            #     warn_once("It seems that your using the Path drawer together with MotionEstimator. This is not fully supported and the results will not be what's expected")
+            if not obj.live_points.any():
+                continue
+
             if self.color is None:
                 color = Color.random(obj.id)
             else:
