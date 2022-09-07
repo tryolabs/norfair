@@ -18,4 +18,4 @@ For additional settings, you may display the instructions using `python demo.py 
 
 This example tracks objects using a single point per detection: the centroid of the bounding boxes returned by Detectron2.
 
-![Norfair Detectron2 demo](../../docs/videos/traffic.gif)
+https://user-images.githubusercontent.com/3588715/188960725-bafc00b4-7783-4bde-b1bc-55ec7fc560db.mp4
