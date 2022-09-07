@@ -34,7 +34,8 @@ class Video:
 
         Arguments `camera` and `input_path` can't be used at the same time, one must be chosen.
     output_path : str, optional
-        The path to the output video to be generated. Can be a folder or a file name.
+        The path to the output video to be generated.
+        Can be a folder were the file will be created or a full path with a file name.
     output_fps : Optional[float], optional
         The frames per second at which to encode the output video file.
 
@@ -45,8 +46,13 @@ class Video:
         due to the latency added by the detector.
     label : str, optional
         Label to add to the progress bar that appears when processing the current video.
-    codec_fourcc : Optional[str], optional
+    output_fourcc : Optional[str], optional
         OpenCV encoding for output video file.
+        By default we use `mp4v` for `.mp4` and `XVID` for `.avi`. This is a combination that works on most systems but
+        it results in larger files. To get smaller files use `avc1` or `H264` if available.
+        Notice that some fourcc are not compatible with some extensions.
+    output_extension : str, optional
+        File extension used for the output video. Ignored if `output_path` is not a folder.
 
     Examples
     --------
@@ -63,13 +69,15 @@ class Video:
         output_path: str = ".",
         output_fps: Optional[float] = None,
         label: str = "",
-        codec_fourcc: Optional[str] = None,
+        output_fourcc: Optional[str] = None,
+        output_extension: str = "mp4",
     ):
         self.camera = camera
         self.input_path = input_path
         self.output_path = output_path
         self.label = label
-        self.codec_fourcc = codec_fourcc
+        self.output_fourcc = output_fourcc
+        self.output_extension = output_extension
         self.output_video: Optional[cv2.VideoWriter] = None
 
         # Input validation
@@ -245,20 +253,20 @@ class Video:
         str
             The path to the file.
         """
-        output_path_is_dir = os.path.isdir(self.output_path)
-        if output_path_is_dir and self.input_path is not None:
-            base_file_name = self.input_path.split("/")[-1].split(".")[0]
-            file_name = base_file_name + "_out.mp4"
-            return os.path.join(self.output_path, file_name)
-        elif output_path_is_dir and self.camera is not None:
-            file_name = f"camera_{self.camera}_out.mp4"
-            return os.path.join(self.output_path, file_name)
-        else:
+        if not os.path.isdir(self.output_path):
             return self.output_path
 
+        if self.input_path is not None:
+            file_name = self.input_path.split("/")[-1].split(".")[0]
+        else:
+            file_name = "camera_{self.camera}"
+        file_name = f"{file_name}_out.{self.output_extension}"
+
+        return os.path.join(self.output_path, file_name)
+
     def get_codec_fourcc(self, filename: str) -> Optional[str]:
-        if self.codec_fourcc is not None:
-            return self.codec_fourcc
+        if self.output_fourcc is not None:
+            return self.output_fourcc
 
         # Default codecs for each extension
         extension = filename[-3:].lower()
