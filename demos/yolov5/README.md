@@ -20,12 +20,12 @@ This example tracks objects using a single or double point per detection: the ce
 
 ## Tracking cars
 
-![Norfair tracking cars using YOLOv5](../../docs/videos/yolov5_cars.gif)
+https://user-images.githubusercontent.com/3588715/189129861-ad2e5eb9-e124-43d9-96f6-1685566639f9.mp4
 
 ## Tracking pedestrians
 
-![Norfair tracking pedestrians using YOLOv5](../../docs/videos/yolov5_pedestrian.gif)
+https://user-images.githubusercontent.com/3588715/189129865-e7c8ccea-b74a-4cd3-a21c-7dc5883c0e95.mp4
 
 ## Tracking all
 
-![Norfair tracking cars and pedestrians using YOLOv5](../../docs/videos/yolov5_all.gif)
+https://user-images.githubusercontent.com/3588715/189129869-83ff94b9-efc9-4789-9d7c-4fd22495fde3.mp4
