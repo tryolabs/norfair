@@ -8,6 +8,7 @@ import torch
 
 import norfair
 from norfair import Detection, Tracker, Video
+from norfair.drawing import Color
 
 # Import openpose
 openpose_install_path = (
@@ -230,11 +231,11 @@ if __name__ == "__main__":
             norfair.draw_tracked_objects(
                 frame,
                 [person for person in tracked_objects if person.label == -1],
-                color_by_label=True,
+                color=Color.green,
             )
             norfair.draw_tracked_boxes(
                 frame,
-                [obj for obj in tracked_objects if obj.label >= 0],
+                [obj for obj in tracked_objects if obj.label > 0],
                 color_by_label=True,
             )
 
