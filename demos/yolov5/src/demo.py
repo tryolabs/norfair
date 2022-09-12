@@ -138,7 +138,6 @@ for input_path in args.files:
         distance_function=distance_function,
         distance_threshold=distance_threshold,
     )
-    paths_drawer = Paths(center, attenuation=0.01)
 
     for frame in video:
         yolo_detections = model(
@@ -158,5 +157,4 @@ for input_path in args.files:
         elif args.track_points == "bbox":
             norfair.draw_boxes(frame, detections)
             norfair.draw_tracked_boxes(frame, tracked_objects)
-        frame = paths_drawer.draw(frame, tracked_objects)
         video.write(frame)

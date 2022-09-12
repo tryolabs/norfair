@@ -42,20 +42,34 @@ def embedding_distance(matched_not_init_trackers, unmatched_trackers):
 def main(
     output_path: str = "./out.mp4",
     skip_period: int = 1,
+    disable_reid: bool = False,
 ):
     video_path, _, video_predictions = generate_video()
 
-    tracker = Tracker(
-        initialization_delay=1,
-        distance_function=distance_func,
-        hit_counter_max=10,
-        filter_factory=OptimizedKalmanFilterFactory(),
-        distance_threshold=50,
-        past_detections_length=5,
-        reid_distance_function=embedding_distance,
-        reid_distance_threshold=0.5,
-        reid_hit_counter_max=500,
-    )
+    if disable_reid:
+        tracker = Tracker(
+            initialization_delay=1,
+            distance_function=distance_func,
+            hit_counter_max=10,
+            filter_factory=OptimizedKalmanFilterFactory(),
+            distance_threshold=50,
+            past_detections_length=5,
+            # reid_distance_function=embedding_distance,
+            # reid_distance_threshold=0.5,
+            # reid_hit_counter_max=500,
+        )
+    else:
+        tracker = Tracker(
+            initialization_delay=1,
+            distance_function=distance_func,
+            hit_counter_max=10,
+            filter_factory=OptimizedKalmanFilterFactory(),
+            distance_threshold=50,
+            past_detections_length=5,
+            reid_distance_function=embedding_distance,
+            reid_distance_threshold=0.5,
+            reid_hit_counter_max=500,
+        )
 
     video = Video(input_path=video_path, output_path=output_path)
     for i, cv2_frame in enumerate(video):

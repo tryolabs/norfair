@@ -11,12 +11,12 @@ RUN pip install --upgrade pip
 # Install Detectron2 building from source
 RUN pip install 'git+https://github.com/facebookresearch/detectron2.git'
 
-# Download model weights
-ADD https://dl.fbaipublicfiles.com/detectron2/COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x/137849600/model_final_f10217.pkl /model/model_final_f10217.pkl
-
 # For some reason it doesn't work with latest version of OpenCV
 RUN pip install opencv-python==4.5.5.64
 
 RUN pip install git+https://github.com/tryolabs/norfair.git@master#egg=norfair
 
 WORKDIR /demo/src/
+
+# Download model weights
+ADD https://dl.fbaipublicfiles.com/detectron2/COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x/137849600/model_final_f10217.pkl /model/model_final_f10217.pkl

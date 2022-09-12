@@ -2,9 +2,9 @@
 
 An example of how to use Norfair to perform re-identification using appearance embeddings. This example creates a simulation video where boxes are moving around. When boxes get occluded by other boxes we just grab the detection from the top box, so any other box occluded is not getting a detection. At the same time, detections are not perfect and have some noise.
 
-|       Without ReID        |       With ReID        |
-| :-----------------------: | :--------------------: |
-| ![](./assets/no_reid.gif) | ![](./assets/reid.gif) |
+Comparison of not using ReID (left) vs using it (right)
+
+https://user-images.githubusercontent.com/3588715/189216867-7b5da1e5-e492-4c9f-ac6e-12cbd3eed1ea.mp4
 
 ## Instructions
 

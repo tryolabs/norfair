@@ -168,13 +168,17 @@ def generate_video(
     output_path: str = "demo.avi",
     fps: int = 30,
     canvas_size: int = 800,
+    border_size=10,
 ):
     def _empty_canvas(canvas_size=(canvas_size, canvas_size, 3)):
         img = np.ones(canvas_size, dtype=np.uint8) * 30
         return img
 
     video = cv2.VideoWriter(
-        output_path, cv2.VideoWriter_fourcc(*"DIVX"), fps, (canvas_size, canvas_size)
+        output_path,
+        cv2.VideoWriter_fourcc(*"DIVX"),
+        fps,
+        (canvas_size + 2 * border_size, canvas_size + 2 * border_size),
     )
 
     detections_gt = []
@@ -200,8 +204,16 @@ def generate_video(
                 img[int(ymin) : int(ymax), int(xmin) : int(xmax), channel] = feature[
                     channel
                 ]
-
-        video.write(img)
+        border_size = 10
+        frame = (
+            np.ones(
+                (canvas_size + 2 * border_size, canvas_size + 2 * border_size, 3),
+                dtype=img.dtype,
+            )
+            * 255
+        )
+        frame[border_size:-border_size, border_size:-border_size] = img
+        video.write(frame)
         detections_gt.append(dets_gt)
         detections_pred.append(dets_pred)
     video.release()

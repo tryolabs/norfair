@@ -11,7 +11,7 @@ ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/hpcx/ompi/lib"
 # Install dependencies for OpenPose and its installation
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get install --yes --auto-remove \
+RUN apt-get update --yes && apt-get install --yes --auto-remove \
     libopencv-dev \
     protobuf-compiler \
     libgoogle-glog-dev \

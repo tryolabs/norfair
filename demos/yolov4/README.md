@@ -20,4 +20,4 @@ For additional settings, you may display the instructions using `python demo.py 
 
 This example tracks objects using a single point per detection: the centroid of the bounding boxes around cars returned by YOLOv4.
 
-![Norfair YOLOv4 demo](../../docs/videos/yolov4_cars.gif)
+https://user-images.githubusercontent.com/3588715/189133927-f4d7e594-7241-4113-bfa9-716b16d07e46.mp4

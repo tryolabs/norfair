@@ -14,7 +14,7 @@ args = parser.parse_args()
 # Set up Detectron2 object detector
 cfg = get_cfg()
 cfg.merge_from_file("./detectron2_config.yaml")
-cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5
+cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.4
 cfg.MODEL.WEIGHTS = "/model/model_final_f10217.pkl"
 detector = DefaultPredictor(cfg)
 
@@ -35,5 +35,5 @@ for frame in video:
         # if c == 2
     ]
     tracked_objects = tracker.update(detections=detections)
-    draw_tracked_objects(frame, tracked_objects)
+    draw_tracked_objects(frame, tracked_objects, id_thickness=2)
     video.write(frame)
