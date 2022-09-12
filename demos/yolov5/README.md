@@ -16,16 +16,8 @@ For additional settings, you may display the instructions using `python demo.py 
 
 ## Explanation
 
-This example tracks objects using a single or double point per detection: the centroid or the two corners of the bounding boxes around objects returned by YOLOv5.
+This example cat track objects using a single or double point per detection: the centroid or the two corners of the bounding boxes around objects returned by YOLOv5.
 
 ## Tracking cars
 
-https://user-images.githubusercontent.com/3588715/189129861-ad2e5eb9-e124-43d9-96f6-1685566639f9.mp4
-
-## Tracking pedestrians
-
-https://user-images.githubusercontent.com/3588715/189129865-e7c8ccea-b74a-4cd3-a21c-7dc5883c0e95.mp4
-
-## Tracking all
-
-https://user-images.githubusercontent.com/3588715/189129869-83ff94b9-efc9-4789-9d7c-4fd22495fde3.mp4
+https://user-images.githubusercontent.com/3588715/189720485-31a6302c-d046-4f3c-ae01-5ae53b9fde35.mp4
