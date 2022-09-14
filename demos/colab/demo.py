@@ -21,14 +21,11 @@ def inference(
     track_points: str,
     model_threshold: str,
 ):
-    temp_dir = tempfile.TemporaryDirectory()
-    output_path = temp_dir.name
-
     coord_transformations = None
     paths_drawer = None
     fix_paths = False
     model = YOLO(model)
-    video = Video(input_path=input_video, output_path=output_path)
+    video = Video(input_path=input_video)
 
     motion_estimation = True
 
@@ -89,10 +86,6 @@ def inference(
         )
         video.write(frame)
 
-    base_file_name = input_video.split("/")[-1].split(".")[0]
-    file_name = base_file_name + "_out.mp4"
-    return os.path.join(output_path, file_name)
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Track objects in a video.")
@@ -122,7 +115,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--track-points",
         type=str,
-        default="centroid",
+        default="bbox",
         help="Track points: 'centroid' or 'bbox'",
     )
     args = parser.parse_args()
