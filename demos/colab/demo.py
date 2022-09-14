@@ -46,7 +46,7 @@ def inference(
     paths_drawer = Paths(center, attenuation=0.01)
 
     if fix_paths:
-        paths_drawer = AbsolutePaths(max_history=20, thickness=2)
+        paths_drawer = AbsolutePaths(max_history=40, thickness=2)
 
     for frame in video:
         yolo_detections = model(
