@@ -23,23 +23,15 @@ def inference(
 ):
     coord_transformations = None
     paths_drawer = None
-    fix_paths = False
+    fix_paths = True
     model = YOLO(model)
     video = Video(input_path=input_video)
 
-    motion_estimation = True
+    transformations_getter = HomographyTransformationGetter()
 
-    drawing_paths = True
-
-    if motion_estimation and drawing_paths:
-        fix_paths = True
-
-    if motion_estimation:
-        transformations_getter = HomographyTransformationGetter()
-
-        motion_estimator = MotionEstimator(
-            max_points=500, min_distance=7, transformations_getter=transformations_getter
-        )
+    motion_estimator = MotionEstimator(
+        max_points=500, min_distance=7, transformations_getter=transformations_getter
+    )
 
     distance_function = iou if track_points == "bbox" else euclidean_distance
     distance_threshold = (
@@ -51,11 +43,10 @@ def inference(
         distance_threshold=distance_threshold,
     )
 
-    if drawing_paths:
-        paths_drawer = Paths(center, attenuation=0.01)
+    paths_drawer = Paths(center, attenuation=0.01)
 
     if fix_paths:
-        paths_drawer = AbsolutePaths(max_history=5, thickness=2)
+        paths_drawer = AbsolutePaths(max_history=20, thickness=2)
 
     for frame in video:
         yolo_detections = model(
@@ -64,8 +55,7 @@ def inference(
 
         mask = np.ones(frame.shape[:2], frame.dtype)
 
-        if motion_estimation:
-            coord_transformations = motion_estimator.update(frame, mask)
+        coord_transformations = motion_estimator.update(frame, mask)
 
         detections = yolo_detections_to_norfair_detections(
             yolo_detections, track_points=track_points
