@@ -43,6 +43,7 @@ def main(
     output_path: str = "./out.mp4",
     skip_period: int = 1,
     disable_reid: bool = False,
+    border_size: int = 10,
 ):
     video_path, _, video_predictions = generate_video()
 
@@ -88,7 +89,19 @@ def main(
             tracked_objects = tracker.update()
         draw_points(cv2_frame, detections)
         draw_tracked_objects(cv2_frame, tracked_objects)
-        video.write(cv2_frame)
+        frame_with_border = np.ones(
+            shape=(
+                cv2_frame.shape[0] + 2 * border_size,
+                cv2_frame.shape[1] + 2 * border_size,
+                cv2_frame.shape[2],
+            ),
+            dtype=cv2_frame.dtype,
+        )
+        frame_with_border *= 254
+        frame_with_border[
+            border_size:-border_size, border_size:-border_size
+        ] = cv2_frame
+        video.write(frame_with_border)
 
 
 if __name__ == "__main__":

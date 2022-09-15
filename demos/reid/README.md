@@ -4,7 +4,7 @@ An example of how to use Norfair to perform re-identification using appearance e
 
 Comparison of not using ReID (left) vs using it (right)
 
-https://user-images.githubusercontent.com/3588715/189216867-7b5da1e5-e492-4c9f-ac6e-12cbd3eed1ea.mp4
+https://user-images.githubusercontent.com/3588715/189763304-05a0bf3c-16d4-4c2a-b7ba-384460cb3533.mp4
 
 ## Instructions
 
