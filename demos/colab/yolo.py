@@ -10,7 +10,9 @@ from norfair import Detection
 class YOLO:
     def __init__(self, model_path: str, device: Optional[str] = None):
         if device is not None and "cuda" in device and not torch.cuda.is_available():
-            raise Exception("Selected device='cuda', but cuda is not available to Pytorch.")
+            raise Exception(
+                "Selected device='cuda', but cuda is not available to Pytorch."
+            )
         # automatically set device if its None
         elif device is None:
             device = "cuda:0" if torch.cuda.is_available() else "cpu"
@@ -58,7 +60,9 @@ def yolo_detections_to_norfair_detections(
                     [detection_as_xywh[0].item(), detection_as_xywh[1].item()],
                 ]
             )
-            scores = np.array([detection_as_xywh[4].item(), detection_as_xywh[4].item()])
+            scores = np.array(
+                [detection_as_xywh[4].item(), detection_as_xywh[4].item()]
+            )
             norfair_detections.append(Detection(points=centroid, scores=scores))
     elif track_points == "bbox":
         detections_as_xyxy = yolo_detections.xyxy[0]
@@ -69,7 +73,9 @@ def yolo_detections_to_norfair_detections(
                     [detection_as_xyxy[2].item(), detection_as_xyxy[3].item()],
                 ]
             )
-            scores = np.array([detection_as_xyxy[4].item(), detection_as_xyxy[4].item()])
+            scores = np.array(
+                [detection_as_xyxy[4].item(), detection_as_xyxy[4].item()]
+            )
             norfair_detections.append(Detection(points=bbox, scores=scores))
 
     return norfair_detections

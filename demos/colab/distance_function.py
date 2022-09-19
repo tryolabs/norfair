@@ -13,7 +13,9 @@ def iou_pytorch(detection, tracked_object):
     # Slower but simplier version of iou
 
     detection_points = np.concatenate([detection.points[0], detection.points[1]])
-    tracked_object_points = np.concatenate([tracked_object.estimate[0], tracked_object.estimate[1]])
+    tracked_object_points = np.concatenate(
+        [tracked_object.estimate[0], tracked_object.estimate[1]]
+    )
 
     box_a = torch.tensor([detection_points], dtype=torch.float)
     box_b = torch.tensor([tracked_object_points], dtype=torch.float)

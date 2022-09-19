@@ -35,7 +35,9 @@ def inference(
 
     distance_function = iou if track_points == "bbox" else euclidean_distance
     distance_threshold = (
-        DISTANCE_THRESHOLD_BBOX if track_points == "bbox" else DISTANCE_THRESHOLD_CENTROID
+        DISTANCE_THRESHOLD_BBOX
+        if track_points == "bbox"
+        else DISTANCE_THRESHOLD_CENTROID
     )
 
     tracker = Tracker(
@@ -80,7 +82,9 @@ def inference(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Track objects in a video.")
     parser.add_argument("files", type=str, help="Video files to process")
-    parser.add_argument("--detector-path", type=str, default="yolov7.pt", help="YOLOv7 model path")
+    parser.add_argument(
+        "--detector-path", type=str, default="yolov7.pt", help="YOLOv7 model path"
+    )
     parser.add_argument(
         "--img-size", type=int, default="720", help="YOLOv7 inference size (pixels)"
     )
@@ -91,7 +95,10 @@ if __name__ == "__main__":
         help="YOLOv7 object confidence threshold",
     )
     parser.add_argument(
-        "--iou-threshold", type=float, default="0.45", help="YOLOv7 IOU threshold for NMS"
+        "--iou-threshold",
+        type=float,
+        default="0.45",
+        help="YOLOv7 IOU threshold for NMS",
     )
     parser.add_argument(
         "--classes",
