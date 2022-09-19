@@ -115,7 +115,6 @@ class Tracker:
 
         self.distance_threshold = distance_threshold
         self.detection_threshold = detection_threshold
-        TrackedObject.count = 0
         self.reid_distance_function = reid_distance_function
         self.reid_distance_threshold = reid_distance_threshold
         self.abs_to_rel = None
