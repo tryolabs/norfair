@@ -44,6 +44,10 @@ pip install norfair[metrics,video]  # Everything included
 
 If the needed dependencies are already present in the system, installing the minimal version of Norfair is enough for enabling the extra features. This is particularly useful for embedded devices, where installing compiled dependencies can be difficult, but they can sometimes come preinstalled with the system.
 
+## Documentation
+
+[Official reference available here](https://tryolabs.github.io/norfair/).
+
 ## Examples & demos
 
 [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/tryolabs/norfair-demo) [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tryolabs/norfair/blob/master/demos/yolov7/src/yolov7_demo.ipynb)
