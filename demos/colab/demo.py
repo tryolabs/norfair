@@ -1,25 +1,19 @@
 import argparse
-import glob
-import os
-import tempfile
+from typing import List
 
 import numpy as np
-from distance_function import euclidean_distance, iou
 from draw import center, draw
 from yolo import YOLO, yolo_detections_to_norfair_detections
 
 from norfair import AbsolutePaths, Paths, Tracker, Video
 from norfair.camera_motion import HomographyTransformationGetter, MotionEstimator
+from norfair.distances import create_normalized_mean_euclidean_distance
 
-DISTANCE_THRESHOLD_BBOX = 3.33
-DISTANCE_THRESHOLD_CENTROID = 30
+DISTANCE_THRESHOLD_CENTROID: float = 0.08
 
 
 def inference(
-    input_video: str,
-    model: str,
-    track_points: str,
-    model_threshold: str,
+    input_video: str, model: str, track_points: str, model_threshold: str, classes: List
 ):
     coord_transformations = None
     paths_drawer = None
@@ -33,12 +27,10 @@ def inference(
         max_points=500, min_distance=7, transformations_getter=transformations_getter
     )
 
-    distance_function = iou if track_points == "bbox" else euclidean_distance
-    distance_threshold = (
-        DISTANCE_THRESHOLD_BBOX
-        if track_points == "bbox"
-        else DISTANCE_THRESHOLD_CENTROID
+    distance_function = create_normalized_mean_euclidean_distance(
+        video.input_height, video.input_width
     )
+    distance_threshold = DISTANCE_THRESHOLD_CENTROID
 
     tracker = Tracker(
         distance_function=distance_function,
@@ -52,7 +44,11 @@ def inference(
 
     for frame in video:
         yolo_detections = model(
-            frame, conf_threshold=model_threshold, iou_threshold=0.45, image_size=720
+            frame,
+            conf_threshold=model_threshold,
+            iou_threshold=0.45,
+            image_size=720,
+            classes=classes,
         )
 
         mask = np.ones(frame.shape[:2], frame.dtype)
@@ -95,12 +91,6 @@ if __name__ == "__main__":
         help="YOLOv7 object confidence threshold",
     )
     parser.add_argument(
-        "--iou-threshold",
-        type=float,
-        default="0.45",
-        help="YOLOv7 IOU threshold for NMS",
-    )
-    parser.add_argument(
         "--classes",
         nargs="+",
         type=int,
@@ -117,4 +107,10 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    inference(args.files, args.detector_path, args.track_points, args.conf_threshold)
+    inference(
+        args.files,
+        args.detector_path,
+        args.track_points,
+        args.conf_threshold,
+        args.classes,
+    )
