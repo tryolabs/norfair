@@ -6,12 +6,9 @@ theme:
     - navigation.instant
     - navigation.tracking
     - navigation.sections
-  # palette:
-    # accent: red
-    # primary: purple
   icon:
     repo: fontawesome/brands/git-alt
-  logo: img/logo.svg
+  logo: img/logo-dark.svg
   language: en
 repo_name: tryolabs/norfair
 repo_url: https://github.com/tryolabs/norfair
