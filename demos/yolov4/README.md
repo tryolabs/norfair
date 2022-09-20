@@ -2,8 +2,6 @@
 
 Simplest possible example of tracking. Based on [pytorch-YOLOv4](https://github.com/Tianxiaomo/pytorch-YOLOv4).
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tryolabs/norfair/blob/master/demos/yolov4/yolov4_demo.ipynb)
-
 ## Instructions
 
 1. Build and run the Docker container with `./run_gpu.sh`.
