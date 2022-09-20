@@ -1,7 +1,7 @@
 site_name: Norfair
 theme:
   name: material
-  favicon: img/logo.ico
+  favicon: img/icon.svg
   features:
     - navigation.instant
     - navigation.tracking
@@ -11,7 +11,7 @@ theme:
     # primary: purple
   icon:
     repo: fontawesome/brands/git-alt
-  logo: img/logo-neg.png
+  logo: img/logo.svg
   language: en
 repo_name: tryolabs/norfair
 repo_url: https://github.com/tryolabs/norfair
