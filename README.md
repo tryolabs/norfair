@@ -1,6 +1,6 @@
 ![Norfair by Tryolabs logo](docs/img/logo.svg)
 
-[![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/tryolabs/norfair-demo) [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tryolabs/norfair/blob/master/demos/yolov7/src/yolov7_demo.ipynb) [![Documentation](https://img.shields.io/badge/api-reference-blue?logo=readthedocs)](https://tryolabs.github.io/norfair/) [![Board](https://img.shields.io/badge/project-board-blue?logo=github)](https://github.com/tryolabs/norfair/projects/1) ![Build status](https://github.com/tryolabs/norfair/workflows/CI/badge.svg?branch=master) [![DOI](https://zenodo.org/badge/276473370.svg)](https://zenodo.org/badge/latestdoi/276473370)
+[![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/tryolabs/norfair-demo) [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tryolabs/norfair/blob/master/demos/yolov7/src/yolov7_demo.ipynb) [![Documentation](https://img.shields.io/badge/api-reference-blue?logo=readthedocs)](https://norfair.ai) [![Board](https://img.shields.io/badge/project-board-blue?logo=github)](https://github.com/tryolabs/norfair/projects/1) ![Build status](https://github.com/tryolabs/norfair/workflows/CI/badge.svg?branch=master) [![DOI](https://zenodo.org/badge/276473370.svg)](https://zenodo.org/badge/latestdoi/276473370)
 
 Norfair is a customizable lightweight Python library for real-time multi-object tracking.
 
@@ -46,7 +46,7 @@ If the needed dependencies are already present in the system, installing the min
 
 ## Documentation
 
-[Official reference available here](https://tryolabs.github.io/norfair/).
+[Official reference available here](https://norfair.ai).
 
 ## Examples & demos
 
