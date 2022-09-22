@@ -31,3 +31,4 @@ build-backend = "poetry.masonry.api"
 
 [tool.isort]
 profile = "black"
+multi_line_output = 3
