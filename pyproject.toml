@@ -1,11 +1,16 @@
 [tool.poetry]
 name = "norfair"
 version = "2.0.0"
-description = "Lightweight Python library for real-time 2D object tracking."
+description = "Lightweight Python library for adding real-time multi-object tracking to any detector."
 license = "BSD-3-Clause"
 authors = ["Tryolabs <hello@tryolabs.com>"]
 repository = "https://github.com/tryolabs/norfair"
 readme = "README.md"
+classifiers = [
+    "License :: OSI Approved :: BSD License",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Programming Language :: Python :: 3.6",
+]
 
 [tool.poetry.dependencies]
 python = "^3.6.1"
@@ -26,8 +31,8 @@ pytest = "^6.2.2"
 tox = "^3.21.4"
 
 [build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.isort]
 profile = "black"
