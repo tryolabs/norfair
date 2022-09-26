@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 
 import numpy as np
 from sahi.predict import get_prediction, get_sliced_prediction
@@ -40,10 +40,8 @@ def main(
     initialization_delay: int,
     hit_counter_max: int,
     enable_sahi: bool,
-    slice_height: int,
-    slice_width: int,
-    overlap_height_ratio: float,
-    overlap_width_ratio: float,
+    slice_size: int,
+    overlap_ratio: float,
     model_confidence_threshold: float,
 ):
     detection_model = obtain_detection_model(model_confidence_threshold)
@@ -64,10 +62,10 @@ def main(
                 result = get_sliced_prediction(
                     frame,
                     detection_model,
-                    slice_height=slice_height,
-                    slice_width=slice_width,
-                    overlap_height_ratio=overlap_height_ratio,
-                    overlap_width_ratio=overlap_width_ratio,
+                    slice_height=slice_size,
+                    slice_width=slice_size,
+                    overlap_height_ratio=overlap_ratio,
+                    overlap_width_ratio=overlap_ratio,
                 )
             else:
                 result = get_prediction(frame, detection_model)
@@ -92,9 +90,7 @@ if __name__ == "__main__":
         initialization_delay=args.initialization_delay,
         hit_counter_max=args.hit_counter_max,
         enable_sahi=args.enable_sahi,
-        slice_height=args.slice_height,
-        slice_width=args.slice_width,
-        overlap_height_ratio=args.overlap_height_ratio,
-        overlap_width_ratio=args.overlap_width_ratio,
+        slice_size=args.slice_size,
+        overlap_ratio=args.overlap_ratio,
         model_confidence_threshold=args.model_confidence_threshold,
     )

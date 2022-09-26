@@ -71,27 +71,15 @@ def create_arg_parser() -> argparse.ArgumentParser:
         default=True,
     )
     parser.add_argument(
-        "--slice-height",
+        "--slice-size",
         type=int,
         help="Sahi's slice height",
         default=256,
     )
     parser.add_argument(
-        "--slice-width",
-        type=int,
-        help="Sahi's slice width",
-        default=256,
-    )
-    parser.add_argument(
-        "--overlap-height-ratio",
+        "--overlap-ratio",
         type=float,
         help="Sahi's overlap height ratio",
-        default=0.2,
-    )
-    parser.add_argument(
-        "--overlap-width-ratio",
-        type=float,
-        help="Sahi's overlap width ratio",
         default=0.2,
     )
     parser.add_argument(
