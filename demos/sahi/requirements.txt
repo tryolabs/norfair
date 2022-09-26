@@ -1,0 +1,3 @@
+opencv-python==4.2.0.32
+sahi==0.10.6
+yolov5==6.2.1
