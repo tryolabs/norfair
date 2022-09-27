@@ -732,7 +732,7 @@ video = ["opencv-python"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.1"
-content-hash = "f2d94dce855f38da3c73efb6b1fe3df680fbba24ef7a5e372d68315198f2465e"
+content-hash = "7916154a715fa71f7c5571c787c5af4d9cb7b90d7aabcff4146f1ad61b0de7e5"
 
 [metadata.files]
 appdirs = [
