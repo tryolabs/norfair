@@ -37,14 +37,16 @@ jobs:
           pip install --upgrade tox
 
       - name: Install Poetry
-        if: "matrix.python-version == '3.6'"
-        uses: snok/install-poetry@v1.1.1
-
-      - name: Install Poetry
         if: "matrix.python-version != '3.6'"
         uses: snok/install-poetry@v1
 
+      - name: Run tests under Python 3.6
+        if: "matrix.python-version == '3.6'"
+        run: |
+          tox -e py36
+
       - name: Run tests
+        if: "matrix.python-version != '3.6'"
         run: |
           tox -e py
 
