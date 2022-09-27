@@ -1,5 +1,3 @@
-from ipaddress import ip_address
-
 import numpy as np
 import pytest
 
@@ -215,6 +213,90 @@ def test_camera_motion(mock_coordinate_transformation):
             obj.get_estimate(absolute=True), validate_points(absolute_points)
         )
         np.testing.assert_almost_equal(obj.estimate, validate_points(relative_points))
+
+
+@pytest.mark.parametrize("delay", [0, 1, 3])
+def test_count(delay):
+    #
+    # Test trackers count of objects
+    #
+    for counter_max in [delay + 1, delay + 3]:
+        #
+        # tests a simple static detection
+        #
+        tracker = Tracker(
+            "frobenius",
+            initialization_delay=delay,
+            distance_threshold=1,
+            hit_counter_max=counter_max,
+        )
+
+        detections = [Detection(points=np.array([[1, 1]]))]
+        for _ in range(delay):
+            assert len(tracker.update(detections)) == 0
+            assert tracker.total_object_count == 0
+            assert tracker.current_object_count == 0
+
+        assert len(tracker.update(detections)) == 1
+        assert tracker.total_object_count == 1
+        assert tracker.current_object_count == 1
+
+        for _ in range(delay + 1, 0, -1):
+            assert len(tracker.update()) == 1
+            assert tracker.total_object_count == 1
+            assert tracker.current_object_count == 1
+
+        assert len(tracker.update()) == 0
+        assert tracker.total_object_count == 1
+        assert tracker.current_object_count == 0
+
+        detections = [
+            Detection(points=np.array([[2, 2]])),
+            Detection(points=np.array([[3, 3]])),
+        ]
+        # test the delay
+        for _ in range(delay):
+            assert len(tracker.update(detections)) == 0
+            assert tracker.total_object_count == 1
+            assert tracker.current_object_count == 0
+
+        assert len(tracker.update(detections)) == 2
+        assert tracker.total_object_count == 3
+        assert tracker.current_object_count == 2
+
+        for _ in range(delay + 1, 0, -1):
+            assert len(tracker.update()) == 2
+            assert tracker.total_object_count == 3
+            assert tracker.current_object_count == 2
+
+        assert len(tracker.update()) == 0
+        assert tracker.total_object_count == 3
+        assert tracker.current_object_count == 0
+
+
+def test_multiple_trackers():
+    tracker1 = Tracker(
+        "frobenius",
+        initialization_delay=0,
+        distance_threshold=1,
+        hit_counter_max=2,
+    )
+    tracker2 = Tracker(
+        "frobenius",
+        initialization_delay=0,
+        distance_threshold=1,
+        hit_counter_max=2,
+    )
+    detections1 = [Detection(points=np.array([[1, 1]]))]
+    detections2 = [Detection(points=np.array([[2, 2]]))]
+
+    tracked_objects1 = tracker1.update(detections1)
+    assert len(tracked_objects1) == 1
+    tracked_objects2 = tracker2.update(detections2)
+    assert len(tracked_objects2) == 1
+
+    assert tracker1.total_object_count == 1
+    assert tracker2.total_object_count == 1
 
 
 # TODO tests list:
