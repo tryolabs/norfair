@@ -6,10 +6,33 @@ license = "BSD-3-Clause"
 authors = ["Tryolabs <hello@tryolabs.com>"]
 repository = "https://github.com/tryolabs/norfair"
 readme = "README.md"
+keywords = [
+    "tracking",
+    "object-detection",
+    "object-tracking",
+    "kalman-filter",
+    "pose-estimation",
+    "re-identification",
+    "multi-object-tracking",
+    "re-id",
+    "tracking-algorithm",
+    "deepsort",
+    "video-tracking",
+    "video-inference-loop"
+]
 classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
     "License :: OSI Approved :: BSD License",
-    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3.6",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Multimedia :: Video"
 ]
 
 [tool.poetry.dependencies]
