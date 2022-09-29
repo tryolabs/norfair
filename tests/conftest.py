@@ -1,6 +1,8 @@
 import numpy as np
 import pytest
 
+from norfair.utils import validate_points
+
 
 @pytest.fixture
 def mock_det():
@@ -30,3 +32,23 @@ def mock_obj(mock_det):
             self.last_detection = mock_det(points, scores=scores)
 
     return FakeTrackedObject
+
+
+@pytest.fixture
+def mock_coordinate_transformation():
+
+    # simple mock to return abs or relative positions
+    class TransformMock:
+        def __init__(self, relative_points, absolute_points) -> None:
+            self.absolute_points = validate_points(absolute_points)
+            self.relative_points = validate_points(relative_points)
+
+        def abs_to_rel(self, points):
+            np.testing.assert_equal(points, self.absolute_points)
+            return self.relative_points
+
+        def rel_to_abs(self, points):
+            np.testing.assert_equal(points, self.relative_points)
+            return self.absolute_points
+
+    return TransformMock
