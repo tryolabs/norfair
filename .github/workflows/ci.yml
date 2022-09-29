@@ -8,61 +8,69 @@ on:
   release:
     types: [published]
 
-jobs:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
 
+jobs:
   #
   # Builds our package and runs the tests under supported
   # versions of Python.
   #
-  unit-test:
+  unit-tests:
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 4
+      max-parallel: 5
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10"]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Install tox
+        run: |
+          pip install --upgrade pip
+          pip install --upgrade tox
+
       - name: Install Poetry
-        uses: snok/install-poetry@v1.1.1
+        if: "matrix.python-version != '3.6'"
+        uses: snok/install-poetry@v1
+
+      - name: Run tests under Python 3.6
+        if: "matrix.python-version == '3.6'"
+        run: |
+          tox -e py36
 
       - name: Run tests
+        if: "matrix.python-version != '3.6'"
         run: |
-          python3 -m venv ./venv
-          source venv/bin/activate
-          pip install --upgrade pip
-          python --version
-          poetry install
-          pytest -s tests/
-  
-  mot-metric:
+          tox -e py
+
+  mot-metrics:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Set up Python 3.9
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
-          python-version: 3.9
+          python-version: "3.9"
+
+      - name: Install tox
+        run: |
+          pip install --upgrade pip
+          pip install --upgrade tox
 
       - name: Install Poetry
-        uses: snok/install-poetry@v1.1.1
+        uses: snok/install-poetry@v1
 
       - name: Run tests
         run: |
-          python3 -m venv ./venv
-          source venv/bin/activate
-          pip install --upgrade pip
-          python --version
-          poetry install -E metrics
-          curl -O https://motchallenge.net/data/MOT17Labels.zip
-          unzip MOT17Labels.zip
-          python3 tests/mot_metrics.py
+          tox -e py39-mot
 
   #
   # Build & upload release to PyPI.
@@ -71,20 +79,20 @@ jobs:
   #
   release:
     runs-on: ubuntu-latest
-    needs: [unit-test, mot-metric]
+    needs: [unit-tests, mot-metrics]
     if: github.event_name == 'release'
     env:
       PYTHON_VERSION: 3.8
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version: "${{ env.PYTHON_VERSION }}"
 
       - name: Install Poetry
-        uses: snok/install-poetry@v1.1.1
+        uses: snok/install-poetry@v1
 
       - name: Release to PyPI
         env:

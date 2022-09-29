@@ -1,10 +1,10 @@
-![Norfair by Tryolabs logo](docs/img/logo.svg)
+![Norfair by Tryolabs logo](https://raw.githubusercontent.com/tryolabs/norfair/master/docs/img/logo.svg)
 
 [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/tryolabs/norfair-demo)
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tryolabs/norfair/blob/master/demos/colab/colab_demo.ipynb)
 
 ![PyPI - Python Versions](https://img.shields.io/pypi/pyversions/norfair)
-![PyPI](https://img.shields.io/pypi/v/norfair?color=green)
+[![PyPI](https://img.shields.io/pypi/v/norfair?color=green)](https://pypi.org/project/norfair/)
 [![Documentation](https://img.shields.io/badge/api-reference-blue?logo=readthedocs)](https://tryolabs.github.io/norfair/)
 [![Board](https://img.shields.io/badge/project-board-blue?logo=github)](https://github.com/tryolabs/norfair/projects/1)
 ![Build status](https://github.com/tryolabs/norfair/workflows/CI/badge.svg?branch=master)
@@ -15,9 +15,9 @@ Norfair is a customizable lightweight Python library for real-time multi-object 
 
 Using Norfair, you can add tracking capabilities to any detector with just a few lines of code.
 
-| Tracking players with moving camera |   Tracking 3D objects    |
-| :---------------------------------: | :----------------------: |
-|    ![](/docs/videos/soccer.gif)     | ![](/docs/videos/3d.gif) |
+|                                           Tracking players with moving camera                                           |                                           Tracking 3D objects                                           |
+| :---------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: |
+| ![Tracking players in a soccer match](https://raw.githubusercontent.com/tryolabs/norfair/master/docs/videos/soccer.gif) | ![Tracking objects in 3D](https://raw.githubusercontent.com/tryolabs/norfair/master/docs/videos/3d.gif) |
 
 ## Features
 
@@ -72,28 +72,28 @@ We provide several examples of how Norfair can be used to add tracking capabilit
 
 Most tracking demos are showcased with vehicles and pedestrians, but the detectors are generally trained with many more classes from the [COCO dataset](https://cocodataset.org/).
 
-1. [YOLOv7](demos/yolov7): tracking object centroids or bounding boxes.
-2. [YOLOv5](demos/yolov5): tracking object centroids or bounding boxes.
-3. [YOLOv4](demos/yolov4): tracking object centroids.
-4. [Detectron2](demos/detectron2): tracking object centroids.
-5. [AlphaPose](demos/alphapose): tracking human keypoints (pose estimation) and inserting Norfair into a complex existing pipeline using.
-6. [OpenPose](demos/openpose): tracking human keypoints.
+1. [YOLOv7](https://github.com/tryolabs/norfair/tree/master/demos/yolov7): tracking object centroids or bounding boxes.
+2. [YOLOv5](https://github.com/tryolabs/norfair/tree/master/demos/yolov5): tracking object centroids or bounding boxes.
+3. [YOLOv4](https://github.com/tryolabs/norfair/tree/master/demos/yolov4): tracking object centroids.
+4. [Detectron2](https://github.com/tryolabs/norfair/tree/master/demos/detectron2): tracking object centroids.
+5. [AlphaPose](https://github.com/tryolabs/norfair/tree/master/demos/alphapose): tracking human keypoints (pose estimation) and inserting Norfair into a complex existing pipeline using.
+6. [OpenPose](https://github.com/tryolabs/norfair/tree/master/demos/openpose): tracking human keypoints.
 
 ### Advanced features
 
-1. [Speed up pose estimation by extrapolating detections](demos/openpose) using [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose).
-2. [Track both bounding boxes and human keypoints](demos/keypoints_bounding_boxes) (multi-class), unifying the detections from a YOLO model and OpenPose.
-3. [Re-identification (ReID)](demos/reid) of tracked objects using appearance embeddings. This is a good starting point for scenarios with a lot of occlusion, in which the Kalman filter alone would struggle.
-4. [Accurately track objects even if the camera is moving](demos/camera_motion), by estimating camera motion potentially accounting for pan, tilt, rotation, movement in any direction, and zoom.
-5. [Track points in 3D](demos/3d_track), using [MediaPipe Objectron](https://google.github.io/mediapipe/solutions/objectron.html).
-6. [Small object tracking](demos/sahi), using [SAHI: Slicing Aided Hyper Inference](https://github.com/obss/sahi).
+1. [Speed up pose estimation by extrapolating detections](https://github.com/tryolabs/norfair/tree/master/demos/openpose) using [OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose).
+2. [Track both bounding boxes and human keypoints](https://github.com/tryolabs/norfair/tree/master/demos/keypoints_bounding_boxes) (multi-class), unifying the detections from a YOLO model and OpenPose.
+3. [Re-identification (ReID)](https://github.com/tryolabs/norfair/tree/master/demos/reid) of tracked objects using appearance embeddings. This is a good starting point for scenarios with a lot of occlusion, in which the Kalman filter alone would struggle.
+4. [Accurately track objects even if the camera is moving](https://github.com/tryolabs/norfair/tree/master/demos/camera_motion), by estimating camera motion potentially accounting for pan, tilt, rotation, movement in any direction, and zoom.
+5. [Track points in 3D](https://github.com/tryolabs/norfair/tree/master/demos/3d_track), using [MediaPipe Objectron](https://google.github.io/mediapipe/solutions/objectron.html).
+6. [Tracking of small objects](https://github.com/tryolabs/norfair/tree/master/demos/sahi), using [SAHI: Slicing Aided Hyper Inference](https://github.com/obss/sahi).
 
 ### Benchmarking and profiling
 
-1. [Kalman filter and distance function profiling](demos/profiling) using [TRT pose estimator](https://github.com/NVIDIA-AI-IOT/trt_pose).
-2. Computation of [MOT17](https://motchallenge.net/data/MOT17/) scores using [motmetrics4norfair](demos/motmetrics4norfair).
+1. [Kalman filter and distance function profiling](https://github.com/tryolabs/norfair/tree/master/demos/profiling) using [TRT pose estimator](https://github.com/NVIDIA-AI-IOT/trt_pose).
+2. Computation of [MOT17](https://motchallenge.net/data/MOT17/) scores using [motmetrics4norfair](https://github.com/tryolabs/norfair/tree/master/demos/motmetrics4norfair).
 
-![Norfair OpenPose Demo](docs/videos/openpose_skip_3_frames.gif)
+![Norfair OpenPose Demo](https://raw.githubusercontent.com/tryolabs/norfair/master/docs/videos/openpose_skip_3_frames.gif)
 
 ## How it works
 
@@ -108,7 +108,7 @@ The following is an example of a particularly simple distance function calculati
 
 As an example we use [Detectron2](https://github.com/facebookresearch/detectron2) to get the single point detections to use with this distance function. We just use the centroids of the bounding boxes it produces around cars as our detections, and get the following results.
 
-![Tracking cars with Norfair](docs/videos/traffic.gif)
+![Tracking cars with Norfair](https://raw.githubusercontent.com/tryolabs/norfair/master/docs/videos/traffic.gif)
 
 On the left you can see the points we get from Detectron2, and on the right how Norfair tracks them assigning a unique identifier through time. Even a straightforward distance function like this one can work when the tracking needed is simple.
 
@@ -201,4 +201,4 @@ For citations in academic publications, please export your desired citation form
 
 ## License
 
-Copyright © 2022, [Tryolabs](https://tryolabs.com). Released under the [BSD 3-Clause](LICENSE).
+Copyright © 2022, [Tryolabs](https://tryolabs.com). Released under the [BSD 3-Clause](https://github.com/tryolabs/norfair/blob/master/LICENSE).

@@ -6,32 +6,61 @@ license = "BSD-3-Clause"
 authors = ["Tryolabs <hello@tryolabs.com>"]
 repository = "https://github.com/tryolabs/norfair"
 readme = "README.md"
+keywords = [
+    "tracking",
+    "object-detection",
+    "object-tracking",
+    "kalman-filter",
+    "pose-estimation",
+    "re-identification",
+    "multi-object-tracking",
+    "re-id",
+    "tracking-algorithm",
+    "deepsort",
+    "video-tracking",
+    "video-inference-loop"
+]
 classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
     "License :: OSI Approved :: BSD License",
-    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3.6",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Multimedia :: Video"
 ]
 
 [tool.poetry.dependencies]
 python = "^3.6.1"
 filterpy = "^1.4.5"
 rich = ">=9.10.0, <13.0.0"
-opencv-python = {version = ">= 3.2.0, < 5.0.0", optional = true}
-motmetrics = {version = "1.2.0", optional = true}
+opencv-python = { version = ">= 3.2.0, < 5.0.0", optional = true }
+motmetrics = { version = "1.2.5", optional = true }
+importlib-metadata = { version = "4.8.3", python = "<3.8" }
 
 [tool.poetry.extras]
-metrics = ["motmetrics"]
+metrics = ["motmetrics", "importlib-metadata"]
 video = ["opencv-python"]
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.test.dependencies]
+pylint = "^2.12.0"
+pytest = "^6.2.5"
+tox = "^3.26.0"
+
+[tool.poetry.group.dev.dependencies]
 black = "^20.8b1"
-isort = "^5.7.0"
-pylint = "^2.6.0"
-pytest = "^6.2.2"
-tox = "^3.21.4"
+isort = "^5.10.1"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+# Need >= 1.1.0a6 to work on Python 3.6 or we get
+# "The Poetry configuration is invalid" because of dependency
+# groups. Otherwise can use >= 1.0.0.
+requires = ["poetry-core>=1.1.0a6"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.isort]

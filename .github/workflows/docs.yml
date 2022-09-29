@@ -31,20 +31,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Set up Python 3.7
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
-          python-version: 3.7
+          python-version: "3.7"
       - name: Setup MKDocs
         run: pip install -r docs/requirements.txt
       - name: Build Docs
-        run:  mkdocs build -d docs_site
+        run: mkdocs build -d docs_site
       - name: Setup Pages
         uses: actions/configure-pages@v2
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
           # Upload entire repository
-          path: 'docs_site'
+          path: "docs_site"
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1
