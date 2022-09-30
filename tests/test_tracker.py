@@ -9,6 +9,7 @@ from norfair import (
     OptimizedKalmanFilterFactory,
     Tracker,
 )
+from norfair.utils import validate_points
 
 
 def test_params():
@@ -152,6 +153,68 @@ def test_distance_t(filter_factory):
     # check that the estimated position makes sense
     assert tracked_objects[0].estimate[0][0] == 1
     assert 4 < tracked_objects[0].estimate[0][1] <= 4.5
+
+
+@pytest.mark.parametrize(
+    "filter_factory", [FilterPyKalmanFilterFactory(), OptimizedKalmanFilterFactory()]
+)
+def test_1d_points(filter_factory, mock_coordinate_transformation):
+    #
+    # Test a detection with rank 1
+    #
+    tracker = Tracker(
+        "frobenius",
+        initialization_delay=0,
+        distance_threshold=1,
+        filter_factory=filter_factory,
+    )
+    detection = Detection(points=np.array([1, 1]))
+    assert detection.points.shape == (1, 2)
+    assert detection.absolute_points.shape == (1, 2)
+    tracked_objects = tracker.update([detection])
+    assert len(tracked_objects) == 1
+    tracked_object = tracked_objects[0]
+    assert tracked_object.estimate.shape == (1, 2)
+
+
+def test_camera_motion(mock_coordinate_transformation):
+    #
+    # Simple test for camera motion
+    #
+    for one_d in [True, False]:
+        tracker = Tracker("frobenius", 1, initialization_delay=0)
+        if one_d:
+            absolute_points = np.array([1, 1])
+        else:
+            absolute_points = np.array([[1, 1]])
+
+        relative_points = absolute_points + 1
+
+        coord_transformation_mock = mock_coordinate_transformation(
+            relative_points=relative_points, absolute_points=absolute_points
+        )
+
+        detection = Detection(relative_points)
+        tracked_objects = tracker.update(
+            [detection], coord_transformations=coord_transformation_mock
+        )
+
+        # assert that the detection was correctly updated
+        np.testing.assert_equal(
+            detection.absolute_points, validate_points(absolute_points)
+        )
+        np.testing.assert_equal(detection.points, validate_points(relative_points))
+
+        # check the tracked_object
+        assert len(tracked_objects) == 1
+        obj = tracked_objects[0]
+        np.testing.assert_almost_equal(
+            obj.get_estimate(absolute=False), validate_points(relative_points)
+        )
+        np.testing.assert_almost_equal(
+            obj.get_estimate(absolute=True), validate_points(absolute_points)
+        )
+        np.testing.assert_almost_equal(obj.estimate, validate_points(relative_points))
 
 
 # TODO tests list:

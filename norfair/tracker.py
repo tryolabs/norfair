@@ -438,18 +438,14 @@ class TrackedObject:
         reid_hit_counter_max: Optional[int],
         abs_to_rel: Callable[[np.array], np.array],
     ):
-        try:
-            initial_detection_points = validate_points(
-                initial_detection.absolute_points
-            )
-        except AttributeError:
+        if not isinstance(initial_detection, Detection):
             print(
                 f"\n[red]ERROR[/red]: The detection list fed into `tracker.update()` should be composed of {Detection} objects not {type(initial_detection)}.\n"
             )
             exit()
 
-        self.dim_points = initial_detection_points.shape[1]
-        self.num_points = initial_detection_points.shape[0]
+        self.dim_points = initial_detection.absolute_points.shape[1]
+        self.num_points = initial_detection.absolute_points.shape[0]
         self.hit_counter_max: int = hit_counter_max
         self.pointwise_hit_counter_max: int = pointwise_hit_counter_max
         self.initialization_delay = initialization_delay
@@ -487,7 +483,7 @@ class TrackedObject:
             self.past_detections: Sequence["Detection"] = []
 
         # Create Kalman Filter
-        self.filter = filter_factory.create_filter(initial_detection_points)
+        self.filter = filter_factory.create_filter(initial_detection.absolute_points)
         self.dim_z = self.dim_points * self.num_points
         self.label = initial_detection.label
         self.abs_to_rel = abs_to_rel
@@ -550,7 +546,6 @@ class TrackedObject:
         return self.point_hit_counter > 0
 
     def hit(self, detection: "Detection", period: int = 1):
-        points = validate_points(detection.absolute_points)
         self._conditionally_add_to_past_detections(detection)
 
         self.last_detection = detection
@@ -580,7 +575,9 @@ class TrackedObject:
         self.point_hit_counter[self.point_hit_counter < 0] = 0
         H_vel = np.zeros(H_pos.shape)  # But we don't directly measure velocity
         H = np.hstack([H_pos, H_vel])
-        self.filter.update(np.expand_dims(points.flatten(), 0).T, None, H)
+        self.filter.update(
+            np.expand_dims(detection.absolute_points.flatten(), 0).T, None, H
+        )
 
         # Force points being detected for the first time to have velocity = 0
         # This is needed because some detectors (like OpenPose) set points with
@@ -600,7 +597,7 @@ class TrackedObject:
         )
 
         self.filter.x[: self.dim_z][first_detection_mask] = np.expand_dims(
-            points.flatten(), 0
+            detection.absolute_points.flatten(), 0
         ).T[first_detection_mask]
 
         self.filter.x[self.dim_z :][np.logical_not(detected_at_least_once_mask)] = 0
@@ -690,9 +687,9 @@ class Detection:
         label: Hashable = None,
         embedding=None,
     ):
-        self.points = points
+        self.points = validate_points(points)
         self.scores = scores
         self.data = data
         self.label = label
-        self.absolute_points = points.copy()
+        self.absolute_points = self.points.copy()
         self.embedding = embedding
