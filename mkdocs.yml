@@ -50,6 +50,13 @@ plugins:
   - gen-files:
       scripts:
       - docs/gen_index.py
+  - mike:
+      version_selector: true
+
+extra:
+  version:
+    provider: mike
+    default: latest
 
 markdown_extensions:
     - toc:
