@@ -248,13 +248,14 @@ def _get_sparse_flow(
     min_distance=15,
     block_size=3,
     mask=None,
+    quality_level=0.01,
 ):
     if prev_pts is None:
         # get points
         prev_pts = cv2.goodFeaturesToTrack(
             gray_prvs,
             maxCorners=max_points,
-            qualityLevel=0.01,
+            qualityLevel=quality_level,
             minDistance=min_distance,
             blockSize=block_size,
             mask=mask,
@@ -293,6 +294,8 @@ class MotionEstimator:
         Draws the optical flow on the frame for debugging.
     flow_color : Optional[Tuple[int, int, int]], optional
         Color of the drawing, by default blue.
+    quality_level : float, optional
+        Parameter characterizing the minimal accepted quality of image corners.
 
     Examples
     --------
@@ -319,6 +322,7 @@ class MotionEstimator:
         transformations_getter: TransformationGetter = None,
         draw_flow: bool = False,
         flow_color: Optional[Tuple[int, int, int]] = None,
+        quality_level: float = 0.01,
     ):
 
         self.max_points = max_points
@@ -338,6 +342,7 @@ class MotionEstimator:
         self.transformations_getter = transformations_getter
         self.prev_mask = None
         self.gray_next = None
+        self.quality_level = quality_level
 
     def update(
         self, frame: np.ndarray, mask: np.ndarray = None
@@ -378,7 +383,8 @@ class MotionEstimator:
             self.max_points,
             self.min_distance,
             self.block_size,
-            mask=self.prev_mask,
+            self.prev_mask,
+            quality_level=self.quality_level,
         )
         if self.draw_flow:
             for (curr, prev) in zip(curr_pts, self.prev_pts):
