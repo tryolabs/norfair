@@ -30,21 +30,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Fetch gh-pages branch
+        run: git fetch origin gh-pages
       - name: Set up Python 3.7
         uses: actions/setup-python@v4
         with:
           python-version: "3.7"
-      - name: Setup MKDocs
+      - name: Setup a user for the commits
+        run: |
+          git config user.name ci-bot 
+          git config user.email ci-bot@tryolabs.com
+      - name: Installing dependencies
         run: pip install -r docs/requirements.txt
-      - name: Build Docs
-        run: mkdocs build -d docs_site
-      - name: Setup Pages
-        uses: actions/configure-pages@v2
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
-        with:
-          # Upload entire repository
-          path: "docs_site"
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v1
+      - name: Updating "dev"
+        run: mike deploy -push dev
+      
