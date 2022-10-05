@@ -1,0 +1,894 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      <link rel="icon" href="img/icon.svg">
+      <meta name="generator" content="mkdocs-1.4.0, mkdocs-material-8.4.1">
+    
+    
+      
+        <title>Norfair</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.69437709.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.cbb835fc.min.css">
+        
+      
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="css/custom.css">
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#features" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="." title="Norfair" class="md-header__button md-logo" aria-label="Norfair" data-md-component="logo">
+      
+  <img src="img/logo-dark.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Norfair
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Home
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/tryolabs/norfair" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    tryolabs/norfair
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="Norfair" class="md-nav__button md-logo" aria-label="Norfair" data-md-component="logo">
+      
+  <img src="img/logo-dark.svg" alt="logo">
+
+    </a>
+    Norfair
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/tryolabs/norfair" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    tryolabs/norfair
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1" type="checkbox" id="__nav_1" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_1">
+          Reference
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Reference" data-md-level="1">
+        <label class="md-nav__title" for="__nav_1">
+          <span class="md-nav__icon md-icon"></span>
+          Reference
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/tracker/" class="md-nav__link">
+        Tracker
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/drawing/" class="md-nav__link">
+        Drawing
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/video/" class="md-nav__link">
+        Video
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/distances/" class="md-nav__link">
+        Distances
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/camera_motion/" class="md-nav__link">
+        Camera Motion
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/filter/" class="md-nav__link">
+        Filter
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/utils/" class="md-nav__link">
+        Utils
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#features" class="md-nav__link">
+    Features
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    Installation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    Documentation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples-demos" class="md-nav__link">
+    Examples &amp; demos
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples &amp; demos">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#adding-tracking-to-different-detectors" class="md-nav__link">
+    Adding tracking to different detectors
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-features" class="md-nav__link">
+    Advanced features
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#benchmarking-and-profiling" class="md-nav__link">
+    Benchmarking and profiling
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    How it works
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#motivation" class="md-nav__link">
+    Motivation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#comparison-to-other-trackers" class="md-nav__link">
+    Comparison to other trackers
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#benchmarks" class="md-nav__link">
+    Benchmarks
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#commercial-support" class="md-nav__link">
+    Commercial support
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#citing-norfair" class="md-nav__link">
+    Citing Norfair
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#license" class="md-nav__link">
+    License
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+
+
+  <h1>Home</h1>
+
+<p><img alt="Norfair by Tryolabs logo" src="https://raw.githubusercontent.com/tryolabs/norfair/master/docs/img/logo.svg" /></p>
+<p><a href="https://huggingface.co/spaces/tryolabs/norfair-demo"><img alt="Hugging Face Spaces" src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue" /></a>
+<a href="https://colab.research.google.com/github/tryolabs/norfair/blob/master/demos/colab/colab_demo.ipynb"><img alt="Open in Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></p>
+<p><img alt="PyPI - Python Versions" src="https://img.shields.io/pypi/pyversions/norfair" />
+<a href="https://pypi.org/project/norfair/"><img alt="PyPI" src="https://img.shields.io/pypi/v/norfair?color=green" /></a>
+<a href="https://tryolabs.github.io/norfair/"><img alt="Documentation" src="https://img.shields.io/badge/api-reference-blue?logo=readthedocs" /></a>
+<a href="https://github.com/tryolabs/norfair/projects/1"><img alt="Board" src="https://img.shields.io/badge/project-board-blue?logo=github" /></a>
+<img alt="Build status" src="https://github.com/tryolabs/norfair/workflows/CI/badge.svg?branch=master" />
+<a href="https://zenodo.org/badge/latestdoi/276473370"><img alt="DOI" src="https://zenodo.org/badge/276473370.svg" /></a>
+<a href="https://github.com/tryolabs/norfair/blob/master/LICENSE"><img alt="License" src="https://img.shields.io/github/license/tryolabs/norfair" /></a></p>
+<p>Norfair is a customizable lightweight Python library for real-time multi-object tracking.</p>
+<p>Using Norfair, you can add tracking capabilities to any detector with just a few lines of code.</p>
+<table>
+<thead>
+<tr>
+<th align="center">Tracking players with moving camera</th>
+<th align="center">Tracking 3D objects</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><img alt="Tracking players in a soccer match" src="https://raw.githubusercontent.com/tryolabs/norfair/master/docs/videos/soccer.gif" /></td>
+<td align="center"><img alt="Tracking objects in 3D" src="https://raw.githubusercontent.com/tryolabs/norfair/master/docs/videos/3d.gif" /></td>
+</tr>
+</tbody>
+</table>
+<h2 id="features">Features<a class="headerlink" href="#features" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Any detector expressing its detections as a series of <code>(x, y)</code> coordinates can be used with Norfair. This includes detectors performing tasks such as object or keypoint detection (see <a href="#examples--demos">examples</a>).</p>
+</li>
+<li>
+<p>Modular. It can easily be inserted into complex video processing pipelines to add tracking to existing projects. At the same time, it is possible to build a video inference loop from scratch using just Norfair and a detector.</p>
+</li>
+<li>
+<p>Supports moving camera, re-identification with appearance embeddings, and n-dimensional object tracking (see <a href="#advanced-features">Advanced features</a>).</p>
+</li>
+<li>
+<p>The function used to calculate the distance between tracked objects and detections is defined by the user, enabling the implementation of different tracking strategies.</p>
+</li>
+<li>
+<p>Fast. The only thing bounding inference speed will be the detection network feeding detections to Norfair.</p>
+</li>
+</ul>
+<p>Norfair is built, used and maintained by <a href="https://tryolabs.com">Tryolabs</a>.</p>
+<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">#</a></h2>
+<p>Norfair currently supports Python 3.6+.</p>
+<p>For the minimal version, install as:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>pip install norfair
+</code></pre></div></td></tr></table></div>
+<p>To make Norfair install the dependencies to support more features, install as:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code>pip install norfair<span class="o">[</span>video<span class="o">]</span>  <span class="c1"># Adds several video helper features running on OpenCV</span>
+pip install norfair<span class="o">[</span>metrics<span class="o">]</span>  <span class="c1"># Supports running MOT metrics evaluation</span>
+pip install norfair<span class="o">[</span>metrics,video<span class="o">]</span>  <span class="c1"># Everything included</span>
+</code></pre></div></td></tr></table></div>
+<p>If the needed dependencies are already present in the system, installing the minimal version of Norfair is enough for enabling the extra features. This is particularly useful for embedded devices, where installing compiled dependencies can be difficult, but they can sometimes come preinstalled with the system.</p>
+<h2 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">#</a></h2>
+<p><a href="https://tryolabs.github.io/norfair/">Official reference available here</a>.</p>
+<h2 id="examples-demos">Examples &amp; demos<a class="headerlink" href="#examples-demos" title="Permanent link">#</a></h2>
+<p><a href="https://huggingface.co/spaces/tryolabs/norfair-demo"><img alt="Hugging Face Spaces" src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue" /></a>
+<a href="https://colab.research.google.com/github/tryolabs/norfair/blob/master/demos/colab/colab_demo.ipynb"><img alt="Open in Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></p>
+<p>We provide several examples of how Norfair can be used to add tracking capabilities to different detectors, and also showcase more advanced features.</p>
+<blockquote>
+<p>Note: for ease of reproducibility, we provide Dockerfiles for all the demos. Even though Norfair does not need a GPU, the default configuration of most demos requires a GPU to be able to run the detectors. For this, make sure you install <a href="https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html">NVIDIA Container Toolkit</a> so that your GPU can be shared with Docker.</p>
+<p>It is possible to run several demos with a CPU, but you will have to modify the scripts or tinker with the installation of their dependencies.</p>
+</blockquote>
+<h3 id="adding-tracking-to-different-detectors">Adding tracking to different detectors<a class="headerlink" href="#adding-tracking-to-different-detectors" title="Permanent link">#</a></h3>
+<p>Most tracking demos are showcased with vehicles and pedestrians, but the detectors are generally trained with many more classes from the <a href="https://cocodataset.org/">COCO dataset</a>.</p>
+<ol>
+<li><a href="https://github.com/tryolabs/norfair/tree/master/demos/yolov7">YOLOv7</a>: tracking object centroids or bounding boxes.</li>
+<li><a href="https://github.com/tryolabs/norfair/tree/master/demos/yolov5">YOLOv5</a>: tracking object centroids or bounding boxes.</li>
+<li><a href="https://github.com/tryolabs/norfair/tree/master/demos/yolov4">YOLOv4</a>: tracking object centroids.</li>
+<li><a href="https://github.com/tryolabs/norfair/tree/master/demos/detectron2">Detectron2</a>: tracking object centroids.</li>
+<li><a href="https://github.com/tryolabs/norfair/tree/master/demos/alphapose">AlphaPose</a>: tracking human keypoints (pose estimation) and inserting Norfair into a complex existing pipeline using.</li>
+<li><a href="https://github.com/tryolabs/norfair/tree/master/demos/openpose">OpenPose</a>: tracking human keypoints.</li>
+</ol>
+<h3 id="advanced-features">Advanced features<a class="headerlink" href="#advanced-features" title="Permanent link">#</a></h3>
+<ol>
+<li><a href="https://github.com/tryolabs/norfair/tree/master/demos/openpose">Speed up pose estimation by extrapolating detections</a> using <a href="https://github.com/CMU-Perceptual-Computing-Lab/openpose">OpenPose</a>.</li>
+<li><a href="https://github.com/tryolabs/norfair/tree/master/demos/keypoints_bounding_boxes">Track both bounding boxes and human keypoints</a> (multi-class), unifying the detections from a YOLO model and OpenPose.</li>
+<li><a href="https://github.com/tryolabs/norfair/tree/master/demos/reid">Re-identification (ReID)</a> of tracked objects using appearance embeddings. This is a good starting point for scenarios with a lot of occlusion, in which the Kalman filter alone would struggle.</li>
+<li><a href="https://github.com/tryolabs/norfair/tree/master/demos/camera_motion">Accurately track objects even if the camera is moving</a>, by estimating camera motion potentially accounting for pan, tilt, rotation, movement in any direction, and zoom.</li>
+<li><a href="https://github.com/tryolabs/norfair/tree/master/demos/3d_track">Track points in 3D</a>, using <a href="https://google.github.io/mediapipe/solutions/objectron.html">MediaPipe Objectron</a>.</li>
+<li><a href="https://github.com/tryolabs/norfair/tree/master/demos/sahi">Tracking of small objects</a>, using <a href="https://github.com/obss/sahi">SAHI: Slicing Aided Hyper Inference</a>.</li>
+</ol>
+<h3 id="benchmarking-and-profiling">Benchmarking and profiling<a class="headerlink" href="#benchmarking-and-profiling" title="Permanent link">#</a></h3>
+<ol>
+<li><a href="https://github.com/tryolabs/norfair/tree/master/demos/profiling">Kalman filter and distance function profiling</a> using <a href="https://github.com/NVIDIA-AI-IOT/trt_pose">TRT pose estimator</a>.</li>
+<li>Computation of <a href="https://motchallenge.net/data/MOT17/">MOT17</a> scores using <a href="https://github.com/tryolabs/norfair/tree/master/demos/motmetrics4norfair">motmetrics4norfair</a>.</li>
+</ol>
+<p><img alt="Norfair OpenPose Demo" src="https://raw.githubusercontent.com/tryolabs/norfair/master/docs/videos/openpose_skip_3_frames.gif" /></p>
+<h2 id="how-it-works">How it works<a class="headerlink" href="#how-it-works" title="Permanent link">#</a></h2>
+<p>Norfair works by estimating the future position of each point based on its past positions. It then tries to match these estimated positions with newly detected points provided by the detector. For this matching to occur, Norfair can rely on any distance function specified by the user of the library. Therefore, each object tracker can be made as simple or as complex as needed.</p>
+<p>The following is an example of a particularly simple distance function calculating the Euclidean distance between tracked objects and detections. This is possibly the simplest distance function you could use in Norfair, as it uses just one single point per detection/object.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code> <span class="k">def</span> <span class="nf">euclidean_distance</span><span class="p">(</span><span class="n">detection</span><span class="p">,</span> <span class="n">tracked_object</span><span class="p">):</span>
+     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">detection</span><span class="o">.</span><span class="n">points</span> <span class="o">-</span> <span class="n">tracked_object</span><span class="o">.</span><span class="n">estimate</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>As an example we use <a href="https://github.com/facebookresearch/detectron2">Detectron2</a> to get the single point detections to use with this distance function. We just use the centroids of the bounding boxes it produces around cars as our detections, and get the following results.</p>
+<p><img alt="Tracking cars with Norfair" src="https://raw.githubusercontent.com/tryolabs/norfair/master/docs/videos/traffic.gif" /></p>
+<p>On the left you can see the points we get from Detectron2, and on the right how Norfair tracks them assigning a unique identifier through time. Even a straightforward distance function like this one can work when the tracking needed is simple.</p>
+<p>Norfair also provides several useful tools for creating a video inference loop. Here is what the full code for creating the previous example looks like, including the code needed to set up Detectron2:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">cv2</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">detectron2.config</span> <span class="kn">import</span> <span class="n">get_cfg</span>
+<span class="kn">from</span> <span class="nn">detectron2.engine</span> <span class="kn">import</span> <span class="n">DefaultPredictor</span>
+
+<span class="kn">from</span> <span class="nn">norfair</span> <span class="kn">import</span> <span class="n">Detection</span><span class="p">,</span> <span class="n">Tracker</span><span class="p">,</span> <span class="n">Video</span><span class="p">,</span> <span class="n">draw_tracked_objects</span>
+
+<span class="c1"># Set up Detectron2 object detector</span>
+<span class="n">cfg</span> <span class="o">=</span> <span class="n">get_cfg</span><span class="p">()</span>
+<span class="n">cfg</span><span class="o">.</span><span class="n">merge_from_file</span><span class="p">(</span><span class="s2">&quot;demos/faster_rcnn_R_50_FPN_3x.yaml&quot;</span><span class="p">)</span>
+<span class="n">cfg</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">ROI_HEADS</span><span class="o">.</span><span class="n">SCORE_THRESH_TEST</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="n">cfg</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">WEIGHTS</span> <span class="o">=</span> <span class="s2">&quot;detectron2://COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x/137849600/model_final_f10217.pkl&quot;</span>
+<span class="n">detector</span> <span class="o">=</span> <span class="n">DefaultPredictor</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+
+<span class="c1"># Norfair</span>
+<span class="n">video</span> <span class="o">=</span> <span class="n">Video</span><span class="p">(</span><span class="n">input_path</span><span class="o">=</span><span class="s2">&quot;video.mp4&quot;</span><span class="p">)</span>
+<span class="n">tracker</span> <span class="o">=</span> <span class="n">Tracker</span><span class="p">(</span><span class="n">distance_function</span><span class="o">=</span><span class="n">euclidean_distance</span><span class="p">,</span> <span class="n">distance_threshold</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">frame</span> <span class="ow">in</span> <span class="n">video</span><span class="p">:</span>
+    <span class="n">detections</span> <span class="o">=</span> <span class="n">detector</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2RGB</span><span class="p">))</span>
+    <span class="n">detections</span> <span class="o">=</span> <span class="p">[</span><span class="n">Detection</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">detections</span><span class="p">[</span><span class="s1">&#39;instances&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">pred_boxes</span><span class="o">.</span><span class="n">get_centers</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()]</span>
+    <span class="n">tracked_objects</span> <span class="o">=</span> <span class="n">tracker</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">detections</span><span class="o">=</span><span class="n">detections</span><span class="p">)</span>
+    <span class="n">draw_tracked_objects</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">tracked_objects</span><span class="p">)</span>
+    <span class="n">video</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>The video and drawing tools use OpenCV frames, so they are compatible with most Python video code available online. The point tracking is based on <a href="https://arxiv.org/abs/1602.00763">SORT</a> generalized to detections consisting of a dynamically changing number of points per detection.</p>
+<h2 id="motivation">Motivation<a class="headerlink" href="#motivation" title="Permanent link">#</a></h2>
+<p>Trying out the latest state-of-the-art detectors normally requires running repositories that weren't intended to be easy to use. These tend to be repositories associated with a research paper describing a novel new way of doing detection, and they are therefore intended to be run as a one-off evaluation script to get some result metric to publish on a particular research paper. This explains why they tend to not be easy to run as inference scripts, or why extracting the core model to use in another standalone script isn't always trivial.</p>
+<p>Norfair was born out of the need to quickly add a simple layer of tracking over a wide range of newly released SOTA detectors. It was designed to seamlessly be plugged into a complex, highly coupled code base, with minimum effort. Norfair provides a series of modular but compatible tools, which you can pick and choose to use in your project.</p>
+<h2 id="comparison-to-other-trackers">Comparison to other trackers<a class="headerlink" href="#comparison-to-other-trackers" title="Permanent link">#</a></h2>
+<p>Norfair's contribution to Python's object tracker library repertoire is its ability to work with any object detector by being able to work with a variable number of points per detection, and the ability for the user to heavily customize the tracker by creating their own distance function.</p>
+<p>If you are looking for a tracker, here are some other projects worth noting:</p>
+<ul>
+<li><a href="https://opencv.org"><strong>OpenCV</strong></a> includes several tracking solutions like <a href="https://docs.opencv.org/3.4/d2/dff/classcv_1_1TrackerKCF.html">KCF Tracker</a> and <a href="https://docs.opencv.org/3.4/d7/d86/classcv_1_1TrackerMedianFlow.html">MedianFlow Tracker</a> which are run by making the user select a part of the frame to track, and then letting the tracker follow that area. They tend not to be run on top of a detector and are not very robust.</li>
+<li><a href="http://dlib.net"><strong>dlib</strong></a> includes a correlation single object tracker. You have to create your own multiple object tracker on top of it yourself if you want to track multiple objects with it.</li>
+<li><a href="https://github.com/MVIG-SJTU/AlphaPose"><strong>AlphaPose</strong></a> just released a new version of their human pose tracker. This tracker is tightly integrated into their code base, and to the task of tracking human poses.</li>
+<li><a href="https://github.com/abewley/sort"><strong>SORT</strong></a> and <a href="https://github.com/nwojke/deep_sort"><strong>Deep SORT</strong></a> are similar to this repo in that they use Kalman filters (and a deep embedding for Deep SORT), but they are hardcoded to a fixed distance function and to tracking boxes. Norfair also adds some filtering when matching tracked objects with detections, and changes the Hungarian Algorithm for its own distance minimizer. Both these repos are also released under the GPL license, which might be an issue for some individuals or companies because the source code of derivative works needs to be published.</li>
+</ul>
+<h2 id="benchmarks">Benchmarks<a class="headerlink" href="#benchmarks" title="Permanent link">#</a></h2>
+<p><a href="https://motchallenge.net/data/MOT17/">MOT17</a> results obtained using <a href="https://github.com/tryolabs/norfair/tree/master/demos/motmetrics4norfair">motmetrics4norfair</a> demo script. Hyperparameters were tuned for reaching a high <code>MOTA</code> on this dataset. A more balanced set of hyperparameters, like the default ones used in the other demos, is recommended for production.</p>
+<table>
+<thead>
+<tr>
+<th align="center"></th>
+<th align="center">Rcll</th>
+<th align="center">Prcn</th>
+<th align="center">GT MT PT ML</th>
+<th align="center">FP FN IDs FM</th>
+<th align="center">MOTA MOTP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">MOT17-13-DPM</td>
+<td align="center">18.5%</td>
+<td align="center">85.8%</td>
+<td align="center">110 6 31 73</td>
+<td align="center">355 9490 90 100</td>
+<td align="center">14.7% 26.7%</td>
+</tr>
+<tr>
+<td align="center">MOT17-04-FRCNN</td>
+<td align="center">56.3%</td>
+<td align="center">93.2%</td>
+<td align="center">83 18 43 22</td>
+<td align="center">1959 20775 90 104</td>
+<td align="center">52.0% 10.7%</td>
+</tr>
+<tr>
+<td align="center">MOT17-11-FRCNN</td>
+<td align="center">61.4%</td>
+<td align="center">92.9%</td>
+<td align="center">75 18 34 23</td>
+<td align="center">443 3639 65 62</td>
+<td align="center">56.1% 10.2%</td>
+</tr>
+<tr>
+<td align="center">MOT17-04-SDP</td>
+<td align="center">77.5%</td>
+<td align="center">97.4%</td>
+<td align="center">83 49 25 9</td>
+<td align="center">1003 10680 232 257</td>
+<td align="center">74.9% 13.2%</td>
+</tr>
+<tr>
+<td align="center">MOT17-13-SDP</td>
+<td align="center">57.6%</td>
+<td align="center">83.3%</td>
+<td align="center">110 46 26 38</td>
+<td align="center">1349 4934 164 163</td>
+<td align="center">44.6% 20.0%</td>
+</tr>
+<tr>
+<td align="center">MOT17-05-DPM</td>
+<td align="center">38.1%</td>
+<td align="center">82.9%</td>
+<td align="center">133 11 58 64</td>
+<td align="center">544 4281 90 100</td>
+<td align="center">28.9% 24.3%</td>
+</tr>
+<tr>
+<td align="center">MOT17-09-DPM</td>
+<td align="center">59.7%</td>
+<td align="center">75.1%</td>
+<td align="center">26 4 17 5</td>
+<td align="center">1052 2147 120 117</td>
+<td align="center">37.7% 26.3%</td>
+</tr>
+<tr>
+<td align="center">MOT17-10-DPM</td>
+<td align="center">37.5%</td>
+<td align="center">84.9%</td>
+<td align="center">57 6 19 32</td>
+<td align="center">856 8024 127 153</td>
+<td align="center">29.8% 24.9%</td>
+</tr>
+<tr>
+<td align="center">MOT17-02-SDP</td>
+<td align="center">50.9%</td>
+<td align="center">75.9%</td>
+<td align="center">62 11 38 13</td>
+<td align="center">3003 9122 272 290</td>
+<td align="center">33.3% 18.4%</td>
+</tr>
+<tr>
+<td align="center">MOT17-11-DPM</td>
+<td align="center">54.2%</td>
+<td align="center">84.7%</td>
+<td align="center">75 12 24 39</td>
+<td align="center">927 4321 87 63</td>
+<td align="center">43.5% 21.7%</td>
+</tr>
+<tr>
+<td align="center">MOT17-09-FRCNN</td>
+<td align="center">58.5%</td>
+<td align="center">98.5%</td>
+<td align="center">26 7 17 2</td>
+<td align="center">49 2209 40 39</td>
+<td align="center">56.8% 9.6%</td>
+</tr>
+<tr>
+<td align="center">MOT17-11-SDP</td>
+<td align="center">75.7%</td>
+<td align="center">90.9%</td>
+<td align="center">75 34 30 11</td>
+<td align="center">719 2297 112 105</td>
+<td align="center">66.9% 14.1%</td>
+</tr>
+<tr>
+<td align="center">MOT17-02-FRCNN</td>
+<td align="center">36.5%</td>
+<td align="center">79.5%</td>
+<td align="center">62 7 26 29</td>
+<td align="center">1751 11796 124 136</td>
+<td align="center">26.4% 13.4%</td>
+</tr>
+<tr>
+<td align="center">MOT17-05-FRCNN</td>
+<td align="center">54.9%</td>
+<td align="center">90.0%</td>
+<td align="center">133 23 69 41</td>
+<td align="center">420 3123 78 84</td>
+<td align="center">47.7% 18.0%</td>
+</tr>
+<tr>
+<td align="center">MOT17-04-DPM</td>
+<td align="center">42.5%</td>
+<td align="center">83.5%</td>
+<td align="center">83 7 44 32</td>
+<td align="center">3985 27335 406 432</td>
+<td align="center">33.2% 21.1%</td>
+</tr>
+<tr>
+<td align="center">MOT17-10-SDP</td>
+<td align="center">74.1%</td>
+<td align="center">88.0%</td>
+<td align="center">57 30 24 3</td>
+<td align="center">1295 3323 283 286</td>
+<td align="center">61.8% 19.8%</td>
+</tr>
+<tr>
+<td align="center">MOT17-10-FRCNN</td>
+<td align="center">60.9%</td>
+<td align="center">75.7%</td>
+<td align="center">57 14 37 6</td>
+<td align="center">2507 5020 310 306</td>
+<td align="center">39.0% 17.2%</td>
+</tr>
+<tr>
+<td align="center">MOT17-09-SDP</td>
+<td align="center">67.7%</td>
+<td align="center">94.6%</td>
+<td align="center">26 12 14 0</td>
+<td align="center">204 1722 54 56</td>
+<td align="center">62.8% 13.0%</td>
+</tr>
+<tr>
+<td align="center">MOT17-02-DPM</td>
+<td align="center">20.2%</td>
+<td align="center">81.4%</td>
+<td align="center">62 5 14 43</td>
+<td align="center">856 14833 113 109</td>
+<td align="center">15.0% 24.6%</td>
+</tr>
+<tr>
+<td align="center">MOT17-13-FRCNN</td>
+<td align="center">59.3%</td>
+<td align="center">74.7%</td>
+<td align="center">110 33 53 24</td>
+<td align="center">2334 4735 342 331</td>
+<td align="center">36.3% 18.4%</td>
+</tr>
+<tr>
+<td align="center">MOT17-05-SDP</td>
+<td align="center">66.8%</td>
+<td align="center">87.9%</td>
+<td align="center">133 32 81 20</td>
+<td align="center">637 2299 134 133</td>
+<td align="center">55.6% 16.5%</td>
+</tr>
+<tr>
+<td align="center">OVERALL</td>
+<td align="center">53.7%</td>
+<td align="center">87.3%</td>
+<td align="center">1638 385 724 529</td>
+<td align="center">26248 156135 3333 3426</td>
+<td align="center">44.9% 16.4%</td>
+</tr>
+</tbody>
+</table>
+<h2 id="commercial-support">Commercial support<a class="headerlink" href="#commercial-support" title="Permanent link">#</a></h2>
+<p>Tryolabs can provide commercial support, implement new features in Norfair or build video analytics tools for solving your challenging problems. Norfair powers several video analytics applications, such as the <a href="https://tryolabs.com/blog/2020/07/09/face-mask-detection-in-street-camera-video-streams-using-ai-behind-the-curtain/">face mask detection</a> tool.</p>
+<p>If you are interested, please <a href="mailto:hello@tryolabs.com">contact us</a>.</p>
+<h2 id="citing-norfair">Citing Norfair<a class="headerlink" href="#citing-norfair" title="Permanent link">#</a></h2>
+<p>For citations in academic publications, please export your desired citation format (BibTeX or other) from <a href="https://doi.org/10.5281/zenodo.5146253">Zenodo</a>.</p>
+<h2 id="license">License<a class="headerlink" href="#license" title="Permanent link">#</a></h2>
+<p>Copyright © 2022, <a href="https://tryolabs.com">Tryolabs</a>. Released under the <a href="https://github.com/tryolabs/norfair/blob/master/LICENSE">BSD 3-Clause</a>.</p>
+
+
+
+
+              
+            </article>
+            
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": ".", "features": ["navigation.instant", "navigation.tracking", "navigation.sections"], "search": "assets/javascripts/workers/search.ecf98df9.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="assets/javascripts/bundle.9c69f0bc.min.js"></script>
+      
+        <script src="js/math.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
