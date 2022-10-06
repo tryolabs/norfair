@@ -6,11 +6,22 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Download the MOT17 dataset
 WORKDIR /
-# To download Detections + Ground Truth (9.7 MB)
-RUN curl -O https://motchallenge.net/data/MOT17Labels.zip && \
-    unzip MOT17Labels.zip -d MOT17
+# Download the MOT17 dataset
+RUN curl -O https://motchallenge.net/data/MOT17.zip && \
+    unzip MOT17.zip
+RUN rm -rf MOT17/test
+
+# Download the MOT20 dataset
+RUN curl -O https://motchallenge.net/data/MOT20.zip && \
+    unzip MOT20.zip
+RUN rm -rf MOT20/test
+
+# Replace MOT Challenge's detections for ByteTrack's detections
+RUN pip install gdown && \
+    gdown --folder https://drive.google.com/drive/folders/1m8alcbgt3e3XAWCq-iOQknGFKqFwSwt0?usp=sharing
+RUN cp -r bytetrack_detections/MOT17/train/ /MOT17/
+RUN cp -r bytetrack_detections/MOT20/train/ /MOT20/
 
 WORKDIR /demo
 COPY requirements.txt requirements.txt
