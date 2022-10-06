@@ -3,15 +3,29 @@ import os.path
 
 import numpy as np
 
-from norfair import Tracker, drawing, metrics, video
+from norfair import drawing, metrics, Tracker, video
+from norfair.camera_motion import MotionEstimator
+from norfair.distances import iou
 from norfair.filter import FilterPyKalmanFilterFactory
 
-frame_skip_period = 1
-detection_threshold = 0.01
-distance_threshold = 0.9
-diagonal_proportion_threshold = 1 / 18
-pointwise_hit_counter_max = 3
-hit_counter_max = 2
+DETECTION_THRESHOLD = 0.5
+DISTANCE_THRESHOLD = 0.9
+POINTWISE_HIT_COUNTER_MAX = 3
+HIT_COUNTER_MAX = 8
+
+
+def build_mask(frame, detections, tracked_objects):
+    # create a mask of ones
+    mask = np.ones(frame.shape[:2], frame.dtype)
+    # set to 0 on detections and tracked_objects
+    for det in detections:
+        i = det.points.astype(int)
+        mask[i[0, 1] : i[1, 1], i[0, 0] : i[1, 0]] = 0
+    for obj in tracked_objects:
+        i = obj.estimate.astype(int)
+        mask[i[0, 1] : i[1, 1], i[0, 0] : i[1, 0]] = 0
+    return mask
+
 
 parser = argparse.ArgumentParser(
     description="Evaluate a basic tracker on MOTChallenge data. Display on terminal the MOTChallenge metrics results "
@@ -67,39 +81,6 @@ else:
 
 accumulator = metrics.Accumulators()
 
-
-def keypoints_distance(detected_pose, tracked_pose):
-    norm_orders = [1, 2, np.inf]
-    distances = 0
-    diagonal = 0
-
-    hor_min_pt = min(detected_pose.points[:, 0])
-    hor_max_pt = max(detected_pose.points[:, 0])
-    ver_min_pt = min(detected_pose.points[:, 1])
-    ver_max_pt = max(detected_pose.points[:, 1])
-
-    # Set keypoint_dist_threshold based on object size, and calculate
-    # distance between detections and tracker estimations
-    for p in norm_orders:
-        distances += np.linalg.norm(
-            detected_pose.points - tracked_pose.estimate, ord=p, axis=1
-        )
-        diagonal += np.linalg.norm(
-            [hor_max_pt - hor_min_pt, ver_max_pt - ver_min_pt], ord=p
-        )
-
-    distances = distances / len(norm_orders)
-
-    keypoint_dist_threshold = diagonal * diagonal_proportion_threshold
-
-    match_num = np.count_nonzero(
-        (distances < keypoint_dist_threshold)
-        * (detected_pose.scores > detection_threshold)
-        * (tracked_pose.last_detection.scores > detection_threshold)
-    )
-    return 1 / (1 + match_num)
-
-
 for input_path in sequences_paths:
     # Search vertical resolution in seqinfo.ini
     seqinfo_path = os.path.join(input_path, "seqinfo.ini")
@@ -114,35 +95,39 @@ for input_path in sequences_paths:
             input_path=input_path, save_path=output_path, information_file=info_file
         )
 
-    if args.make_video:
-        video_file = video.VideoFromFrames(
-            input_path=input_path, save_path=output_path, information_file=info_file
-        )
+    video_file = video.VideoFromFrames(
+        input_path=input_path,
+        save_path=output_path,
+        information_file=info_file,
+        make_video=args.make_video,
+    )
 
     tracker = Tracker(
-        distance_function=keypoints_distance,
-        distance_threshold=distance_threshold,
-        detection_threshold=detection_threshold,
-        pointwise_hit_counter_max=pointwise_hit_counter_max,
-        hit_counter_max=hit_counter_max,
+        distance_function=iou,
+        distance_threshold=DISTANCE_THRESHOLD,
+        detection_threshold=DETECTION_THRESHOLD,
+        pointwise_hit_counter_max=POINTWISE_HIT_COUNTER_MAX,
+        hit_counter_max=HIT_COUNTER_MAX,
         filter_factory=FilterPyKalmanFilterFactory(),
     )
+
+    motion_estimator = MotionEstimator(max_points=500)
 
     # Initialize accumulator for this video
     accumulator.create_accumulator(input_path=input_path, information_file=info_file)
 
-    for frame_number, detections in enumerate(all_detections):
-        if frame_number % frame_skip_period == 0:
-            tracked_objects = tracker.update(
-                detections=detections, period=frame_skip_period
-            )
-        else:
-            detections = []
-            tracked_objects = tracker.update()
+    tracked_objects = []
+    for frame, detections in zip(video_file, all_detections):
+        mask = build_mask(frame, detections, tracked_objects)
+        coord_transformations = motion_estimator.update(frame, mask)
+
+        tracked_objects = tracker.update(
+            detections=detections,
+            coord_transformations=coord_transformations,
+        )
 
         # Draw detection and tracked object boxes on frame
         if args.make_video:
-            frame = next(video_file)
             frame = drawing.draw_boxes(frame, detections=detections)
             frame = drawing.draw_tracked_boxes(frame=frame, objects=tracked_objects)
             video_file.update(frame=frame)
