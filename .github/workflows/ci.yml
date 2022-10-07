@@ -70,7 +70,7 @@ jobs:
 
       - name: Run tests
         run: |
-          tox -e py39-mot
+          tox -e mot-py39
 
   #
   # Build & upload release to PyPI.
