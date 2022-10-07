@@ -162,32 +162,27 @@ If you are looking for a tracker, here are some other projects worth noting:
 
 ## Benchmarks
 
-[MOT17](https://motchallenge.net/data/MOT17/) results obtained using [motmetrics4norfair](https://github.com/tryolabs/norfair/tree/master/demos/motmetrics4norfair) demo script. Hyperparameters were tuned for reaching a high `MOTA` on this dataset. A more balanced set of hyperparameters, like the default ones used in the other demos, is recommended for production.
+[MOT17](https://motchallenge.net/data/MOT17/) and [MOT20](https://motchallenge.net/data/MOT17/) results obtained using [motmetrics4norfair](https://github.com/tryolabs/norfair/tree/master/demos/motmetrics4norfair) demo script on the `train` split. We used detections obtained with [ByteTrack's](https://github.com/ifzhang/ByteTrack) YOLOX object detection model.
 
-|                | Rcll  | Prcn  |   GT MT PT ML    |      FP FN IDs FM      |  MOTA MOTP  |
-| :------------: | :---: | :---: | :--------------: | :--------------------: | :---------: |
-|  MOT17-13-DPM  | 18.5% | 85.8% |   110 6 31 73    |    355 9490 90 100     | 14.7% 26.7% |
-| MOT17-04-FRCNN | 56.3% | 93.2% |   83 18 43 22    |   1959 20775 90 104    | 52.0% 10.7% |
-| MOT17-11-FRCNN | 61.4% | 92.9% |   75 18 34 23    |     443 3639 65 62     | 56.1% 10.2% |
-|  MOT17-04-SDP  | 77.5% | 97.4% |    83 49 25 9    |   1003 10680 232 257   | 74.9% 13.2% |
-|  MOT17-13-SDP  | 57.6% | 83.3% |   110 46 26 38   |   1349 4934 164 163    | 44.6% 20.0% |
-|  MOT17-05-DPM  | 38.1% | 82.9% |   133 11 58 64   |    544 4281 90 100     | 28.9% 24.3% |
-|  MOT17-09-DPM  | 59.7% | 75.1% |    26 4 17 5     |   1052 2147 120 117    | 37.7% 26.3% |
-|  MOT17-10-DPM  | 37.5% | 84.9% |    57 6 19 32    |    856 8024 127 153    | 29.8% 24.9% |
-|  MOT17-02-SDP  | 50.9% | 75.9% |   62 11 38 13    |   3003 9122 272 290    | 33.3% 18.4% |
-|  MOT17-11-DPM  | 54.2% | 84.7% |   75 12 24 39    |     927 4321 87 63     | 43.5% 21.7% |
-| MOT17-09-FRCNN | 58.5% | 98.5% |    26 7 17 2     |     49 2209 40 39      | 56.8% 9.6%  |
-|  MOT17-11-SDP  | 75.7% | 90.9% |   75 34 30 11    |    719 2297 112 105    | 66.9% 14.1% |
-| MOT17-02-FRCNN | 36.5% | 79.5% |    62 7 26 29    |   1751 11796 124 136   | 26.4% 13.4% |
-| MOT17-05-FRCNN | 54.9% | 90.0% |   133 23 69 41   |     420 3123 78 84     | 47.7% 18.0% |
-|  MOT17-04-DPM  | 42.5% | 83.5% |    83 7 44 32    |   3985 27335 406 432   | 33.2% 21.1% |
-|  MOT17-10-SDP  | 74.1% | 88.0% |    57 30 24 3    |   1295 3323 283 286    | 61.8% 19.8% |
-| MOT17-10-FRCNN | 60.9% | 75.7% |    57 14 37 6    |   2507 5020 310 306    | 39.0% 17.2% |
-|  MOT17-09-SDP  | 67.7% | 94.6% |    26 12 14 0    |     204 1722 54 56     | 62.8% 13.0% |
-|  MOT17-02-DPM  | 20.2% | 81.4% |    62 5 14 43    |   856 14833 113 109    | 15.0% 24.6% |
-| MOT17-13-FRCNN | 59.3% | 74.7% |   110 33 53 24   |   2334 4735 342 331    | 36.3% 18.4% |
-|  MOT17-05-SDP  | 66.8% | 87.9% |   133 32 81 20   |    637 2299 134 133    | 55.6% 16.5% |
-|    OVERALL     | 53.7% | 87.3% | 1638 385 724 529 | 26248 156135 3333 3426 | 44.9% 16.4% |
+| MOT17 Train |   IDF1  IDP  IDR  | Rcll  | Prcn  |  MOTA MOTP  |
+| :---------: | :---------------: | :---: | :---: | :---------: |
+|  MOT17-02   | 61.3% 63.6% 59.0% | 86.8% | 93.5% | 79.9% 14.8% |
+|  MOT17-04   | 93.3% 93.6% 93.0% | 98.6% | 99.3% | 97.9% 07.9% |
+|  MOT17-05   | 77.8% 77.7% 77.8% | 85.9% | 85.8% | 71.2% 14.7% |
+|  MOT17-09   | 65.0% 67.4% 62.9% | 90.3% | 96.8% | 86.8% 12.2% |
+|  MOT17-10   | 70.2% 72.5% 68.1% | 87.3% | 93.0% | 80.1% 18.7% |
+|  MOT17-11   | 80.2% 80.5% 80.0% | 93.0% | 93.6% | 86.4% 11.3% |
+|  MOT17-13   | 79.0% 79.6% 78.4% | 90.6% | 92.0% | 82.4% 16.6% |
+|   OVERALL   | 80.6% 81.8% 79.6% | 92.9% | 95.5% | 88.1% 11.9% |
+
+
+| MOT20 Train |   IDF1  IDP  IDR  | Rcll  | Prcn  |  MOTA MOTP  |
+|  :------:   | :---------------: | :---: | :---: | :---------: |
+|  MOT20-01   | 85.9% 88.1% 83.8% | 93.4% | 98.2% | 91.5% 12.6% |
+|  MOT20-02   | 72.8% 74.6% 71.0% | 93.2% | 97.9% | 91.0% 12.7% |
+|  MOT20-03   | 93.0% 94.1% 92.0% | 96.1% | 98.3% | 94.4% 13.7% |
+|  MOT20-05   | 87.9% 88.9% 87.0% | 96.0% | 98.1% | 94.1% 13.0% |
+|   OVERALL   | 87.3% 88.4% 86.2% | 95.6% | 98.1% | 93.7% 13.2% |
 
 ## Commercial support
 
