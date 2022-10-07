@@ -4,48 +4,15 @@ import numpy as np
 import pandas as pd
 
 from norfair import FilterPyKalmanFilterFactory, Tracker, metrics
+from norfair.distances import iou
 
 DATASET_PATH = "train"
 MOTA_ERROR_THRESHOLD = 0.0
 
-FRAME_SKIP_PERIOD = 1
 DETECTION_THRESHOLD = 0.01
 DISTANCE_THRESHOLD = 0.9
-DIAGONAL_PROPORTION_THRESHOLD = 1 / 18
 POINTWISE_HIT_COUNTER_MAX = 3
 HIT_COUNTER_MAX = 2
-
-
-def keypoints_distance(detected_pose, tracked_pose):
-    norm_orders = [1, 2, np.inf]
-    distances = 0
-    diagonal = 0
-
-    hor_min_pt = min(detected_pose.points[:, 0])
-    hor_max_pt = max(detected_pose.points[:, 0])
-    ver_min_pt = min(detected_pose.points[:, 1])
-    ver_max_pt = max(detected_pose.points[:, 1])
-
-    # Set keypoint_dist_threshold based on object size, and calculate
-    # distance between detections and tracker estimations
-    for p in norm_orders:
-        distances += np.linalg.norm(
-            detected_pose.points - tracked_pose.estimate, ord=p, axis=1
-        )
-        diagonal += np.linalg.norm(
-            [hor_max_pt - hor_min_pt, ver_max_pt - ver_min_pt], ord=p
-        )
-
-    distances = distances / len(norm_orders)
-
-    keypoint_dist_threshold = diagonal * DIAGONAL_PROPORTION_THRESHOLD
-
-    match_num = np.count_nonzero(
-        (distances < keypoint_dist_threshold)
-        * (detected_pose.scores > DETECTION_THRESHOLD)
-        * (tracked_pose.last_detection.scores > DETECTION_THRESHOLD)
-    )
-    return 1 / (1 + match_num)
 
 
 def mot_metrics():
@@ -81,7 +48,7 @@ def mot_metrics():
         )
 
         tracker = Tracker(
-            distance_function=keypoints_distance,
+            distance_function=iou,
             distance_threshold=DISTANCE_THRESHOLD,
             detection_threshold=DETECTION_THRESHOLD,
             pointwise_hit_counter_max=POINTWISE_HIT_COUNTER_MAX,
@@ -94,14 +61,10 @@ def mot_metrics():
             input_path=input_path, information_file=info_file
         )
 
-        for frame_number, detections in enumerate(all_detections):
-            if frame_number % FRAME_SKIP_PERIOD == 0:
-                tracked_objects = tracker.update(
-                    detections=detections, period=FRAME_SKIP_PERIOD
-                )
-            else:
-                detections = []
-                tracked_objects = tracker.update()
+        for detections in all_detections:
+            tracked_objects = tracker.update(
+                detections=detections,
+            )
 
             accumulator.update(predictions=tracked_objects)
 
