@@ -1534,6 +1534,16 @@ More points make the estimation process slower but more precise</p></td>
                 <code>None</code>
           </td>
         </tr>
+        <tr>
+          <td><code>quality_level</code></td>
+          <td>
+                <code>float, optional</code>
+          </td>
+          <td><p>Parameter characterizing the minimal accepted quality of image corners.</p></td>
+          <td>
+                <code>0.01</code>
+          </td>
+        </tr>
     </tbody>
   </table>
 
@@ -1554,8 +1564,7 @@ More points make the estimation process slower but more precise</p></td>
 
         <details class="quote">
           <summary>Source code in <code>norfair/camera_motion.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">274</span>
-<span class="normal">275</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">275</span>
 <span class="normal">276</span>
 <span class="normal">277</span>
 <span class="normal">278</span>
@@ -1680,7 +1689,13 @@ More points make the estimation process slower but more precise</p></td>
 <span class="normal">397</span>
 <span class="normal">398</span>
 <span class="normal">399</span>
-<span class="normal">400</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">MotionEstimator</span><span class="p">:</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">MotionEstimator</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Estimator of the motion of the camera.</span>
 
@@ -1702,6 +1717,8 @@ More points make the estimation process slower but more precise</p></td>
 <span class="sd">        Draws the optical flow on the frame for debugging.</span>
 <span class="sd">    flow_color : Optional[Tuple[int, int, int]], optional</span>
 <span class="sd">        Color of the drawing, by default blue.</span>
+<span class="sd">    quality_level : float, optional</span>
+<span class="sd">        Parameter characterizing the minimal accepted quality of image corners.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -1728,6 +1745,7 @@ More points make the estimation process slower but more precise</p></td>
         <span class="n">transformations_getter</span><span class="p">:</span> <span class="n">TransformationGetter</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">draw_flow</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">flow_color</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">quality_level</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
     <span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">max_points</span> <span class="o">=</span> <span class="n">max_points</span>
@@ -1747,6 +1765,7 @@ More points make the estimation process slower but more precise</p></td>
         <span class="bp">self</span><span class="o">.</span><span class="n">transformations_getter</span> <span class="o">=</span> <span class="n">transformations_getter</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prev_mask</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gray_next</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quality_level</span> <span class="o">=</span> <span class="n">quality_level</span>
 
     <span class="k">def</span> <span class="nf">update</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">mask</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1787,7 +1806,8 @@ More points make the estimation process slower but more precise</p></td>
             <span class="bp">self</span><span class="o">.</span><span class="n">max_points</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">min_distance</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">block_size</span><span class="p">,</span>
-            <span class="n">mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prev_mask</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prev_mask</span><span class="p">,</span>
+            <span class="n">quality_level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">quality_level</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">draw_flow</span><span class="p">:</span>
             <span class="k">for</span> <span class="p">(</span><span class="n">curr</span><span class="p">,</span> <span class="n">prev</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">curr_pts</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">prev_pts</span><span class="p">):</span>
@@ -1898,12 +1918,7 @@ or vice versa.</p></td>
 
       <details class="quote">
         <summary>Source code in <code>norfair/camera_motion.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">342</span>
-<span class="normal">343</span>
-<span class="normal">344</span>
-<span class="normal">345</span>
-<span class="normal">346</span>
-<span class="normal">347</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">347</span>
 <span class="normal">348</span>
 <span class="normal">349</span>
 <span class="normal">350</span>
@@ -1956,7 +1971,13 @@ or vice versa.</p></td>
 <span class="normal">397</span>
 <span class="normal">398</span>
 <span class="normal">399</span>
-<span class="normal">400</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">update</span><span class="p">(</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">update</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">mask</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CoordinatesTransformation</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -1995,7 +2016,8 @@ or vice versa.</p></td>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_points</span><span class="p">,</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">min_distance</span><span class="p">,</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">block_size</span><span class="p">,</span>
-        <span class="n">mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prev_mask</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prev_mask</span><span class="p">,</span>
+        <span class="n">quality_level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">quality_level</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">draw_flow</span><span class="p">:</span>
         <span class="k">for</span> <span class="p">(</span><span class="n">curr</span><span class="p">,</span> <span class="n">prev</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">curr_pts</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">prev_pts</span><span class="p">):</span>
