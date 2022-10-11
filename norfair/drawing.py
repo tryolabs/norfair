@@ -765,6 +765,7 @@ class FixedCamera:
     As the camera moves, the smaller frame moves in the opposite direction, stabilizing the objects in it.
 
     Useful for debugging or demoing the camera motion.
+    ![Example GIF](../../videos/camera_stabilization.gif)
 
     !!! Warning
         This only works with [`TranslationTransformation`][norfair.camera_motion.TranslationTransformation],
