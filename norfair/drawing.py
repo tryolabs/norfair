@@ -715,7 +715,7 @@ def draw_absolute_grid(
     Useful for debugging camera motion.
 
     The points are drawn as if the camera were in the center of a sphere and points are drawn in the intersection
-    of each circle of latitude and line of latitude.
+    of latitude and longitude lines over the surface of the sphere.
 
     Parameters
     ----------
@@ -761,10 +761,10 @@ class FixedCamera:
     """
     Class used to stabilize video based on the camera motion.
 
-    Starts with a bigger video, where the original frame is drawn on top of a black background.
-    As the camera moves, the smaller frame moves in the oposite direction, stablilizing the objects in it.
+    Starts with a larger frame, where the original frame is drawn on top of a black background.
+    As the camera moves, the smaller frame moves in the opposite direction, stabilizing the objects in it.
 
-    Usefull for debugging or demoing the camera motion.
+    Useful for debugging or demoing the camera motion.
 
     !!! Warning
         This only works with [`TranslationTransformation`][norfair.camera_motion.TranslationTransformation],
@@ -775,8 +775,8 @@ class FixedCamera:
         If using other drawers, always apply this one last. Using other drawers on the scaled up frame will not work as expected.
 
     !!! Note
-        Sometimes the camera moves so far from the original point that the result won't fit in the scaled up frame,
-        in this case a warning will be logged and the frames will be cropped to avoid errors.
+        Sometimes the camera moves so far from the original point that the result won't fit in the scaled-up frame.
+        In this case, a warning will be logged and the frames will be cropped to avoid errors.
 
     Parameters
     ----------
