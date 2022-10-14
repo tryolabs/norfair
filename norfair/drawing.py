@@ -1,11 +1,12 @@
 """Drawing utils"""
 import random
-from optparse import Option
+from collections import defaultdict
+from functools import lru_cache
 from typing import TYPE_CHECKING, Callable, Optional, Sequence, Tuple
 
 import numpy as np
 
-from .camera_motion import TranslationTransformation
+from .camera_motion import CoordinatesTransformation, TranslationTransformation
 from .utils import validate_points, warn_once
 
 try:
@@ -562,7 +563,7 @@ class Paths:
         Draw the paths of the points interest on a frame.
 
         !!! warning
-            This method does **not** draw frames in place use the returned one.
+            This method does **not** draw frames in place as other drawers do, the resulting frame is returned.
 
         Parameters
         ----------
@@ -661,9 +662,6 @@ class Color:
         return getattr(Color, color_list[obj_id % len(color_list)])
 
 
-from functools import lru_cache
-
-
 @lru_cache(maxsize=4)
 def _get_grid(size, w, h, polar=False):
     """
@@ -703,14 +701,40 @@ def _get_grid(size, w, h, polar=False):
 
 
 def draw_absolute_grid(
-    frame,
-    coord_transformations,
-    grid_size=20,
-    radius=2,
-    thickness=1,
-    color=Color.black,
-    polar=False,
+    frame: np.ndarray,
+    coord_transformations: CoordinatesTransformation,
+    grid_size: int = 20,
+    radius: int = 2,
+    thickness: int = 1,
+    color: Optional[Tuple[int, int, int]] = Color.black,
+    polar: bool = False,
 ):
+    """
+    Draw a grid of points in absolute coordinates.
+
+    Useful for debugging camera motion.
+
+    The points are drawn as if the camera were in the center of a sphere and points are drawn in the intersection
+    of latitude and longitude lines over the surface of the sphere.
+
+    Parameters
+    ----------
+    frame : np.ndarray
+        The OpenCV frame to draw on.
+    coord_transformations : CoordinatesTransformation
+        The coordinate transformation as returned by the [`MotionEstimator`][norfair.camera_motion.MotionEstimator]
+    grid_size : int, optional
+        How many points to draw.
+    radius : int, optional
+        Size of each point.
+    thickness : int, optional
+        Thickness of each point
+    color : Optional[Tuple[int, int, int]], optional
+        Color of the points.
+    polar : Bool, optional
+        If True, the points on the first frame are drawn as if the camera were pointing to a pole (viewed from the center of the earth).
+        By default, False is used which means the points are drawn as if the camera were pointing to the Equator.
+    """
     h, w, _ = frame.shape
 
     # get absolute points grid
@@ -734,12 +758,76 @@ def draw_absolute_grid(
 
 
 class FixedCamera:
+    """
+    Class used to stabilize video based on the camera motion.
+
+    Starts with a larger frame, where the original frame is drawn on top of a black background.
+    As the camera moves, the smaller frame moves in the opposite direction, stabilizing the objects in it.
+
+    Useful for debugging or demoing the camera motion.
+    ![Example GIF](../../videos/camera_stabilization.gif)
+
+    !!! Warning
+        This only works with [`TranslationTransformation`][norfair.camera_motion.TranslationTransformation],
+        using [`HomographyTransformation`][norfair.camera_motion.HomographyTransformation] will result in
+        unexpected behaviour.
+
+    !!! Warning
+        If using other drawers, always apply this one last. Using other drawers on the scaled up frame will not work as expected.
+
+    !!! Note
+        Sometimes the camera moves so far from the original point that the result won't fit in the scaled-up frame.
+        In this case, a warning will be logged and the frames will be cropped to avoid errors.
+
+    Parameters
+    ----------
+    scale : float, optional
+        The resulting video will have a resolution of `scale * (H, W)` where HxW is the resolution of the original video.
+        Use a bigger scale if the camera is moving too much.
+    attenuation : float, optional
+        Controls how fast the older frames fade to black.
+
+    Examples
+    --------
+    >>> # setup
+    >>> tracker = Tracker("frobenious", 100)
+    >>> motion_estimator = MotionEstimator()
+    >>> video = Video(input_path="video.mp4")
+    >>> fixed_camera = FixedCamera()
+    >>> # process video
+    >>> for frame in video:
+    >>>     coord_transformations = motion_estimator.update(frame)
+    >>>     detections = get_detections(frame)
+    >>>     tracked_objects = tracker.update(detections, coord_transformations)
+    >>>     draw_tracked_objects(frame, tracked_objects)  # fixed_camera should always be the last drawer
+    >>>     bigger_frame = fixed_camera.adjust_frame(frame, coord_transformations)
+    >>>     video.write(bigger_frame)
+    """
+
     def __init__(self, scale: float = 2, attenuation: float = 0.05):
         self.scale = scale
         self._background = None
         self._attenuation_factor = 1 - attenuation
 
-    def adjust_frame(self, frame, coord_transformation: TranslationTransformation):
+    def adjust_frame(
+        self, frame: np.ndarray, coord_transformation: TranslationTransformation
+    ) -> np.ndarray:
+        """
+        Render scaled up frame.
+
+        Parameters
+        ----------
+        frame : np.ndarray
+            The OpenCV frame.
+        coord_transformation : TranslationTransformation
+            The coordinate transformation as returned by the [`MotionEstimator`][norfair.camera_motion.MotionEstimator]
+
+        Returns
+        -------
+        np.ndarray
+            The new bigger frame with the original frame drawn on it.
+        """
+
         # initialize background if necessary
         if self._background is None:
             original_size = (
@@ -806,18 +894,54 @@ class FixedCamera:
         return self._background
 
 
-from collections import defaultdict
-
-
 class AbsolutePaths:
+    """
+    Class that draws the absolute paths taken by a set of points.
+
+    Works just like [`Paths`][norfair.drawing.Paths] but supports camera motion.
+
+    !!! warning
+        This drawer is not optimized so it can be stremely slow. Performance degrades linearly with
+        `max_history * number_of_tracked_objects`.
+
+    Parameters
+    ----------
+    get_points_to_draw : Optional[Callable[[np.array], np.array]], optional
+        Function that takes a list of points (the `.estimate` attribute of a [`TrackedObject`][norfair.tracker.TrackedObject])
+        and returns a list of points for which we want to draw their paths.
+
+        By default it is the mean point of all the points in the tracker.
+    thickness : Optional[int], optional
+        Thickness of the circles representing the paths of interest.
+    color : Optional[Tuple[int, int, int]], optional
+        [Color][norfair.drawing.Color] of the circles representing the paths of interest.
+    radius : Optional[int], optional
+        Radius of the circles representing the paths of interest.
+    max_history : int, optional
+        Number of past points to include in the path. High values make the drawing slower
+
+    Examples
+    --------
+    >>> from norfair import Tracker, Video, Path
+    >>> video = Video("video.mp4")
+    >>> tracker = Tracker(...)
+    >>> path_drawer = Path()
+    >>> for frame in video:
+    >>>    detections = get_detections(frame)  # runs detector and returns Detections
+    >>>    tracked_objects = tracker.update(detections)
+    >>>    frame = path_drawer.draw(frame, tracked_objects)
+    >>>    video.write(frame)
+    """
+
     def __init__(
         self,
-        get_points_to_draw=None,
-        thickness=None,
-        color=None,
-        radius=None,
+        get_points_to_draw: Optional[Callable[[np.array], np.array]] = None,
+        thickness: Optional[int] = None,
+        color: Optional[Tuple[int, int, int]] = None,
+        radius: Optional[int] = None,
         max_history=20,
     ):
+
         if get_points_to_draw is None:
 
             def get_points_to_draw(points):
