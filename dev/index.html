@@ -645,194 +645,121 @@ pip install norfair<span class="o">[</span>metrics,video<span class="o">]</span>
 <li><a href="https://github.com/abewley/sort"><strong>SORT</strong></a> and <a href="https://github.com/nwojke/deep_sort"><strong>Deep SORT</strong></a> are similar to this repo in that they use Kalman filters (and a deep embedding for Deep SORT), but they are hardcoded to a fixed distance function and to tracking boxes. Norfair also adds some filtering when matching tracked objects with detections, and changes the Hungarian Algorithm for its own distance minimizer. Both these repos are also released under the GPL license, which might be an issue for some individuals or companies because the source code of derivative works needs to be published.</li>
 </ul>
 <h2 id="benchmarks">Benchmarks<a class="headerlink" href="#benchmarks" title="Permanent link">#</a></h2>
-<p><a href="https://motchallenge.net/data/MOT17/">MOT17</a> results obtained using <a href="https://github.com/tryolabs/norfair/tree/master/demos/motmetrics4norfair">motmetrics4norfair</a> demo script. Hyperparameters were tuned for reaching a high <code>MOTA</code> on this dataset. A more balanced set of hyperparameters, like the default ones used in the other demos, is recommended for production.</p>
+<p><a href="https://motchallenge.net/data/MOT17/">MOT17</a> and <a href="https://motchallenge.net/data/MOT17/">MOT20</a> results obtained using <a href="https://github.com/tryolabs/norfair/tree/master/demos/motmetrics4norfair">motmetrics4norfair</a> demo script on the <code>train</code> split. We used detections obtained with <a href="https://github.com/ifzhang/ByteTrack">ByteTrack's</a> YOLOX object detection model.</p>
 <table>
 <thead>
 <tr>
-<th align="center"></th>
+<th align="center">MOT17 Train</th>
+<th align="center">IDF1  IDP  IDR</th>
 <th align="center">Rcll</th>
 <th align="center">Prcn</th>
-<th align="center">GT MT PT ML</th>
-<th align="center">FP FN IDs FM</th>
 <th align="center">MOTA MOTP</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="center">MOT17-13-DPM</td>
-<td align="center">18.5%</td>
+<td align="center">MOT17-02</td>
+<td align="center">61.3% 63.6% 59.0%</td>
+<td align="center">86.8%</td>
+<td align="center">93.5%</td>
+<td align="center">79.9% 14.8%</td>
+</tr>
+<tr>
+<td align="center">MOT17-04</td>
+<td align="center">93.3% 93.6% 93.0%</td>
+<td align="center">98.6%</td>
+<td align="center">99.3%</td>
+<td align="center">97.9% 07.9%</td>
+</tr>
+<tr>
+<td align="center">MOT17-05</td>
+<td align="center">77.8% 77.7% 77.8%</td>
+<td align="center">85.9%</td>
 <td align="center">85.8%</td>
-<td align="center">110 6 31 73</td>
-<td align="center">355 9490 90 100</td>
-<td align="center">14.7% 26.7%</td>
+<td align="center">71.2% 14.7%</td>
 </tr>
 <tr>
-<td align="center">MOT17-04-FRCNN</td>
-<td align="center">56.3%</td>
-<td align="center">93.2%</td>
-<td align="center">83 18 43 22</td>
-<td align="center">1959 20775 90 104</td>
-<td align="center">52.0% 10.7%</td>
+<td align="center">MOT17-09</td>
+<td align="center">65.0% 67.4% 62.9%</td>
+<td align="center">90.3%</td>
+<td align="center">96.8%</td>
+<td align="center">86.8% 12.2%</td>
 </tr>
 <tr>
-<td align="center">MOT17-11-FRCNN</td>
-<td align="center">61.4%</td>
-<td align="center">92.9%</td>
-<td align="center">75 18 34 23</td>
-<td align="center">443 3639 65 62</td>
-<td align="center">56.1% 10.2%</td>
+<td align="center">MOT17-10</td>
+<td align="center">70.2% 72.5% 68.1%</td>
+<td align="center">87.3%</td>
+<td align="center">93.0%</td>
+<td align="center">80.1% 18.7%</td>
 </tr>
 <tr>
-<td align="center">MOT17-04-SDP</td>
-<td align="center">77.5%</td>
-<td align="center">97.4%</td>
-<td align="center">83 49 25 9</td>
-<td align="center">1003 10680 232 257</td>
-<td align="center">74.9% 13.2%</td>
+<td align="center">MOT17-11</td>
+<td align="center">80.2% 80.5% 80.0%</td>
+<td align="center">93.0%</td>
+<td align="center">93.6%</td>
+<td align="center">86.4% 11.3%</td>
 </tr>
 <tr>
-<td align="center">MOT17-13-SDP</td>
-<td align="center">57.6%</td>
-<td align="center">83.3%</td>
-<td align="center">110 46 26 38</td>
-<td align="center">1349 4934 164 163</td>
-<td align="center">44.6% 20.0%</td>
-</tr>
-<tr>
-<td align="center">MOT17-05-DPM</td>
-<td align="center">38.1%</td>
-<td align="center">82.9%</td>
-<td align="center">133 11 58 64</td>
-<td align="center">544 4281 90 100</td>
-<td align="center">28.9% 24.3%</td>
-</tr>
-<tr>
-<td align="center">MOT17-09-DPM</td>
-<td align="center">59.7%</td>
-<td align="center">75.1%</td>
-<td align="center">26 4 17 5</td>
-<td align="center">1052 2147 120 117</td>
-<td align="center">37.7% 26.3%</td>
-</tr>
-<tr>
-<td align="center">MOT17-10-DPM</td>
-<td align="center">37.5%</td>
-<td align="center">84.9%</td>
-<td align="center">57 6 19 32</td>
-<td align="center">856 8024 127 153</td>
-<td align="center">29.8% 24.9%</td>
-</tr>
-<tr>
-<td align="center">MOT17-02-SDP</td>
-<td align="center">50.9%</td>
-<td align="center">75.9%</td>
-<td align="center">62 11 38 13</td>
-<td align="center">3003 9122 272 290</td>
-<td align="center">33.3% 18.4%</td>
-</tr>
-<tr>
-<td align="center">MOT17-11-DPM</td>
-<td align="center">54.2%</td>
-<td align="center">84.7%</td>
-<td align="center">75 12 24 39</td>
-<td align="center">927 4321 87 63</td>
-<td align="center">43.5% 21.7%</td>
-</tr>
-<tr>
-<td align="center">MOT17-09-FRCNN</td>
-<td align="center">58.5%</td>
-<td align="center">98.5%</td>
-<td align="center">26 7 17 2</td>
-<td align="center">49 2209 40 39</td>
-<td align="center">56.8% 9.6%</td>
-</tr>
-<tr>
-<td align="center">MOT17-11-SDP</td>
-<td align="center">75.7%</td>
-<td align="center">90.9%</td>
-<td align="center">75 34 30 11</td>
-<td align="center">719 2297 112 105</td>
-<td align="center">66.9% 14.1%</td>
-</tr>
-<tr>
-<td align="center">MOT17-02-FRCNN</td>
-<td align="center">36.5%</td>
-<td align="center">79.5%</td>
-<td align="center">62 7 26 29</td>
-<td align="center">1751 11796 124 136</td>
-<td align="center">26.4% 13.4%</td>
-</tr>
-<tr>
-<td align="center">MOT17-05-FRCNN</td>
-<td align="center">54.9%</td>
-<td align="center">90.0%</td>
-<td align="center">133 23 69 41</td>
-<td align="center">420 3123 78 84</td>
-<td align="center">47.7% 18.0%</td>
-</tr>
-<tr>
-<td align="center">MOT17-04-DPM</td>
-<td align="center">42.5%</td>
-<td align="center">83.5%</td>
-<td align="center">83 7 44 32</td>
-<td align="center">3985 27335 406 432</td>
-<td align="center">33.2% 21.1%</td>
-</tr>
-<tr>
-<td align="center">MOT17-10-SDP</td>
-<td align="center">74.1%</td>
-<td align="center">88.0%</td>
-<td align="center">57 30 24 3</td>
-<td align="center">1295 3323 283 286</td>
-<td align="center">61.8% 19.8%</td>
-</tr>
-<tr>
-<td align="center">MOT17-10-FRCNN</td>
-<td align="center">60.9%</td>
-<td align="center">75.7%</td>
-<td align="center">57 14 37 6</td>
-<td align="center">2507 5020 310 306</td>
-<td align="center">39.0% 17.2%</td>
-</tr>
-<tr>
-<td align="center">MOT17-09-SDP</td>
-<td align="center">67.7%</td>
-<td align="center">94.6%</td>
-<td align="center">26 12 14 0</td>
-<td align="center">204 1722 54 56</td>
-<td align="center">62.8% 13.0%</td>
-</tr>
-<tr>
-<td align="center">MOT17-02-DPM</td>
-<td align="center">20.2%</td>
-<td align="center">81.4%</td>
-<td align="center">62 5 14 43</td>
-<td align="center">856 14833 113 109</td>
-<td align="center">15.0% 24.6%</td>
-</tr>
-<tr>
-<td align="center">MOT17-13-FRCNN</td>
-<td align="center">59.3%</td>
-<td align="center">74.7%</td>
-<td align="center">110 33 53 24</td>
-<td align="center">2334 4735 342 331</td>
-<td align="center">36.3% 18.4%</td>
-</tr>
-<tr>
-<td align="center">MOT17-05-SDP</td>
-<td align="center">66.8%</td>
-<td align="center">87.9%</td>
-<td align="center">133 32 81 20</td>
-<td align="center">637 2299 134 133</td>
-<td align="center">55.6% 16.5%</td>
+<td align="center">MOT17-13</td>
+<td align="center">79.0% 79.6% 78.4%</td>
+<td align="center">90.6%</td>
+<td align="center">92.0%</td>
+<td align="center">82.4% 16.6%</td>
 </tr>
 <tr>
 <td align="center">OVERALL</td>
-<td align="center">53.7%</td>
-<td align="center">87.3%</td>
-<td align="center">1638 385 724 529</td>
-<td align="center">26248 156135 3333 3426</td>
-<td align="center">44.9% 16.4%</td>
+<td align="center">80.6% 81.8% 79.6%</td>
+<td align="center">92.9%</td>
+<td align="center">95.5%</td>
+<td align="center">88.1% 11.9%</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th align="center">MOT20 Train</th>
+<th align="center">IDF1  IDP  IDR</th>
+<th align="center">Rcll</th>
+<th align="center">Prcn</th>
+<th align="center">MOTA MOTP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">MOT20-01</td>
+<td align="center">85.9% 88.1% 83.8%</td>
+<td align="center">93.4%</td>
+<td align="center">98.2%</td>
+<td align="center">91.5% 12.6%</td>
+</tr>
+<tr>
+<td align="center">MOT20-02</td>
+<td align="center">72.8% 74.6% 71.0%</td>
+<td align="center">93.2%</td>
+<td align="center">97.9%</td>
+<td align="center">91.0% 12.7%</td>
+</tr>
+<tr>
+<td align="center">MOT20-03</td>
+<td align="center">93.0% 94.1% 92.0%</td>
+<td align="center">96.1%</td>
+<td align="center">98.3%</td>
+<td align="center">94.4% 13.7%</td>
+</tr>
+<tr>
+<td align="center">MOT20-05</td>
+<td align="center">87.9% 88.9% 87.0%</td>
+<td align="center">96.0%</td>
+<td align="center">98.1%</td>
+<td align="center">94.1% 13.0%</td>
+</tr>
+<tr>
+<td align="center">OVERALL</td>
+<td align="center">87.3% 88.4% 86.2%</td>
+<td align="center">95.6%</td>
+<td align="center">98.1%</td>
+<td align="center">93.7% 13.2%</td>
 </tr>
 </tbody>
 </table>
