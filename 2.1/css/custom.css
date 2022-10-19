@@ -1,0 +1,7 @@
+:root>* {
+  --md-primary-fg-color: #0B0723;
+}
+
+.md-header__topic>.md-ellipsis {
+  opacity: 0;
+}
