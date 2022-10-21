@@ -145,12 +145,12 @@ def detect():
         da_seg_mask = driving_area_mask(seg)
         ll_seg_mask = lane_line_mask(ll)
 
-        # Track detections with Norfair
         # Resize bbox to im0 size
         for det in pred:
             det[:, :4] = scale_coords(img.shape[2:], det[:, :4], img0.shape).round()
             show_seg_result(img0, (da_seg_mask, ll_seg_mask), is_demo=True)
 
+        # Track detections with Norfair
         # Transfrom YOLOP detections to Norfair detecions
         detections = yolop_detections_to_norfair_detections(pred)
         tracked_objects = tracker.update(detections=detections)

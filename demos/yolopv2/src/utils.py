@@ -39,6 +39,10 @@ def yolop_detections_to_norfair_detections(
     return norfair_detections
 
 
+## The following code was extracted from the YOLOPv2 repo
+## https://github.com/CAIC-AD/YOLOPv2
+
+
 def driving_area_mask(seg=None):
     da_predict = seg[:, :, 12:372, :]
     da_seg_mask = torch.nn.functional.interpolate(
@@ -148,8 +152,6 @@ def non_max_suppression(
     t = time.time()
     output = [torch.zeros((0, 6), device=prediction.device)] * prediction.shape[0]
     for xi, x in enumerate(prediction):  # image index, image inference
-        # Apply constraints
-        # x[((x[..., 2:4] < min_wh) | (x[..., 2:4] > max_wh)).any(1), 4] = 0  # width-height
         x = x[xc[xi]]  # confidence
 
         # Cat apriori labels if autolabelling
@@ -294,7 +296,6 @@ def box_iou(box1, box2):
 
 
 def show_seg_result(img, result, palette=None, is_demo=False):
-
     if palette is None:
         palette = np.random.randint(0, 255, size=(3, 3))
     palette[0] = [0, 0, 0]
@@ -323,7 +324,3 @@ def show_seg_result(img, result, palette=None, is_demo=False):
     # print(color_seg.shape)
     color_mask = np.mean(color_seg, 2)
     img[color_mask != 0] = img[color_mask != 0] * 0.5 + color_seg[color_mask != 0] * 0.5
-    # img = img * 0.5 + color_seg * 0.5
-    # img = img.astype(np.uint8)
-    # img = cv2.resize(img, (1280,720), interpolation=cv2.INTER_LINEAR)
-    return
