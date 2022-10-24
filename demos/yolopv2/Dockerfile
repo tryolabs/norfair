@@ -12,6 +12,4 @@ COPY requirements.txt /demo/requirements.txt
 
 RUN pip install -r /demo/requirements.txt
 
-RUN pip install git+https://github.com/tryolabs/norfair.git@master#egg=norfair
-
 WORKDIR /demo/src/
