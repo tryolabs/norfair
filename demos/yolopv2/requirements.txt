@@ -1,0 +1,5 @@
+# Usage: pip install -r requirements.txt
+
+opencv-python==4.5.5.64
+numpy==1.22.4
+norfair==2.1.0
