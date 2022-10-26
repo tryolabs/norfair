@@ -24,7 +24,7 @@ The detections from the model will need to be wrapped in an instance of [Detecti
 
 ## Install
 
-Installing Norfair is extremely easy, simply run `pip install norfair` to install the latest version from [pypi](https://pypi.org/project/norfair/).
+Installing Norfair is extremely easy, simply run `pip install norfair` to install the latest version from [PyPI](https://pypi.org/project/norfair/).
 
 You can also install the latest version from the master branch using `pip install git+https://github.com/tryolabs/norfair.git@master#egg=norfair`
 
@@ -44,7 +44,7 @@ from norfair import Detection, Tracker, Video, draw_tracked_objects
 
 detector = MyDetector()  # Set up a detector
 video = Video(input_path="video.mp4")
-tracker = Tracker(distance_function="frobenious", distance_threshold=100)
+tracker = Tracker(distance_function="frobenius", distance_threshold=100)
 
 for frame in video:
    detections = detector(frame)
@@ -75,12 +75,12 @@ After inspecting the detections you might find issues with the tracking, several
 
 - Objects take **too long to start**, this can have multiple causes:
     - `initialization_delay` is too big on the Tracker. Makes the TrackedObject stay on initializing for too long, `3` is usually a good value to start with.
-    - `distance_threshold` is too big on the Tracker. Prevents the Detections to be matched with the correct TrackedObject. The best value depends on the distance used.
-    - Incorrect `distance_function` on the Tracker. Some distances might not be valid in some cases, for instance, if using IoU but the objects in your video move so quickly that there is never an overlap between the detections of consecutive frames. Try different distances, `frobenious` or `create_normalized_mean_euclidean_distance` are good starting points.
+    - `distance_threshold` is too small on the Tracker. Prevents the Detections to be matched with the correct TrackedObject. The best value depends on the distance used.
+    - Incorrect `distance_function` on the Tracker. Some distances might not be valid in some cases, for instance, if using IoU but the objects in your video move so quickly that there is never an overlap between the detections of consecutive frames. Try different distances, `frobenius` or `create_normalized_mean_euclidean_distance` are good starting points.
 - Objects take **too long to disappear**. Lower `hit_counter_max` on the Tracker.
 - Points or bounding boxes **jitter too much**. Increase `R` (measurement error) or lower `Q` (estimate or process error) on the `OptimizedKalmanFilterFactory` or `FilterPyKalmanFilterFactory`. This makes the Kalman Filter put less weight on the measurements and trust more on the estimate, stabilizing the result.
 - **Camera motion** confuses the Tracker. If the camera moves, the apparent movement of objects can become too erratic for the Tracker. Use `MotionEstimator`.
 - **Incorrect matches** between Detections and TrackedObjects, a couple of scenarios can cause this:
     - `distance_threshold` is too big so the Tracker matches Detections to TrackedObjects that are simply too far. Lower the threshold until you fix the error, the correct value will depend on the distance function that you're using.
     - Mismatches when objects overlap. In this case, tracking becomes more challenging, usually, the quality of the detection degrades causing one of the objects to be missed or creating a single big detection that includes both objects. On top of the detection issues, the tracker needs to decide which detection should be matched to which TrackedObject which can be error-prone if only considering spatial information. The solution is not easy but incorporating the notion of the appearance similarity based on some kind of embedding to your distance_finction can help.
-- Can't **recover** an object **after oclussions**. Use ReID distance, see [this demo](TODO) for an example but for real-world use you will need a good ReID model that can provide good embeddings.
+- Can't **recover** an object **after occlusions**. Use ReID distance, see [this demo](https://github.com/tryolabs/norfair/tree/master/demos/reid) for an example but for real-world use you will need a good ReID model that can provide good embeddings.
