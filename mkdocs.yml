@@ -6,6 +6,7 @@ theme:
     - navigation.instant
     - navigation.tracking
     - navigation.sections
+    - navigation.tabs
   icon:
     repo: fontawesome/brands/git-alt
   logo: img/logo-dark.svg
@@ -20,8 +21,12 @@ extra_javascript:
   - js/math.js
   - https://polyfill.io/v3/polyfill.min.js?features=es6
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
 nav:
+  - Home: index.md
+  - Getting Started: getting_started.md
   - Reference:
+    - reference/index.md
     - Tracker: reference/tracker.md
     - Drawing: reference/drawing.md
     - Video: reference/video.md
