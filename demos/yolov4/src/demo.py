@@ -62,7 +62,7 @@ model = YOLO(
 for input_path in args.files:
     video = Video(input_path=input_path, output_path=args.output_path)
     tracker = Tracker(
-        distance_function="frobenius",
+        distance_function="euclidean",
         distance_threshold=max_distance_between_points,
     )
 

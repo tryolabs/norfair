@@ -3,8 +3,6 @@ from mmdet.apis import inference_detector, init_detector
 from mmdet.core import get_classes
 
 from norfair import Detection, Tracker, Video, draw_tracked_objects
-from norfair.distances import frobenius
-from norfair.tracker import TrackedObject
 
 #
 # MMDetection setup
@@ -27,7 +25,7 @@ VEHICLE_CLASSES = [
 
 
 tracker = Tracker(
-    distance_function=frobenius, distance_threshold=20, detection_threshold=0.6
+    distance_function="euclidean", distance_threshold=20, detection_threshold=0.6
 )
 
 

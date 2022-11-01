@@ -224,7 +224,7 @@ def run():
         )
 
         tracker = Tracker(
-            distance_function="frobenius",
+            distance_function="euclidean",
             detection_threshold=args.confidence_threshold,
             distance_threshold=args.distance_threshold,
             initialization_delay=args.initialization_delay,

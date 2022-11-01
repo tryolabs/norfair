@@ -12,10 +12,6 @@ from norfair import Tracker, Video, draw_points, draw_tracked_objects, get_cutou
 from norfair.filter import OptimizedKalmanFilterFactory
 
 
-def distance_func(detection, tracked_object):
-    return np.linalg.norm(detection.points - tracked_object.estimate)
-
-
 def embedding_distance(matched_not_init_trackers, unmatched_trackers):
     snd_embedding = unmatched_trackers.last_detection.embedding
 
@@ -50,19 +46,16 @@ def main(
     if disable_reid:
         tracker = Tracker(
             initialization_delay=1,
-            distance_function=distance_func,
+            distance_function="euclidean",
             hit_counter_max=10,
             filter_factory=OptimizedKalmanFilterFactory(),
             distance_threshold=50,
             past_detections_length=5,
-            # reid_distance_function=embedding_distance,
-            # reid_distance_threshold=0.5,
-            # reid_hit_counter_max=500,
         )
     else:
         tracker = Tracker(
             initialization_delay=1,
-            distance_function=distance_func,
+            distance_function="euclidean",
             hit_counter_max=10,
             filter_factory=OptimizedKalmanFilterFactory(),
             distance_threshold=50,

@@ -20,7 +20,7 @@ detector = DefaultPredictor(cfg)
 
 # Norfair
 video = Video(input_path=args.file)
-tracker = Tracker(distance_function="frobenius", distance_threshold=20)
+tracker = Tracker(distance_function="euclidean", distance_threshold=20)
 
 for frame in video:
     detections = detector(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
