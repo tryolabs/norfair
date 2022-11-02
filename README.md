@@ -27,7 +27,7 @@ Using Norfair, you can add tracking capabilities to any detector with just a few
 
 - Supports moving camera, re-identification with appearance embeddings, and n-dimensional object tracking (see [Advanced features](#advanced-features)).
 
-- The function used to calculate the distance between tracked objects and detections is defined by the user, enabling the implementation of different tracking strategies.
+- Norfair provides several predefined distance functions to compare tracked objects and detections. The distance functions can also be defined by the user, enabling the implementation of different tracking strategies.
 
 - Fast. The only thing bounding inference speed will be the detection network feeding detections to Norfair.
 
@@ -98,9 +98,9 @@ Most tracking demos are showcased with vehicles and pedestrians, but the detecto
 
 ## How it works
 
-Norfair works by estimating the future position of each point based on its past positions. It then tries to match these estimated positions with newly detected points provided by the detector. For this matching to occur, Norfair can rely on any distance function specified by the user of the library. Therefore, each object tracker can be made as simple or as complex as needed.
+Norfair works by estimating the future position of each point based on its past positions. It then tries to match these estimated positions with newly detected points provided by the detector. For this matching to occur, Norfair can rely on any distance function. There are some predefined distances already integrated in Norfair, and the users can also define their own custom distances. Therefore, each object tracker can be made as simple or as complex as needed.
 
-The following is an example of a particularly simple distance function calculating the Euclidean distance between tracked objects and detections. This is possibly the simplest distance function you could use in Norfair, as it uses just one single point per detection/object.
+The following is an example of a particularly simple distance function calculating the Euclidean distance between tracked objects and detections. This distance is already integrated in Norfair and can be used simply by setting the string `"euclidean"` when building the tracker. This is possibly the simplest distance function you could use in Norfair, as it uses just one single point per detection/object.
 
 ```python
  def euclidean_distance(detection, tracked_object):
@@ -132,7 +132,7 @@ detector = DefaultPredictor(cfg)
 
 # Norfair
 video = Video(input_path="video.mp4")
-tracker = Tracker(distance_function=euclidean_distance, distance_threshold=20)
+tracker = Tracker(distance_function="euclidean", distance_threshold=20)
 
 for frame in video:
     detections = detector(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))

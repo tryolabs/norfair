@@ -790,7 +790,7 @@ class FixedCamera:
     Examples
     --------
     >>> # setup
-    >>> tracker = Tracker("frobenious", 100)
+    >>> tracker = Tracker("euclidean", 100)
     >>> motion_estimator = MotionEstimator()
     >>> video = Video(input_path="video.mp4")
     >>> fixed_camera = FixedCamera()
