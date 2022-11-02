@@ -2,8 +2,12 @@ import numpy as np
 import pytest
 
 from norfair.distances import (
+    ScalarDistance,
+    ScipyDistance,
+    VectorizedDistance,
     create_keypoints_voting_distance,
     create_normalized_mean_euclidean_distance,
+    frobenius,
     get_distance_by_name,
 )
 
@@ -14,37 +18,37 @@ def test_frobenius(mock_obj, mock_det):
     # perfect match
     det = mock_det([[1, 2], [3, 4]])
     obj = mock_obj([[1, 2], [3, 4]])
-    np.testing.assert_almost_equal(fro(det, obj), 0)
+    np.testing.assert_almost_equal(fro.distance_function(det, obj), 0)
 
     # foat type
     det = mock_det([[1.1, 2.2], [3.3, 4.4]])
     obj = mock_obj([[1.1, 2.2], [3.3, 4.4]])
-    np.testing.assert_almost_equal(fro(det, obj), 0)
+    np.testing.assert_almost_equal(fro.distance_function(det, obj), 0)
 
     # distance of 1 in 1 dimension of 1 point
     det = mock_det([[1, 2], [3, 4]])
     obj = mock_obj([[2, 2], [3, 4]])
-    np.testing.assert_almost_equal(fro(det, obj), np.sqrt(1))
+    np.testing.assert_almost_equal(fro.distance_function(det, obj), np.sqrt(1))
 
     # distance of 2 in 1 dimension of 1 point
     det = mock_det([[1, 2], [3, 4]])
     obj = mock_obj([[3, 2], [3, 4]])
-    np.testing.assert_almost_equal(fro(det, obj), 2)
+    np.testing.assert_almost_equal(fro.distance_function(det, obj), 2)
 
     # distance of 1 in all dimensions of all points
     det = mock_det([[1, 2], [3, 4]])
     obj = mock_obj([[2, 3], [4, 5]])
-    np.testing.assert_almost_equal(fro(det, obj), np.sqrt(4))
+    np.testing.assert_almost_equal(fro.distance_function(det, obj), np.sqrt(4))
 
     # negative difference
     det = mock_det([[1, 2], [3, 4]])
     obj = mock_obj([[-1, 2], [3, 4]])
-    np.testing.assert_almost_equal(fro(det, obj), 2)
+    np.testing.assert_almost_equal(fro.distance_function(det, obj), 2)
 
     # negative equals
     det = mock_det([[-1, 2], [3, 4]])
     obj = mock_obj([[-1, 2], [3, 4]])
-    np.testing.assert_almost_equal(fro(det, obj), 0)
+    np.testing.assert_almost_equal(fro.distance_function(det, obj), 0)
 
 
 def test_mean_manhattan(mock_det, mock_obj):
@@ -53,37 +57,37 @@ def test_mean_manhattan(mock_det, mock_obj):
     # perfect match
     det = mock_det([[1, 2], [3, 4]])
     obj = mock_obj([[1, 2], [3, 4]])
-    np.testing.assert_almost_equal(man(det, obj), 0)
+    np.testing.assert_almost_equal(man.distance_function(det, obj), 0)
 
     # foat type
     det = mock_det([[1.1, 2.2], [3.3, 4.4]])
     obj = mock_obj([[1.1, 2.2], [3.3, 4.4]])
-    np.testing.assert_almost_equal(man(det, obj), 0)
+    np.testing.assert_almost_equal(man.distance_function(det, obj), 0)
 
     # distance of 1 in 1 dimension of 1 point
     det = mock_det([[1, 2], [3, 4]])
     obj = mock_obj([[2, 2], [3, 4]])
-    np.testing.assert_almost_equal(man(det, obj), 1 / 2)
+    np.testing.assert_almost_equal(man.distance_function(det, obj), 1 / 2)
 
     # distance of 2 in 1 dimension of 1 point
     det = mock_det([[1, 2], [3, 4]])
     obj = mock_obj([[3, 2], [3, 4]])
-    np.testing.assert_almost_equal(man(det, obj), 1)
+    np.testing.assert_almost_equal(man.distance_function(det, obj), 1)
 
     # distance of 1 in all dimensions of all points
     det = mock_det([[1, 2], [3, 4]])
     obj = mock_obj([[2, 3], [4, 5]])
-    np.testing.assert_almost_equal(man(det, obj), 2)
+    np.testing.assert_almost_equal(man.distance_function(det, obj), 2)
 
     # negative difference
     det = mock_det([[1, 2], [3, 4]])
     obj = mock_obj([[-1, 2], [3, 4]])
-    np.testing.assert_almost_equal(man(det, obj), 1)
+    np.testing.assert_almost_equal(man.distance_function(det, obj), 1)
 
     # negative equals
     det = mock_det([[-1, 2], [3, 4]])
     obj = mock_obj([[-1, 2], [3, 4]])
-    np.testing.assert_almost_equal(man(det, obj), 0)
+    np.testing.assert_almost_equal(man.distance_function(det, obj), 0)
 
 
 def test_mean_euclidean(mock_det, mock_obj):
@@ -92,47 +96,47 @@ def test_mean_euclidean(mock_det, mock_obj):
     # perfect match
     det = mock_det([[1, 2], [3, 4]])
     obj = mock_obj([[1, 2], [3, 4]])
-    np.testing.assert_almost_equal(euc(det, obj), 0)
+    np.testing.assert_almost_equal(euc.distance_function(det, obj), 0)
 
     # foat type
     det = mock_det([[1.1, 2.2], [3.3, 4.4]])
     obj = mock_obj([[1.1, 2.2], [3.3, 4.4]])
-    np.testing.assert_almost_equal(euc(det, obj), 0)
+    np.testing.assert_almost_equal(euc.distance_function(det, obj), 0)
 
     # distance of 1 in 1 dimension of 1 point
     det = mock_det([[1, 2], [3, 4]])
     obj = mock_obj([[2, 2], [3, 4]])
-    np.testing.assert_almost_equal(euc(det, obj), 1 / 2)
+    np.testing.assert_almost_equal(euc.distance_function(det, obj), 1 / 2)
 
     # distance of 2 in 1 dimension of 1 point
     det = mock_det([[1, 2], [3, 4]])
     obj = mock_obj([[3, 2], [3, 4]])
-    np.testing.assert_almost_equal(euc(det, obj), 1)
+    np.testing.assert_almost_equal(euc.distance_function(det, obj), 1)
 
     # distance of 2 in 1 dimension of all points
     det = mock_det([[1, 2], [3, 4]])
     obj = mock_obj([[3, 2], [5, 4]])
-    np.testing.assert_almost_equal(euc(det, obj), 2)
+    np.testing.assert_almost_equal(euc.distance_function(det, obj), 2)
 
     # distance of 2 in all dimensions of all points
     det = mock_det([[1, 2], [3, 4]])
     obj = mock_obj([[3, 4], [5, 6]])
-    np.testing.assert_almost_equal(euc(det, obj), np.sqrt(8))
+    np.testing.assert_almost_equal(euc.distance_function(det, obj), np.sqrt(8))
 
     # distance of 1 in all dimensions of all points
     det = mock_det([[1, 2], [3, 4]])
     obj = mock_obj([[2, 3], [4, 5]])
-    np.testing.assert_almost_equal(euc(det, obj), np.sqrt(2))
+    np.testing.assert_almost_equal(euc.distance_function(det, obj), np.sqrt(2))
 
     # negative difference
     det = mock_det([[1, 2], [3, 4]])
     obj = mock_obj([[-1, 2], [3, 4]])
-    np.testing.assert_almost_equal(euc(det, obj), 1)
+    np.testing.assert_almost_equal(euc.distance_function(det, obj), 1)
 
     # negative equals
     det = mock_det([[-1, 2], [3, 4]])
     obj = mock_obj([[-1, 2], [3, 4]])
-    np.testing.assert_almost_equal(euc(det, obj), 0)
+    np.testing.assert_almost_equal(euc.distance_function(det, obj), 0)
 
 
 def test_iou(mock_det, mock_obj):
@@ -142,60 +146,60 @@ def test_iou(mock_det, mock_obj):
     # perfect match
     det = mock_det([[0, 0], [1, 1]])
     obj = mock_obj([[0, 0], [1, 1]])
-    np.testing.assert_almost_equal(iou(det, obj), 0)
-    np.testing.assert_almost_equal(iou_opt(det, obj), 0)
+    np.testing.assert_almost_equal(iou.distance_function(det, obj), 0)
+    np.testing.assert_almost_equal(iou_opt.distance_function(det, obj), 0)
 
     # float type
     det = mock_det([[0.0, 0.0], [1.1, 1.1]])
     obj = mock_obj([[0.0, 0.0], [1.1, 1.1]])
-    np.testing.assert_almost_equal(iou(det, obj), 0)
-    np.testing.assert_almost_equal(iou_opt(det, obj), 0)
+    np.testing.assert_almost_equal(iou.distance_function(det, obj), 0)
+    np.testing.assert_almost_equal(iou_opt.distance_function(det, obj), 0)
 
     # det contained in obj
     det = mock_det([[0, 0], [1, 1]])
     obj = mock_obj([[0, 0], [2, 2]])
-    np.testing.assert_almost_equal(iou(det, obj), 1 - 1 / 4)
-    np.testing.assert_almost_equal(iou_opt(det, obj), 1 - 1 / 4)
+    np.testing.assert_almost_equal(iou.distance_function(det, obj), 1 - 1 / 4)
+    np.testing.assert_almost_equal(iou_opt.distance_function(det, obj), 1 - 1 / 4)
 
     # no overlap
     det = mock_det([[0, 0], [1, 1]])
     obj = mock_obj([[1, 1], [2, 2]])
-    np.testing.assert_almost_equal(iou(det, obj), 1)
-    np.testing.assert_almost_equal(iou_opt(det, obj), 1)
+    np.testing.assert_almost_equal(iou.distance_function(det, obj), 1)
+    np.testing.assert_almost_equal(iou_opt.distance_function(det, obj), 1)
 
     # obj fully contained on det
     det = mock_det([[0, 0], [4, 4]])
     obj = mock_obj([[1, 1], [2, 2]])
-    np.testing.assert_almost_equal(iou(det, obj), 1 - 1 / 16)
-    np.testing.assert_almost_equal(iou_opt(det, obj), 1 - 1 / 16)
+    np.testing.assert_almost_equal(iou.distance_function(det, obj), 1 - 1 / 16)
+    np.testing.assert_almost_equal(iou_opt.distance_function(det, obj), 1 - 1 / 16)
 
     # partial overlap
     det = mock_det([[0, 0], [2, 2]])
     obj = mock_obj([[1, 1], [3, 3]])
-    np.testing.assert_almost_equal(iou(det, obj), 1 - 1 / (8 - 1))
-    np.testing.assert_almost_equal(iou_opt(det, obj), 1 - 1 / (8 - 1))
+    np.testing.assert_almost_equal(iou.distance_function(det, obj), 1 - 1 / (8 - 1))
+    np.testing.assert_almost_equal(iou_opt.distance_function(det, obj), 1 - 1 / (8 - 1))
 
     # invalid bbox
     det = mock_det([[0, 0]])
     obj = mock_obj([[0, 0]])
     with pytest.raises(AssertionError):
-        iou(det, obj)
+        iou.distance_function(det, obj)
 
     # invalid bbox
     det = mock_det([[0, 0], [1, 1], [2, 2]])
     obj = mock_obj([[0, 0], [2, 2]])
     with pytest.raises(AssertionError):
-        iou(det, obj)
+        iou.distance_function(det, obj)
 
     # invalid box should be corrected
     det = mock_det([[4, 4], [0, 0]])
     obj = mock_obj([[0, 0], [4, 4]])
-    np.testing.assert_almost_equal(iou(det, obj), 0)
+    np.testing.assert_almost_equal(iou.distance_function(det, obj), 0)
 
     # invalid box should be corrected
     det = mock_det([[0, 0], [4, 4]])
     obj = mock_obj([[4, 4], [0, 0]])
-    np.testing.assert_almost_equal(iou(det, obj), 0)
+    np.testing.assert_almost_equal(iou.distance_function(det, obj), 0)
 
 
 def test_keypoint_vote(mock_obj, mock_det):
@@ -286,3 +290,53 @@ def test_normalized_euclidean(mock_obj, mock_det):
     det = mock_det([[-1, 2], [3, 4]])
     obj = mock_obj([[-1, 2], [3, 4]])
     np.testing.assert_almost_equal(norm_e(det, obj), 0)
+
+
+def test_scalar_distance(mock_obj, mock_det):
+    fro = ScalarDistance(frobenius)
+
+    det = mock_det([[1, 2], [3, 4]])
+    obj = mock_obj([[1, 2], [3, 4]])
+
+    dist_matrix = fro.get_distances([obj], [det])
+
+    assert type(dist_matrix) == np.ndarray
+    assert dist_matrix.shape == (1, 1)
+    assert dist_matrix[0, 0] == 0
+
+
+def test_vectorized_distance(mock_obj, mock_det):
+    def distance_function(cands, objs):
+        distance_matrix = np.full(
+            (len(cands), len(objs)),
+            fill_value=np.inf,
+            dtype=np.float32,
+        )
+        for c, cand in enumerate(cands):
+            for o, obj in enumerate(objs):
+                distance_matrix[c, o] = np.linalg.norm(cand - obj)
+        return distance_matrix
+
+    fro = VectorizedDistance(distance_function)
+
+    det = mock_det([[1, 2], [3, 4]])
+    obj = mock_obj([[1, 2], [3, 4]])
+
+    dist_matrix = fro.get_distances([obj], [det])
+
+    assert type(dist_matrix) == np.ndarray
+    assert dist_matrix.shape == (1, 1)
+    assert dist_matrix[0, 0] == 0
+
+
+def test_scipy_distance(mock_obj, mock_det):
+    euc = ScipyDistance("euclidean")
+
+    det = mock_det([[1, 2], [3, 4]])
+    obj = mock_obj([[1, 2], [4, 4]])
+
+    dist_matrix = euc.get_distances([obj], [det])
+
+    assert type(dist_matrix) == np.ndarray
+    assert dist_matrix.shape == (1, 1)
+    assert dist_matrix[0, 0] == 1.0

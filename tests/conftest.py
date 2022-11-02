@@ -7,7 +7,7 @@ from norfair.utils import validate_points
 @pytest.fixture
 def mock_det():
     class FakeDetection:
-        def __init__(self, points, scores=None) -> None:
+        def __init__(self, points, scores=None, label=None) -> None:
             if not isinstance(points, np.ndarray):
                 points = np.array(points)
             self.points = points
@@ -17,6 +17,7 @@ def mock_det():
                 if scores.ndim == 0 and points.shape[0] > 1:
                     scores = np.full(points.shape[0], scores)
             self.scores = scores
+            self.label = label
 
     return FakeDetection
 
@@ -24,12 +25,13 @@ def mock_det():
 @pytest.fixture
 def mock_obj(mock_det):
     class FakeTrackedObject:
-        def __init__(self, points, scores=None):
+        def __init__(self, points, scores=None, label=None):
             if not isinstance(points, np.ndarray):
                 points = np.array(points)
 
             self.estimate = points
             self.last_detection = mock_det(points, scores=scores)
+            self.label = label
 
     return FakeTrackedObject
 
