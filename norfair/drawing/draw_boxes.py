@@ -3,6 +3,7 @@ from typing import Optional, Sequence, Tuple, Union
 import numpy as np
 
 from norfair.tracker import Detection, TrackedObject
+from norfair.utils import warn_once
 
 from .color import ColorLike, Palette, parse_color
 from .drawer import Drawable, Drawer
@@ -11,14 +12,21 @@ from .utils import _build_text
 
 def draw_boxes(
     frame: np.ndarray,
-    drawables: Sequence[Union[Detection, TrackedObject]],
+    drawables: Sequence[Union[Detection, TrackedObject]] = None,
     color: ColorLike = "by_id",
     thickness: Optional[int] = None,
+    random_color: bool = False,  # Deprecated
+    color_by_label: bool = False,  # Deprecated
     draw_labels: bool = False,
-    draw_ids: bool = False,
     text_size: Optional[float] = None,
+    draw_ids: bool = False,
     text_color: Optional[ColorLike] = None,
     text_thickness: Optional[int] = None,
+    draw_box: bool = True,
+    detections: Sequence["Detection"] = None,  # Deprecated
+    line_color: Optional[ColorLike] = None,  # Deprecated
+    line_width: Optional[int] = None,  # Deprecated
+    label_size: Optional[int] = None,  # Deprecated
 ) -> np.ndarray:
     """
     Draw bounding boxes corresponding to Detections or TrackedObjects.
@@ -62,6 +70,33 @@ def draw_boxes(
     np.ndarray
         The resulting frame.
     """
+    #
+    # handle deprecated parameters
+    #
+    if random_color is not None:
+        warn_once(
+            'Parameter "random_color" is deprecated, set `color="random"` instead'
+        )
+        color = "random"
+    if color_by_label is not None:
+        warn_once(
+            'Parameter "color_by_label" is deprecated, set `color="by_label"` instead'
+        )
+        color = "by_label"
+    if detections is not None:
+        warn_once('Parameter "detections" is deprecated, use "drawables" instead')
+        drawables = detections
+    if line_color is not None:
+        warn_once('Parameter "line_color" is deprecated, use "color" instead')
+        color = line_color
+    if line_width is not None:
+        warn_once('Parameter "line_width" is deprecated, use "thickness" instead')
+        thickness = line_width
+    if label_size is not None:
+        warn_once('Parameter "label_size" is deprecated, use "text_size" instead')
+        text_size = label_size
+    # end
+
     if color is None:
         color = "by_id"
     if thickness is None:
@@ -77,17 +112,19 @@ def draw_boxes(
             obj_color = Palette.choose_color(d.id)
         elif color == "by_label":
             obj_color = Palette.choose_color(d.label)
+        elif color == "random":
+            obj_color = Palette.choose_color(np.random.rand())
         else:
             obj_color = parse_color(color)
 
         points = d.points.astype(int)
-
-        Drawer.rectangle(
-            frame,
-            tuple(points),
-            color=obj_color,
-            thickness=thickness,
-        )
+        if draw_box:
+            Drawer.rectangle(
+                frame,
+                tuple(points),
+                color=obj_color,
+                thickness=thickness,
+            )
 
         text = _build_text(d, draw_labels=draw_labels, draw_ids=draw_ids)
         if text:
@@ -111,3 +148,31 @@ def draw_boxes(
             )
 
     return frame
+
+
+def draw_tracked_boxes(
+    frame: np.ndarray,
+    objects: Sequence["TrackedObject"],
+    border_colors: Optional[Tuple[int, int, int]] = None,
+    border_width: Optional[int] = None,
+    id_size: Optional[int] = None,
+    id_thickness: Optional[int] = None,
+    draw_box: bool = True,
+    color_by_label: bool = False,
+    draw_labels: bool = False,
+    label_size: Optional[int] = None,
+    label_width: Optional[int] = None,
+) -> np.array:
+    "**Deprecated**. Use [`draw_box`][norfair.drawing.draw_boxes.draw_boxes]"
+    warn_once("draw_tracked_boxes is deprecated, use draw_box instead")
+    return draw_boxes(
+        frame=frame,
+        drawables=objects,
+        color="by_label" if color_by_label else border_colors,
+        thickness=border_width,
+        text_size=label_size or id_size,
+        text_thickness=id_thickness or label_width,
+        draw_labels=draw_labels,
+        draw_ids=id_size is not None and id_size > 0,
+        hide_box=not draw_box,
+    )

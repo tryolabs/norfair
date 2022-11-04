@@ -3,6 +3,7 @@ from typing import Optional, Sequence, Union
 import numpy as np
 
 from norfair.tracker import Detection, TrackedObject
+from norfair.utils import warn_once
 
 from .color import ColorLike, Palette, parse_color
 from .drawer import Drawable, Drawer
@@ -11,17 +12,21 @@ from .utils import _build_text
 
 def draw_points(
     frame: np.ndarray,
-    drawables: Sequence[Union[Detection, TrackedObject]],
-    color: ColorLike = "by_id",
+    drawables: Sequence[Union[Detection, TrackedObject]] = None,
     radius: Optional[int] = None,
     thickness: Optional[int] = None,
+    color: ColorLike = "by_id",
+    color_by_label: bool = None,  # deprecated
     draw_labels: bool = True,
-    draw_ids: bool = True,
-    draw_points: bool = True,
     text_size: Optional[int] = None,
+    draw_ids: bool = True,
+    draw_points: bool = True,  # pylint: disable=redefined-outer-name
+    text_thickness: Optional[int] = None,
     text_color: Optional[ColorLike] = None,
     hide_dead_points: bool = True,
-):
+    detections: Sequence["Detection"] = None,  # deprecated
+    label_size: Optional[int] = None,  # deprecated
+) -> np.ndarray:
     """
     Draw the points included in a list of Detections or TrackedObjects.
 
@@ -71,6 +76,26 @@ def draw_points(
     np.ndarray
         The resulting frame.
     """
+    #
+    # handle deprecated parameters
+    #
+    if color_by_label is not None:
+        warn_once(
+            'Parameter "color_by_label" on function draw_points is deprecated, set `color="by_label"` instead'
+        )
+        color = "by_label"
+    if detections is not None:
+        warn_once(
+            "Parameter 'detections' on function draw_points is deprecated, use 'drawables' instead"
+        )
+        drawables = detections
+    if label_size is not None:
+        warn_once(
+            "Parameter 'label_size' on function draw_points is deprecated, use 'text_size' instead"
+        )
+        text_size = label_size
+    # end
+
     if drawables is None:
         return
     if color is None:
@@ -90,6 +115,8 @@ def draw_points(
             obj_color = Palette.choose_color(d.id)
         elif color == "by_label":
             obj_color = Palette.choose_color(d.label)
+        elif color == "random":
+            obj_color = Palette.choose_color(np.random.rand())
         else:
             obj_color = parse_color(color)
 
@@ -120,8 +147,60 @@ def draw_points(
                 tuple(position.astype(int)),
                 size=text_size,
                 color=obj_text_color,
+                thickness=text_thickness,
             )
     return frame
+
+
+# HACK add an alias to prevent error in the function below
+# the deprecated draw_tracked_objects accepts a parameter called
+# "draw_points" which overwrites the function "draw_points" from above
+# since draw_tracked_objects needs to call this function, an alias
+# is defined that can be used to call draw_points
+_draw_points_alias = draw_points
+
+
+def draw_tracked_objects(
+    frame: np.ndarray,
+    objects: Sequence["TrackedObject"],
+    radius: Optional[int] = None,
+    color: Optional[ColorLike] = None,
+    id_size: Optional[float] = None,
+    id_thickness: Optional[int] = None,
+    draw_points: bool = True,  # pylint: disable=redefined-outer-name
+    color_by_label: bool = False,
+    draw_labels: bool = False,
+    label_size: Optional[int] = None,
+):
+    """
+    **Deprecated** use [`draw_points`][norfair.drawing.draw_points.draw_points]
+    """
+    warn_once("draw_tracked_objects is deprecated, use draw_points instead")
+
+    frame_scale = frame.shape[0] / 100
+    if radius is None:
+        radius = int(frame_scale * 0.5)
+    if id_size is None:
+        id_size = frame_scale / 10
+    if id_thickness is None:
+        id_thickness = int(frame_scale / 5)
+    if label_size is None:
+        label_size = int(max(frame_scale / 100, 1))
+
+    _draw_points_alias(
+        frame=frame,
+        drawables=objects,
+        color="by_label" if color_by_label else color,
+        radius=radius,
+        thickness=None,
+        draw_labels=draw_labels,
+        draw_ids=id_size is not None and id_size > 0,
+        draw_points=draw_points,
+        text_size=label_size or id_size,
+        text_thickness=id_thickness,
+        text_color=None,
+        hide_dead_points=True,
+    )
 
 
 # TODO: We used to have this function to debug
