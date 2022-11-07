@@ -1,3 +1,4 @@
+"Collection of drawing functions"
 from .absolute_grid import draw_absolute_grid
 from .color import Color, ColorType, Palette
 from .draw_boxes import draw_boxes, draw_tracked_boxes

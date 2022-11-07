@@ -34,42 +34,54 @@ def draw_points(
     ----------
     frame : np.ndarray
         The OpenCV frame to draw on. Modified in place.
-    drawables : Sequence[Union[Detection, TrackedObject]]
+    drawables : Sequence[Union[Detection, TrackedObject]], optional
         List of objects to draw, Detections and TrackedObjects are accepted.
-    color : ColorLike, optional
-        This parameter can take:
-        1. A color as a tuple of ints describing the BGR `(0, 0, 255)`
-        2. A 6-digit hex string `"#FF0000"`
-        3. One of the defined color names `"red"`
-        4. A string defining the strategy to choose colors from the Palette:
-            1. based on the id of the objects `"by_id"`
-            2. based on the label of the objects `"by_label"`
-        Note that if your objects don't have labels or ids (Detections never have ids)
-        the selected color will be the same for all objects.
     radius : Optional[int], optional
         Radius of the circles representing each point.
         By default a sensible value is picked considering the frame size.
     thickness : Optional[int], optional
         Thickness or width of the line.
+    color : ColorLike, optional
+        This parameter can take:
+
+        1. A color as a tuple of ints describing the BGR `(0, 0, 255)`
+        2. A 6-digit hex string `"#FF0000"`
+        3. One of the defined color names `"red"`
+        4. A string defining the strategy to choose colors from the Palette:
+
+            1. based on the id of the objects `"by_id"`
+            2. based on the label of the objects `"by_label"`
+            3. random choice `"random"`
+
+        If using `by_id` or `by_label` strategy but your objects don't
+        have that field defined (Detections never have ids) the
+        selected color will be the same for all objects (Palette's default Color).
+    color_by_label : bool, optional
+        **Deprecated**. set `color="by_label"`.
     draw_labels : bool, optional
         If set to True, the label is added to a title that is drawn on top of the box.
         If an object doesn't have a label this parameter is ignored.
+    text_size : Optional[int], optional
+        Size of the title, the value is used as a multiplier of the base size of the font.
+        By default the size is scaled automatically based on the frame size.
     draw_ids : bool, optional
         If set to True, the id is added to a title that is drawn on top of the box.
         If an object doesn't have an id this parameter is ignored.
-    text_size : Optional[float], optional
-        Size of the title, the value is used as a multiplier of the base size of the font.
-        By default the size is scaled automatically based on the frame size.
-    text_color : Optional[int], optional
-        Color of the text. By default the same color as the box is used.
+    draw_points : bool, optional
+        Set to False to hide the points and just draw the text.
     text_thickness : Optional[int], optional
         Thickness of the font. By default it's scaled with the `text_size`.
+    text_color : Optional[ColorLike], optional
+        Color of the text. By default the same color as the box is used.
     hide_dead_points : bool, optional
-        By default the dead points of the TrackedObject are hidden.
-        A point is considered dead if the corresponding value of `TrackedObject.live_points` is set to False.
-        If all objects are dead the object is not drawn.
+        Set this param to False to always draw all points, even the ones considered "dead".
+        A point is "dead" when the corresponding value of `TrackedObject.live_points`
+        is set to False. If all objects are dead the object is not drawn.
         All points of a detection are considered to be alive.
-        Set this param to False to always draw all points.
+    detections : Sequence[Detection], optional
+        **Deprecated**. use drawables.
+    label_size : Optional[int], optional
+        **Deprecated**. text_size.
 
     Returns
     -------

@@ -223,13 +223,14 @@ class Color:
     cb10 = hex_to_bgr("#56b4e9")
 
 
-def parse_color(value: ColorLike) -> Color:
+def parse_color(value: ColorLike) -> ColorType:
     """Makes best effort to parse the given value to a Color
 
     Parameters
     ----------
     value : ColorLike
         Can be one of:
+
         1. a string with the 6 digits hex value (`"#ff0000"`)
         2. a string with one of the names defined in Colors (`"red"`)
         3. a BGR tuple (`(0, 0, 255)`)
@@ -299,11 +300,34 @@ PALETTES = {
 
 
 class Palette:
+    """
+    Class to control the color pallete for drawing.
+
+    Examples
+    --------
+    Change palette:
+    >>> from norfair import Palette
+    >>> Palette.set("colorblind")
+    >>> # or a custom palette
+    >>> from norfair import Color
+    >>> Palette.set([Color.red, Color.blue, "#ffeeff"])
+    """
+
     _colors = PALETTES["tab10"]
     _default_color = Color.black
 
     @classmethod
     def set(cls, palette: Union[str, Iterable[ColorLike]]):
+        """
+        Selects a color palette.
+
+        Parameters
+        ----------
+        palette : Union[str, Iterable[ColorLike]]
+            can be either
+            - the name of one of the predefined palettes `tab10`, `tab20`, or `colorblind`
+            - a list of ColorLike objects that can be parsed by [`parse_color`][norfair.drawing.color.parse_color]
+        """
         if isinstance(palette, str):
             try:
                 cls._colors = PALETTES[palette]
@@ -320,6 +344,14 @@ class Palette:
 
     @classmethod
     def set_default_color(cls, color: ColorLike):
+        """
+        Selects the default color of `choose_color` when hashable is None.
+
+        Parameters
+        ----------
+        color : ColorLike
+            The new default color.
+        """
         cls._default_color = parse_color(color)
 
     @classmethod
