@@ -100,13 +100,6 @@ Most tracking demos are showcased with vehicles and pedestrians, but the detecto
 
 Norfair works by estimating the future position of each point based on its past positions. It then tries to match these estimated positions with newly detected points provided by the detector. For this matching to occur, Norfair can rely on any distance function. There are some predefined distances already integrated in Norfair, and the users can also define their own custom distances. Therefore, each object tracker can be made as simple or as complex as needed.
 
-The following is an example of a particularly simple distance function calculating the Euclidean distance between tracked objects and detections. This distance is already integrated in Norfair and can be used simply by setting the string `"euclidean"` when building the tracker. This is possibly the simplest distance function you could use in Norfair, as it uses just one single point per detection/object.
-
-```python
- def euclidean_distance(detection, tracked_object):
-     return np.linalg.norm(detection.points - tracked_object.estimate)
-```
-
 As an example we use [Detectron2](https://github.com/facebookresearch/detectron2) to get the single point detections to use with this distance function. We just use the centroids of the bounding boxes it produces around cars as our detections, and get the following results.
 
 ![Tracking cars with Norfair](https://raw.githubusercontent.com/tryolabs/norfair/master/docs/videos/traffic.gif)

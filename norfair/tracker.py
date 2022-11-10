@@ -7,8 +7,7 @@ from rich import print
 from norfair.camera_motion import CoordinatesTransformation
 
 from .distances import (
-    _SCIPY_DISTANCE_FUNCTIONS,
-    _VECTORIZED_DISTANCE_FUNCTIONS,
+    AVAILABLE_VECTORIZED_DISTANCES,
     ScalarDistance,
     get_distance_by_name,
 )
@@ -103,8 +102,7 @@ class Tracker:
             warning(
                 "You are using a scalar distance function. If you want to speed up the"
                 " tracking process please consider using a vectorized distance"
-                " function such as"
-                f" {list(_VECTORIZED_DISTANCE_FUNCTIONS.keys()) + _SCIPY_DISTANCE_FUNCTIONS}."
+                f" function such as {AVAILABLE_VECTORIZED_DISTANCES}."
             )
             distance_function = ScalarDistance(distance_function)
         else:

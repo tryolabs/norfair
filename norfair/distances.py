@@ -28,10 +28,10 @@ class Distance(ABC):
 
         Parameters
         ----------
-        objects: Sequence[TrackedObject]
+        objects : Sequence[TrackedObject]
             Sequence of [TrackedObject][norfair.tracker.TrackedObject] to be compared with potential [Detection][norfair.tracker.Detection] or [TrackedObject][norfair.tracker.TrackedObject]
             candidates.
-        candidates: Union[List[Detection], List[TrackedObject]], optional
+        candidates : Union[List[Detection], List[TrackedObject]], optional
             List of candidates ([Detection][norfair.tracker.Detection] or [TrackedObject][norfair.tracker.TrackedObject]) to be compared to [TrackedObject][norfair.tracker.TrackedObject].
 
         Returns
@@ -48,10 +48,7 @@ class ScalarDistance(Distance):
 
     Parameters
     ----------
-    distance_function : Union[
-            Callable[["Detection", "TrackedObject"], float],
-            Callable[["TrackedObject", "TrackedObject"], float],
-        ],
+    distance_function : Union[Callable[["Detection", "TrackedObject"], float], Callable[["TrackedObject", "TrackedObject"], float]]
         Distance function used to determine the pointwise distance between new candidates and objects.
         This function should take 2 input arguments, the first being a `Union[Detection, TrackedObject]`,
         and the second [TrackedObject][norfair.tracker.TrackedObject]. It has to return a `float` with the distance it calculates.
@@ -76,10 +73,10 @@ class ScalarDistance(Distance):
 
         Parameters
         ----------
-        objects: Sequence[TrackedObject]
+        objects : Sequence[TrackedObject]
             Sequence of [TrackedObject][norfair.tracker.TrackedObject] to be compared with potential [Detection][norfair.tracker.Detection] or [TrackedObject][norfair.tracker.TrackedObject]
             candidates.
-        candidates: Union[List[Detection], List[TrackedObject]], optional
+        candidates : Union[List[Detection], List[TrackedObject]], optional
             List of candidates ([Detection][norfair.tracker.Detection] or [TrackedObject][norfair.tracker.TrackedObject]) to be compared to [TrackedObject][norfair.tracker.TrackedObject].
 
         Returns
@@ -107,12 +104,14 @@ class ScalarDistance(Distance):
 
 class VectorizedDistance(Distance):
     """
-    VectorizedDistance class represents a distance that is calculated pairwise.
+    VectorizedDistance class represents a distance that is calculated in a vectorized way. This means
+    that instead of going through every pair and explicitly calculating its distance, VectorizedDistance
+    uses the entire vectors to compare to each other in a single operation.
 
     Parameters
     ----------
     distance_function : Callable[[np.ndarray, np.ndarray], np.ndarray]
-        Distance function used to determine the pairwise distances between new candidates and objects.
+        Distance function used to determine the distances between new candidates and objects.
         This function should take 2 input arguments, the first being a `np.ndarray` and the second
         `np.ndarray`. It has to return a `np.ndarray` with the distance matrix it calculates.
     """
@@ -133,10 +132,10 @@ class VectorizedDistance(Distance):
 
         Parameters
         ----------
-        objects: Sequence[TrackedObject]
+        objects : Sequence[TrackedObject]
             Sequence of [TrackedObject][norfair.tracker.TrackedObject] to be compared with potential [Detection][norfair.tracker.Detection] or [TrackedObject][norfair.tracker.TrackedObject]
             candidates.
-        candidates: Union[List[Detection], List[TrackedObject]], optional
+        candidates : Union[List[Detection], List[TrackedObject]], optional
             List of candidates ([Detection][norfair.tracker.Detection] or [TrackedObject][norfair.tracker.TrackedObject]) to be compared to [TrackedObject][norfair.tracker.TrackedObject].
 
         Returns
@@ -191,12 +190,13 @@ class VectorizedDistance(Distance):
     ) -> np.ndarray:
         """
         Method that computes the pairwise distances between new candidates and objects.
+        It is intended to use the entire vectors to compare to each other in a single operation.
 
         Parameters
         ----------
-        stacked_candidates: np.ndarray
+        stacked_candidates : np.ndarray
             np.ndarray containing a stack of candidates to be compared with the stacked_objects.
-        stacked_objects: np.ndarray
+        stacked_objects : np.ndarray
             np.ndarray containing a stack of objects to be compared with the stacked_objects.
 
         Returns
@@ -209,7 +209,7 @@ class VectorizedDistance(Distance):
 
 class ScipyDistance(VectorizedDistance):
     """
-    ScipyDistance class extends VectorizedDistance for the use of Scipy's pairwise distances.
+    ScipyDistance class extends VectorizedDistance for the use of Scipy's vectorized distances.
 
     This class uses `scipy.spatial.distance.cdist` to calculate distances between two `np.ndarray`.
 
@@ -235,12 +235,13 @@ class ScipyDistance(VectorizedDistance):
     ) -> np.ndarray:
         """
         Method that computes the pairwise distances between new candidates and objects.
+        It is intended to use the entire vectors to compare to each other in a single operation.
 
         Parameters
         ----------
-        stacked_candidates: np.ndarray
+        stacked_candidates : np.ndarray
             np.ndarray containing a stack of candidates to be compared with the stacked_objects.
-        stacked_objects: np.ndarray
+        stacked_objects : np.ndarray
             np.ndarray containing a stack of objects to be compared with the stacked_objects.
 
         Returns
@@ -472,21 +473,31 @@ _SCIPY_DISTANCE_FUNCTIONS = [
     "sqeuclidean",
     "yule",
 ]
+AVAILABLE_VECTORIZED_DISTANCES = (
+    list(_VECTORIZED_DISTANCE_FUNCTIONS.keys()) + _SCIPY_DISTANCE_FUNCTIONS
+)
 
 
 def get_distance_by_name(name: str) -> Distance:
-    f"""
+    """
     Select a distance by name.
 
-    Valid names are: `{list(_SCALAR_DISTANCE_FUNCTIONS.keys()) + list(_VECTORIZED_DISTANCE_FUNCTIONS.keys()) + _SCIPY_DISTANCE_FUNCTIONS}`.
+    Parameters
+    ----------
+    name : str
+        A string defining the metric to get.
+
+    Returns
+    -------
+    Distance
+        The distance object.
     """
 
     if name in _SCALAR_DISTANCE_FUNCTIONS:
         warning(
             "You are using a scalar distance function. If you want to speed up the"
             " tracking process please consider using a vectorized distance function"
-            " such as"
-            f" {list(_VECTORIZED_DISTANCE_FUNCTIONS.keys()) + _SCIPY_DISTANCE_FUNCTIONS}."
+            f" such as {AVAILABLE_VECTORIZED_DISTANCES}."
         )
         distance = _SCALAR_DISTANCE_FUNCTIONS[name]
         distance_function = ScalarDistance(distance)
@@ -498,7 +509,7 @@ def get_distance_by_name(name: str) -> Distance:
     else:
         raise ValueError(
             f"Invalid distance '{name}', expecting one of"
-            f" {list(_SCALAR_DISTANCE_FUNCTIONS.keys()) + list(_VECTORIZED_DISTANCE_FUNCTIONS.keys()) + _SCIPY_DISTANCE_FUNCTIONS}"
+            f" {list(_SCALAR_DISTANCE_FUNCTIONS.keys()) + AVAILABLE_VECTORIZED_DISTANCES}"
         )
 
     return distance_function
