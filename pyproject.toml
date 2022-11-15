@@ -44,7 +44,7 @@ motmetrics = { version = "1.2.5", optional = true }
 importlib-metadata = { version = "4.8.3", python = "<3.8" }
 
 [tool.poetry.extras]
-metrics = ["motmetrics", "importlib-metadata"]
+metrics = ["motmetrics"]
 video = ["opencv-python"]
 
 [tool.poetry.group.test.dependencies]
