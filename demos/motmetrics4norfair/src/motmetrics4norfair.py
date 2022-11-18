@@ -5,7 +5,6 @@ import numpy as np
 
 from norfair import drawing, metrics, Tracker, video
 from norfair.camera_motion import MotionEstimator
-from norfair.distances import iou
 from norfair.filter import FilterPyKalmanFilterFactory
 
 DETECTION_THRESHOLD = 0.5
@@ -103,7 +102,7 @@ for input_path in sequences_paths:
     )
 
     tracker = Tracker(
-        distance_function=iou,
+        distance_function="iou_opt",
         distance_threshold=DISTANCE_THRESHOLD,
         detection_threshold=DETECTION_THRESHOLD,
         pointwise_hit_counter_max=POINTWISE_HIT_COUNTER_MAX,

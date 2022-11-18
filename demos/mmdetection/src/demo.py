@@ -5,8 +5,6 @@ from mmdet.apis import inference_detector, init_detector
 from mmdet.core import get_classes
 
 from norfair import Detection, Tracker, Video, draw_tracked_objects
-from norfair.distances import frobenius
-from norfair.tracker import TrackedObject
 
 parser = argparse.ArgumentParser(description="Track human poses in a video.")
 parser.add_argument("files", type=str, nargs="+", help="Video files to process")
@@ -34,7 +32,7 @@ VEHICLE_CLASSES = [
 for input_path in args.files:
 
     tracker = Tracker(
-        distance_function=frobenius, distance_threshold=20, detection_threshold=0.6
+        distance_function="euclidean", distance_threshold=20, detection_threshold=0.6
     )
 
     video = Video(input_path=input_path, output_path=args.output_path)

@@ -1,3 +1,4 @@
+from logging import warning
 from typing import Any, Callable, Hashable, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
@@ -5,7 +6,11 @@ from rich import print
 
 from norfair.camera_motion import CoordinatesTransformation
 
-from .distances import get_distance_by_name
+from .distances import (
+    AVAILABLE_VECTORIZED_DISTANCES,
+    ScalarDistance,
+    get_distance_by_name,
+)
 from .filter import FilterFactory, OptimizedKalmanFilterFactory
 from .utils import validate_points
 
@@ -21,6 +26,8 @@ class Tracker:
         This function should take 2 input arguments, the first being a [Detection][norfair.tracker.Detection], and the second a [TrackedObject][norfair.tracker.TrackedObject].
         It has to return a `float` with the distance it calculates.
         Some common distances are implemented in [distances][], as a shortcut the tracker accepts the name of these [predefined distances][norfair.distances.get_distance_by_name].
+        Scipy's predefined distances are also accepted. A `str` with one of the available metrics in
+        [`scipy.spatial.distance.cdist`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.cdist.html).
     distance_threshold : float
         Defines what is the maximum distance that can constitute a match.
         Detections and tracked objects whose distances are above this threshold won't be matched by the tracker.
@@ -91,6 +98,18 @@ class Tracker:
 
         if isinstance(distance_function, str):
             distance_function = get_distance_by_name(distance_function)
+        elif isinstance(distance_function, Callable):
+            warning(
+                "You are using a scalar distance function. If you want to speed up the"
+                " tracking process please consider using a vectorized distance"
+                f" function such as {AVAILABLE_VECTORIZED_DISTANCES}."
+            )
+            distance_function = ScalarDistance(distance_function)
+        else:
+            raise ValueError(
+                "Argument `distance_function` should be a string or function but is"
+                f" {type(distance_function)} instead."
+            )
         self.distance_function = distance_function
 
         self.hit_counter_max = hit_counter_max
@@ -115,7 +134,10 @@ class Tracker:
 
         self.distance_threshold = distance_threshold
         self.detection_threshold = detection_threshold
-        self.reid_distance_function = reid_distance_function
+        if reid_distance_function is not None:
+            self.reid_distance_function = ScalarDistance(reid_distance_function)
+        else:
+            self.reid_distance_function = reid_distance_function
         self.reid_distance_threshold = reid_distance_threshold
         self._obj_factory = _TrackedObjectFactory()
 
@@ -261,33 +283,6 @@ class Tracker:
             if not o.is_initializing and o.hit_counter_is_positive
         ]
 
-    def _get_distances(
-        self,
-        distance_function,
-        distance_threshold,
-        objects: Sequence["TrackedObject"],
-        candidates: Optional[Union[List["Detection"], List["TrackedObject"]]],
-    ):
-        distance_matrix = np.ones((len(candidates), len(objects)), dtype=np.float32)
-        distance_matrix *= distance_threshold + 1
-        for c, candidate in enumerate(candidates):
-            for o, obj in enumerate(objects):
-                if candidate.label != obj.label:
-                    distance_matrix[c, o] = distance_threshold + 1
-                    if (candidate.label is None) or (obj.label is None):
-                        print("\nThere are detections with and without label!")
-                    continue
-                distance = distance_function(candidate, obj)
-                # Cap detections and objects with no chance of getting matched so we
-                # dont force the hungarian algorithm to minimize them and therefore
-                # introduce the possibility of sub optimal results.
-                # Note: This is probably not needed with the new distance minimizing algorithm
-                if distance > distance_threshold:
-                    distance_matrix[c, o] = distance_threshold + 1
-                else:
-                    distance_matrix[c, o] = distance
-        return distance_matrix
-
     def _update_objects_in_place(
         self,
         distance_function,
@@ -297,9 +292,7 @@ class Tracker:
         period: int,
     ):
         if candidates is not None and len(candidates) > 0:
-            distance_matrix = self._get_distances(
-                distance_function, distance_threshold, objects, candidates
-            )
+            distance_matrix = distance_function.get_distances(objects, candidates)
             if np.isnan(distance_matrix).any():
                 print(
                     "\nReceived nan values from distance function, please check your distance function for errors!"

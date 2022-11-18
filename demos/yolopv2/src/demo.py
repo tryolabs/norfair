@@ -96,7 +96,7 @@ def detect():
 
     # Norfair Tracker init
     tracker = Tracker(
-        distance_function=iou,
+        distance_function="iou",
         distance_threshold=0.7,
     )
 

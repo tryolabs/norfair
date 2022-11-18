@@ -22,7 +22,7 @@ DEFAULT_VIDEO_SAVE_OPT = {
 EVAL_JOINTS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
 
 detection_threshold = 0.2
-keypoint_dist_threshold = None
+keypoint_dist_threshold = 10
 
 
 def keypoints_distance(detected_pose, tracked_pose):
@@ -262,7 +262,6 @@ class DataWriter:
 
                 final_result.append(result)
                 if self.opt.save_img or self.save_video or self.opt.vis:
-
                     img = orig_img.copy()
                     global keypoint_dist_threshold
                     keypoint_dist_threshold = img.shape[0] / 30

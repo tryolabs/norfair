@@ -6,7 +6,6 @@ import torch
 
 import norfair
 from norfair import Detection, Paths, Tracker, Video
-from norfair.distances import frobenius, iou
 
 DISTANCE_THRESHOLD_BBOX: float = 0.7
 DISTANCE_THRESHOLD_CENTROID: int = 30
@@ -127,7 +126,7 @@ model = YOLO(args.model_name, device=args.device)
 for input_path in args.files:
     video = Video(input_path=input_path)
 
-    distance_function = iou if args.track_points == "bbox" else frobenius
+    distance_function = "iou_opt" if args.track_points == "bbox" else "euclidean"
     distance_threshold = (
         DISTANCE_THRESHOLD_BBOX
         if args.track_points == "bbox"

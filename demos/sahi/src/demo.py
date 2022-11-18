@@ -6,7 +6,6 @@ from sahi.prediction import PredictionResult
 from utils import create_arg_parser, obtain_detection_model
 
 from norfair import Detection, Tracker, Video, draw_boxes, draw_tracked_boxes
-from norfair.distances import iou
 from norfair.filter import OptimizedKalmanFilterFactory
 
 
@@ -48,7 +47,7 @@ def main(
 
     tracker = Tracker(
         initialization_delay=initialization_delay,
-        distance_function=iou,
+        distance_function="iou",
         hit_counter_max=hit_counter_max,
         filter_factory=OptimizedKalmanFilterFactory(),
         distance_threshold=distance_threshold,

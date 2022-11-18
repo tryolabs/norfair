@@ -15,17 +15,17 @@ def test_params():
     # test some invalid initializations
     #
     with pytest.raises(ValueError):
-        Tracker("frobenius", distance_threshold=10, initialization_delay=-1)
+        Tracker("euclidean", distance_threshold=10, initialization_delay=-1)
     with pytest.raises(ValueError):
         Tracker(
-            "frobenius",
+            "euclidean",
             distance_threshold=10,
             initialization_delay=1,
             hit_counter_max=0,
         )
     with pytest.raises(ValueError):
         Tracker(
-            "frobenius",
+            "euclidean",
             distance_threshold=10,
             initialization_delay=1,
             hit_counter_max=1,
@@ -49,7 +49,7 @@ def test_simple(filter_factory):
             # tests a simple static detection
             #
             tracker = Tracker(
-                "frobenius",
+                "euclidean",
                 initialization_delay=delay,
                 distance_threshold=100,
                 hit_counter_max=counter_max,
@@ -108,7 +108,7 @@ def test_moving(filter_factory):
     # Test a simple case of a moving object
     #
     tracker = Tracker(
-        "frobenius",
+        "euclidean",
         initialization_delay=3,
         distance_threshold=100,
         filter_factory=filter_factory,
@@ -133,7 +133,7 @@ def test_distance_t(filter_factory):
     # Test a moving object with a small distance threshold
     #
     tracker = Tracker(
-        "frobenius",
+        "euclidean",
         initialization_delay=1,
         distance_threshold=1,
         filter_factory=filter_factory,
@@ -161,7 +161,7 @@ def test_1d_points(filter_factory, mock_coordinate_transformation):
     # Test a detection with rank 1
     #
     tracker = Tracker(
-        "frobenius",
+        "euclidean",
         initialization_delay=0,
         distance_threshold=1,
         filter_factory=filter_factory,
@@ -180,7 +180,7 @@ def test_camera_motion(mock_coordinate_transformation):
     # Simple test for camera motion
     #
     for one_d in [True, False]:
-        tracker = Tracker("frobenius", 1, initialization_delay=0)
+        tracker = Tracker("euclidean", 1, initialization_delay=0)
         if one_d:
             absolute_points = np.array([1, 1])
         else:
@@ -225,7 +225,7 @@ def test_count(delay):
         # tests a simple static detection
         #
         tracker = Tracker(
-            "frobenius",
+            "euclidean",
             initialization_delay=delay,
             distance_threshold=1,
             hit_counter_max=counter_max,
@@ -276,13 +276,13 @@ def test_count(delay):
 
 def test_multiple_trackers():
     tracker1 = Tracker(
-        "frobenius",
+        "euclidean",
         initialization_delay=0,
         distance_threshold=1,
         hit_counter_max=2,
     )
     tracker2 = Tracker(
-        "frobenius",
+        "euclidean",
         initialization_delay=0,
         distance_threshold=1,
         hit_counter_max=2,

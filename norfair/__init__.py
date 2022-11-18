@@ -6,7 +6,7 @@ Examples
 >>> from norfair import Detection, Tracker, Video, draw_tracked_objects
 >>> detector = MyDetector()  # Set up a detector
 >>> video = Video(input_path="video.mp4")
->>> tracker = Tracker(distance_function="frobenious", distance_threshold=50)
+>>> tracker = Tracker(distance_function="euclidean", distance_threshold=50)
 >>> for frame in video:
 >>>    detections = detector(frame)
 >>>    norfair_detections = [Detection(points) for points in detections]

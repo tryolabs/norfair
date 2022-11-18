@@ -7,7 +7,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 RUN pip install --upgrade pip && \
-    pip install mediapipe==0.8.10.1 && \
+    pip install mediapipe==0.8.11 && \
     pip install opencv-python==4.5.5.64
 
 RUN pip install git+https://github.com/tryolabs/norfair.git@master#egg=norfair

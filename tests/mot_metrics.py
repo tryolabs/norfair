@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 
 from norfair import FilterPyKalmanFilterFactory, Tracker, metrics
-from norfair.distances import iou
 
 DATASET_PATH = "train"
 MOTA_ERROR_THRESHOLD = 0.0
@@ -48,7 +47,7 @@ def mot_metrics():
         )
 
         tracker = Tracker(
-            distance_function=iou,
+            distance_function="iou",
             distance_threshold=DISTANCE_THRESHOLD,
             detection_threshold=DETECTION_THRESHOLD,
             pointwise_hit_counter_max=POINTWISE_HIT_COUNTER_MAX,
