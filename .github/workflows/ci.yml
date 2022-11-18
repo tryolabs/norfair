@@ -72,6 +72,58 @@ jobs:
         run: |
           tox -e mot-py39
 
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
+      - name: Build package
+        run: poetry build -f sdist
+
+      - name: Prepare package
+        run: |
+          tar xvf "dist/norfair-$(poetry version -s).tar.gz"
+          mv norfair-$(poetry version -s) norfair-dist
+
+      - name: Save artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: norfair-dist
+          path: norfair-dist
+
+  install:
+    needs: [build]
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 5
+      matrix:
+        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10"]
+    steps:
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Download a single artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: norfair-dist
+          path: ./norfair-dist
+
+      - name: Install
+        run: pip install ./norfair-dist/
+
+      - name: Test
+        run: python -c "import norfair"
+
   #
   # Build & upload release to PyPI.
   #
