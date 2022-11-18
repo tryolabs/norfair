@@ -1448,7 +1448,7 @@ Use a bigger scale if the camera is moving too much.</p></td>
 
 <p><strong>Examples:</strong></p>
     <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="c1"># setup</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">tracker</span> <span class="o">=</span> <span class="n">Tracker</span><span class="p">(</span><span class="s2">&quot;frobenious&quot;</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tracker</span> <span class="o">=</span> <span class="n">Tracker</span><span class="p">(</span><span class="s2">&quot;euclidean&quot;</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">motion_estimator</span> <span class="o">=</span> <span class="n">MotionEstimator</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">video</span> <span class="o">=</span> <span class="n">Video</span><span class="p">(</span><span class="n">input_path</span><span class="o">=</span><span class="s2">&quot;video.mp4&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fixed_camera</span> <span class="o">=</span> <span class="n">FixedCamera</span><span class="p">()</span>
@@ -1632,7 +1632,7 @@ Use a bigger scale if the camera is moving too much.</p></td>
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; # setup</span>
-<span class="sd">    &gt;&gt;&gt; tracker = Tracker(&quot;frobenious&quot;, 100)</span>
+<span class="sd">    &gt;&gt;&gt; tracker = Tracker(&quot;euclidean&quot;, 100)</span>
 <span class="sd">    &gt;&gt;&gt; motion_estimator = MotionEstimator()</span>
 <span class="sd">    &gt;&gt;&gt; video = Video(input_path=&quot;video.mp4&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; fixed_camera = FixedCamera()</span>

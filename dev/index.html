@@ -746,7 +746,7 @@
 <p>Supports moving camera, re-identification with appearance embeddings, and n-dimensional object tracking (see <a href="#advanced-features">Advanced features</a>).</p>
 </li>
 <li>
-<p>The function used to calculate the distance between tracked objects and detections is defined by the user, enabling the implementation of different tracking strategies.</p>
+<p>Norfair provides several predefined distance functions to compare tracked objects and detections. The distance functions can also be defined by the user, enabling the implementation of different tracking strategies.</p>
 </li>
 <li>
 <p>Fast. The only thing bounding inference speed will be the detection network feeding detections to Norfair.</p>
@@ -803,12 +803,7 @@ pip install norfair<span class="o">[</span>metrics,video<span class="o">]</span>
 </ol>
 <p><img alt="Norfair OpenPose Demo" src="https://raw.githubusercontent.com/tryolabs/norfair/master/docs/videos/openpose_skip_3_frames.gif" /></p>
 <h2 id="how-it-works">How it works<a class="headerlink" href="#how-it-works" title="Permanent link">#</a></h2>
-<p>Norfair works by estimating the future position of each point based on its past positions. It then tries to match these estimated positions with newly detected points provided by the detector. For this matching to occur, Norfair can rely on any distance function specified by the user of the library. Therefore, each object tracker can be made as simple or as complex as needed.</p>
-<p>The following is an example of a particularly simple distance function calculating the Euclidean distance between tracked objects and detections. This is possibly the simplest distance function you could use in Norfair, as it uses just one single point per detection/object.</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
-<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code> <span class="k">def</span> <span class="nf">euclidean_distance</span><span class="p">(</span><span class="n">detection</span><span class="p">,</span> <span class="n">tracked_object</span><span class="p">):</span>
-     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">detection</span><span class="o">.</span><span class="n">points</span> <span class="o">-</span> <span class="n">tracked_object</span><span class="o">.</span><span class="n">estimate</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+<p>Norfair works by estimating the future position of each point based on its past positions. It then tries to match these estimated positions with newly detected points provided by the detector. For this matching to occur, Norfair can rely on any distance function. There are some predefined distances already integrated in Norfair, and the users can also define their own custom distances. Therefore, each object tracker can be made as simple or as complex as needed.</p>
 <p>As an example we use <a href="https://github.com/facebookresearch/detectron2">Detectron2</a> to get the single point detections to use with this distance function. We just use the centroids of the bounding boxes it produces around cars as our detections, and get the following results.</p>
 <p><img alt="Tracking cars with Norfair" src="https://raw.githubusercontent.com/tryolabs/norfair/master/docs/videos/traffic.gif" /></p>
 <p>On the left you can see the points we get from Detectron2, and on the right how Norfair tracks them assigning a unique identifier through time. Even a straightforward distance function like this one can work when the tracking needed is simple.</p>
@@ -852,7 +847,7 @@ pip install norfair<span class="o">[</span>metrics,video<span class="o">]</span>
 
 <span class="c1"># Norfair</span>
 <span class="n">video</span> <span class="o">=</span> <span class="n">Video</span><span class="p">(</span><span class="n">input_path</span><span class="o">=</span><span class="s2">&quot;video.mp4&quot;</span><span class="p">)</span>
-<span class="n">tracker</span> <span class="o">=</span> <span class="n">Tracker</span><span class="p">(</span><span class="n">distance_function</span><span class="o">=</span><span class="n">euclidean_distance</span><span class="p">,</span> <span class="n">distance_threshold</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">tracker</span> <span class="o">=</span> <span class="n">Tracker</span><span class="p">(</span><span class="n">distance_function</span><span class="o">=</span><span class="s2">&quot;euclidean&quot;</span><span class="p">,</span> <span class="n">distance_threshold</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 
 <span class="k">for</span> <span class="n">frame</span> <span class="ow">in</span> <span class="n">video</span><span class="p">:</span>
     <span class="n">detections</span> <span class="o">=</span> <span class="n">detector</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2RGB</span><span class="p">))</span>

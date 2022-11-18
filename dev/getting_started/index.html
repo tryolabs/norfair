@@ -669,7 +669,7 @@ To use this functionality you need to install Norfair with the <code>video</code
 
 <span class="n">detector</span> <span class="o">=</span> <span class="n">MyDetector</span><span class="p">()</span>  <span class="c1"># Set up a detector</span>
 <span class="n">video</span> <span class="o">=</span> <span class="n">Video</span><span class="p">(</span><span class="n">input_path</span><span class="o">=</span><span class="s2">&quot;video.mp4&quot;</span><span class="p">)</span>
-<span class="n">tracker</span> <span class="o">=</span> <span class="n">Tracker</span><span class="p">(</span><span class="n">distance_function</span><span class="o">=</span><span class="s2">&quot;frobenius&quot;</span><span class="p">,</span> <span class="n">distance_threshold</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">tracker</span> <span class="o">=</span> <span class="n">Tracker</span><span class="p">(</span><span class="n">distance_function</span><span class="o">=</span><span class="s2">&quot;euclidean&quot;</span><span class="p">,</span> <span class="n">distance_threshold</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
 
 <span class="k">for</span> <span class="n">frame</span> <span class="ow">in</span> <span class="n">video</span><span class="p">:</span>
    <span class="n">detections</span> <span class="o">=</span> <span class="n">detector</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
@@ -691,7 +691,7 @@ To use this functionality you need to install Norfair with the <code>video</code
 <li>Objects take <strong>too long to start</strong>, this can have multiple causes:<ul>
 <li><code>initialization_delay</code> is too big on the Tracker. Makes the TrackedObject stay on initializing for too long, <code>3</code> is usually a good value to start with.</li>
 <li><code>distance_threshold</code> is too small on the Tracker. Prevents the Detections to be matched with the correct TrackedObject. The best value depends on the distance used.</li>
-<li>Incorrect <code>distance_function</code> on the Tracker. Some distances might not be valid in some cases, for instance, if using IoU but the objects in your video move so quickly that there is never an overlap between the detections of consecutive frames. Try different distances, <code>frobenius</code> or <code>create_normalized_mean_euclidean_distance</code> are good starting points.</li>
+<li>Incorrect <code>distance_function</code> on the Tracker. Some distances might not be valid in some cases, for instance, if using IoU but the objects in your video move so quickly that there is never an overlap between the detections of consecutive frames. Try different distances, <code>euclidean</code> or <code>create_normalized_mean_euclidean_distance</code> are good starting points.</li>
 </ul>
 </li>
 <li>Objects take <strong>too long to disappear</strong>. Lower <code>hit_counter_max</code> on the Tracker.</li>
@@ -699,7 +699,7 @@ To use this functionality you need to install Norfair with the <code>video</code
 <li><strong>Camera motion</strong> confuses the Tracker. If the camera moves, the apparent movement of objects can become too erratic for the Tracker. Use <code>MotionEstimator</code>.</li>
 <li><strong>Incorrect matches</strong> between Detections and TrackedObjects, a couple of scenarios can cause this:<ul>
 <li><code>distance_threshold</code> is too big so the Tracker matches Detections to TrackedObjects that are simply too far. Lower the threshold until you fix the error, the correct value will depend on the distance function that you're using.</li>
-<li>Mismatches when objects overlap. In this case, tracking becomes more challenging, usually, the quality of the detection degrades causing one of the objects to be missed or creating a single big detection that includes both objects. On top of the detection issues, the tracker needs to decide which detection should be matched to which TrackedObject which can be error-prone if only considering spatial information. The solution is not easy but incorporating the notion of the appearance similarity based on some kind of embedding to your distance_finction can help.</li>
+<li>Mismatches when objects overlap. In this case, tracking becomes more challenging, usually, the quality of the detection degrades causing one of the objects to be missed or creating a single big detection that includes both objects. On top of the detection issues, the tracker needs to decide which detection should be matched to which TrackedObject which can be error-prone if only considering spatial information. The solution is not easy but incorporating the notion of the appearance similarity based on some kind of embedding to your distance_function can help.</li>
 </ul>
 </li>
 <li>Can't <strong>recover</strong> an object <strong>after occlusions</strong>. Use ReID distance, see <a href="https://github.com/tryolabs/norfair/tree/master/demos/reid">this demo</a> for an example but for real-world use you will need a good ReID model that can provide good embeddings.</li>
