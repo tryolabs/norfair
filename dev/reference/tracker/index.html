@@ -792,7 +792,7 @@ which can be problematic as this can result in objects appearing and immediately
           <td><p>Each tracked object keeps track of how often the points it's tracking have been getting matched.
 Points that are getting matched (<code>pointwise_hit_counter &gt; 0</code>) are said to be live, and points which aren't (<code>pointwise_hit_counter = 0</code>)
 are said to not be live.</p>
-<p>This is used to determine things like which individual points in a tracked object get drawn by <a class="autorefs autorefs-internal" href="../drawing/#norfair.drawing.draw_tracked_objects"><code>draw_tracked_objects</code></a> and which don't.
+<p>This is used to determine things like which individual points in a tracked object get drawn by <a class="autorefs autorefs-internal" href="../drawing/#norfair.drawing.draw_points.draw_tracked_objects"><code>draw_tracked_objects</code></a> and which don't.
 This argument defines how large the inertia for each point of a tracker can grow.</p></td>
           <td>
                 <code>4</code>
@@ -2285,7 +2285,7 @@ Useful if you are storing embeddings in your detections and want to do metric le
           </td>
           <td><p>A boolean mask with shape <code>(n_points,)</code>. Points marked as <code>True</code> have recently been matched with detections.
 Points marked as <code>False</code> haven't and are to be considered stale, and should be ignored.</p>
-<p>Functions like <a class="autorefs autorefs-internal" href="../drawing/#norfair.drawing.draw_tracked_objects"><code>draw_tracked_objects</code></a> use this property to determine which points not to draw.</p></td>
+<p>Functions like <a class="autorefs autorefs-internal" href="../drawing/#norfair.drawing.draw_points.draw_tracked_objects"><code>draw_tracked_objects</code></a> use this property to determine which points not to draw.</p></td>
         </tr>
         <tr>
           <td><code>initializing_id</code></td>
