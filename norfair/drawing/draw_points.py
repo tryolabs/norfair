@@ -110,6 +110,10 @@ def draw_points(
 
     if drawables is None:
         return
+
+    if text_color is not None:
+        text_color = parse_color(text_color)
+
     if color is None:
         color = "by_id"
     if thickness is None:
@@ -135,7 +139,7 @@ def draw_points(
         if text_color is None:
             obj_text_color = obj_color
         else:
-            obj_text_color = color
+            obj_text_color = text_color
 
         if draw_points:
             for point, live in zip(d.points, d.live_points):

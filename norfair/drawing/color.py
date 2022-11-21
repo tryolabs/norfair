@@ -1,5 +1,5 @@
 import re
-from typing import Any, Iterable, Tuple, Union
+from typing import Any, Hashable, Iterable, Tuple, Union
 
 # types
 
@@ -7,12 +7,12 @@ ColorType = Tuple[int, int, int]
 ColorLike = Union[ColorType, str]
 
 
-def hex_to_bgr(string: str) -> ColorType:
-    """Converts convencional 6 digits hex colors to BGR tuples
+def hex_to_bgr(hex_value: str) -> ColorType:
+    """Converts conventional 6 digits hex colors to BGR tuples
 
     Parameters
     ----------
-    string : str
+    hex_value : str
         hex value with leading `#` for instance `"#ff0000"`
 
     Returns
@@ -25,10 +25,16 @@ def hex_to_bgr(string: str) -> ColorType:
     ValueError
         if the string is invalid
     """
-    # TODO: support 3-digits hex
-    if re.match("#[a-f0-9]{6}$", string):
-        return int(string[3:5], 16), int(string[5:7], 16), int(string[1:3], 16)
-    raise ValueError(f"'{string}' is not a valid color")
+    if re.match("#[a-f0-9]{6}$", hex_value):
+        return int(hex_value[3:5], 16), int(hex_value[5:7], 16), int(hex_value[1:3], 16)
+
+    if re.match("#[a-f0-9]{3}$", hex_value):
+        return (
+            int(hex_value[3] * 2, 16),
+            int(hex_value[2] * 2, 16),
+            int(hex_value[1] * 2, 16),
+        )
+    raise ValueError(f"'{hex_value}' is not a valid color")
 
 
 class Color:
@@ -223,12 +229,12 @@ class Color:
     cb10 = hex_to_bgr("#56b4e9")
 
 
-def parse_color(value: ColorLike) -> ColorType:
+def parse_color(color_like: ColorLike) -> ColorType:
     """Makes best effort to parse the given value to a Color
 
     Parameters
     ----------
-    value : ColorLike
+    color_like : ColorLike
         Can be one of:
 
         1. a string with the 6 digits hex value (`"#ff0000"`)
@@ -240,13 +246,13 @@ def parse_color(value: ColorLike) -> ColorType:
     Color
         The BGR tuple.
     """
-    if isinstance(value, str):
-        if value.startswith("#"):
-            return hex_to_bgr(value)
+    if isinstance(color_like, str):
+        if color_like.startswith("#"):
+            return hex_to_bgr(color_like)
         else:
-            return getattr(Color, value)
-    # TODO: validate value?
-    return tuple([int(v) for v in value])
+            return getattr(Color, color_like)
+    # TODO: validate?
+    return tuple([int(v) for v in color_like])
 
 
 PALETTES = {
@@ -355,7 +361,7 @@ class Palette:
         cls._default_color = parse_color(color)
 
     @classmethod
-    def choose_color(cls, hashable):
+    def choose_color(cls, hashable: Hashable) -> ColorType:
         if hashable is None:
             return cls._default_color
         return cls._colors[abs(hash(hashable)) % len(cls._colors)]

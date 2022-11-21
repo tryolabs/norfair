@@ -124,6 +124,9 @@ def draw_boxes(
     if drawables is None:
         return frame
 
+    if text_color is not None:
+        text_color = parse_color(text_color)
+
     for obj in drawables:
         d = Drawable(obj)
 
@@ -150,7 +153,7 @@ def draw_boxes(
             if text_color is None:
                 obj_text_color = obj_color
             else:
-                obj_text_color = color
+                obj_text_color = text_color
             # the anchor will become the bottom-left of the text,
             # we select-top left of the bbox compensating for the thickness of the box
             text_anchor = (
