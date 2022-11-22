@@ -15,8 +15,8 @@ def draw_boxes(
     drawables: Sequence[Union[Detection, TrackedObject]] = None,
     color: ColorLike = "by_id",
     thickness: Optional[int] = None,
-    random_color: bool = False,  # Deprecated
-    color_by_label: bool = False,  # Deprecated
+    random_color: bool = None,  # Deprecated
+    color_by_label: bool = None,  # Deprecated
     draw_labels: bool = False,
     text_size: Optional[float] = None,
     draw_ids: bool = False,
@@ -196,5 +196,5 @@ def draw_tracked_boxes(
         text_thickness=id_thickness or label_width,
         draw_labels=draw_labels,
         draw_ids=id_size is not None and id_size > 0,
-        hide_box=not draw_box,
+        draw_box=draw_box,
     )
