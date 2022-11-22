@@ -1877,7 +1877,7 @@ All points of a detection are considered to be alive.</p></td>
 
 
 <h3 class="doc doc-heading" id="norfair.drawing.draw_boxes.draw_boxes">
-<code class="highlight language-python"><span class="n">draw_boxes</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">drawables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;by_id&#39;</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">random_color</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">color_by_label</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">draw_labels</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">text_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">draw_ids</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">text_color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">text_thickness</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">draw_box</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">detections</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">line_color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">label_size</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">draw_boxes</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">drawables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;by_id&#39;</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">random_color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">color_by_label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">draw_labels</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">text_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">draw_ids</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">text_color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">text_thickness</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">draw_box</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">detections</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">line_color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">label_size</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 <a class="headerlink" href="#norfair.drawing.draw_boxes.draw_boxes" title="Permanent link">#</a></h3>
 
@@ -1962,7 +1962,7 @@ selected color will be the same for all objects (Palette's default Color).</p></
           </td>
           <td><p><strong>Deprecated</strong>. Set color="random".</p></td>
           <td>
-                <code>False</code>
+                <code>None</code>
           </td>
         </tr>
         <tr>
@@ -1972,7 +1972,7 @@ selected color will be the same for all objects (Palette's default Color).</p></
           </td>
           <td><p><strong>Deprecated</strong>. Set color="by_label".</p></td>
           <td>
-                <code>False</code>
+                <code>None</code>
           </td>
         </tr>
         <tr>
@@ -2265,8 +2265,8 @@ If an object doesn't have an id this parameter is ignored.</p></td>
     <span class="n">drawables</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Detection</span><span class="p">,</span> <span class="n">TrackedObject</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">color</span><span class="p">:</span> <span class="n">ColorLike</span> <span class="o">=</span> <span class="s2">&quot;by_id&quot;</span><span class="p">,</span>
     <span class="n">thickness</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">random_color</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># Deprecated</span>
-    <span class="n">color_by_label</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># Deprecated</span>
+    <span class="n">random_color</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># Deprecated</span>
+    <span class="n">color_by_label</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># Deprecated</span>
     <span class="n">draw_labels</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">text_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">draw_ids</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -2491,7 +2491,7 @@ If an object doesn't have an id this parameter is ignored.</p></td>
         <span class="n">text_thickness</span><span class="o">=</span><span class="n">id_thickness</span> <span class="ow">or</span> <span class="n">label_width</span><span class="p">,</span>
         <span class="n">draw_labels</span><span class="o">=</span><span class="n">draw_labels</span><span class="p">,</span>
         <span class="n">draw_ids</span><span class="o">=</span><span class="n">id_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">id_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="n">hide_box</span><span class="o">=</span><span class="ow">not</span> <span class="n">draw_box</span><span class="p">,</span>
+        <span class="n">draw_box</span><span class="o">=</span><span class="n">draw_box</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
@@ -2551,11 +2551,7 @@ This is the format opencv uses.</p>
 
         <details class="quote">
           <summary>Source code in <code>norfair/drawing/color.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 40</span>
-<span class="normal"> 41</span>
-<span class="normal"> 42</span>
-<span class="normal"> 43</span>
-<span class="normal"> 44</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 44</span>
 <span class="normal"> 45</span>
 <span class="normal"> 46</span>
 <span class="normal"> 47</span>
@@ -2740,7 +2736,11 @@ This is the format opencv uses.</p>
 <span class="normal">226</span>
 <span class="normal">227</span>
 <span class="normal">228</span>
-<span class="normal">229</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Color</span><span class="p">:</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Color</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Contains predefined colors.</span>
 
@@ -2981,11 +2981,7 @@ This is the format opencv uses.</p>
 
         <details class="quote">
           <summary>Source code in <code>norfair/drawing/color.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">308</span>
-<span class="normal">309</span>
-<span class="normal">310</span>
-<span class="normal">311</span>
-<span class="normal">312</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">312</span>
 <span class="normal">313</span>
 <span class="normal">314</span>
 <span class="normal">315</span>
@@ -3040,7 +3036,11 @@ This is the format opencv uses.</p>
 <span class="normal">364</span>
 <span class="normal">365</span>
 <span class="normal">366</span>
-<span class="normal">367</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Palette</span><span class="p">:</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Palette</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class to control the color pallete for drawing.</span>
 
@@ -3161,11 +3161,7 @@ This is the format opencv uses.</p>
 
       <details class="quote">
         <summary>Source code in <code>norfair/drawing/color.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">325</span>
-<span class="normal">326</span>
-<span class="normal">327</span>
-<span class="normal">328</span>
-<span class="normal">329</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">329</span>
 <span class="normal">330</span>
 <span class="normal">331</span>
 <span class="normal">332</span>
@@ -3185,7 +3181,11 @@ This is the format opencv uses.</p>
 <span class="normal">346</span>
 <span class="normal">347</span>
 <span class="normal">348</span>
-<span class="normal">349</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">palette</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">ColorLike</span><span class="p">]]):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Selects a color palette.</span>
@@ -3260,17 +3260,17 @@ This is the format opencv uses.</p>
 
       <details class="quote">
         <summary>Source code in <code>norfair/drawing/color.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">351</span>
-<span class="normal">352</span>
-<span class="normal">353</span>
-<span class="normal">354</span>
-<span class="normal">355</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">355</span>
 <span class="normal">356</span>
 <span class="normal">357</span>
 <span class="normal">358</span>
 <span class="normal">359</span>
 <span class="normal">360</span>
-<span class="normal">361</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">set_default_color</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="n">ColorLike</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Selects the default color of `choose_color` when hashable is None.</span>
@@ -3399,7 +3399,11 @@ This is the format opencv uses.</p>
 <span class="normal">34</span>
 <span class="normal">35</span>
 <span class="normal">36</span>
-<span class="normal">37</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">hex_to_bgr</span><span class="p">(</span><span class="n">hex_value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ColorType</span><span class="p">:</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">hex_to_bgr</span><span class="p">(</span><span class="n">hex_value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ColorType</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Converts conventional 6 digits hex colors to BGR tuples</span>
 
 <span class="sd">    Parameters</span>
@@ -3418,7 +3422,11 @@ This is the format opencv uses.</p>
 <span class="sd">        if the string is invalid</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;#[a-f0-9]</span><span class="si">{6}</span><span class="s2">$&quot;</span><span class="p">,</span> <span class="n">hex_value</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">hex_value</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">5</span><span class="p">],</span> <span class="mi">16</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">hex_value</span><span class="p">[</span><span class="mi">5</span><span class="p">:</span><span class="mi">7</span><span class="p">],</span> <span class="mi">16</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">hex_value</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="mi">16</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">hex_value</span><span class="p">[</span><span class="mi">5</span><span class="p">:</span><span class="mi">7</span><span class="p">],</span> <span class="mi">16</span><span class="p">),</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">hex_value</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">5</span><span class="p">],</span> <span class="mi">16</span><span class="p">),</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">hex_value</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="mi">16</span><span class="p">),</span>
+        <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;#[a-f0-9]</span><span class="si">{3}</span><span class="s2">$&quot;</span><span class="p">,</span> <span class="n">hex_value</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">(</span>
@@ -3496,11 +3504,7 @@ This is the format opencv uses.</p>
 
       <details class="quote">
         <summary>Source code in <code>norfair/drawing/color.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">232</span>
-<span class="normal">233</span>
-<span class="normal">234</span>
-<span class="normal">235</span>
-<span class="normal">236</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">236</span>
 <span class="normal">237</span>
 <span class="normal">238</span>
 <span class="normal">239</span>
@@ -3519,7 +3523,11 @@ This is the format opencv uses.</p>
 <span class="normal">252</span>
 <span class="normal">253</span>
 <span class="normal">254</span>
-<span class="normal">255</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">parse_color</span><span class="p">(</span><span class="n">color_like</span><span class="p">:</span> <span class="n">ColorLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ColorType</span><span class="p">:</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">parse_color</span><span class="p">(</span><span class="n">color_like</span><span class="p">:</span> <span class="n">ColorLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ColorType</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Makes best effort to parse the given value to a Color</span>
 
 <span class="sd">    Parameters</span>
