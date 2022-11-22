@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING, Callable, List, Optional, Sequence, Union
 import numpy as np
 from scipy.spatial.distance import cdist
 
+from optimized_iou import iou_opt, DTYPE
+
 if TYPE_CHECKING:
     from .tracker import Detection, TrackedObject
 
@@ -166,7 +168,7 @@ class VectorizedDistance(Distance):
             for o in objects:
                 if str(o.label) == label:
                     stacked_objects.append(o.estimate.ravel())
-            stacked_objects = np.stack(stacked_objects)
+            stacked_objects = np.stack(stacked_objects).astype(DTYPE)
 
             stacked_candidates = []
             for c in candidates:
@@ -175,7 +177,7 @@ class VectorizedDistance(Distance):
                         stacked_candidates.append(c.points.ravel())
                     else:
                         stacked_candidates.append(c.estimate.ravel())
-            stacked_candidates = np.stack(stacked_candidates)
+            stacked_candidates = np.stack(stacked_candidates).astype(DTYPE)
 
             # calculate the pairwise distances between objects and candidates with this label
             # and assign the result to the correct positions inside distance_matrix
@@ -420,35 +422,13 @@ def iou(detection: "Detection", tracked_object: "TrackedObject") -> float:
     return _iou(boxa, boxb)
 
 
-def iou_opt(detection: "Detection", tracked_object: "TrackedObject") -> float:
-    """
-    Optimized version of [`iou`][norfair.distances.iou].
-
-    Performs faster but errors might be cryptic if the bounding boxes are not valid.
-
-    Parameters
-    ----------
-    detection : Detection
-        A detection.
-    tracked_object : TrackedObject
-        A tracked object.
-
-    Returns
-    -------
-    float
-        The distance.
-    """
-    return _iou(detection.points, tracked_object.estimate)
-
-
 _SCALAR_DISTANCE_FUNCTIONS = {
     "frobenius": frobenius,
     "mean_manhattan": mean_manhattan,
     "mean_euclidean": mean_euclidean,
     "iou": iou,
-    "iou_opt": iou_opt,
 }
-_VECTORIZED_DISTANCE_FUNCTIONS = {}
+_VECTORIZED_DISTANCE_FUNCTIONS = {"iou_opt": iou_opt}
 _SCIPY_DISTANCE_FUNCTIONS = [
     "braycurtis",
     "canberra",
