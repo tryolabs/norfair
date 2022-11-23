@@ -10,6 +10,7 @@ from norfair.distances import (
     frobenius,
     get_distance_by_name,
 )
+from optimized_iou import DTYPE
 
 
 def test_frobenius(mock_obj, mock_det):
@@ -147,37 +148,61 @@ def test_iou(mock_det, mock_obj):
     det = mock_det([[0, 0], [1, 1]])
     obj = mock_obj([[0, 0], [1, 1]])
     np.testing.assert_almost_equal(iou.distance_function(det, obj), 0)
-    np.testing.assert_almost_equal(iou_opt.distance_function(det, obj), 0)
+    det.points = det.points.reshape(1, 4).astype(DTYPE)
+    obj.estimate = obj.estimate.reshape(1, 4).astype(DTYPE)
+    np.testing.assert_almost_equal(
+        iou_opt.distance_function(det.points, obj.estimate), 0
+    )
 
     # float type
     det = mock_det([[0.0, 0.0], [1.1, 1.1]])
     obj = mock_obj([[0.0, 0.0], [1.1, 1.1]])
     np.testing.assert_almost_equal(iou.distance_function(det, obj), 0)
-    np.testing.assert_almost_equal(iou_opt.distance_function(det, obj), 0)
+    det.points = det.points.reshape(1, 4).astype(DTYPE)
+    obj.estimate = obj.estimate.reshape(1, 4).astype(DTYPE)
+    np.testing.assert_almost_equal(
+        iou_opt.distance_function(det.points, obj.estimate), 0
+    )
 
     # det contained in obj
     det = mock_det([[0, 0], [1, 1]])
     obj = mock_obj([[0, 0], [2, 2]])
     np.testing.assert_almost_equal(iou.distance_function(det, obj), 1 - 1 / 4)
-    np.testing.assert_almost_equal(iou_opt.distance_function(det, obj), 1 - 1 / 4)
+    det.points = det.points.reshape(1, 4).astype(DTYPE)
+    obj.estimate = obj.estimate.reshape(1, 4).astype(DTYPE)
+    np.testing.assert_almost_equal(
+        iou_opt.distance_function(det.points, obj.estimate), 1 - 1 / 4
+    )
 
     # no overlap
     det = mock_det([[0, 0], [1, 1]])
     obj = mock_obj([[1, 1], [2, 2]])
     np.testing.assert_almost_equal(iou.distance_function(det, obj), 1)
-    np.testing.assert_almost_equal(iou_opt.distance_function(det, obj), 1)
+    det.points = det.points.reshape(1, 4).astype(DTYPE)
+    obj.estimate = obj.estimate.reshape(1, 4).astype(DTYPE)
+    np.testing.assert_almost_equal(
+        iou_opt.distance_function(det.points, obj.estimate), 1
+    )
 
     # obj fully contained on det
     det = mock_det([[0, 0], [4, 4]])
     obj = mock_obj([[1, 1], [2, 2]])
     np.testing.assert_almost_equal(iou.distance_function(det, obj), 1 - 1 / 16)
-    np.testing.assert_almost_equal(iou_opt.distance_function(det, obj), 1 - 1 / 16)
+    det.points = det.points.reshape(1, 4).astype(DTYPE)
+    obj.estimate = obj.estimate.reshape(1, 4).astype(DTYPE)
+    np.testing.assert_almost_equal(
+        iou_opt.distance_function(det.points, obj.estimate), 1 - 1 / 16
+    )
 
     # partial overlap
     det = mock_det([[0, 0], [2, 2]])
     obj = mock_obj([[1, 1], [3, 3]])
     np.testing.assert_almost_equal(iou.distance_function(det, obj), 1 - 1 / (8 - 1))
-    np.testing.assert_almost_equal(iou_opt.distance_function(det, obj), 1 - 1 / (8 - 1))
+    det.points = det.points.reshape(1, 4).astype(DTYPE)
+    obj.estimate = obj.estimate.reshape(1, 4).astype(DTYPE)
+    np.testing.assert_almost_equal(
+        iou_opt.distance_function(det.points, obj.estimate), 1 - 1 / (8 - 1)
+    )
 
     # invalid bbox
     det = mock_det([[0, 0]])
