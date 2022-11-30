@@ -26,6 +26,7 @@ def draw_points(
     hide_dead_points: bool = True,
     detections: Sequence["Detection"] = None,  # deprecated
     label_size: Optional[int] = None,  # deprecated
+    draw_scores: bool = False,
 ) -> np.ndarray:
     """
     Draw the points included in a list of Detections or TrackedObjects.
@@ -60,6 +61,9 @@ def draw_points(
         **Deprecated**. set `color="by_label"`.
     draw_labels : bool, optional
         If set to True, the label is added to a title that is drawn on top of the box.
+        If an object doesn't have a label this parameter is ignored.
+    draw_scores : bool, optional
+        If set to True, the score is added to a title that is drawn on top of the box.
         If an object doesn't have a label this parameter is ignored.
     text_size : Optional[int], optional
         Size of the title, the value is used as a multiplier of the base size of the font.
@@ -152,10 +156,12 @@ def draw_points(
                         thickness=thickness,
                     )
 
-        if draw_labels or draw_ids:
+        if draw_labels or draw_ids or draw_scores:
             position = d.points[d.live_points].mean(axis=0)
             position -= radius
-            text = _build_text(d, draw_labels=draw_labels, draw_ids=draw_ids)
+            text = _build_text(
+                d, draw_labels=draw_labels, draw_ids=draw_ids, draw_scores=draw_scores
+            )
 
             Drawer.text(
                 frame,
@@ -165,6 +171,7 @@ def draw_points(
                 color=obj_text_color,
                 thickness=text_thickness,
             )
+
     return frame
 
 

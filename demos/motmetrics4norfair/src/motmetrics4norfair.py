@@ -3,7 +3,7 @@ import os.path
 
 import numpy as np
 
-from norfair import drawing, metrics, Tracker, video
+from norfair import Tracker, drawing, metrics, video
 from norfair.camera_motion import MotionEstimator
 from norfair.filter import FilterPyKalmanFilterFactory
 

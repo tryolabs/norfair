@@ -27,7 +27,7 @@ def draw_boxes(
     line_color: Optional[ColorLike] = None,  # Deprecated
     line_width: Optional[int] = None,  # Deprecated
     label_size: Optional[int] = None,  # Deprecated´
-    draw_scores: bool =False,
+    draw_scores: bool = False,
 ) -> np.ndarray:
     """
     Draw bounding boxes corresponding to Detections or TrackedObjects.
@@ -152,7 +152,9 @@ def draw_boxes(
                 thickness=thickness,
             )
 
-        text = _build_text(d, draw_labels=draw_labels, draw_ids=draw_ids, draw_scores=draw_scores)
+        text = _build_text(
+            d, draw_labels=draw_labels, draw_ids=draw_ids, draw_scores=draw_scores
+        )
         if text:
             if text_color is None:
                 obj_text_color = obj_color
@@ -173,7 +175,6 @@ def draw_boxes(
                 thickness=text_thickness,
             )
 
-
     return frame
 
 
@@ -187,7 +188,6 @@ def draw_tracked_boxes(
     draw_box: bool = True,
     color_by_label: bool = False,
     draw_labels: bool = False,
-    draw_scores: bool = False,
     label_size: Optional[int] = None,
     label_width: Optional[int] = None,
 ) -> np.array:
@@ -201,7 +201,6 @@ def draw_tracked_boxes(
         text_size=label_size or id_size,
         text_thickness=id_thickness or label_width,
         draw_labels=draw_labels,
-        draw_scores=draw_scores,
         draw_ids=id_size is not None and id_size > 0,
         draw_box=draw_box,
     )
