@@ -167,8 +167,8 @@ class Drawer:
         """
         frame = cv2.rectangle(
             frame,
-            points[0],
-            points[1],
+            tuple(points[0]),
+            tuple(points[1]),
             color=color,
             thickness=thickness,
         )
