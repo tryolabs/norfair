@@ -298,15 +298,6 @@ class Tracker:
                     "\nReceived nan values from distance function, please check your distance function for errors!"
                 )
                 exit()
-            if np.isinf(distance_matrix).any():
-                print(
-                    "\nReceived inf values from distance function, please check your distance function for errors!"
-                )
-                print(
-                    "If you want to explicitly ignore a certain detection - tracked object pair, just"
-                )
-                print("return distance_threshold + 1 from your distance function.")
-                exit()
 
             # Used just for debugging distance function
             if distance_matrix.any():
