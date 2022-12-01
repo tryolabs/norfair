@@ -249,6 +249,8 @@ def _get_sparse_flow(
     block_size=3,
     mask=None,
     quality_level=0.01,
+    win_size=None,
+    max_level=None,
 ):
     if prev_pts is None:
         # get points
@@ -263,7 +265,7 @@ def _get_sparse_flow(
 
     # compute optical flow
     curr_pts, status, err = cv2.calcOpticalFlowPyrLK(
-        gray_prvs, gray_next, prev_pts, None
+        gray_prvs, gray_next, prev_pts, None, winSize=win_size, maxLevel=max_level
     )
     # filter valid points
     idx = np.where(status == 1)[0]
@@ -323,6 +325,8 @@ class MotionEstimator:
         draw_flow: bool = False,
         flow_color: Optional[Tuple[int, int, int]] = None,
         quality_level: float = 0.01,
+        win_size: int = None,
+        max_level: Tuple[int, int] = None,
     ):
 
         self.max_points = max_points
@@ -343,6 +347,8 @@ class MotionEstimator:
         self.prev_mask = None
         self.gray_next = None
         self.quality_level = quality_level
+        self.win_size = win_size
+        self.max_level = max_level
 
     def update(
         self, frame: np.ndarray, mask: np.ndarray = None
@@ -385,6 +391,8 @@ class MotionEstimator:
             self.block_size,
             self.prev_mask,
             quality_level=self.quality_level,
+            win_size=self.win_size,
+            max_level=self.max_level,
         )
         if self.draw_flow:
             for (curr, prev) in zip(curr_pts, self.prev_pts):
