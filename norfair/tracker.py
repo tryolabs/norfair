@@ -537,12 +537,12 @@ class TrackedObject:
             self.update_coordinate_transformation(coord_transformations)
 
     def tracker_step(self):
-        self.hit_counter -= 1
         if self.reid_hit_counter is None:
             if self.hit_counter <= 0:
                 self.reid_hit_counter = self.reid_hit_counter_max
         else:
             self.reid_hit_counter -= 1
+        self.hit_counter -= 1
         self.point_hit_counter -= 1
         self.age += 1
         # Advances the tracker's state
