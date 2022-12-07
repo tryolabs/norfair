@@ -2669,12 +2669,12 @@ which needs to reach a certain match rate to be converted into a full blown <cod
             <span class="bp">self</span><span class="o">.</span><span class="n">update_coordinate_transformation</span><span class="p">(</span><span class="n">coord_transformations</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">tracker_step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">hit_counter</span> <span class="o">-=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reid_hit_counter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hit_counter</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">reid_hit_counter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reid_hit_counter_max</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">reid_hit_counter</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hit_counter</span> <span class="o">-=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">point_hit_counter</span> <span class="o">-=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">age</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="c1"># Advances the tracker&#39;s state</span>
