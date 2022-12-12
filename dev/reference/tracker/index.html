@@ -383,22 +383,22 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#norfair.tracker.Tracker.update" class="md-nav__link">
-    update()
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#norfair.tracker.Tracker.current_object_count" class="md-nav__link">
-    current_object_count()
+    current_object_count
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#norfair.tracker.Tracker.total_object_count" class="md-nav__link">
-    total_object_count()
+    total_object_count
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#norfair.tracker.Tracker.update" class="md-nav__link">
+    update()
   </a>
   
 </li>
@@ -597,22 +597,22 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#norfair.tracker.Tracker.update" class="md-nav__link">
-    update()
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#norfair.tracker.Tracker.current_object_count" class="md-nav__link">
-    current_object_count()
+    current_object_count
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#norfair.tracker.Tracker.total_object_count" class="md-nav__link">
-    total_object_count()
+    total_object_count
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#norfair.tracker.Tracker.update" class="md-nav__link">
+    update()
   </a>
   
 </li>
@@ -1624,6 +1624,48 @@ If used, this argument (<code>reid_hit_counter_max</code>) defines how long an o
 
 
 
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 class="doc doc-heading" id="norfair.tracker.Tracker.current_object_count">
+<code class="highlight language-python"><span class="n">current_object_count</span><span class="p">:</span> <span class="nb">int</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a class="headerlink" href="#norfair.tracker.Tracker.current_object_count" title="Permanent link">#</a></h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Number of active TrackedObjects</p>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 class="doc doc-heading" id="norfair.tracker.Tracker.total_object_count">
+<code class="highlight language-python"><span class="n">total_object_count</span><span class="p">:</span> <span class="nb">int</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a class="headerlink" href="#norfair.tracker.Tracker.total_object_count" title="Permanent link">#</a></h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Total number of TrackedObjects initialized in the by this Tracker</p>
+  </div>
+
+</div>
+
 
 
 <div class="doc doc-object doc-function">
@@ -1946,72 +1988,6 @@ which is useful if the user is dynamically changing how many frames the detector
         <span class="p">)</span>
 
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_active_objects</span><span class="p">()</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h3 class="doc doc-heading" id="norfair.tracker.Tracker.current_object_count">
-<code class="highlight language-python"><span class="n">current_object_count</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-<a class="headerlink" href="#norfair.tracker.Tracker.current_object_count" title="Permanent link">#</a></h3>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Number of active TrackedObjects</p>
-
-      <details class="quote">
-        <summary>Source code in <code>norfair/tracker.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">262</span>
-<span class="normal">263</span>
-<span class="normal">264</span>
-<span class="normal">265</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">current_object_count</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Number of active TrackedObjects&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_active_objects</span><span class="p">())</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h3 class="doc doc-heading" id="norfair.tracker.Tracker.total_object_count">
-<code class="highlight language-python"><span class="n">total_object_count</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-<a class="headerlink" href="#norfair.tracker.Tracker.total_object_count" title="Permanent link">#</a></h3>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Total number of TrackedObjects initialized in the by this Tracker</p>
-
-      <details class="quote">
-        <summary>Source code in <code>norfair/tracker.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">267</span>
-<span class="normal">268</span>
-<span class="normal">269</span>
-<span class="normal">270</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">total_object_count</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Total number of TrackedObjects initialized in the by this Tracker&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj_factory</span><span class="o">.</span><span class="n">count</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
