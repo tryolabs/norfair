@@ -345,110 +345,75 @@ def mean_manhattan(detection: "Detection", tracked_object: "TrackedObject") -> f
     ).mean()
 
 
-def _validate_bboxes(bbox: np.ndarray):
-    """Validates that the numpy array a is a valid bounding box"""
-    assert bbox.shape == (
-        2,
-        2,
-    ), f"incorrect bbox, expecting shape (2, 2) but received {bbox.shape}"
-
-    assert bbox[0, 0] < bbox[1, 0] and bbox[0, 1] < bbox[1, 1], f"incorrect bbox {bbox}"
-
-
-def _iou(box_a, box_b) -> float:
+def _boxes_area(boxes: np.ndarray) -> np.ndarray:
     """
-    Underlying iou distance. See `Norfair.distances.iou`.
+    Calculate the area of bounding boxes.
     """
-
-    # Detection points will be box A
-    # Tracked objects point will be box B.
-    box_a = np.concatenate(box_a)
-    box_b = np.concatenate(box_b)
-    x_a = max(box_a[0], box_b[0])
-    y_a = max(box_a[1], box_b[1])
-    x_b = min(box_a[2], box_b[2])
-    y_b = min(box_a[3], box_b[3])
-
-    # Compute the area of intersection rectangle
-    inter_area = max(0, x_b - x_a) * max(0, y_b - y_a)
-
-    # Compute the area of both the prediction and tracker
-    # rectangles
-    box_a_area = (box_a[2] - box_a[0]) * (box_a[3] - box_a[1])
-    box_b_area = (box_b[2] - box_b[0]) * (box_b[3] - box_b[1])
-
-    # Compute the intersection over union by taking the intersection
-    # area and dividing it by the sum of prediction + tracker
-    # areas - the interesection area
-    iou = inter_area / float(box_a_area + box_b_area - inter_area)
-    # Since 0 <= IoU <= 1, we define 1-IoU as a distance.
-    # Distance values will be in [0, 1]
-    return 1 - iou
+    return (boxes[2] - boxes[0]) * (boxes[3] - boxes[1])
 
 
-def iou(detection: "Detection", tracked_object: "TrackedObject") -> float:
+def _validate_bboxes(bboxes: np.ndarray):
     """
-    Intersection over union distance between the bounding boxes.
+    Validate that bounding boxes are well formed.
+    """
+    assert (
+        type(bboxes) == np.ndarray and len(bboxes.shape) == 2 and bboxes.shape[1] == 4
+    ), f"Bounding boxes must be defined as np.array with (N, 4) shape, {bboxes} given"
 
-    Assumes that `detection.points` (and by consecuence `tracked_object.estimate`)
-    define a bounding box in the form `[[x0, y0], [x1, y1]]`.
+    if not (all(bboxes[:, 0] < bboxes[:, 2]) and all(bboxes[:, 1] < bboxes[:, 3])):
+        warning(
+            f"Incorrect bounding boxes. Check that x_min < x_max and y_min < y_max."
+        )
+
+
+def iou(candidates: np.ndarray, objects: np.ndarray) -> np.ndarray:
+    """
+    Calculate IoU between two sets of bounding boxes. Both sets of boxes are expected
+    to be in `[x_min, y_min, x_max, y_max]` format.
 
     Normal IoU is 1 when the boxes are the same and 0 when they don't overlap,
     to transform that into a distance that makes sense we return `1 - iou`.
 
-    Performs checks that the bounding boxes are valid to give better error messages.
-    For a faster implementation without checks use [`iou_opt`][norfair.distances.iou_opt].
-
     Parameters
     ----------
-    detection : Detection
-        A detection.
-    tracked_object : TrackedObject
-        A tracked object.
+    candidates : numpy.ndarray
+        (N, 4) numpy.ndarray containing candidates bounding boxes.
+    objects : numpy.ndarray
+        (K, 4) numpy.ndarray containing objects bounding boxes.
 
     Returns
     -------
-    float
-        The distance.
+    numpy.ndarray
+        (N, K) numpy.ndarray of `1 - iou` between candidates and objects.
     """
-    boxa = detection.points.copy()
-    boxa.sort(axis=0)
-    _validate_bboxes(boxa)
-    boxb = tracked_object.estimate.copy()
-    boxb.sort(axis=0)
-    _validate_bboxes(boxb)
-    return _iou(boxa, boxb)
+    _validate_bboxes(candidates)
+
+    area_candidates = _boxes_area(candidates.T)
+    area_objects = _boxes_area(objects.T)
+
+    top_left = np.maximum(candidates[:, None, :2], objects[:, :2])
+    bottom_right = np.minimum(candidates[:, None, 2:], objects[:, 2:])
+
+    area_intersection = np.prod(
+        np.clip(bottom_right - top_left, a_min=0, a_max=None), 2
+    )
+    return 1 - area_intersection / (
+        area_candidates[:, None] + area_objects - area_intersection
+    )
 
 
-def iou_opt(detection: "Detection", tracked_object: "TrackedObject") -> float:
-    """
-    Optimized version of [`iou`][norfair.distances.iou].
-
-    Performs faster but errors might be cryptic if the bounding boxes are not valid.
-
-    Parameters
-    ----------
-    detection : Detection
-        A detection.
-    tracked_object : TrackedObject
-        A tracked object.
-
-    Returns
-    -------
-    float
-        The distance.
-    """
-    return _iou(detection.points, tracked_object.estimate)
+iou_opt = iou  # deprecated
 
 
 _SCALAR_DISTANCE_FUNCTIONS = {
     "frobenius": frobenius,
     "mean_manhattan": mean_manhattan,
     "mean_euclidean": mean_euclidean,
-    "iou": iou,
-    "iou_opt": iou_opt,
 }
-_VECTORIZED_DISTANCE_FUNCTIONS = {}
+_VECTORIZED_DISTANCE_FUNCTIONS = {
+    "iou": iou,
+    "iou_opt": iou,  # deprecated
+}
 _SCIPY_DISTANCE_FUNCTIONS = [
     "braycurtis",
     "canberra",
@@ -504,6 +469,8 @@ def get_distance_by_name(name: str) -> Distance:
     elif name in _SCIPY_DISTANCE_FUNCTIONS:
         distance_function = ScipyDistance(name)
     elif name in _VECTORIZED_DISTANCE_FUNCTIONS:
+        if name == "iou_opt":
+            warning("iou_opt is deprecated, use iou instead")
         distance = _VECTORIZED_DISTANCE_FUNCTIONS[name]
         distance_function = VectorizedDistance(distance)
     else:
