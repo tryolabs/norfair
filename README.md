@@ -1,4 +1,4 @@
-![Norfair by Tryolabs logo](https://raw.githubusercontent.com/tryolabs/norfair/master/docs/img/logo.svg)
+![Norfair by Tryolabs logo](https://raw.githubusercontent.com/tryolabs/norfair/master/docs/img/banner.png)
 
 [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/tryolabs/norfair-demo)
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tryolabs/norfair/blob/master/demos/colab/colab_demo.ipynb)
@@ -158,7 +158,7 @@ If you are looking for a tracker, here are some other projects worth noting:
 
 [MOT17](https://motchallenge.net/data/MOT17/) and [MOT20](https://motchallenge.net/data/MOT17/) results obtained using [motmetrics4norfair](https://github.com/tryolabs/norfair/tree/master/demos/motmetrics4norfair) demo script on the `train` split. We used detections obtained with [ByteTrack's](https://github.com/ifzhang/ByteTrack) YOLOX object detection model.
 
-| MOT17 Train |   IDF1  IDP  IDR  | Rcll  | Prcn  |  MOTA MOTP  |
+| MOT17 Train |   IDF1 IDP IDR    | Rcll  | Prcn  |  MOTA MOTP  |
 | :---------: | :---------------: | :---: | :---: | :---------: |
 |  MOT17-02   | 61.3% 63.6% 59.0% | 86.8% | 93.5% | 79.9% 14.8% |
 |  MOT17-04   | 93.3% 93.6% 93.0% | 98.6% | 99.3% | 97.9% 07.9% |
@@ -169,9 +169,8 @@ If you are looking for a tracker, here are some other projects worth noting:
 |  MOT17-13   | 79.0% 79.6% 78.4% | 90.6% | 92.0% | 82.4% 16.6% |
 |   OVERALL   | 80.6% 81.8% 79.6% | 92.9% | 95.5% | 88.1% 11.9% |
 
-
-| MOT20 Train |   IDF1  IDP  IDR  | Rcll  | Prcn  |  MOTA MOTP  |
-|  :------:   | :---------------: | :---: | :---: | :---------: |
+| MOT20 Train |   IDF1 IDP IDR    | Rcll  | Prcn  |  MOTA MOTP  |
+| :---------: | :---------------: | :---: | :---: | :---------: |
 |  MOT20-01   | 85.9% 88.1% 83.8% | 93.4% | 98.2% | 91.5% 12.6% |
 |  MOT20-02   | 72.8% 74.6% 71.0% | 93.2% | 97.9% | 91.0% 12.7% |
 |  MOT20-03   | 93.0% 94.1% 92.0% | 96.1% | 98.3% | 94.4% 13.7% |
