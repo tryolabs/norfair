@@ -12,7 +12,7 @@ from .utils import _build_text
 
 def draw_boxes(
     frame: np.ndarray,
-    drawables: Sequence[Union[Detection, TrackedObject]] = None,
+    drawables: Union[Sequence[Detection], Sequence[TrackedObject]] = None,
     color: ColorLike = "by_id",
     thickness: Optional[int] = None,
     random_color: bool = None,  # Deprecated
@@ -36,7 +36,7 @@ def draw_boxes(
     ----------
     frame : np.ndarray
         The OpenCV frame to draw on. Modified in place.
-    drawables : Sequence[Union[Detection, TrackedObject]], optional
+    drawables : Union[Sequence[Detection], Sequence[TrackedObject]], optional
         List of objects to draw, Detections and TrackedObjects are accepted.
         This objects are assumed to contain 2 bi-dimensional points defining
         the bounding box as `[[x0, y0], [x1, y1]]`.
