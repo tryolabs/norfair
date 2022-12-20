@@ -1,4 +1,4 @@
-from typing import Optional, Sequence, Tuple, Union
+from typing import Any, Optional, Sequence, Tuple, Union
 
 import numpy as np
 
@@ -304,8 +304,20 @@ class Drawable:
 
     Parameters
     ----------
-    obj : Union[Detection, TrackedObject]
+    obj : Union[Detection, TrackedObject], optional
         A [Detection][norfair.tracker.Detection] or a [TrackedObject][norfair.tracker.TrackedObject]
+        that will be used to initialized the drawable.
+        If this parameter is passed, all other arguments are ignored
+    points : np.ndarray, optional
+        Points included in the drawable, shape is `(N_points, N_dimensions)`. Ignored if `obj` is passed
+    id : Any, optional
+        Id of this object. Ignored if `obj` is passed
+    label : Any, optional
+        Label specifying the class of the object. Ignored if `obj` is passed
+    scores : np.ndarray, optional
+        Confidence scores of each point, shape is `(N_points,)`. Ignored if `obj` is passed
+    live_points : np.ndarray, optional
+        Bolean array indicating which points are alive, shape is `(N_points,)`. Ignored if `obj` is passed
 
     Raises
     ------
@@ -313,7 +325,15 @@ class Drawable:
         If obj is not an instance of the supported classes.
     """
 
-    def __init__(self, obj: Union[Detection, TrackedObject]) -> None:
+    def __init__(
+        self,
+        obj: Union[Detection, TrackedObject] = None,
+        points: np.ndarray = None,
+        id: Any = None,
+        label: Any = None,
+        scores: np.ndarray = None,
+        live_points: np.ndarray = None,
+    ) -> None:
         if isinstance(obj, Detection):
             self.points = obj.points
             self.id = None
@@ -331,6 +351,12 @@ class Drawable:
             # it could be the scores of the last detection or some kind of moving average
             self.scores = None
             self.live_points = obj.live_points
+        elif obj is None:
+            self.points = points
+            self.id = id
+            self.label = label
+            self.scores = scores
+            self.live_points = live_points
         else:
             raise ValueError(
                 f"Extecting a Detection or a TrackedObject but received {type(obj)}"

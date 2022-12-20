@@ -126,7 +126,10 @@ def draw_points(
         radius = int(round(max(max(frame.shape) * 0.002, 1)))
 
     for o in drawables:
-        d = Drawable(o)
+        if not isinstance(o, Drawable):
+            d = Drawable(o)
+        else:
+            d = o
 
         if hide_dead_points and not d.live_points.any():
             continue
