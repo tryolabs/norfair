@@ -12,7 +12,7 @@ from .utils import _build_text
 
 def draw_points(
     frame: np.ndarray,
-    drawables: Sequence[Union[Detection, TrackedObject]] = None,
+    drawables: Union[Sequence[Detection], Sequence[TrackedObject]] = None,
     radius: Optional[int] = None,
     thickness: Optional[int] = None,
     color: ColorLike = "by_id",
@@ -35,7 +35,7 @@ def draw_points(
     ----------
     frame : np.ndarray
         The OpenCV frame to draw on. Modified in place.
-    drawables : Sequence[Union[Detection, TrackedObject]], optional
+    drawables : Union[Sequence[Detection], Sequence[TrackedObject]], optional
         List of objects to draw, Detections and TrackedObjects are accepted.
     radius : Optional[int], optional
         Radius of the circles representing each point.
