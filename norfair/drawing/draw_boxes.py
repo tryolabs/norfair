@@ -132,7 +132,10 @@ def draw_boxes(
         text_color = parse_color(text_color)
 
     for obj in drawables:
-        d = Drawable(obj)
+        if not isinstance(obj, Drawable):
+            d = Drawable(obj)
+        else:
+            d = obj
 
         if color == "by_id":
             obj_color = Palette.choose_color(d.id)
