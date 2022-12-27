@@ -20,9 +20,9 @@ jobs:
   unit-tests:
     runs-on: ubuntu-20.04
     strategy:
-      max-parallel: 5
+      max-parallel: 4
       matrix:
-        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10"]
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
     steps:
       - uses: actions/checkout@v3
 
@@ -37,16 +37,9 @@ jobs:
           pip install --upgrade tox
 
       - name: Install Poetry
-        if: "matrix.python-version != '3.6'"
         uses: snok/install-poetry@v1
 
-      - name: Run tests under Python 3.6
-        if: "matrix.python-version == '3.6'"
-        run: |
-          tox -e py36
-
       - name: Run tests
-        if: "matrix.python-version != '3.6'"
         run: |
           tox -e py
 
@@ -103,9 +96,9 @@ jobs:
     needs: [build]
     runs-on: ubuntu-20.04
     strategy:
-      max-parallel: 5
+      max-parallel: 4
       matrix:
-        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10"]
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
     steps:
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
