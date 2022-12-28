@@ -89,6 +89,12 @@ Most tracking demos are showcased with vehicles and pedestrians, but the detecto
 5. [Track points in 3D](https://github.com/tryolabs/norfair/tree/master/demos/3d_track), using [MediaPipe Objectron](https://google.github.io/mediapipe/solutions/objectron.html).
 6. [Tracking of small objects](https://github.com/tryolabs/norfair/tree/master/demos/sahi), using [SAHI: Slicing Aided Hyper Inference](https://github.com/obss/sahi).
 
+### ROS integration
+
+To make it even easier to use Norfair in robotics projects, we now offer a version that integrates with the Robotic Operating System (ROS).
+
+We present a [ROS package](https://github.com/tryolabs/norfair-ros) and a [fully functional environment](https://github.com/tryolabs/norfair-ros-dev) running on Docker to do the first steps with this package and start your first application easier.
+
 ### Benchmarking and profiling
 
 1. [Kalman filter and distance function profiling](https://github.com/tryolabs/norfair/tree/master/demos/profiling) using [TRT pose estimator](https://github.com/NVIDIA-AI-IOT/trt_pose).
