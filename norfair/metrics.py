@@ -131,7 +131,7 @@ class DetectionFileParser:
             self.sorted_by_frame.append(self.get_dets_from_frame(frame_number))
 
     def get_dets_from_frame(self, frame_number):
-        """ this function returns a list of norfair Detections class, corresponding to frame=frame_number """
+        """this function returns a list of norfair Detections class, corresponding to frame=frame_number"""
 
         indexes = np.argwhere(self.matrix_detections[:, 0] == frame_number)
         detections = []
