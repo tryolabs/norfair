@@ -756,7 +756,7 @@ coordinates in one reference to another.</p>
 <span class="normal">36</span>
 <span class="normal">37</span>
 <span class="normal">38</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">CoordinatesTransformation</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Abstract class representing a coordinate transformation.</span>
 
 <span class="sd">    Detections&#39; and tracked objects&#39; coordinates can be interpreted in 2 reference:</span>
@@ -830,7 +830,7 @@ coordinates in one reference to another.</p>
 <span class="normal">48</span>
 <span class="normal">49</span>
 <span class="normal">50</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">TransformationGetter</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Abstract class representing a method for finding CoordinatesTransformation between 2 sets of points</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -925,7 +925,7 @@ coordinates in one reference to another.</p>
 <span class="normal">71</span>
 <span class="normal">72</span>
 <span class="normal">73</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">TranslationTransformation</span><span class="p">(</span><span class="n">CoordinatesTransformation</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Coordinate transformation between points using a simple translation</span>
 
 <span class="sd">    Parameters</span>
@@ -1077,7 +1077,7 @@ Eventually, if the transformation is no longer able to match enough points, the 
 <span class="normal">125</span>
 <span class="normal">126</span>
 <span class="normal">127</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">TranslationTransformationGetter</span><span class="p">(</span><span class="n">TransformationGetter</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates TranslationTransformation between points.</span>
 
 <span class="sd">    The camera movement is calculated as the mode of optical flow between the previous reference frame</span>
@@ -1227,7 +1227,7 @@ Eventually, if the transformation is no longer able to match enough points, the 
 <span class="normal">161</span>
 <span class="normal">162</span>
 <span class="normal">163</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">HomographyTransformation</span><span class="p">(</span><span class="n">CoordinatesTransformation</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Coordinate transformation beweent points using an homography</span>
 
 <span class="sd">    Parameters</span>
@@ -1445,7 +1445,7 @@ Valid options are: <code>[0, cv.RANSAC, cv.LMEDS, cv.RHO]</code>, by default <co
 <span class="normal">235</span>
 <span class="normal">236</span>
 <span class="normal">237</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">HomographyTransformationGetter</span><span class="p">(</span><span class="n">TransformationGetter</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates HomographyTransformation between points.</span>
 
 <span class="sd">    The camera movement is represented as an homography that matches the optical flow between the previous reference frame</span>
@@ -1791,7 +1791,7 @@ More points make the estimation process slower but more precise</p></td>
 <span class="normal">404</span>
 <span class="normal">405</span>
 <span class="normal">406</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">MotionEstimator</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Estimator of the motion of the camera.</span>
 
 <span class="sd">    Uses optical flow to estimate the motion of the camera from frame to frame.</span>
@@ -1865,7 +1865,7 @@ More points make the estimation process slower but more precise</p></td>
     <span class="k">def</span> <span class="nf">update</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">mask</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CoordinatesTransformation</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Estimate camera motion for each frame</span>
 
 <span class="sd">        Parameters</span>
@@ -2075,7 +2075,7 @@ or vice versa.</p></td>
 <span class="normal">406</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">update</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">mask</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CoordinatesTransformation</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Estimate camera motion for each frame</span>
 
 <span class="sd">    Parameters</span>

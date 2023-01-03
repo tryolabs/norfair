@@ -755,7 +755,7 @@ while the latter requires creating your own class extending <code>FilterPyKalman
 <span class="normal">92</span>
 <span class="normal">93</span>
 <span class="normal">94</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">FilterPyKalmanFilterFactory</span><span class="p">(</span><span class="n">FilterFactory</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This class can be used either to change some parameters of the [KalmanFilter](https://filterpy.readthedocs.io/en/latest/kalman/KalmanFilter.html)</span>
 <span class="sd">    that the tracker uses, or to fully customize the predictive filter implementation to use (as long as the methods and properties are compatible).</span>
 
@@ -782,7 +782,7 @@ while the latter requires creating your own class extending <code>FilterPyKalman
         <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="n">P</span>
 
     <span class="k">def</span> <span class="nf">create_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initial_detection</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KalmanFilter</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method returns a new predictive filter instance with the current setup, to be used by each new [`TrackedObject`][norfair.tracker.TrackedObject] that is created.</span>
 <span class="sd">        This predictive filter will be used to estimate speed and future positions of the object, to better match the detections during its trajectory.</span>
 
@@ -956,7 +956,7 @@ which shall be used as initial position estimation for it.</p></td>
 <span class="normal">92</span>
 <span class="normal">93</span>
 <span class="normal">94</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initial_detection</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KalmanFilter</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This method returns a new predictive filter instance with the current setup, to be used by each new [`TrackedObject`][norfair.tracker.TrackedObject] that is created.</span>
 <span class="sd">    This predictive filter will be used to estimate speed and future positions of the object, to better match the detections during its trajectory.</span>
 
@@ -1159,7 +1159,7 @@ which shall be used as initial position estimation for it.</p></td>
 <span class="normal">281</span>
 <span class="normal">282</span>
 <span class="normal">283</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">OptimizedKalmanFilterFactory</span><span class="p">(</span><span class="n">FilterFactory</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates faster Filters than [`FilterPyKalmanFilterFactory`][norfair.filter.FilterPyKalmanFilterFactory].</span>
 
 <span class="sd">    It allows the user to create Kalman Filter optimized for tracking and set its parameters.</span>

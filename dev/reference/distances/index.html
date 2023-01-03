@@ -944,7 +944,7 @@
 <span class="normal">40</span>
 <span class="normal">41</span>
 <span class="normal">42</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Distance</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Abstract class representing a distance.</span>
 
 <span class="sd">    Subclasses must implement the method `get_distances`</span>
@@ -956,7 +956,7 @@
         <span class="n">objects</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="s2">&quot;TrackedObject&quot;</span><span class="p">],</span>
         <span class="n">candidates</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="s2">&quot;Detection&quot;</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="s2">&quot;TrackedObject&quot;</span><span class="p">]]],</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method that calculates the distances between new candidates and objects.</span>
 
 <span class="sd">        Parameters</span>
@@ -1089,7 +1089,7 @@ candidates.</p></td>
     <span class="n">objects</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="s2">&quot;TrackedObject&quot;</span><span class="p">],</span>
     <span class="n">candidates</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="s2">&quot;Detection&quot;</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="s2">&quot;TrackedObject&quot;</span><span class="p">]]],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Method that calculates the distances between new candidates and objects.</span>
 
 <span class="sd">    Parameters</span>
@@ -1225,7 +1225,7 @@ and the second <a class="autorefs autorefs-internal" href="../tracker/#norfair.t
 <span class="normal">100</span>
 <span class="normal">101</span>
 <span class="normal">102</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ScalarDistance</span><span class="p">(</span><span class="n">Distance</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    ScalarDistance class represents a distance that is calculated pointwise.</span>
 
 <span class="sd">    Parameters</span>
@@ -1250,7 +1250,7 @@ and the second <a class="autorefs autorefs-internal" href="../tracker/#norfair.t
         <span class="n">objects</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="s2">&quot;TrackedObject&quot;</span><span class="p">],</span>
         <span class="n">candidates</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="s2">&quot;Detection&quot;</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="s2">&quot;TrackedObject&quot;</span><span class="p">]]],</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method that calculates the distances between new candidates and objects.</span>
 
 <span class="sd">        Parameters</span>
@@ -1407,7 +1407,7 @@ candidates.</p></td>
     <span class="n">objects</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="s2">&quot;TrackedObject&quot;</span><span class="p">],</span>
     <span class="n">candidates</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="s2">&quot;Detection&quot;</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="s2">&quot;TrackedObject&quot;</span><span class="p">]]],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Method that calculates the distances between new candidates and objects.</span>
 
 <span class="sd">    Parameters</span>
@@ -1605,7 +1605,7 @@ This function should take 2 input arguments, the first being a <code>np.ndarray<
 <span class="normal">205</span>
 <span class="normal">206</span>
 <span class="normal">207</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">VectorizedDistance</span><span class="p">(</span><span class="n">Distance</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    VectorizedDistance class represents a distance that is calculated in a vectorized way. This means</span>
 <span class="sd">    that instead of going through every pair and explicitly calculating its distance, VectorizedDistance</span>
 <span class="sd">    uses the entire vectors to compare to each other in a single operation.</span>
@@ -1629,7 +1629,7 @@ This function should take 2 input arguments, the first being a <code>np.ndarray<
         <span class="n">objects</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="s2">&quot;TrackedObject&quot;</span><span class="p">],</span>
         <span class="n">candidates</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="s2">&quot;Detection&quot;</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="s2">&quot;TrackedObject&quot;</span><span class="p">]]],</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method that calculates the distances between new candidates and objects.</span>
 
 <span class="sd">        Parameters</span>
@@ -1690,7 +1690,7 @@ This function should take 2 input arguments, the first being a <code>np.ndarray<
     <span class="k">def</span> <span class="nf">_compute_distance</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">stacked_candidates</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">stacked_objects</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method that computes the pairwise distances between new candidates and objects.</span>
 <span class="sd">        It is intended to use the entire vectors to compare to each other in a single operation.</span>
 
@@ -1857,7 +1857,7 @@ candidates.</p></td>
     <span class="n">objects</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="s2">&quot;TrackedObject&quot;</span><span class="p">],</span>
     <span class="n">candidates</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="s2">&quot;Detection&quot;</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="s2">&quot;TrackedObject&quot;</span><span class="p">]]],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Method that calculates the distances between new candidates and objects.</span>
 
 <span class="sd">    Parameters</span>
@@ -2020,7 +2020,7 @@ new candidates and objects.</p></td>
 <span class="normal">250</span>
 <span class="normal">251</span>
 <span class="normal">252</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ScipyDistance</span><span class="p">(</span><span class="n">VectorizedDistance</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    ScipyDistance class extends VectorizedDistance for the use of Scipy&#39;s vectorized distances.</span>
 
 <span class="sd">    This class uses `scipy.spatial.distance.cdist` to calculate distances between two `np.ndarray`.</span>
@@ -2045,7 +2045,7 @@ new candidates and objects.</p></td>
     <span class="k">def</span> <span class="nf">_compute_distance</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">stacked_candidates</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">stacked_objects</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method that computes the pairwise distances between new candidates and objects.</span>
 <span class="sd">        It is intended to use the entire vectors to compare to each other in a single operation.</span>
 
@@ -2194,7 +2194,7 @@ d_f(a, b) = ||a - b||_F
 <span class="normal">283</span>
 <span class="normal">284</span>
 <span class="normal">285</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">frobenius</span><span class="p">(</span><span class="n">detection</span><span class="p">:</span> <span class="s2">&quot;Detection&quot;</span><span class="p">,</span> <span class="n">tracked_object</span><span class="p">:</span> <span class="s2">&quot;TrackedObject&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Frobernius norm on the difference of the points in detection and the estimates in tracked_object.</span>
 
 <span class="sd">    The Frobenius distance and norm are given by:</span>
@@ -2328,7 +2328,7 @@ d(a, b) = \frac{\sum_{i=0}^N ||a_i - b_i||_2}{N}
 <span class="normal">310</span>
 <span class="normal">311</span>
 <span class="normal">312</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">mean_euclidean</span><span class="p">(</span><span class="n">detection</span><span class="p">:</span> <span class="s2">&quot;Detection&quot;</span><span class="p">,</span> <span class="n">tracked_object</span><span class="p">:</span> <span class="s2">&quot;TrackedObject&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Average euclidean distance between the points in detection and estimates in tracked_object.</span>
 
 <span class="sd">    $$</span>
@@ -2464,7 +2464,7 @@ d(a, b) = \frac{\sum_{i=0}^N ||a_i - b_i||_1}{N}
 <span class="normal">343</span>
 <span class="normal">344</span>
 <span class="normal">345</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">mean_manhattan</span><span class="p">(</span><span class="n">detection</span><span class="p">:</span> <span class="s2">&quot;Detection&quot;</span><span class="p">,</span> <span class="n">tracked_object</span><span class="p">:</span> <span class="s2">&quot;TrackedObject&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Average manhattan distance between the points in detection and the estimates in tracked_object</span>
 
 <span class="sd">    Given by:</span>
@@ -2606,7 +2606,7 @@ For a faster implementation without checks use <a class="autorefs autorefs-inter
 <span class="normal">418</span>
 <span class="normal">419</span>
 <span class="normal">420</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">iou</span><span class="p">(</span><span class="n">detection</span><span class="p">:</span> <span class="s2">&quot;Detection&quot;</span><span class="p">,</span> <span class="n">tracked_object</span><span class="p">:</span> <span class="s2">&quot;TrackedObject&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Intersection over union distance between the bounding boxes.</span>
 
 <span class="sd">    Assumes that `detection.points` (and by consecuence `tracked_object.estimate`)</span>
@@ -2731,7 +2731,7 @@ For a faster implementation without checks use <a class="autorefs autorefs-inter
 <span class="normal">439</span>
 <span class="normal">440</span>
 <span class="normal">441</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">iou_opt</span><span class="p">(</span><span class="n">detection</span><span class="p">:</span> <span class="s2">&quot;Detection&quot;</span><span class="p">,</span> <span class="n">tracked_object</span><span class="p">:</span> <span class="s2">&quot;TrackedObject&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Optimized version of [`iou`][norfair.distances.iou].</span>
 
 <span class="sd">    Performs faster but errors might be cryptic if the bounding boxes are not valid.</span>
@@ -2848,7 +2848,7 @@ For a faster implementation without checks use <a class="autorefs autorefs-inter
 <span class="normal">513</span>
 <span class="normal">514</span>
 <span class="normal">515</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_distance_by_name</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Distance</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Select a distance by name.</span>
 
 <span class="sd">    Parameters</span>
@@ -2878,7 +2878,7 @@ For a faster implementation without checks use <a class="autorefs autorefs-inter
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;Invalid distance &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;, expecting one of&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">_SCALAR_DISTANCE_FUNCTIONS</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">+</span> <span class="n">AVAILABLE_VECTORIZED_DISTANCES</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">_SCALAR_DISTANCE_FUNCTIONS</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">AVAILABLE_VECTORIZED_DISTANCES</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">distance_function</span>
@@ -3003,7 +3003,7 @@ point in the tracked object.</p>
 <span class="normal">556</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_keypoints_voting_distance</span><span class="p">(</span>
     <span class="n">keypoint_distance_threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">detection_threshold</span><span class="p">:</span> <span class="nb">float</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="s2">&quot;Detection&quot;</span><span class="p">,</span> <span class="s2">&quot;TrackedObject&quot;</span><span class="p">],</span> <span class="nb">float</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Construct a keypoint voting distance function configured with the thresholds.</span>
 
 <span class="sd">    Count how many points in a detection match the with a tracked_object.</span>
@@ -3150,7 +3150,7 @@ point in the tracked object.</p>
 <span class="normal">592</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_normalized_mean_euclidean_distance</span><span class="p">(</span>
     <span class="n">height</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">int</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="s2">&quot;Detection&quot;</span><span class="p">,</span> <span class="s2">&quot;TrackedObject&quot;</span><span class="p">],</span> <span class="nb">float</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Construct a normalized mean euclidean distance function configured with the max height and width.</span>
 
 <span class="sd">    The result distance is bound to [0, 1] where 1 indicates oposite corners of the image.</span>
@@ -3171,7 +3171,7 @@ point in the tracked object.</p>
     <span class="k">def</span> <span class="nf">normalized__mean_euclidean_distance</span><span class="p">(</span>
         <span class="n">detection</span><span class="p">:</span> <span class="s2">&quot;Detection&quot;</span><span class="p">,</span> <span class="n">tracked_object</span><span class="p">:</span> <span class="s2">&quot;TrackedObject&quot;</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Normalized mean euclidean distance&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Normalized mean euclidean distance&quot;&quot;&quot;</span>
         <span class="c1"># calculate distances and normalized it by width and height</span>
         <span class="n">difference</span> <span class="o">=</span> <span class="p">(</span><span class="n">detection</span><span class="o">.</span><span class="n">points</span> <span class="o">-</span> <span class="n">tracked_object</span><span class="o">.</span><span class="n">estimate</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
         <span class="n">difference</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/=</span> <span class="n">width</span>

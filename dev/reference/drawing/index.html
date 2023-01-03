@@ -1406,7 +1406,7 @@ All points of a detection are considered to be alive.</p></td>
     <span class="n">label_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># deprecated</span>
     <span class="n">draw_scores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Draw the points included in a list of Detections or TrackedObjects.</span>
 
 <span class="sd">    Parameters</span>
@@ -1732,7 +1732,7 @@ All points of a detection are considered to be alive.</p></td>
     <span class="n">draw_labels</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">label_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    **Deprecated** use [`draw_points`][norfair.drawing.draw_points.draw_points]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">warn_once</span><span class="p">(</span><span class="s2">&quot;draw_tracked_objects is deprecated, use draw_points instead&quot;</span><span class="p">)</span>
@@ -2330,7 +2330,7 @@ If an object doesn't have an id this parameter is ignored.</p></td>
     <span class="n">label_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># Deprecated´</span>
     <span class="n">draw_scores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Draw bounding boxes corresponding to Detections or TrackedObjects.</span>
 
 <span class="sd">    Parameters</span>
@@ -2801,7 +2801,7 @@ This is the format opencv uses.</p>
 <span class="normal">231</span>
 <span class="normal">232</span>
 <span class="normal">233</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Color</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Contains predefined colors.</span>
 
 <span class="sd">    Colors are defined as a Tuple of integers between 0 and 255 expressing the values in BGR</span>
@@ -3101,7 +3101,7 @@ This is the format opencv uses.</p>
 <span class="normal">369</span>
 <span class="normal">370</span>
 <span class="normal">371</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Palette</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class to control the color pallete for drawing.</span>
 
 <span class="sd">    Examples</span>
@@ -3119,7 +3119,7 @@ This is the format opencv uses.</p>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">palette</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">ColorLike</span><span class="p">]]):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Selects a color palette.</span>
 
 <span class="sd">        Parameters</span>
@@ -3145,7 +3145,7 @@ This is the format opencv uses.</p>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">set_default_color</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="n">ColorLike</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Selects the default color of `choose_color` when hashable is None.</span>
 
 <span class="sd">        Parameters</span>
@@ -3247,7 +3247,7 @@ This is the format opencv uses.</p>
 <span class="normal">352</span>
 <span class="normal">353</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">palette</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">ColorLike</span><span class="p">]]):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Selects a color palette.</span>
 
 <span class="sd">    Parameters</span>
@@ -3332,7 +3332,7 @@ This is the format opencv uses.</p>
 <span class="normal">364</span>
 <span class="normal">365</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">set_default_color</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">color</span><span class="p">:</span> <span class="n">ColorLike</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Selects the default color of `choose_color` when hashable is None.</span>
 
 <span class="sd">    Parameters</span>
@@ -3464,7 +3464,7 @@ This is the format opencv uses.</p>
 <span class="normal">39</span>
 <span class="normal">40</span>
 <span class="normal">41</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">hex_to_bgr</span><span class="p">(</span><span class="n">hex_value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ColorType</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Converts conventional 6 digits hex colors to BGR tuples</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts conventional 6 digits hex colors to BGR tuples</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -3588,7 +3588,7 @@ This is the format opencv uses.</p>
 <span class="normal">257</span>
 <span class="normal">258</span>
 <span class="normal">259</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">parse_color</span><span class="p">(</span><span class="n">color_like</span><span class="p">:</span> <span class="n">ColorLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ColorType</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Makes best effort to parse the given value to a Color</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Makes best effort to parse the given value to a Color</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -3857,7 +3857,7 @@ if it is <code>0</code> then the path is never erased.</p></td>
 <span class="normal">120</span>
 <span class="normal">121</span>
 <span class="normal">122</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Paths</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class that draws the paths taken by a set of points of interest defined from the coordinates of each tracker estimation.</span>
 
 <span class="sd">    Parameters</span>
@@ -3914,7 +3914,7 @@ if it is <code>0</code> then the path is never erased.</p></td>
     <span class="k">def</span> <span class="nf">draw</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">tracked_objects</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">TrackedObject</span><span class="p">]</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Draw the paths of the points interest on a frame.</span>
 
 <span class="sd">        !!! warning</span>
@@ -4112,7 +4112,7 @@ if it is <code>0</code> then the path is never erased.</p></td>
 <span class="normal">122</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">draw</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">tracked_objects</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">TrackedObject</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Draw the paths of the points interest on a frame.</span>
 
 <span class="sd">    !!! warning</span>
@@ -4390,7 +4390,7 @@ and returns a list of points for which we want to draw their paths.</p>
 <span class="normal">230</span>
 <span class="normal">231</span>
 <span class="normal">232</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">AbsolutePaths</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class that draws the absolute paths taken by a set of points.</span>
 
 <span class="sd">    Works just like [`Paths`][norfair.drawing.Paths] but supports camera motion.</span>
@@ -4776,7 +4776,7 @@ Use a bigger scale if the camera is moving too much.</p></td>
 <span class="normal">139</span>
 <span class="normal">140</span>
 <span class="normal">141</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">FixedCamera</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class used to stabilize video based on the camera motion.</span>
 
 <span class="sd">    Starts with a larger frame, where the original frame is drawn on top of a black background.</span>
@@ -4830,7 +4830,7 @@ Use a bigger scale if the camera is moving too much.</p></td>
     <span class="k">def</span> <span class="nf">adjust_frame</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">coord_transformation</span><span class="p">:</span> <span class="n">TranslationTransformation</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Render scaled up frame.</span>
 
 <span class="sd">        Parameters</span>
@@ -5078,7 +5078,7 @@ Use a bigger scale if the camera is moving too much.</p></td>
 <span class="normal">141</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">adjust_frame</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">coord_transformation</span><span class="p">:</span> <span class="n">TranslationTransformation</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Render scaled up frame.</span>
 
 <span class="sd">    Parameters</span>
@@ -5372,7 +5372,7 @@ By default, False is used which means the points are drawn as if the camera were
     <span class="n">color</span><span class="p">:</span> <span class="n">ColorType</span> <span class="o">=</span> <span class="n">Color</span><span class="o">.</span><span class="n">black</span><span class="p">,</span>
     <span class="n">polar</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Draw a grid of points in absolute coordinates.</span>
 
 <span class="sd">    Useful for debugging camera motion.</span>

@@ -1243,7 +1243,7 @@ If used, this argument (<code>reid_hit_counter_max</code>) defines how long an o
 <span class="normal">384</span>
 <span class="normal">385</span>
 <span class="normal">386</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Tracker</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The class in charge of performing the tracking of the detections produced by a detector.</span>
 
 <span class="sd">    Parameters</span>
@@ -1374,7 +1374,7 @@ If used, this argument (<code>reid_hit_counter_max</code>) defines how long an o
         <span class="n">period</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">coord_transformations</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CoordinatesTransformation</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="s2">&quot;TrackedObject&quot;</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Process detections found in each frame.</span>
 
 <span class="sd">        The detections can be matched to previous tracked objects or new ones will be created</span>
@@ -1488,16 +1488,16 @@ If used, this argument (<code>reid_hit_counter_max</code>) defines how long an o
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">current_object_count</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Number of active TrackedObjects&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of active TrackedObjects&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_active_objects</span><span class="p">())</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">total_object_count</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Total number of TrackedObjects initialized in the by this Tracker&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Total number of TrackedObjects initialized in the by this Tracker&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj_factory</span><span class="o">.</span><span class="n">count</span>
 
     <span class="k">def</span> <span class="nf">get_active_objects</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="s2">&quot;TrackedObject&quot;</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Get the list of active objects</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the list of active objects</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -1578,7 +1578,7 @@ If used, this argument (<code>reid_hit_counter_max</code>) defines how long an o
         <span class="k">return</span> <span class="n">unmatched_candidates</span><span class="p">,</span> <span class="n">matched_objects</span><span class="p">,</span> <span class="n">unmatched_objects</span>
 
     <span class="k">def</span> <span class="nf">match_dets_and_objs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distance_matrix</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">distance_threshold</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Matches detections with tracked_objects from a distance matrix</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Matches detections with tracked_objects from a distance matrix</span>
 
 <span class="sd">        I used to match by minimizing the global distances, but found several</span>
 <span class="sd">        cases in which this was not optimal. So now I just match by starting</span>
@@ -1877,7 +1877,7 @@ which is useful if the user is dynamically changing how many frames the detector
     <span class="n">period</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="n">coord_transformations</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CoordinatesTransformation</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="s2">&quot;TrackedObject&quot;</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Process detections found in each frame.</span>
 
 <span class="sd">    The detections can be matched to previous tracked objects or new ones will be created</span>
@@ -2041,7 +2041,7 @@ which is useful if the user is dynamically changing how many frames the detector
 <span class="normal">282</span>
 <span class="normal">283</span>
 <span class="normal">284</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_active_objects</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="s2">&quot;TrackedObject&quot;</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Get the list of active objects</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the list of active objects</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -2117,7 +2117,7 @@ distance, which is what used to happen</p>
 <span class="normal">384</span>
 <span class="normal">385</span>
 <span class="normal">386</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">match_dets_and_objs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distance_matrix</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">distance_threshold</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Matches detections with tracked_objects from a distance matrix</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Matches detections with tracked_objects from a distance matrix</span>
 
 <span class="sd">    I used to match by minimizing the global distances, but found several</span>
 <span class="sd">    cases in which this was not optimal. So now I just match by starting</span>
@@ -2540,7 +2540,7 @@ which needs to reach a certain match rate to be converted into a full blown <cod
 <span class="normal">709</span>
 <span class="normal">710</span>
 <span class="normal">711</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">TrackedObject</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The objects returned by the tracker&#39;s `update` function on each iteration.</span>
 
 <span class="sd">    They represent the objects currently being tracked by the tracker.</span>
@@ -2692,7 +2692,7 @@ which needs to reach a certain match rate to be converted into a full blown <cod
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">point_hit_counter</span> <span class="o">&gt;</span> <span class="mi">0</span>
 
     <span class="k">def</span> <span class="nf">hit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">detection</span><span class="p">:</span> <span class="s2">&quot;Detection&quot;</span><span class="p">,</span> <span class="n">period</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Update tracked object with a new detection</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update tracked object with a new detection</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -2777,7 +2777,7 @@ which needs to reach a certain match rate to be converted into a full blown <cod
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_conditionally_add_to_past_detections</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">detection</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Adds detections into (and pops detections away) from `past_detections`</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds detections into (and pops detections away) from `past_detections`</span>
 
 <span class="sd">        It does so by keeping a fixed amount of past detections saved into each</span>
 <span class="sd">        TrackedObject, while maintaining them distributed uniformly through the object&#39;s</span>
@@ -2794,7 +2794,7 @@ which needs to reach a certain match rate to be converted into a full blown <cod
             <span class="bp">self</span><span class="o">.</span><span class="n">past_detections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">detection</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tracked_object</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Merge with a not yet initialized TrackedObject instance&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Merge with a not yet initialized TrackedObject instance&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reid_hit_counter</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hit_counter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_period</span> <span class="o">*</span> <span class="mi">2</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">point_hit_counter</span> <span class="o">=</span> <span class="n">tracked_object</span><span class="o">.</span><span class="n">point_hit_counter</span>
@@ -2953,7 +2953,7 @@ which needs to reach a certain match rate to be converted into a full blown <cod
 <span class="normal">654</span>
 <span class="normal">655</span>
 <span class="normal">656</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">hit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">detection</span><span class="p">:</span> <span class="s2">&quot;Detection&quot;</span><span class="p">,</span> <span class="n">period</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Update tracked object with a new detection</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Update tracked object with a new detection</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -3060,7 +3060,7 @@ which needs to reach a certain match rate to be converted into a full blown <cod
 <span class="normal">700</span>
 <span class="normal">701</span>
 <span class="normal">702</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tracked_object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Merge with a not yet initialized TrackedObject instance&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Merge with a not yet initialized TrackedObject instance&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">reid_hit_counter</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">hit_counter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_period</span> <span class="o">*</span> <span class="mi">2</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">point_hit_counter</span> <span class="o">=</span> <span class="n">tracked_object</span><span class="o">.</span><span class="n">point_hit_counter</span>
@@ -3228,7 +3228,7 @@ tracked objects with new detections. Label's type must be hashable for drawing p
 <span class="normal">761</span>
 <span class="normal">762</span>
 <span class="normal">763</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Detection</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Detections returned by the detector must be converted to a `Detection` object before being used by Norfair.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Detections returned by the detector must be converted to a `Detection` object before being used by Norfair.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>

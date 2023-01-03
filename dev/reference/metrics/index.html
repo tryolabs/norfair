@@ -632,7 +632,7 @@ the 'save_path', and optionally the 'information_file' (in case you don't give a
 <span class="normal"> 98</span>
 <span class="normal"> 99</span>
 <span class="normal">100</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">PredictionsTextFile</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Generates a text file with your predicted tracked objects, in the MOTChallenge format.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generates a text file with your predicted tracked objects, in the MOTChallenge format.</span>
 <span class="sd">    It needs the &#39;input_path&#39;, which is the path to the sequence being processed,</span>
 <span class="sd">    the &#39;save_path&#39;, and optionally the &#39;information_file&#39; (in case you don&#39;t give an</span>
 <span class="sd">    &#39;information_file&#39;, is assumed there is one in the input_path folder).</span>
@@ -660,7 +660,7 @@ the 'save_path', and optionally the 'information_file' (in case you don't give a
     <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predictions</span><span class="p">,</span> <span class="n">frame_number</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">frame_number</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">frame_number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_number</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write tracked object information in the output file (for this frame), in the format</span>
 <span class="sd">        frame_number, id, bb_left, bb_top, bb_width, bb_height, -1, -1, -1, -1</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -792,7 +792,7 @@ the 'save_path', and optionally the 'information_file' (in case you don't give a
 <span class="normal">158</span>
 <span class="normal">159</span>
 <span class="normal">160</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DetectionFileParser</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Get Norfair detections from MOTChallenge text files containing detections&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get Norfair detections from MOTChallenge text files containing detections&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_path</span><span class="p">,</span> <span class="n">information_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">frame_number</span> <span class="o">=</span> <span class="mi">1</span>
@@ -822,7 +822,7 @@ the 'save_path', and optionally the 'information_file' (in case you don't give a
             <span class="bp">self</span><span class="o">.</span><span class="n">sorted_by_frame</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_dets_from_frame</span><span class="p">(</span><span class="n">frame_number</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">get_dets_from_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame_number</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; this function returns a list of norfair Detections class, corresponding to frame=frame_number &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;this function returns a list of norfair Detections class, corresponding to frame=frame_number&quot;&quot;&quot;</span>
 
         <span class="n">indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix_detections</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">frame_number</span><span class="p">)</span>
         <span class="n">detections</span> <span class="o">=</span> <span class="p">[]</span>
@@ -895,7 +895,7 @@ the 'save_path', and optionally the 'information_file' (in case you don't give a
 <span class="normal">145</span>
 <span class="normal">146</span>
 <span class="normal">147</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_dets_from_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame_number</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; this function returns a list of norfair Detections class, corresponding to frame=frame_number &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;this function returns a list of norfair Detections class, corresponding to frame=frame_number&quot;&quot;&quot;</span>
 
     <span class="n">indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix_detections</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">frame_number</span><span class="p">)</span>
     <span class="n">detections</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1017,7 +1017,7 @@ The dataframe is indexed by ('FrameId', 'Id')</p></td>
 <span class="normal">292</span>
 <span class="normal">293</span>
 <span class="normal">294</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_motchallenge</span><span class="p">(</span><span class="n">matrix_data</span><span class="p">,</span> <span class="n">min_confidence</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Load MOT challenge data.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load MOT challenge data.</span>
 
 <span class="sd">    This is a modification of the function load_motchallenge from the py-motmetrics library, defined in io.py</span>
 <span class="sd">    In this version, the pandas dataframe is generated from a numpy array (matrix_data) instead of a text file.</span>
@@ -1099,7 +1099,7 @@ The dataframe is indexed by ('FrameId', 'Id')</p></td>
 <span class="normal">307</span>
 <span class="normal">308</span>
 <span class="normal">309</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">compare_dataframes</span><span class="p">(</span><span class="n">gts</span><span class="p">,</span> <span class="n">ts</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Builds accumulator for each sequence.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Builds accumulator for each sequence.&quot;&quot;&quot;</span>
     <span class="n">accs</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">tsacc</span> <span class="ow">in</span> <span class="n">ts</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>

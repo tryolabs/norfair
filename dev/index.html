@@ -770,14 +770,14 @@
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">#</a></h2>
 <p>Norfair currently supports Python 3.6+.</p>
 <p>For the minimal version, install as:</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>pip install norfair
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>norfair
 </code></pre></div></td></tr></table></div>
 <p>To make Norfair install the dependencies to support more features, install as:</p>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
-<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code>pip install norfair<span class="o">[</span>video<span class="o">]</span>  <span class="c1"># Adds several video helper features running on OpenCV</span>
-pip install norfair<span class="o">[</span>metrics<span class="o">]</span>  <span class="c1"># Supports running MOT metrics evaluation</span>
-pip install norfair<span class="o">[</span>metrics,video<span class="o">]</span>  <span class="c1"># Everything included</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>norfair<span class="o">[</span>video<span class="o">]</span><span class="w">  </span><span class="c1"># Adds several video helper features running on OpenCV</span>
+pip<span class="w"> </span>install<span class="w"> </span>norfair<span class="o">[</span>metrics<span class="o">]</span><span class="w">  </span><span class="c1"># Supports running MOT metrics evaluation</span>
+pip<span class="w"> </span>install<span class="w"> </span>norfair<span class="o">[</span>metrics,video<span class="o">]</span><span class="w">  </span><span class="c1"># Everything included</span>
 </code></pre></div></td></tr></table></div>
 <p>If the needed dependencies are already present in the system, installing the minimal version of Norfair is enough for enabling the extra features. This is particularly useful for embedded devices, where installing compiled dependencies can be difficult, but they can sometimes come preinstalled with the system.</p>
 <h2 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">#</a></h2>
