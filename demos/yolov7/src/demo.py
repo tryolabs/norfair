@@ -136,7 +136,7 @@ model = YOLO(args.detector_path, device=args.device)
 for input_path in args.files:
     video = Video(input_path=input_path)
 
-    distance_function = "iou_opt" if args.track_points == "bbox" else "euclidean"
+    distance_function = "iou" if args.track_points == "bbox" else "euclidean"
 
     distance_threshold = (
         DISTANCE_THRESHOLD_BBOX

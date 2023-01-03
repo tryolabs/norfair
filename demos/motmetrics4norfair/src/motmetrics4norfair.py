@@ -102,7 +102,7 @@ for input_path in sequences_paths:
     )
 
     tracker = Tracker(
-        distance_function="iou_opt",
+        distance_function="iou",
         distance_threshold=DISTANCE_THRESHOLD,
         detection_threshold=DETECTION_THRESHOLD,
         pointwise_hit_counter_max=POINTWISE_HIT_COUNTER_MAX,

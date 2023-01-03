@@ -139,67 +139,50 @@ def test_mean_euclidean(mock_det, mock_obj):
     np.testing.assert_almost_equal(euc.distance_function(det, obj), 0)
 
 
-def test_iou(mock_det, mock_obj):
+def test_iou():
     iou = get_distance_by_name("iou")
-    iou_opt = get_distance_by_name("iou_opt")
 
     # perfect match
-    det = mock_det([[0, 0], [1, 1]])
-    obj = mock_obj([[0, 0], [1, 1]])
+    det = np.array([[0, 0, 1, 1]])
+    obj = np.array([[0, 0, 1, 1]])
     np.testing.assert_almost_equal(iou.distance_function(det, obj), 0)
-    np.testing.assert_almost_equal(iou_opt.distance_function(det, obj), 0)
 
     # float type
-    det = mock_det([[0.0, 0.0], [1.1, 1.1]])
-    obj = mock_obj([[0.0, 0.0], [1.1, 1.1]])
+    det = np.array([[0.0, 0.0, 1.1, 1.1]])
+    obj = np.array([[0.0, 0.0, 1.1, 1.1]])
     np.testing.assert_almost_equal(iou.distance_function(det, obj), 0)
-    np.testing.assert_almost_equal(iou_opt.distance_function(det, obj), 0)
 
     # det contained in obj
-    det = mock_det([[0, 0], [1, 1]])
-    obj = mock_obj([[0, 0], [2, 2]])
+    det = np.array([[0, 0, 1, 1]])
+    obj = np.array([[0, 0, 2, 2]])
     np.testing.assert_almost_equal(iou.distance_function(det, obj), 1 - 1 / 4)
-    np.testing.assert_almost_equal(iou_opt.distance_function(det, obj), 1 - 1 / 4)
 
     # no overlap
-    det = mock_det([[0, 0], [1, 1]])
-    obj = mock_obj([[1, 1], [2, 2]])
+    det = np.array([[0, 0, 1, 1]])
+    obj = np.array([[1, 1, 2, 2]])
     np.testing.assert_almost_equal(iou.distance_function(det, obj), 1)
-    np.testing.assert_almost_equal(iou_opt.distance_function(det, obj), 1)
 
     # obj fully contained on det
-    det = mock_det([[0, 0], [4, 4]])
-    obj = mock_obj([[1, 1], [2, 2]])
+    det = np.array([[0, 0, 4, 4]])
+    obj = np.array([[1, 1, 2, 2]])
     np.testing.assert_almost_equal(iou.distance_function(det, obj), 1 - 1 / 16)
-    np.testing.assert_almost_equal(iou_opt.distance_function(det, obj), 1 - 1 / 16)
 
     # partial overlap
-    det = mock_det([[0, 0], [2, 2]])
-    obj = mock_obj([[1, 1], [3, 3]])
+    det = np.array([[0, 0, 2, 2]])
+    obj = np.array([[1, 1, 3, 3]])
     np.testing.assert_almost_equal(iou.distance_function(det, obj), 1 - 1 / (8 - 1))
-    np.testing.assert_almost_equal(iou_opt.distance_function(det, obj), 1 - 1 / (8 - 1))
 
     # invalid bbox
-    det = mock_det([[0, 0]])
-    obj = mock_obj([[0, 0]])
+    det = np.array([[0, 0]])
+    obj = np.array([[0, 0]])
     with pytest.raises(AssertionError):
         iou.distance_function(det, obj)
 
     # invalid bbox
-    det = mock_det([[0, 0], [1, 1], [2, 2]])
-    obj = mock_obj([[0, 0], [2, 2]])
+    det = np.array([[0, 0, 1, 1, 2, 2]])
+    obj = np.array([[0, 0, 2, 2]])
     with pytest.raises(AssertionError):
         iou.distance_function(det, obj)
-
-    # invalid box should be corrected
-    det = mock_det([[4, 4], [0, 0]])
-    obj = mock_obj([[0, 0], [4, 4]])
-    np.testing.assert_almost_equal(iou.distance_function(det, obj), 0)
-
-    # invalid box should be corrected
-    det = mock_det([[0, 0], [4, 4]])
-    obj = mock_obj([[4, 4], [0, 0]])
-    np.testing.assert_almost_equal(iou.distance_function(det, obj), 0)
 
 
 def test_keypoint_vote(mock_obj, mock_det):
