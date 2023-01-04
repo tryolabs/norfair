@@ -55,7 +55,9 @@ If the needed dependencies are already present in the system, installing the min
 
 ## Documentation
 
-[Official reference available here](https://tryolabs.github.io/norfair/).
+[Getting started guide](https://tryolabs.github.io/norfair/latest/getting_started/).
+
+[Official reference](https://tryolabs.github.io/norfair/latest/reference/).
 
 ## Examples & demos
 
