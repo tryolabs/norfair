@@ -147,7 +147,7 @@ jobs:
           poetry publish --build -n
 
 
-  release:
+  deploy-doc:
     runs-on: ubuntu-20.04
     needs: [release]
     if: github.event_name == 'release'
