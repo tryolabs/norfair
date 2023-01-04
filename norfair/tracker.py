@@ -557,15 +557,46 @@ class TrackedObject:
         return self.reid_hit_counter is None or self.reid_hit_counter >= 0
 
     @property
-    def estimate(self):
+    def estimate_velocity(self) -> np.ndarray:
+        """Get the velocity estimate of the object from the Kalman filter. This velocity is in the absolute coordinate system.
+
+        Returns
+        -------
+        np.ndarray
+            An array of shape (self.num_points, self.dim_points) containing the velocity estimate of the object on each axis.
+        """
+        return self.filter.x.T.flatten()[self.dim_z :].reshape(-1, self.dim_points)
+
+    @property
+    def estimate(self) -> np.ndarray:
+        """Get the position estimate of the object from the Kalman filter.
+
+        Returns
+        -------
+        np.ndarray
+            An array of shape (self.num_points, self.dim_points) containing the position estimate of the object on each axis.
+        """
+        return self.get_estimate()
+
+    def get_estimate(self, absolute=False) -> np.ndarray:
+        """Get the position estimate of the object from the Kalman filter in an absolute or relative format.
+
+        Parameters
+        ----------
+        absolute : bool, optional
+            If true the coordinates are returned in absolute format, by default False, by default False.
+
+        Returns
+        -------
+        np.ndarray
+            An array of shape (self.num_points, self.dim_points) containing the position estimate of the object on each axis.
+
+        Raises
+        ------
+        ValueError
+            Alert if the coordinates are requested in absolute format but the tracker has no coordinate transformation.
+        """
         positions = self.filter.x.T.flatten()[: self.dim_z].reshape(-1, self.dim_points)
-
-        if self.abs_to_rel is not None:
-            return self.abs_to_rel(positions)
-        return positions
-
-    def get_estimate(self, absolute=False):
-        positions = self.filter.x.T.flatten()[: self.dim_z].reshape(-1, 2)
         if self.abs_to_rel is None:
             if not absolute:
                 return positions
