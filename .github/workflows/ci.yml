@@ -145,3 +145,24 @@ jobs:
         run: |
           poetry config -n pypi-token.pypi "$PYPI_TOKEN"
           poetry publish --build -n
+
+
+  release:
+    runs-on: ubuntu-20.04
+    needs: [release]
+    if: github.event_name == 'release'
+    env:
+      PYTHON_VERSION: 3.8
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: "${{ env.PYTHON_VERSION }}"
+
+      - name: Install dependencies
+        run: pip install -r docs/requirements.txt
+
+      - name: Install dependencies
+        run: python docs/deploy_docs.py
