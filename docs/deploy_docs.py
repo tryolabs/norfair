@@ -53,4 +53,4 @@ if __name__ == "__main__":
 
     logger.info("Running mike...")
 
-    logger.info("\n".join(run_cmd(f"mike deploy -u {target_version} {alias}")))
+    logger.info("\n".join(run_cmd(f"mike deploy --push -u {target_version} {alias}")))
