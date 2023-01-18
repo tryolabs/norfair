@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from norfair import Color
+from norfair import Palette
 
 CONNECTED_INDEXES = [1, 2, 4, 3, 1, 5, 7, 3, 7, 8, 6, 5, 6, 2, 4, 8]
 
@@ -146,7 +146,7 @@ def draw_3d_tracked_boxes(
         if draw_only_alive and not obj.live_points.any():
             continue
         if border_colors is None:
-            color = Color.random(obj.id)
+            color = Palette.choose_color(obj.id)
         else:
             color = border_colors[n % len(border_colors)]
 
