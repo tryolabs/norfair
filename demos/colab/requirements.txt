@@ -1,6 +1,5 @@
 torch==1.12.1
 torchvision==0.13.1
-numpy==1.21.6
 rich==12.5.1
 opencv-python==4.6.0.66
 tqdm==4.64.1
