@@ -111,7 +111,7 @@ class Paths:
             points_to_draw = self.get_points_to_draw(obj.estimate)
 
             for point in points_to_draw:
-                frame = Drawer.circle(
+                self.mask = Drawer.circle(
                     self.mask,
                     position=tuple(point.astype(int)),
                     radius=self.radius,
