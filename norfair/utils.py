@@ -14,20 +14,16 @@ def validate_points(points: np.ndarray) -> np.array:
     if len(points.shape) == 1:
         points = points[np.newaxis, ...]
     elif len(points.shape) > 2:
-        print_detection_error_message_and_exit(points)
+        raise_detection_error_message(points)
     return points
 
 
-def print_detection_error_message_and_exit(points):
-    print("\n[red]INPUT ERROR:[/red]")
-    print(
-        f"Each `Detection` object should have a property `points` of shape (num_of_points_to_track, 2), not {points.shape}. Check your `Detection` list creation code."
-    )
-    print("You can read the documentation for the `Detection` class here:")
-    print(
-        "https://tryolabs.github.io/norfair/reference/tracker/#norfair.tracker.Detection\n"
-    )
-    exit()
+def raise_detection_error_message(points):
+    message = "\n[red]INPUT ERROR:[/red]\n"
+    message += f"Each `Detection` object should have a property `points` of shape (num_of_points_to_track, 2), not {points.shape}. Check your `Detection` list creation code.\n"
+    message += "You can read the documentation for the `Detection` class here:\n"
+    message += "https://tryolabs.github.io/norfair/reference/tracker/#norfair.tracker.Detection\n"
+    raise ValueError(message)
 
 
 def print_objects_as_table(tracked_objects: Sequence):
@@ -73,22 +69,20 @@ def get_cutout(points, image):
 
 class DummyOpenCVImport:
     def __getattribute__(self, name):
-        print(
+        raise ImportError(
             r"""[bold red]Missing dependency:[/bold red] You are trying to use Norfair's video features. However, OpenCV is not installed.
 
 Please, make sure there is an existing installation of OpenCV or install Norfair with `pip install norfair\[video]`."""
         )
-        exit()
 
 
 class DummyMOTMetricsImport:
     def __getattribute__(self, name):
-        print(
+        raise ImportError(
             r"""[bold red]Missing dependency:[/bold red] You are trying to use Norfair's metrics features without the required dependencies.
 
 Please, install Norfair with `pip install norfair\[metrics]`, or `pip install norfair\[metrics,video]` if you also want video features."""
         )
-        exit()
 
 
 # lru_cache will prevent re-run the function if the message is the same

@@ -176,8 +176,7 @@ class Video:
         cv2.destroyAllWindows()
 
     def _fail(self, msg: str):
-        print(msg)
-        exit()
+        raise RuntimeError(msg)
 
     def write(self, frame: np.ndarray) -> int:
         """
