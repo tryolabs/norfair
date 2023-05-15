@@ -9,7 +9,7 @@
       
       
       <link rel="icon" href="../../img/icon.svg">
-      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-8.4.1">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-8.4.1">
     
     
       
@@ -1908,7 +1908,7 @@ All points of a detection are considered to be alive.</p></td>
 
 
 <h3 class="doc doc-heading" id="norfair.drawing.draw_boxes.draw_boxes">
-<code class="highlight language-python"><span class="n">draw_boxes</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">drawables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;by_id&#39;</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">random_color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">color_by_label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">draw_labels</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">text_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">draw_ids</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">text_color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">text_thickness</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">draw_box</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">detections</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">line_color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">label_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">draw_scores</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">draw_boxes</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">drawables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;by_id&#39;</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">random_color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">color_by_label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">draw_labels</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">text_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">draw_ids</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text_color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">text_thickness</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">draw_box</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">detections</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">line_color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">label_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">draw_scores</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
 
 <a class="headerlink" href="#norfair.drawing.draw_boxes.draw_boxes" title="Permanent link">#</a></h3>
 
@@ -2047,7 +2047,7 @@ By default the size is scaled automatically based on the frame size.</p></td>
           <td><p>If set to True, the id is added to a title that is drawn on top of the box.
 If an object doesn't have an id this parameter is ignored.</p></td>
           <td>
-                <code>False</code>
+                <code>True</code>
           </td>
         </tr>
         <tr>
@@ -2320,7 +2320,7 @@ If an object doesn't have an id this parameter is ignored.</p></td>
     <span class="n">color_by_label</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># Deprecated</span>
     <span class="n">draw_labels</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">text_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">draw_ids</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">draw_ids</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">text_color</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ColorLike</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">text_thickness</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">draw_box</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
