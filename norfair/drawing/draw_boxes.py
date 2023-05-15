@@ -19,7 +19,7 @@ def draw_boxes(
     color_by_label: bool = None,  # Deprecated
     draw_labels: bool = False,
     text_size: Optional[float] = None,
-    draw_ids: bool = False,
+    draw_ids: bool = True,
     text_color: Optional[ColorLike] = None,
     text_thickness: Optional[int] = None,
     draw_box: bool = True,
