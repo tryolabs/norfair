@@ -1,18 +1,15 @@
 import argparse
 from typing import List, Optional, Union
 
-import numpy as np
-import torch
-
 import norfair
-from norfair import Detection, Paths, Tracker, Video
+import numpy as np
+import super_gradients
+import torch
+from norfair import Detection, Tracker, Video
 
 DISTANCE_THRESHOLD_BBOX: float = 0.7
 DISTANCE_THRESHOLD_CENTROID: int = 30
 MAX_DISTANCE: int = 10000
-
-
-import super_gradients
 
 
 class YOLO_NAS:
@@ -70,7 +67,7 @@ def yolo_detections_to_norfair_detections(
 
     elif track_points == "bbox":
 
-        ## yolo_nas detections
+        # yolo_nas detections
         detections_as_xyxy = yolo_detections[0]
         class_names = detections_as_xyxy.class_names
         labels = detections_as_xyxy.prediction.labels

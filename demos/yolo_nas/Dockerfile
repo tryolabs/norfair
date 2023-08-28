@@ -14,7 +14,7 @@ RUN pip install -r https://raw.githubusercontent.com/Deci-AI/super-gradients/mas
 
 RUN pip install git+https://github.com/tryolabs/norfair.git@master#egg=norfair
 
-RUN pip install super-gradients
-
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
 
 WORKDIR /demo/src/
