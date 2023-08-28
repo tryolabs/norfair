@@ -17,3 +17,6 @@ For additional settings, you may display the instructions using `python demo.py 
 ## Explanation
 
 This example tracks objects using a single point per detection: the centroid of the bounding boxes around cars returned by YOLO-NAS-L
+
+https://github.com/agosl/norfair/assets/35232517/3faffb87-6d18-4bcd-9321-3742080ef2e4
+
