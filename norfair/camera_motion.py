@@ -211,10 +211,10 @@ class HomographyTransformationGetter(TransformationGetter):
         self.proportion_points_used_threshold = proportion_points_used_threshold
 
     def __call__(
-        self, curr_pts: np.ndarray, prev_pts: np.ndarray
+        self, curr_pts: Optional[np.ndarray], prev_pts: Optional[np.ndarray]
     ) -> Tuple[bool, Optional[HomographyTransformation]]:
 
-        if prev_pts.shape[0] < 4:
+        if prev_pts is None or curr_pts is None or prev_pts.shape[0] < 4:
             # Preventing the following error: cv2.error: OpenCV(4.8.0)
             # /io/opencv/modules/calib3d/src/fundam.cpp:385:
             # error: (-28:Unknown error code -28) The input arrays should have
@@ -391,7 +391,7 @@ class MotionEstimator:
             self.gray_prvs = self.gray_next
             self.prev_mask = mask
 
-        curr_pts, self.prev_pts = _get_sparse_flow(
+        curr_pts, prev_pts = _get_sparse_flow(
             self.gray_next,
             self.gray_prvs,
             self.prev_pts,
@@ -401,17 +401,22 @@ class MotionEstimator:
             self.prev_mask,
             quality_level=self.quality_level,
         )
-        if self.draw_flow:
-            for (curr, prev) in zip(curr_pts, self.prev_pts):
-                c = tuple(curr.astype(int).ravel())
-                p = tuple(prev.astype(int).ravel())
-                cv2.line(frame, c, p, self.flow_color, 2)
-                cv2.circle(frame, c, 3, self.flow_color, -1)
 
-        update_prvs, coord_transformations = self.transformations_getter(
-            curr_pts,
-            self.prev_pts,
-        )
+        update_prvs, coord_transformations = True, None
+        if curr_pts is not None and prev_pts is not None:
+            self.prev_pts = prev_pts
+
+            if self.draw_flow:
+                for (curr, prev) in zip(curr_pts, self.prev_pts):
+                    c = tuple(curr.astype(int).ravel())
+                    p = tuple(prev.astype(int).ravel())
+                    cv2.line(frame, c, p, self.flow_color, 2)
+                    cv2.circle(frame, c, 3, self.flow_color, -1)
+
+            update_prvs, coord_transformations = self.transformations_getter(
+                curr_pts,
+                self.prev_pts,
+            )
 
         if update_prvs:
             self.gray_prvs = self.gray_next
