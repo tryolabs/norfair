@@ -212,7 +212,16 @@ class HomographyTransformationGetter(TransformationGetter):
 
     def __call__(
         self, curr_pts: np.ndarray, prev_pts: np.ndarray
-    ) -> Tuple[bool, HomographyTransformation]:
+    ) -> Tuple[bool, Optional[HomographyTransformation]]:
+
+        if prev_pts.shape[0] < 4:
+            # Preventing the following error: cv2.error: OpenCV(4.8.0)
+            # /io/opencv/modules/calib3d/src/fundam.cpp:385:
+            # error: (-28:Unknown error code -28) The input arrays should have
+            # at least 4 corresponding point sets to calculate Homography
+            # in function 'findHomography'
+            return True, None
+
         homography_matrix, points_used = cv2.findHomography(
             prev_pts,
             curr_pts,
