@@ -270,6 +270,12 @@ def _get_sparse_flow(
             mask=mask,
         )
 
+    if prev_pts is None:
+        # Preventing the following error: cv2.error: OpenCV(4.8.0)
+        # /io/opencv/modules/video/src/lkpyramid.cpp:1260: error: (-215:Assertion failed)
+        # (npoints = prevPtsMat.checkVector(2, CV_32F, true)) >= 0 in function 'calc'
+        return None, None
+
     # compute optical flow
     curr_pts, status, err = cv2.calcOpticalFlowPyrLK(
         gray_prvs, gray_next, prev_pts, None
