@@ -18,6 +18,3 @@ For additional settings, you may display the instructions using `python demo.py 
 
 This example can track objects using any detection model from DeGirum's cloud platform.
 
-## Tracking cars
-
-https://user-images.githubusercontent.com/3588715/189720485-31a6302c-d046-4f3c-ae01-5ae53b9fde35.mp4
