@@ -6,10 +6,11 @@ Example of tracking with DeGirum PySDK. Based on [YOLOv5 Example](https://github
 
 1. Build and run the Docker container with `./run.sh`.
 2. Copy a video to the `src` folder.
-3. Within the container, run with the default parameters:
+3. Generate [DeGirum Cloud Platform token](https://docs.degirum.com/content/delight/token/)
+4. Within the container, run, providing token to DeGirum Cloud Platform from previous step:
 
    ```bash
-   python demo.py <video>.mp4
+   python demo.py <video>.mp4 --token <token>
    ```
 
 For additional settings, you may display the instructions using `python demo.py --help`.

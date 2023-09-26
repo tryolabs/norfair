@@ -11,20 +11,18 @@ import norfair
 from norfair import Detection, Tracker, Video
 
 parser = argparse.ArgumentParser(description="Track objects in a video.")
-parser.add_argument("input", type=str, nargs="?", help="Video file to process")
+parser.add_argument("input", nargs="?", help="Video file to process")
+parser.add_argument("--token", required=True, help="Token for DeGirum cloud platform")
 parser.add_argument("--camera", type=int, help="Camera ID")
 parser.add_argument("--show", action="store_true", help="Display in real-time")
+parser.add_argument("--device", default="cloud", help="'local' 'cloud' or hostname")
 parser.add_argument(
-    "--zoo-url", type=str, required=True, help="DeGirum Cloud Platform Model Zoo URL"
+    "--zoo-url",
+    default="https://cs.degirum.com/degirum/public",
+    help="DeGirum Cloud Platform Model Zoo URL",
 )
 parser.add_argument(
-    "--token", type=str, required=True, help="Token for DeGirum cloud platform"
-)
-parser.add_argument(
-    "--device", type=str, default="cloud", help="'local' 'cloud' or device hostname"
-)
-parser.add_argument(
-    "--model", type=str, default="yolo_v5s_coco--512x512_quant_n2x_orca_1", help="Model"
+    "--model", default="yolo_v5s_coco--512x512_quant_n2x_orca_1", help="Model to run"
 )
 parser.add_argument(
     "--conf-threshold", type=float, default="0.25", help="Object confidence threshold"
