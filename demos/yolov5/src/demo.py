@@ -151,9 +151,7 @@ for input_path in args.files:
         )
         tracked_objects = tracker.update(detections=detections)
         if args.track_points == "centroid":
-            norfair.draw_points(frame, detections)
-            norfair.draw_tracked_objects(frame, tracked_objects)
+            norfair.draw_points(frame, tracked_objects)
         elif args.track_points == "bbox":
-            norfair.draw_boxes(frame, detections)
-            norfair.draw_tracked_boxes(frame, tracked_objects)
+            norfair.draw_boxes(frame, tracked_objects)
         video.write(frame)
