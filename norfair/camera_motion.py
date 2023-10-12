@@ -223,12 +223,8 @@ class HomographyTransformationGetter(TransformationGetter):
 
         if not (isinstance(prev_pts, np.ndarray) and prev_pts.shape[0] >= 4
                 and isinstance(curr_pts, np.ndarray) and curr_pts.shape[0] >= 4):
-            warning("The homography couldn't be computed in this frame "
-                    "due to low amount of points")
-            if isinstance(self.data, np.ndarray):
-                return True, HomographyTransformation(self.data)
-            else:
-                return True, None
+            warning('Can\'t calculate homography, less than 4 four points to match')
+            return True, None
 
         homography_matrix, points_used = cv2.findHomography(
             prev_pts,
