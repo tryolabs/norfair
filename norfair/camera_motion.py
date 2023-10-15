@@ -1,5 +1,7 @@
 "Camera motion stimation module."
+import copy
 from abc import ABC, abstractmethod
+from logging import warning
 from typing import Optional, Tuple
 
 import numpy as np
@@ -151,7 +153,11 @@ class HomographyTransformation(CoordinatesTransformation):
         points_transformed = points_transformed / points_transformed[:, -1].reshape(
             -1, 1
         )
-        return points_transformed[:, :2]
+        new_points_transformed = points_transformed[:, :2]
+        if np.isnan(new_points_transformed).any() or np.isinf(new_points_transformed).any():
+            new_points_transformed = np.array([[0, 0], [0, 0]])
+
+        return new_points_transformed
 
     def rel_to_abs(self, points: np.ndarray):
         ones = np.ones((len(points), 1))
@@ -211,15 +217,12 @@ class HomographyTransformationGetter(TransformationGetter):
         self.proportion_points_used_threshold = proportion_points_used_threshold
 
     def __call__(
-        self, curr_pts: Optional[np.ndarray], prev_pts: Optional[np.ndarray]
+        self, curr_pts: np.ndarray, prev_pts: np.ndarray
     ) -> Tuple[bool, Optional[HomographyTransformation]]:
 
-        if prev_pts is None or curr_pts is None or prev_pts.shape[0] < 4:
-            # Preventing the following error: cv2.error: OpenCV(4.8.0)
-            # /io/opencv/modules/calib3d/src/fundam.cpp:385:
-            # error: (-28:Unknown error code -28) The input arrays should have
-            # at least 4 corresponding point sets to calculate Homography
-            # in function 'findHomography'
+        if not (isinstance(prev_pts, np.ndarray) and prev_pts.shape[0] >= 4
+                and isinstance(curr_pts, np.ndarray) and curr_pts.shape[0] >= 4):
+            warning('Can\'t calculate homography, less than 4 four points to match')
             return True, None
 
         homography_matrix, points_used = cv2.findHomography(
@@ -269,12 +272,6 @@ def _get_sparse_flow(
             blockSize=block_size,
             mask=mask,
         )
-
-    if prev_pts is None:
-        # Preventing the following error: cv2.error: OpenCV(4.8.0)
-        # /io/opencv/modules/video/src/lkpyramid.cpp:1260: error: (-215:Assertion failed)
-        # (npoints = prevPtsMat.checkVector(2, CV_32F, true)) >= 0 in function 'calc'
-        return None, None
 
     # compute optical flow
     curr_pts, status, err = cv2.calcOpticalFlowPyrLK(
@@ -355,13 +352,15 @@ class MotionEstimator:
             transformations_getter = HomographyTransformationGetter()
 
         self.transformations_getter = transformations_getter
+        self.transformations_getter_copy = copy.deepcopy(transformations_getter)
+
         self.prev_mask = None
         self.gray_next = None
         self.quality_level = quality_level
 
     def update(
         self, frame: np.ndarray, mask: np.ndarray = None
-    ) -> CoordinatesTransformation:
+    ) -> Optional[CoordinatesTransformation]:
         """
         Estimate camera motion for each frame
 
@@ -386,41 +385,46 @@ class MotionEstimator:
             The CoordinatesTransformation that can transform coordinates on this frame to absolute coordinates
             or vice versa.
         """
+
         self.gray_next = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         if self.gray_prvs is None:
             self.gray_prvs = self.gray_next
             self.prev_mask = mask
 
-        curr_pts, prev_pts = _get_sparse_flow(
-            self.gray_next,
-            self.gray_prvs,
-            self.prev_pts,
-            self.max_points,
-            self.min_distance,
-            self.block_size,
-            self.prev_mask,
-            quality_level=self.quality_level,
-        )
-
-        update_prvs, coord_transformations = True, None
-        if curr_pts is not None and prev_pts is not None:
-            self.prev_pts = prev_pts
-
+        curr_pts, prev_pts = None, None
+        try:
+            curr_pts, prev_pts = _get_sparse_flow(
+                self.gray_next,
+                self.gray_prvs,
+                self.prev_pts,
+                self.max_points,
+                self.min_distance,
+                self.block_size,
+                self.prev_mask,
+                quality_level=self.quality_level,
+            )
             if self.draw_flow:
-                for (curr, prev) in zip(curr_pts, self.prev_pts):
+                for (curr, prev) in zip(curr_pts, prev_pts):
                     c = tuple(curr.astype(int).ravel())
                     p = tuple(prev.astype(int).ravel())
                     cv2.line(frame, c, p, self.flow_color, 2)
                     cv2.circle(frame, c, 3, self.flow_color, -1)
+        except Exception as e:
+            warning(e)
 
-            update_prvs, coord_transformations = self.transformations_getter(
-                curr_pts,
-                self.prev_pts,
-            )
+        update_prvs, coord_transformations = True, None
+        try:
+            update_prvs, coord_transformations = self.transformations_getter(curr_pts, prev_pts)
+        except Exception as e:
+            warning(e)
+            del self.transformations_getter
+            self.transformations_getter = copy.deepcopy(self.transformations_getter_copy)
 
         if update_prvs:
             self.gray_prvs = self.gray_next
             self.prev_pts = None
             self.prev_mask = mask
+        else:
+            self.prev_pts = prev_pts
 
         return coord_transformations
