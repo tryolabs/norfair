@@ -151,20 +151,21 @@ class HomographyTransformation(CoordinatesTransformation):
         ones = np.ones((len(points), 1))
         points_with_ones = np.hstack((points, ones))
         points_transformed = points_with_ones @ self.homography_matrix.T
-        points_transformed = points_transformed / points_transformed[:, -1].reshape(
+        last_column = points_transformed[:, -1]
+        last_column[last_column == 0] = 0.0000001
+        points_transformed = points_transformed / last_column.reshape(
             -1, 1
         )
         new_points_transformed = points_transformed[:, :2]
-        if np.isnan(new_points_transformed).any() or np.isinf(new_points_transformed).any():
-            new_points_transformed = np.array([[0, 0], [0, 0]])
-
         return new_points_transformed
 
     def rel_to_abs(self, points: np.ndarray):
         ones = np.ones((len(points), 1))
         points_with_ones = np.hstack((points, ones))
         points_transformed = points_with_ones @ self.inverse_homography_matrix.T
-        points_transformed = points_transformed / points_transformed[:, -1].reshape(
+        last_column = points_transformed[:, -1]
+        last_column[last_column == 0] = 0.0000001
+        points_transformed = points_transformed / last_column.reshape(
             -1, 1
         )
         return points_transformed[:, :2]
