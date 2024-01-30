@@ -20,7 +20,7 @@ jobs:
   unit-tests:
     runs-on: ubuntu-20.04
     strategy:
-      max-parallel: 4
+      max-parallel: 3
       matrix:
         python-version: ["3.8", "3.9", "3.10"]
     steps:
@@ -96,7 +96,7 @@ jobs:
     needs: [build]
     runs-on: ubuntu-20.04
     strategy:
-      max-parallel: 4
+      max-parallel: 3
       matrix:
         python-version: ["3.8", "3.9", "3.10"]
     steps:
