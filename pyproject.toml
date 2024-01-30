@@ -35,7 +35,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 filterpy = "^1.4.5"
 rich = ">=9.10.0, <13.0.0"
 scipy = ">=1.5.4"

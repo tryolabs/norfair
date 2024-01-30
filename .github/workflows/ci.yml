@@ -20,9 +20,9 @@ jobs:
   unit-tests:
     runs-on: ubuntu-20.04
     strategy:
-      max-parallel: 4
+      max-parallel: 3
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10"]
+        python-version: ["3.8", "3.9", "3.10"]
     steps:
       - uses: actions/checkout@v3
 
@@ -96,9 +96,9 @@ jobs:
     needs: [build]
     runs-on: ubuntu-20.04
     strategy:
-      max-parallel: 4
+      max-parallel: 3
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10"]
+        python-version: ["3.8", "3.9", "3.10"]
     steps:
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
