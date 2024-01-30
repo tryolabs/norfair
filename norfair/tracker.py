@@ -294,10 +294,9 @@ class Tracker:
         if candidates is not None and len(candidates) > 0:
             distance_matrix = distance_function.get_distances(objects, candidates)
             if np.isnan(distance_matrix).any():
-                print(
+                raise ValueError(
                     "\nReceived nan values from distance function, please check your distance function for errors!"
                 )
-                exit()
 
             # Used just for debugging distance function
             if distance_matrix.any():
@@ -485,10 +484,9 @@ class TrackedObject:
         coord_transformations: Optional[CoordinatesTransformation] = None,
     ):
         if not isinstance(initial_detection, Detection):
-            print(
+            raise ValueError(
                 f"\n[red]ERROR[/red]: The detection list fed into `tracker.update()` should be composed of {Detection} objects not {type(initial_detection)}.\n"
             )
-            exit()
         self._obj_factory = obj_factory
         self.dim_points = initial_detection.absolute_points.shape[1]
         self.num_points = initial_detection.absolute_points.shape[0]
