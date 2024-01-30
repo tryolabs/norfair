@@ -1494,8 +1494,7 @@ If used, this argument (<code>reid_hit_counter_max</code>) defines how long an o
 <span class="normal">382</span>
 <span class="normal">383</span>
 <span class="normal">384</span>
-<span class="normal">385</span>
-<span class="normal">386</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Tracker</span><span class="p">:</span>
+<span class="normal">385</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Tracker</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The class in charge of performing the tracking of the detections produced by a detector.</span>
 
@@ -1774,10 +1773,9 @@ If used, this argument (<code>reid_hit_counter_max</code>) defines how long an o
         <span class="k">if</span> <span class="n">candidates</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">candidates</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">distance_matrix</span> <span class="o">=</span> <span class="n">distance_function</span><span class="o">.</span><span class="n">get_distances</span><span class="p">(</span><span class="n">objects</span><span class="p">,</span> <span class="n">candidates</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">distance_matrix</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
-                <span class="nb">print</span><span class="p">(</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Received nan values from distance function, please check your distance function for errors!&quot;</span>
                 <span class="p">)</span>
-                <span class="n">exit</span><span class="p">()</span>
 
             <span class="c1"># Used just for debugging distance function</span>
             <span class="k">if</span> <span class="n">distance_matrix</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
@@ -2365,7 +2363,8 @@ distance, which is what used to happen</p>
 
           <details class="quote">
             <summary>Source code in <code>norfair/tracker.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">353</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">352</span>
+<span class="normal">353</span>
 <span class="normal">354</span>
 <span class="normal">355</span>
 <span class="normal">356</span>
@@ -2397,8 +2396,7 @@ distance, which is what used to happen</p>
 <span class="normal">382</span>
 <span class="normal">383</span>
 <span class="normal">384</span>
-<span class="normal">385</span>
-<span class="normal">386</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">match_dets_and_objs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distance_matrix</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">distance_threshold</span><span class="p">):</span>
+<span class="normal">385</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">match_dets_and_objs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distance_matrix</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">distance_threshold</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Matches detections with tracked_objects from a distance matrix</span>
 
 <span class="sd">    I used to match by minimizing the global distances, but found several</span>
@@ -2578,7 +2576,8 @@ which needs to reach a certain match rate to be converted into a full blown <cod
 
             <details class="quote">
               <summary>Source code in <code>norfair/tracker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">434</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">433</span>
+<span class="normal">434</span>
 <span class="normal">435</span>
 <span class="normal">436</span>
 <span class="normal">437</span>
@@ -2884,9 +2883,7 @@ which needs to reach a certain match rate to be converted into a full blown <cod
 <span class="normal">737</span>
 <span class="normal">738</span>
 <span class="normal">739</span>
-<span class="normal">740</span>
-<span class="normal">741</span>
-<span class="normal">742</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">TrackedObject</span><span class="p">:</span>
+<span class="normal">740</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">TrackedObject</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The objects returned by the tracker&#39;s `update` function on each iteration.</span>
 
@@ -2940,10 +2937,9 @@ which needs to reach a certain match rate to be converted into a full blown <cod
         <span class="n">coord_transformations</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CoordinatesTransformation</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">initial_detection</span><span class="p">,</span> <span class="n">Detection</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">(</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">[red]ERROR[/red]: The detection list fed into `tracker.update()` should be composed of </span><span class="si">{</span><span class="n">Detection</span><span class="si">}</span><span class="s2"> objects not </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">initial_detection</span><span class="p">)</span><span class="si">}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">&quot;</span>
             <span class="p">)</span>
-            <span class="n">exit</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_obj_factory</span> <span class="o">=</span> <span class="n">obj_factory</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dim_points</span> <span class="o">=</span> <span class="n">initial_detection</span><span class="o">.</span><span class="n">absolute_points</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_points</span> <span class="o">=</span> <span class="n">initial_detection</span><span class="o">.</span><span class="n">absolute_points</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -3395,7 +3391,9 @@ which needs to reach a certain match rate to be converted into a full blown <cod
 
           <details class="quote">
             <summary>Source code in <code>norfair/tracker.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">581</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">579</span>
+<span class="normal">580</span>
+<span class="normal">581</span>
 <span class="normal">582</span>
 <span class="normal">583</span>
 <span class="normal">584</span>
@@ -3423,9 +3421,7 @@ which needs to reach a certain match rate to be converted into a full blown <cod
 <span class="normal">606</span>
 <span class="normal">607</span>
 <span class="normal">608</span>
-<span class="normal">609</span>
-<span class="normal">610</span>
-<span class="normal">611</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">absolute</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="normal">609</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">absolute</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the position estimate of the object from the Kalman filter in an absolute or relative format.</span>
 
 <span class="sd">    Parameters</span>
@@ -3523,7 +3519,9 @@ which needs to reach a certain match rate to be converted into a full blown <cod
 
           <details class="quote">
             <summary>Source code in <code>norfair/tracker.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">617</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">615</span>
+<span class="normal">616</span>
+<span class="normal">617</span>
 <span class="normal">618</span>
 <span class="normal">619</span>
 <span class="normal">620</span>
@@ -3591,9 +3589,7 @@ which needs to reach a certain match rate to be converted into a full blown <cod
 <span class="normal">682</span>
 <span class="normal">683</span>
 <span class="normal">684</span>
-<span class="normal">685</span>
-<span class="normal">686</span>
-<span class="normal">687</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">hit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">detection</span><span class="p">:</span> <span class="s2">&quot;Detection&quot;</span><span class="p">,</span> <span class="n">period</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+<span class="normal">685</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">hit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">detection</span><span class="p">:</span> <span class="s2">&quot;Detection&quot;</span><span class="p">,</span> <span class="n">period</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Update tracked object with a new detection</span>
 
 <span class="sd">    Parameters</span>
@@ -3687,7 +3683,9 @@ which needs to reach a certain match rate to be converted into a full blown <cod
 
           <details class="quote">
             <summary>Source code in <code>norfair/tracker.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">719</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">717</span>
+<span class="normal">718</span>
+<span class="normal">719</span>
 <span class="normal">720</span>
 <span class="normal">721</span>
 <span class="normal">722</span>
@@ -3699,9 +3697,7 @@ which needs to reach a certain match rate to be converted into a full blown <cod
 <span class="normal">728</span>
 <span class="normal">729</span>
 <span class="normal">730</span>
-<span class="normal">731</span>
-<span class="normal">732</span>
-<span class="normal">733</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tracked_object</span><span class="p">):</span>
+<span class="normal">731</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tracked_object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Merge with a not yet initialized TrackedObject instance&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">reid_hit_counter</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">hit_counter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_period</span> <span class="o">*</span> <span class="mi">2</span>
@@ -3842,7 +3838,9 @@ tracked objects with new detections. Label's type must be hashable for drawing p
 
             <details class="quote">
               <summary>Source code in <code>norfair/tracker.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">745</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">743</span>
+<span class="normal">744</span>
+<span class="normal">745</span>
 <span class="normal">746</span>
 <span class="normal">747</span>
 <span class="normal">748</span>
@@ -3889,9 +3887,7 @@ tracked objects with new detections. Label's type must be hashable for drawing p
 <span class="normal">789</span>
 <span class="normal">790</span>
 <span class="normal">791</span>
-<span class="normal">792</span>
-<span class="normal">793</span>
-<span class="normal">794</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Detection</span><span class="p">:</span>
+<span class="normal">792</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Detection</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Detections returned by the detector must be converted to a `Detection` object before being used by Norfair.</span>
 
 <span class="sd">    Parameters</span>
