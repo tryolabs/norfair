@@ -152,9 +152,7 @@ class HomographyTransformation(CoordinatesTransformation):
         points_transformed = points_with_ones @ self.homography_matrix.T
         last_column = points_transformed[:, -1]
         last_column[last_column == 0] = 0.0000001
-        points_transformed = points_transformed / last_column.reshape(
-            -1, 1
-        )
+        points_transformed = points_transformed / last_column.reshape(-1, 1)
         new_points_transformed = points_transformed[:, :2]
         return new_points_transformed
 
@@ -164,9 +162,7 @@ class HomographyTransformation(CoordinatesTransformation):
         points_transformed = points_with_ones @ self.inverse_homography_matrix.T
         last_column = points_transformed[:, -1]
         last_column[last_column == 0] = 0.0000001
-        points_transformed = points_transformed / last_column.reshape(
-            -1, 1
-        )
+        points_transformed = points_transformed / last_column.reshape(-1, 1)
         return points_transformed[:, :2]
 
 
@@ -221,10 +217,16 @@ class HomographyTransformationGetter(TransformationGetter):
         self, curr_pts: np.ndarray, prev_pts: np.ndarray
     ) -> Tuple[bool, Optional[HomographyTransformation]]:
 
-        if not (isinstance(prev_pts, np.ndarray) and prev_pts.shape[0] >= 4
-                and isinstance(curr_pts, np.ndarray) and curr_pts.shape[0] >= 4):
-            warning("The homography couldn't be computed in this frame "
-                    "due to low amount of points")
+        if not (
+            isinstance(prev_pts, np.ndarray)
+            and prev_pts.shape[0] >= 4
+            and isinstance(curr_pts, np.ndarray)
+            and curr_pts.shape[0] >= 4
+        ):
+            warning(
+                "The homography couldn't be computed in this frame "
+                "due to low amount of points"
+            )
             if isinstance(self.data, np.ndarray):
                 return True, HomographyTransformation(self.data)
             else:
@@ -425,7 +427,9 @@ class MotionEstimator:
         except Exception as e:
             warning(e)
             del self.transformations_getter
-            self.transformations_getter = copy.deepcopy(self.transformations_getter_copy)
+            self.transformations_getter = copy.deepcopy(
+                self.transformations_getter_copy
+            )
 
         if update_prvs:
             self.gray_prvs = self.gray_next
