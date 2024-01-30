@@ -1,5 +1,7 @@
 "Camera motion stimation module."
+import copy
 from abc import ABC, abstractmethod
+from logging import warning
 from typing import Optional, Tuple
 
 import numpy as np
@@ -148,18 +150,19 @@ class HomographyTransformation(CoordinatesTransformation):
         ones = np.ones((len(points), 1))
         points_with_ones = np.hstack((points, ones))
         points_transformed = points_with_ones @ self.homography_matrix.T
-        points_transformed = points_transformed / points_transformed[:, -1].reshape(
-            -1, 1
-        )
-        return points_transformed[:, :2]
+        last_column = points_transformed[:, -1]
+        last_column[last_column == 0] = 0.0000001
+        points_transformed = points_transformed / last_column.reshape(-1, 1)
+        new_points_transformed = points_transformed[:, :2]
+        return new_points_transformed
 
     def rel_to_abs(self, points: np.ndarray):
         ones = np.ones((len(points), 1))
         points_with_ones = np.hstack((points, ones))
         points_transformed = points_with_ones @ self.inverse_homography_matrix.T
-        points_transformed = points_transformed / points_transformed[:, -1].reshape(
-            -1, 1
-        )
+        last_column = points_transformed[:, -1]
+        last_column[last_column == 0] = 0.0000001
+        points_transformed = points_transformed / last_column.reshape(-1, 1)
         return points_transformed[:, :2]
 
 
@@ -212,7 +215,23 @@ class HomographyTransformationGetter(TransformationGetter):
 
     def __call__(
         self, curr_pts: np.ndarray, prev_pts: np.ndarray
-    ) -> Tuple[bool, HomographyTransformation]:
+    ) -> Tuple[bool, Optional[HomographyTransformation]]:
+
+        if not (
+            isinstance(prev_pts, np.ndarray)
+            and prev_pts.shape[0] >= 4
+            and isinstance(curr_pts, np.ndarray)
+            and curr_pts.shape[0] >= 4
+        ):
+            warning(
+                "The homography couldn't be computed in this frame "
+                "due to low amount of points"
+            )
+            if isinstance(self.data, np.ndarray):
+                return True, HomographyTransformation(self.data)
+            else:
+                return True, None
+
         homography_matrix, points_used = cv2.findHomography(
             prev_pts,
             curr_pts,
@@ -340,13 +359,15 @@ class MotionEstimator:
             transformations_getter = HomographyTransformationGetter()
 
         self.transformations_getter = transformations_getter
+        self.transformations_getter_copy = copy.deepcopy(transformations_getter)
+
         self.prev_mask = None
         self.gray_next = None
         self.quality_level = quality_level
 
     def update(
         self, frame: np.ndarray, mask: np.ndarray = None
-    ) -> CoordinatesTransformation:
+    ) -> Optional[CoordinatesTransformation]:
         """
         Estimate camera motion for each frame
 
@@ -371,36 +392,50 @@ class MotionEstimator:
             The CoordinatesTransformation that can transform coordinates on this frame to absolute coordinates
             or vice versa.
         """
+
         self.gray_next = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         if self.gray_prvs is None:
             self.gray_prvs = self.gray_next
             self.prev_mask = mask
 
-        curr_pts, self.prev_pts = _get_sparse_flow(
-            self.gray_next,
-            self.gray_prvs,
-            self.prev_pts,
-            self.max_points,
-            self.min_distance,
-            self.block_size,
-            self.prev_mask,
-            quality_level=self.quality_level,
-        )
-        if self.draw_flow:
-            for (curr, prev) in zip(curr_pts, self.prev_pts):
-                c = tuple(curr.astype(int).ravel())
-                p = tuple(prev.astype(int).ravel())
-                cv2.line(frame, c, p, self.flow_color, 2)
-                cv2.circle(frame, c, 3, self.flow_color, -1)
+        curr_pts, prev_pts = None, None
+        try:
+            curr_pts, prev_pts = _get_sparse_flow(
+                self.gray_next,
+                self.gray_prvs,
+                self.prev_pts,
+                self.max_points,
+                self.min_distance,
+                self.block_size,
+                self.prev_mask,
+                quality_level=self.quality_level,
+            )
+            if self.draw_flow:
+                for (curr, prev) in zip(curr_pts, prev_pts):
+                    c = tuple(curr.astype(int).ravel())
+                    p = tuple(prev.astype(int).ravel())
+                    cv2.line(frame, c, p, self.flow_color, 2)
+                    cv2.circle(frame, c, 3, self.flow_color, -1)
+        except Exception as e:
+            warning(e)
 
-        update_prvs, coord_transformations = self.transformations_getter(
-            curr_pts,
-            self.prev_pts,
-        )
+        update_prvs, coord_transformations = True, None
+        try:
+            update_prvs, coord_transformations = self.transformations_getter(
+                curr_pts, prev_pts
+            )
+        except Exception as e:
+            warning(e)
+            del self.transformations_getter
+            self.transformations_getter = copy.deepcopy(
+                self.transformations_getter_copy
+            )
 
         if update_prvs:
             self.gray_prvs = self.gray_next
             self.prev_pts = None
             self.prev_mask = mask
+        else:
+            self.prev_pts = prev_pts
 
         return coord_transformations

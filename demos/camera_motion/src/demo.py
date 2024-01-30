@@ -11,14 +11,15 @@ from norfair import (
     Tracker,
     Video,
     draw_absolute_grid,
-    draw_tracked_boxes,
 )
+
 from norfair.camera_motion import (
     HomographyTransformationGetter,
     MotionEstimator,
     TranslationTransformationGetter,
 )
-from norfair.drawing import draw_tracked_objects
+
+from norfair.drawing import draw_points, draw_boxes
 
 
 def yolo_detections_to_norfair_detections(yolo_detections, track_boxes):
@@ -66,7 +67,7 @@ def run():
     parser.add_argument(
         "--distance-threshold",
         type=float,
-        default=0.8,
+        default=None,
         help="Max distance to consider when matching detections and tracked objects",
     )
     parser.add_argument(
@@ -223,10 +224,22 @@ def run():
             else partial(video.show, downsample_ratio=args.downsample_ratio)
         )
 
+        distance_threshold = args.distance_threshold
+        if args.track_boxes:
+            drawing_function = draw_boxes
+            distance_function = "iou"
+            if args.distance_threshold is None:
+                distance_threshold = 0.5
+        else:
+            drawing_function = draw_points
+            distance_function = "euclidean"
+            if args.distance_threshold is None:
+                distance_threshold = video.input_height / 10
+
         tracker = Tracker(
-            distance_function="euclidean",
+            distance_function=distance_function,
             detection_threshold=args.confidence_threshold,
-            distance_threshold=args.distance_threshold,
+            distance_threshold=distance_threshold,
             initialization_delay=args.initialization_delay,
             hit_counter_max=args.hit_counter_max,
         )
@@ -259,11 +272,11 @@ def run():
             )
 
             if args.draw_objects:
-                draw_tracked_objects(
+                drawing_function(
                     frame,
                     tracked_objects,
-                    id_size=args.id_size,
-                    id_thickness=None
+                    text_size=args.id_size,
+                    text_thickness=None
                     if args.id_size is None
                     else int(args.id_size * 2),
                 )
