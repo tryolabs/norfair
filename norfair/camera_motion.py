@@ -3,7 +3,6 @@ import copy
 from abc import ABC, abstractmethod
 from logging import warning
 from typing import Optional, Tuple
-from logging import warning
 
 import numpy as np
 
