@@ -45,10 +45,54 @@ def set_reference(
     reference: str,
     footage: str,
     transformation_getter: TransformationGetter = None,
-    detector=None,
+    mask_generator=None,
     desired_size=700,
     motion_estimator=None,
 ):
+    """
+    Get a transformation to relate the coordinate transformations between footage absolute frame (first image in footage) and reference absolute frame (first image in reference).
+
+    UI usage:
+
+        Creates a UI to annotate points that match in reference and footage, and estimate the transformation.
+        To add a point, just click a pair of points (one from the footage window, and another from the reference window) and select "Add"
+        To remove a point, just select the corresponding point at the bottom left corner, and select "Remove".
+
+        If either footage or reference are videos, you can jump to future frames to pick points that match.
+        For example, to jump 215 frames in the footage, just write an integer number of frames to jump next to 'Frames to skip (footage)', and select "Skip frames".
+        A motion estimator can be used to relate the coordinates of the current frame you see (in either footage or reference) to coordinates in its corresponding first frame.
+
+        Once a transformation has been estimated, you can test it:
+        To Test your transformation, Select the 'Test' mode, and pick a point in either the reference or the footage, and see the associated point in the other window.
+        You can keep adding more associated points until you are satisfied with the estimated transformation
+
+    Argument:
+     - reference: str
+        Path to the reference image or video
+
+     - footage: str
+        Path to the footage image or video
+
+     - transformation_getter: TransformationGetter, optional
+        TransformationGetter defining the type of transformation you want to fix between reference and footage.
+        Since the transformation can be really far from identity (given that the perspectives in footage and reference can be immensely different),
+        and also knowing that outliers shouldn't be common given that a human is picking the points, it is recommended to use a high ransac_reproj_threshold (~ 1000)
+
+     - mask_generator: optional function that creates a mask (np.ndarray) from a PIL image. This mask is then provided to the corresponding MotionEstimator to avoid
+        sampling points within the mask.
+
+     - desired_size: int, optional
+        How large you want the clickable windows in the UI to be.
+
+     - motion_estimator: MotionEstimator, optional
+        When using videos for either the footage or the reference, you can provide a MotionEstimator to relate the coordinates in all the frames in the video.
+        The motion estimator is only useful if the camera in either the video of the footage or the video of the reference can move. Otherwise, avoid using it.
+
+     returns: CoordinatesTransformation instance
+        The provided transformation_getter will fit a transformation from the reference (as 'absolute') to the footage (as 'relative').
+        CoordinatesTransformation.abs_to_rel will give the transformation from the first frame in the reference to the first frame in the footage.
+        CoordinatesTransformation.rel_to_abs will give the transformation from the first frame in the footage to the first frame in the reference.
+    """
 
     global window
 
@@ -132,9 +176,22 @@ def set_reference(
             return None
 
     def test_transformation(
-        change_of_coordinates, canvas, point, original_size, canvas_size
+        change_of_coordinates,
+        canvas,
+        point,
+        original_size,
+        canvas_size,
+        motion_transformation=None,
     ):
         point_in_new_coordinates = change_of_coordinates(np.array([point]))[0]
+
+        try:
+            point_in_new_coordinates = motion_transformation.abs_to_rel(
+                np.array([point_in_new_coordinates])
+            )[0]
+        except AttributeError:
+            pass
+
         point_in_canvas_coordinates = np.multiply(
             point_in_new_coordinates,
             np.array(
@@ -159,7 +216,7 @@ def set_reference(
             tags="myPoint",
         )
 
-    ######### MAKSE SUBBLOCK TO FINISH
+    ######### MAKE SUBBLOCK TO FINISH
 
     frame_options_finish = tk.Frame(master=frame_options)
 
@@ -201,15 +258,56 @@ def set_reference(
     ###### MAKE SUBBLOCK TO SEE POINTS AND CHOOSE THEM
     def handle_mark_annotation(key):
         def handle_annotation(event):
+            global skipper
+            global reference_original_size
+            global reference_canvas_size
+            global footage_original_size
+            global footage_canvas_size
+
             points[key]["marked"] = not points[key]["marked"]
 
             if points[key]["marked"]:
                 points[key]["button"].configure(fg="black", highlightbackground="red")
+
+                try:
+                    footage_point_in_rel_coords = skipper["footage"][
+                        "motion_transformation"
+                    ].abs_to_rel(np.array([points[key]["footage"]]))[0]
+                    footage_point_in_rel_coords = np.multiply(
+                        footage_point_in_rel_coords,
+                        np.array(
+                            [
+                                footage_canvas_size[0] / footage_original_size[0],
+                                footage_canvas_size[1] / footage_original_size[1],
+                            ]
+                        ),
+                    ).astype(int)
+                except AttributeError:
+                    footage_point_in_rel_coords = points[key]["footage_canvas"]
+                    pass
+
+                try:
+                    reference_point_in_rel_coords = skipper["reference"][
+                        "motion_transformation"
+                    ].abs_to_rel(np.array([points[key]["footage"]]))[0]
+                    reference_point_in_rel_coords = np.multiply(
+                        reference_point_in_rel_coords,
+                        np.array(
+                            [
+                                reference_canvas_size[0] / reference_original_size[0],
+                                reference_canvas_size[1] / reference_original_size[1],
+                            ]
+                        ),
+                    ).astype(int)
+                except AttributeError:
+                    reference_point_in_rel_coords = points[key]["reference_canvas"]
+                    pass
+
                 draw_point_in_canvas(
-                    canvas_footage, points[key]["footage_canvas"], color="red"
+                    canvas_footage, footage_point_in_rel_coords, color="red"
                 )
                 draw_point_in_canvas(
-                    canvas_reference, points[key]["reference_canvas"], color="red"
+                    canvas_reference, reference_point_in_rel_coords, color="red"
                 )
             else:
                 points[key]["button"].configure(
@@ -249,6 +347,8 @@ def set_reference(
     footage_point = None
     footage_point_canvas = None
 
+    motion_estimator_footage = None
+    motion_transformation = None
     try:
         image = Image.open(footage)
         video = None
@@ -258,7 +358,15 @@ def set_reference(
         video = Video(input_path=footage)
         total_frames = int(video.video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
         fps = video.output_fps
-        image = Image.fromarray(cv2.cvtColor(next(video.__iter__()), cv2.COLOR_BGR2RGB))
+        image = cv2.cvtColor(next(video.__iter__()), cv2.COLOR_BGR2RGB)
+        if motion_estimator is not None:
+            motion_estimator_footage = deepcopy(motion_estimator)
+            if mask_generator is not None:
+                mask = mask_generator(image)
+            else:
+                mask = None
+            motion_transformation = motion_estimator_footage.update(image, mask)
+        image = Image.fromarray(image)
 
     footage_original_width = image.width
     footage_original_height = image.height
@@ -284,13 +392,27 @@ def set_reference(
         global canvas_reference
         global reference_original_size
         global reference_canvas_size
-        footage_point = (
-            np.around(event.x * (footage_original_width / footage_canvas_width), 1),
-            np.around(event.y * (footage_original_height / footage_canvas_height), 1),
-        )
+        global skipper
+
         footage_point_canvas = (event.x, event.y)
         draw_point_in_canvas(canvas_footage, footage_point_canvas)
-        print("Footage window clicked at: ", footage_point)
+
+        footage_point = np.array(
+            [
+                event.x * (footage_original_width / footage_canvas_width),
+                event.y * (footage_original_height / footage_canvas_height),
+            ]
+        )
+        print("Footage window clicked at: ", footage_point.round(1))
+
+        try:
+            footage_point = skipper["footage"]["motion_transformation"].rel_to_abs(
+                np.array([footage_point])
+            )[0]
+        except AttributeError:
+            pass
+
+        footage_point = footage_point.round(1)
 
         if not mode_annotate:
             if transformation is not None:
@@ -300,6 +422,7 @@ def set_reference(
                     footage_point,
                     reference_original_size,
                     reference_canvas_size,
+                    skipper["reference"]["motion_transformation"],
                 )
             else:
                 print("Can't test the transformation yet, still need more points")
@@ -314,12 +437,15 @@ def set_reference(
         "fps": fps,
         "button_skip": None,
         "entry_skip": None,
-        "motion_estimator": None,
+        "motion_estimator": motion_estimator_footage,
+        "motion_transformation": motion_transformation,
         "canvas": canvas_footage,
         "image_container": footage_image_container,
         "current_frame_label": None,
     }
 
+    motion_estimator_reference = None
+    motion_transformation = None
     try:
         image = Image.open(reference)
         video = None
@@ -329,7 +455,16 @@ def set_reference(
         video = Video(input_path=reference)
         total_frames = int(video.video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
         fps = video.output_fps
-        image = Image.fromarray(cv2.cvtColor(next(video.__iter__()), cv2.COLOR_BGR2RGB))
+        image = cv2.cvtColor(next(video.__iter__()), cv2.COLOR_BGR2RGB)
+        if motion_estimator is not None:
+            motion_estimator_reference = deepcopy(motion_estimator)
+            if mask_generator is not None:
+                mask = mask_generator(image)
+            else:
+                mask = None
+            motion_transformation = motion_estimator_reference.update(image, mask)
+
+        image = Image.fromarray(image)
 
     reference_original_width = image.width
     reference_original_height = image.height
@@ -355,16 +490,27 @@ def set_reference(
         global canvas_footage
         global footage_original_size
         global footage_canvas_size
+        global skipper
 
-        reference_point = (
-            np.around(event.x * (reference_original_width / reference_canvas_width), 1),
-            np.around(
-                event.y * (reference_original_height / reference_canvas_height), 1
-            ),
-        )
         reference_point_canvas = (event.x, event.y)
         draw_point_in_canvas(canvas_reference, reference_point_canvas)
-        print("Reference window clicked at: ", reference_point)
+
+        reference_point = np.array(
+            [
+                event.x * (reference_original_width / reference_canvas_width),
+                event.y * (reference_original_height / reference_canvas_height),
+            ]
+        )
+        print("Reference window clicked at: ", reference_point.round(1))
+
+        try:
+            reference_point = skipper["reference"]["motion_transformation"].rel_to_abs(
+                np.array([reference_point])
+            )[0]
+        except AttributeError:
+            pass
+
+        reference_point = reference_point.round(1)
 
         if not mode_annotate:
             if transformation is not None:
@@ -374,6 +520,7 @@ def set_reference(
                     reference_point,
                     footage_original_size,
                     footage_canvas_size,
+                    skipper["footage"]["motion_transformation"],
                 )
             else:
                 print("Can't test the transformation yet, still need more points")
@@ -388,7 +535,8 @@ def set_reference(
         "fps": fps,
         "button_skip": None,
         "entry_skip": None,
-        "motion_estimator": None,
+        "motion_estimator": motion_estimator_reference,
+        "motion_transformation": motion_transformation,
         "canvas": canvas_reference,
         "image_container": reference_image_container,
         "current_frame_label": None,
@@ -424,6 +572,9 @@ def set_reference(
                 return
             video = skipper[video_type]["video"]
             change_image = False
+            motion_estimator = skipper[video_type]["motion_estimator"]
+            motion_transformation = skipper[video_type]["motion_transformation"]
+
             while (frames_to_skip > 0) and (
                 skipper[video_type]["current_frame"]
                 < skipper[video_type]["total_frames"]
@@ -433,6 +584,18 @@ def set_reference(
                 skipper[video_type]["current_frame"] += 1
 
                 image = next(video.__iter__())
+
+                if motion_estimator is not None:
+                    if mask_generator is not None:
+                        mask = mask_generator(image)
+                    else:
+                        mask = None
+                    motion_transformation = motion_estimator.update(
+                        np.array(image), mask
+                    )
+
+            skipper[video_type]["motion_estimator"] = motion_estimator
+            skipper[video_type]["motion_transformation"] = motion_transformation
 
             if change_image:
                 image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
