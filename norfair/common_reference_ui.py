@@ -58,7 +58,7 @@ def set_reference(
     UI usage:
 
         Creates a UI to annotate points that match in reference and footage, and estimate the transformation.
-        To add a point, just click a pair of points (one from the footage window, and another from the reference window) and select "Add"
+        To add a point, just click a pair of points (one from the footage window, and another from the reference window) and select "Add".
         To remove a point, just select the corresponding point at the bottom left corner, and select "Remove".
         You can also ignore point, by clicking them and selecting "Ignore". The transformation will not used ingored points.
         To 'uningnore' points that have been previously ignored, just click them and select "Unignore".
@@ -66,10 +66,11 @@ def set_reference(
         If either footage or reference are videos, you can jump to future frames to pick points that match.
         For example, to jump 215 frames in the footage, just write an integer number of frames to jump next to 'Frames to skip (footage)', and select "Skip frames".
         A motion estimator can be used to relate the coordinates of the current frame you see (in either footage or reference) to coordinates in its corresponding first frame.
+        You can go back to the first frame of the video (in either footage or reference) by selecting "Reset video".
 
         Once a transformation has been estimated, you can test it:
         To Test your transformation, Select the 'Test' mode, and pick a point in either the reference or the footage, and see the associated point in the other window.
-        You can keep adding more associated points until you are satisfied with the estimated transformation
+        You can keep adding more associated points until you are satisfied with the estimated transformation.
 
     Argument:
      - reference: str
@@ -470,11 +471,13 @@ def set_reference(
         "fps": fps,
         "button_skip": None,
         "entry_skip": None,
+        "button_reset": None,
         "motion_estimator": motion_estimator_footage,
         "motion_transformation": motion_transformation,
         "canvas": canvas_footage,
         "image_container": footage_image_container,
         "current_frame_label": None,
+        "path": footage,
     }
 
     motion_estimator_reference = None
@@ -568,11 +571,13 @@ def set_reference(
         "fps": fps,
         "button_skip": None,
         "entry_skip": None,
+        "button_reset": None,
         "motion_estimator": motion_estimator_reference,
         "motion_transformation": motion_transformation,
         "canvas": canvas_reference,
         "image_container": reference_image_container,
         "current_frame_label": None,
+        "path": reference,
     }
 
     ###### MAKE SUBBLOCK FOR TITLE
@@ -588,7 +593,43 @@ def set_reference(
     title.pack(side=tk.TOP)
     frame_options_title.pack(side=tk.TOP)
 
-    ############### VIDEO CATEGORY SUBBLOCKS (FPS, TOTAL FRAMES, SKIP FRAMES)
+    ############### VIDEO CATEGORY SUBBLOCKS (FPS, TOTAL FRAMES, SKIP FRAMES, RESET VIDEO)
+
+    def get_reset_video_handler(video_type):
+        def handle_reset_video(event):
+            global skipper
+
+            if skipper[video_type]["current_frame"] > 1:
+                skipper[video_type]["video"].video_capture.release()
+                cv2.destroyAllWindows()
+                video = Video(input_path=skipper[video_type]["path"])
+                image = cv2.cvtColor(next(video.__iter__()), cv2.COLOR_BGR2RGB)
+                skipper[video_type]["video"] = video
+                if motion_estimator is not None:
+                    skipper[video_type]["motion_estimator"] = deepcopy(motion_estimator)
+                    if mask_generator is not None:
+                        mask = mask_generator(image)
+                    else:
+                        mask = None
+                    skipper[video_type]["motion_transformation"] = skipper[video_type][
+                        "motion_estimator"
+                    ].update(image, mask)
+                skipper[video_type]["current_frame"] = 1
+                image = Image.fromarray(image)
+
+                image.thumbnail((desired_size, desired_size))
+                image = ImageTk.PhotoImage(image)
+
+                skipper[video_type]["canvas"].itemconfig(
+                    skipper[video_type]["image_container"], image=image
+                )
+                skipper[video_type]["canvas"].imgref = image
+
+                skipper[video_type]["current_frame_label"].config(
+                    text=f"Total frames {video_type}: 1/{skipper[video_type]['total_frames']}"
+                )
+
+        return handle_reset_video
 
     def get_skiper_handler(video_type):
         entry_skip = skipper[video_type]["entry_skip"]
@@ -650,6 +691,7 @@ def set_reference(
         return handle_skip_frame
 
     skiper_handlers = {}
+    reset_video_handlers = {}
     for video_type in skipper.keys():
 
         if skipper[video_type]["fps"] is not None:
@@ -720,6 +762,37 @@ def set_reference(
             button_skip.pack(side=tk.LEFT)
 
             frame_options_skip.pack(side=tk.TOP)
+
+            ###### MAKE SUBBLOCK TO RESET VIDEO
+            frame_options_reset_video = tk.Frame(master=frame_options)
+            text_reset_video = tk.Label(
+                master=frame_options_reset_video,
+                text=f"Go to frame 1 ({video_type})",
+                foreground="white",
+                background="#5f9ea0",
+                width=20,
+                height=1,
+            )
+
+            reset_video_handlers[video_type] = get_reset_video_handler(video_type)
+
+            button_reset = tk.Button(
+                master=frame_options_reset_video,
+                text="Reset video",
+                width=16,
+                height=1,
+                bg="blue",
+                fg="black",
+            )
+
+            button_reset.bind("<Button>", reset_video_handlers[video_type])
+
+            skipper[video_type]["button_reset"] = button_reset
+
+            text_reset_video.pack(side=tk.LEFT)
+            button_reset.pack(side=tk.LEFT)
+
+            frame_options_reset_video.pack(side=tk.TOP)
 
     ###### MAKE SUBBLOCK TO ADD ANNOTATION
 
