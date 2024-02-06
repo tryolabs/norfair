@@ -1,4 +1,4 @@
-# from tkinter import
+import os
 import tkinter as tk
 from copy import deepcopy
 
@@ -144,7 +144,6 @@ def set_reference(
 
     skipper = {}
 
-    desired_size = 700
     radius = max(int(desired_size / 100), 1)
 
     points = {}
@@ -153,6 +152,8 @@ def set_reference(
     transformation = None
 
     window = tk.Tk()
+    window.title("Norfair - Set Reference Coordinates")
+    window.configure(bg="LightSkyBlue1")
 
     frame_options = tk.Frame()
     frame_images = tk.Frame()
@@ -579,6 +580,21 @@ def set_reference(
         "current_frame_label": None,
         "path": reference,
     }
+    ######### MAKE SUBBLOCK FOR LOGO
+
+    frame_options_logo = tk.Frame(master=frame_options)
+    image = Image.open(
+        os.path.join(os.path.dirname(__file__), "../docs/img/logo-dark.png")
+    )
+    image = image.resize((300, 70))
+    image = ImageTk.PhotoImage(image)
+
+    image_label = tk.Label(
+        frame_options_logo, image=image, width=40, height=60, bg="LightSkyBlue1"
+    )
+
+    image_label.pack(side=tk.TOP, fill="both", expand="yes")
+    frame_options_logo.pack(side=tk.TOP, fill="both", expand="yes")
 
     ###### MAKE SUBBLOCK FOR TITLE
     frame_options_title = tk.Frame(master=frame_options)
