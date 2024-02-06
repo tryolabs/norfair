@@ -414,7 +414,10 @@ def set_reference(
     footage_canvas_size = (footage_canvas_width, footage_canvas_height)
 
     canvas_footage = tk.Canvas(
-        frame_images, width=footage_photo.width(), height=footage_photo.height()
+        frame_images,
+        width=footage_photo.width(),
+        height=footage_photo.height(),
+        bg="gray",
     )
     footage_image_container = canvas_footage.create_image(
         0, 0, anchor=tk.NW, image=footage_photo
@@ -514,7 +517,10 @@ def set_reference(
     reference_canvas_size = (reference_canvas_width, reference_canvas_height)
 
     canvas_reference = tk.Canvas(
-        frame_images, width=reference_photo.width(), height=reference_photo.height()
+        frame_images,
+        width=reference_photo.width(),
+        height=reference_photo.height(),
+        bg="gray",
     )
     reference_image_container = canvas_reference.create_image(
         0, 0, anchor=tk.NW, image=reference_photo
