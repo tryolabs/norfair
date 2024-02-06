@@ -40,6 +40,9 @@ frame_options_annotations = None
 handling_mark_functions = None
 handle_mark_annotation = None
 
+global button_says_ignore
+global button_ignore
+
 
 def set_reference(
     reference: str,
@@ -57,6 +60,8 @@ def set_reference(
         Creates a UI to annotate points that match in reference and footage, and estimate the transformation.
         To add a point, just click a pair of points (one from the footage window, and another from the reference window) and select "Add"
         To remove a point, just select the corresponding point at the bottom left corner, and select "Remove".
+        You can also ignore point, by clicking them and selecting "Ignore". The transformation will not used ingored points.
+        To 'uningnore' points that have been previously ignored, just click them and select "Unignore".
 
         If either footage or reference are videos, you can jump to future frames to pick points that match.
         For example, to jump 215 frames in the footage, just write an integer number of frames to jump next to 'Frames to skip (footage)', and select "Skip frames".
@@ -99,6 +104,8 @@ def set_reference(
     global transformation
 
     global button_finish
+    global button_says_ignore
+    global button_ignore
 
     global reference_point_canvas
     global footage_point_canvas
@@ -154,26 +161,24 @@ def set_reference(
 
     def estimate_transformation(points):
         global button_finish
-        if len(points) >= 4:
-            curr_pts = np.array(
-                [point["reference"] for point in points.values()]
-            )  # use current points as reference points
-            prev_pts = np.array(
-                [point["footage"] for point in points.values()]
-            )  # use previous points as footage points (to deduce reference -> footage)
+        curr_pts = np.array(
+            [point["reference"] for point in points.values() if not point["ignore"]]
+        )  # use current points as reference points
+        prev_pts = np.array(
+            [point["footage"] for point in points.values() if not point["ignore"]]
+        )  # use previous points as footage points (to deduce reference -> footage)
 
-            try:
+        button_finish.configure(fg="black", highlightbackground="green")
+        try:
+            transformation = transformation_getter(curr_pts, prev_pts)[1]
+        except:
+            transformation = None
 
-                button_finish.configure(fg="black", highlightbackground="green")
-                return transformation_getter(curr_pts, prev_pts)[1]
-            except np.linalg.LinAlgError:
-                button_finish.configure(
-                    fg="grey", highlightbackground="SystemButtonFace"
-                )
-                return None
+        if transformation is not None:
+            button_finish.configure(fg="black", highlightbackground="green")
         else:
             button_finish.configure(fg="grey", highlightbackground="SystemButtonFace")
-            return None
+        return transformation
 
     def test_transformation(
         change_of_coordinates,
@@ -263,8 +268,22 @@ def set_reference(
             global reference_canvas_size
             global footage_original_size
             global footage_canvas_size
+            global button_says_ignore
+            global button_ignore
+            global points
 
             points[key]["marked"] = not points[key]["marked"]
+
+            marked_points = [
+                point["ignore"] for point in points.values() if point["marked"]
+            ]
+
+            if (len(marked_points) > 0) and (all(marked_points)):
+                button_says_ignore = False
+                button_ignore.configure(text="Unignore")
+            else:
+                button_says_ignore = True
+                button_ignore.configure(text="Ignore")
 
             if points[key]["marked"]:
                 points[key]["button"].configure(fg="black", highlightbackground="red")
@@ -289,7 +308,7 @@ def set_reference(
                 try:
                     reference_point_in_rel_coords = skipper["reference"][
                         "motion_transformation"
-                    ].abs_to_rel(np.array([points[key]["footage"]]))[0]
+                    ].abs_to_rel(np.array([points[key]["reference"]]))[0]
                     reference_point_in_rel_coords = np.multiply(
                         reference_point_in_rel_coords,
                         np.array(
@@ -303,13 +322,27 @@ def set_reference(
                     reference_point_in_rel_coords = points[key]["reference_canvas"]
                     pass
 
+                if points[key]["ignore"]:
+                    color = "gray"
+                else:
+                    color = "red"
+
                 draw_point_in_canvas(
-                    canvas_footage, footage_point_in_rel_coords, color="red"
+                    canvas_footage, footage_point_in_rel_coords, color=color
                 )
                 draw_point_in_canvas(
-                    canvas_reference, reference_point_in_rel_coords, color="red"
+                    canvas_reference, reference_point_in_rel_coords, color=color
                 )
             else:
+                if points[key]["ignore"]:
+                    points[key]["button"].configure(
+                        fg="gray", highlightbackground="gray"
+                    )
+                else:
+                    points[key]["button"].configure(
+                        fg="black", highlightbackground="SystemButtonFace"
+                    )
+
                 points[key]["button"].configure(
                     fg="black", highlightbackground="SystemButtonFace"
                 )
@@ -729,6 +762,7 @@ def set_reference(
                     "footage_canvas": footage_point_canvas,
                     "button": None,
                     "marked": False,
+                    "ignore": False,
                 }
                 points[points_sampled] = new_point
 
@@ -823,6 +857,58 @@ def set_reference(
     button_test.pack(side=tk.LEFT)
 
     frame_options_annotate_or_test.pack(side=tk.TOP)
+
+    ###### MAKE SUBBLOCK TO IGNORE POINTS
+
+    button_says_ignore = True
+    frame_options_ignore = tk.Frame(master=frame_options)
+    text_ignore = tk.Label(
+        master=frame_options_ignore,
+        text="Ignore points",
+        foreground="white",
+        background="#5f9ea0",
+        width=20,
+        height=1,
+    )
+    button_ignore = tk.Button(
+        master=frame_options_ignore,
+        text="Ignore",
+        width=16,
+        height=1,
+        bg="blue",
+        fg="black",
+        command=lambda: handle_ignore_point(),
+    )
+
+    def handle_ignore_point():
+        global points
+        global transformation
+        global button_says_ignore
+
+        if button_says_ignore:
+            fg = "gray"
+            highlightbackground = "gray"
+        else:
+            fg = "black"
+            highlightbackground = "SystemButtonFace"
+
+        for key, couple in points.items():
+            if couple["marked"]:
+                points[key]["ignore"] = button_says_ignore
+                points[key]["button"].configure(
+                    fg=fg, highlightbackground=highlightbackground
+                )
+                points[key]["marked"] = False
+                remove_drawings_in_canvas(canvas_footage)
+                remove_drawings_in_canvas(canvas_reference)
+        button_says_ignore = True
+        button_ignore.configure(text="Ignore")
+        transformation = estimate_transformation(points)
+
+    text_ignore.pack(side=tk.LEFT)
+    button_ignore.pack(side=tk.LEFT)
+
+    frame_options_ignore.pack(side=tk.TOP)
 
     ###### MAKE SUBBLOCK TO REMOVE POINTS
 
