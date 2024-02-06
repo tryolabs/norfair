@@ -598,6 +598,8 @@ def set_reference(
     def get_reset_video_handler(video_type):
         def handle_reset_video(event):
             global skipper
+            global canvas_footage
+            global canvas_reference
 
             if skipper[video_type]["current_frame"] > 1:
                 skipper[video_type]["video"].video_capture.release()
@@ -624,6 +626,8 @@ def set_reference(
                     skipper[video_type]["image_container"], image=image
                 )
                 skipper[video_type]["canvas"].imgref = image
+                canvas_footage.delete("myPoint")
+                canvas_reference.delete("myPoint")
 
                 skipper[video_type]["current_frame_label"].config(
                     text=f"Total frames {video_type}: 1/{skipper[video_type]['total_frames']}"
@@ -636,6 +640,8 @@ def set_reference(
 
         def handle_skip_frame(event):
             global skipper
+            global canvas_footage
+            global canvas_reference
 
             try:
                 frames_to_skip = int(entry_skip.get())
@@ -687,6 +693,8 @@ def set_reference(
                 skipper[video_type]["current_frame_label"].config(
                     text=f"Total frames {video_type}: {frame_number}/{total_frames}"
                 )
+                canvas_footage.delete("myPoint")
+                canvas_reference.delete("myPoint")
 
         return handle_skip_frame
 
