@@ -50,7 +50,8 @@ def set_reference(
     transformation_getter: TransformationGetter = None,
     mask_generator=None,
     desired_size=700,
-    motion_estimator=None,
+    motion_estimator_footage=None,
+    motion_estimator_reference=None,
 ):
     """
     Get a transformation to relate the coordinate transformations between footage absolute frame (first image in footage) and reference absolute frame (first image in reference).
@@ -90,9 +91,13 @@ def set_reference(
      - desired_size: int, optional
         How large you want the clickable windows in the UI to be.
 
-     - motion_estimator: MotionEstimator, optional
-        When using videos for either the footage or the reference, you can provide a MotionEstimator to relate the coordinates in all the frames in the video.
-        The motion estimator is only useful if the camera in either the video of the footage or the video of the reference can move. Otherwise, avoid using it.
+     - motion_estimator_footage: MotionEstimator, optional
+        When using videos for the footage, you can provide a MotionEstimator to relate the coordinates in all the frames in the video.
+        The motion estimator is only useful if the camera in the video of the footage can move. Otherwise, avoid using it.
+
+     - motion_estimator_reference: MotionEstimator, optional
+        When using videos the reference, you can provide a MotionEstimator to relate the coordinates in all the frames in the video.
+        The motion estimator is only useful if the camera in the video of the reference can move. Otherwise, avoid using it.
 
      returns: CoordinatesTransformation instance
         The provided transformation_getter will fit a transformation from the reference (as 'absolute') to the footage (as 'relative').
@@ -382,8 +387,8 @@ def set_reference(
     footage_point = None
     footage_point_canvas = None
 
-    motion_estimator_footage = None
     motion_transformation = None
+    motion_estimator_backup = None
     try:
         image = Image.open(footage)
         video = None
@@ -394,8 +399,8 @@ def set_reference(
         total_frames = int(video.video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
         fps = video.output_fps
         image = cv2.cvtColor(next(video.__iter__()), cv2.COLOR_BGR2RGB)
-        if motion_estimator is not None:
-            motion_estimator_footage = deepcopy(motion_estimator)
+        if motion_estimator_footage is not None:
+            motion_estimator_backup = deepcopy(motion_estimator_footage)
             if mask_generator is not None:
                 mask = mask_generator(image)
             else:
@@ -478,14 +483,15 @@ def set_reference(
         "button_reset": None,
         "motion_estimator": motion_estimator_footage,
         "motion_transformation": motion_transformation,
+        "motion_estimator_backup": motion_estimator_backup,
         "canvas": canvas_footage,
         "image_container": footage_image_container,
         "current_frame_label": None,
         "path": footage,
     }
 
-    motion_estimator_reference = None
     motion_transformation = None
+    motion_estimator_backup = None
     try:
         image = Image.open(reference)
         video = None
@@ -496,8 +502,8 @@ def set_reference(
         total_frames = int(video.video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
         fps = video.output_fps
         image = cv2.cvtColor(next(video.__iter__()), cv2.COLOR_BGR2RGB)
-        if motion_estimator is not None:
-            motion_estimator_reference = deepcopy(motion_estimator)
+        if motion_estimator_reference is not None:
+            motion_estimator_backup = deepcopy(motion_estimator_reference)
             if mask_generator is not None:
                 mask = mask_generator(image)
             else:
@@ -581,6 +587,7 @@ def set_reference(
         "button_reset": None,
         "motion_estimator": motion_estimator_reference,
         "motion_transformation": motion_transformation,
+        "motion_estimator_backup": motion_estimator_backup,
         "canvas": canvas_reference,
         "image_container": reference_image_container,
         "current_frame_label": None,
@@ -629,8 +636,10 @@ def set_reference(
                 video = Video(input_path=skipper[video_type]["path"])
                 image = cv2.cvtColor(next(video.__iter__()), cv2.COLOR_BGR2RGB)
                 skipper[video_type]["video"] = video
-                if motion_estimator is not None:
-                    skipper[video_type]["motion_estimator"] = deepcopy(motion_estimator)
+                if skipper[video_type]["motion_estimator"] is not None:
+                    skipper[video_type]["motion_estimator"] = deepcopy(
+                        skipper[video_type]["motion_estimator_backup"]
+                    )
                     if mask_generator is not None:
                         mask = mask_generator(image)
                     else:
