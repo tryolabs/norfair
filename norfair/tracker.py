@@ -93,6 +93,7 @@ class Tracker:
         ] = None,
         reid_distance_threshold: float = 0,
         reid_hit_counter_max: Optional[int] = None,
+        camera_name: str = None,
     ):
         self.tracked_objects: Sequence["TrackedObject"] = []
 
@@ -139,6 +140,7 @@ class Tracker:
         else:
             self.reid_distance_function = reid_distance_function
         self.reid_distance_threshold = reid_distance_threshold
+        self.camera_name = camera_name
         self._obj_factory = _TrackedObjectFactory()
 
     def update(
@@ -254,6 +256,7 @@ class Tracker:
                     past_detections_length=self.past_detections_length,
                     reid_hit_counter_max=self.reid_hit_counter_max,
                     coord_transformations=coord_transformations,
+                    camera_name=self.camera_name,
                 )
             )
 
@@ -404,6 +407,7 @@ class _TrackedObjectFactory:
         past_detections_length: int,
         reid_hit_counter_max: Optional[int],
         coord_transformations: CoordinatesTransformation,
+        camera_name: str,
     ) -> "TrackedObject":
         obj = TrackedObject(
             obj_factory=self,
@@ -417,6 +421,7 @@ class _TrackedObjectFactory:
             past_detections_length=past_detections_length,
             reid_hit_counter_max=reid_hit_counter_max,
             coord_transformations=coord_transformations,
+            camera_name=camera_name,
         )
         return obj
 
@@ -482,6 +487,7 @@ class TrackedObject:
         past_detections_length: int,
         reid_hit_counter_max: Optional[int],
         coord_transformations: Optional[CoordinatesTransformation] = None,
+        camera_name: str = None,
     ):
         if not isinstance(initial_detection, Detection):
             raise ValueError(
@@ -503,6 +509,8 @@ class TrackedObject:
         self.last_detection: "Detection" = initial_detection
         self.age: int = 0
         self.is_initializing: bool = self.hit_counter <= self.initialization_delay
+
+        self.camera_name = camera_name
 
         self.initializing_id: Optional[int] = self._obj_factory.get_initializing_id()
         self.id: Optional[int] = None
