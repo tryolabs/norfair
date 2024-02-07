@@ -365,7 +365,7 @@ def set_reference(
 
         new_button = tk.Button(
             master=frame_options_annotations,
-            text=f"{key}: reference {couple['reference']} <-> footage {couple['footage']}",
+            text=f"{key}: reference ({couple['reference'][0]}, {couple['reference'][1]}) <-> footage ({couple['footage'][0]}, {couple['footage'][1]})",
             width=35,
             height=1,
             bg="blue",
@@ -884,7 +884,7 @@ def set_reference(
 
                 new_button = tk.Button(
                     master=frame_options_annotations,
-                    text=f"{points_sampled}: reference {reference_point} <-> footage {footage_point}",
+                    text=f"{points_sampled}: reference ({reference_point[0]}, {reference_point[1]}) <-> footage ({footage_point[0]}, {footage_point[1]})",
                     width=35,
                     height=1,
                     bg="blue",
