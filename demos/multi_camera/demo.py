@@ -328,7 +328,7 @@ def run():
         reference_path = args.reference
     for path in args.files[first_video_is_reference:]:
 
-        pickle_path = f"{os.path.splitext(os.path.basename(path))[0]}.pkl"
+        pickle_path = f"{os.path.splitext(os.path.basename(reference_path))[0]}_{os.path.splitext(os.path.basename(path))[0]}.pkl"
 
         initial_transformations[path] = None
         if args.load_transformation:
