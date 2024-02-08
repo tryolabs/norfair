@@ -743,6 +743,7 @@ class TrackedObject:
     ):
         if coordinate_transformation is not None:
             self.abs_to_rel = coordinate_transformation.abs_to_rel
+            self.rel_to_abs = coordinate_transformation.rel_to_abs
 
     def _acquire_ids(self):
         self.id, self.global_id = self._obj_factory.get_ids()
