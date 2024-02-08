@@ -142,429 +142,457 @@ class MultiCameraClusterizer:
         )
 
         current_clusters = flatten_list(trackers_by_camera)
-        distance_matrix = (
-            np.zeros((len(current_clusters), len(current_clusters)))
-            + distance_same_camera
-        )
 
-        # this could have been better optimized, since we don't need to iterate over tracked_objects of the same camera
-        for n, tracked_object_1 in enumerate(current_clusters):
-            for m, tracked_object_2 in enumerate(current_clusters[:n]):
-                distance_matrix[n, m] = distance_function(
-                    tracked_object_1, tracked_object_2
-                )
-                distance_matrix[m, n] = distance_matrix[n, m]
-
-        # change the type from TrackedObject to Cluster, to initialize individual clusters
-        current_clusters = [
-            Cluster(tracked_object) for tracked_object in current_clusters
-        ]
-
-        min_distance = distance_matrix.min()
-
-        # join clusters iteratively by looking at distances
-        while min_distance < self.distance_threshold:
-
-            flattened_arg_min = distance_matrix.argmin()
-
-            number_cluster_A = flattened_arg_min // distance_matrix.shape[1]
-            number_cluster_B = flattened_arg_min % distance_matrix.shape[1]
-
-            cluster_A = current_clusters[number_cluster_A]
-            cluster_B = current_clusters[number_cluster_B]
-
-            if self.join_distance_by == "max":
-                distance_to_joined_cluster = np.maximum(
-                    distance_matrix[number_cluster_A], distance_matrix[number_cluster_B]
-                )
-            elif self.join_distance_by == "mean":
-                size_cluster_A = len(cluster_A)
-                size_cluster_B = len(cluster_B)
-                distance_to_joined_cluster = (
-                    size_cluster_A * distance_matrix[number_cluster_A]
-                    + size_cluster_B * distance_matrix[number_cluster_B]
-                ) / (size_cluster_A + size_cluster_B)
-            else:
-                raise ValueError(
-                    f"MultiCameraClusterizer.join_distance_by was changed to a value that is not 'mean' or 'max'."
-                )
-
-            distance_matrix[number_cluster_A] = distance_to_joined_cluster
-            distance_matrix[:, number_cluster_A] = distance_to_joined_cluster
-
-            distance_matrix[number_cluster_B] = self.distance_threshold + 1
-            distance_matrix[:, number_cluster_B] = self.distance_threshold + 1
-
-            current_clusters[number_cluster_A].tracked_objects.update(
-                cluster_B.tracked_objects
+        if len(current_clusters) > 0:
+            distance_matrix = (
+                np.zeros((len(current_clusters), len(current_clusters)))
+                + distance_same_camera
             )
-            current_clusters[number_cluster_A].tracked_ids.extend(cluster_B.tracked_ids)
-            current_clusters[number_cluster_B] = None
+
+            # this could have been better optimized, since we don't need to iterate over tracked_objects of the same camera
+            for n, tracked_object_1 in enumerate(current_clusters):
+                for m, tracked_object_2 in enumerate(current_clusters[:n]):
+                    distance_matrix[n, m] = distance_function(
+                        tracked_object_1, tracked_object_2
+                    )
+                    distance_matrix[m, n] = distance_matrix[n, m]
+
+            # change the type from TrackedObject to Cluster, to initialize individual clusters
+            current_clusters = [
+                Cluster(tracked_object) for tracked_object in current_clusters
+            ]
 
             min_distance = distance_matrix.min()
 
-        current_clusters = [
-            cluster for cluster in current_clusters if cluster is not None
-        ]
-        current_clusters = sorted(current_clusters, key=len)
+            # join clusters iteratively by looking at distances
+            while min_distance < self.distance_threshold:
 
-        current_clusters = ClustersList(current_clusters)
+                flattened_arg_min = distance_matrix.argmin()
 
-        if len(self.past_clusters) == self.memory:
-            self.past_clusters.pop(0)
+                number_cluster_A = flattened_arg_min // distance_matrix.shape[1]
+                number_cluster_B = flattened_arg_min % distance_matrix.shape[1]
 
-        self.past_clusters.append(deepcopy(current_clusters))
+                cluster_A = current_clusters[number_cluster_A]
+                cluster_B = current_clusters[number_cluster_B]
 
-        # Let's intersect the past clusters
-        past_cluster_number = 0
-        while past_cluster_number < len(self.past_clusters) - 1:
-            past_cluster = self.past_clusters[past_cluster_number]
-            accumulated_intersections_since_we_started_with_this_past_cluster = 0
-            covered_current_cluster = False
-
-            # lists as [[('cam0', '2'), ('cam2', '2')], [('cam0', '1'), ('cam1', '1'), ('cam2', '1')]]
-            past_cluster_as_list = [
-                cluster.tracked_ids for cluster in past_cluster.clusters
-            ]
-
-            sorted(past_cluster_as_list, key=len, reverse=True)
-
-            cluster_B_number = 0
-            for n in range(len(current_clusters)):
-                current_clusters.clusters[n].has_been_covered = False
-            while cluster_B_number < len(past_cluster_as_list):
-                cluster_B = past_cluster_as_list[cluster_B_number]
-                accumulated_intersections_since_we_started_with_cluster_B = 0
-                covered_cluster_B = False
-
-                cluster_A_number = 0
-                while cluster_A_number < len(current_clusters):
-                    cluster_A = current_clusters.clusters[cluster_A_number]
-
-                    if not cluster_A.has_been_covered:
-                        intersection = set(cluster_A.tracked_ids).intersection(
-                            set(cluster_B)
-                        )
-                        if len(intersection) > 0:
-                            accumulated_intersections_since_we_started_with_cluster_B += len(
-                                intersection
-                            )
-                            accumulated_intersections_since_we_started_with_this_past_cluster += len(
-                                intersection
-                            )
-
-                            covered_cluster_B = (
-                                accumulated_intersections_since_we_started_with_cluster_B
-                                == len(cluster_B)
-                            )
-                            covered_current_cluster = (
-                                accumulated_intersections_since_we_started_with_this_past_cluster
-                                == len(current_clusters.all_track_ids)
-                            )
-
-                            if len(cluster_A) > len(intersection):
-                                # split cluster_A
-
-                                missing_indices = (
-                                    set(cluster_A.tracked_ids) - intersection
-                                )
-                                missing_trackers = {}
-                                for (camera_name, track_id) in missing_indices:
-                                    missing_trackers[
-                                        camera_name
-                                    ] = cluster_A.tracked_objects.pop(camera_name)
-
-                                cluster_A.tracked_ids = list(intersection)
-                                cluster_A.has_been_covered = True
-
-                                missing_cluster = Cluster()
-                                missing_cluster.tracked_objects = missing_trackers
-                                missing_cluster.tracked_ids = list(missing_indices)
-
-                                current_clusters.clusters[cluster_A_number] = cluster_A
-                                current_clusters.clusters.append(missing_cluster)
-                            else:
-                                cluster_A.has_been_covered = True
-
-                            if covered_current_cluster:
-                                # if the past_cluster already covered the current_cluster, then go to next past_cluster
-                                cluster_A_number = len(current_clusters) + 1
-                                cluster_B_number = len(past_cluster_as_list) + 1
-                                past_cluster_number += 1
-                            elif covered_cluster_B:
-                                # if I covered cluster_B with current_cluster, then go to next cluster_B in past_cluster
-                                cluster_A_number = len(current_clusters) + 1
-                                cluster_B_number += 1
-                    cluster_A_number += 1
-                cluster_B_number += 1
-            past_cluster_number += 1
-
-        # Now current_clusters combines the information of the recent past
-
-        if len(self.clusters) == 0:
-            # if we had no clusters previously, just use the new ones
-            for n in range(len(current_clusters)):
-                current_clusters.clusters[n].id = self.last_cluster_id
-                self.last_cluster_id += 1
-            self.clusters = current_clusters.clusters
-        else:
-            # if we had clusters, we need to do intersections to see which current clusters correspond to and old one
-            # this will allow us to update the old cluster (and creating new ones if we need to)
-
-            # compute the matrix of intersection of clusters
-            cardinal_intersection_matrix = []
-            intersection_matrix_ids = []
-
-            cluster_number = 0
-            new_self_clusters = []
-            while cluster_number < len(self.clusters):
-                new_row_interesection_ids = [None] * len(current_clusters)
-                new_row_cardinal_intersection = np.zeros((len(current_clusters),))
-
-                cluster = self.clusters[cluster_number]
-
-                copy_cluster = deepcopy(cluster)
-                copy_cluster.tracked_ids = []
-                copy_cluster.tracked_objects = {}
-
-                size_of_cluster = len(cluster)
-                size_covered = 0
-
-                current_cluster_number = 0
-                while current_cluster_number < len(current_clusters):
-                    current_cluster = current_clusters.clusters[current_cluster_number]
-
-                    if current_cluster.total_covered == len(current_cluster):
-                        current_cluster_number += 1
-                        continue
-
-                    intersection = set(cluster.tracked_ids).intersection(
-                        set(current_cluster.tracked_ids)
+                if self.join_distance_by == "max":
+                    distance_to_joined_cluster = np.maximum(
+                        distance_matrix[number_cluster_A],
+                        distance_matrix[number_cluster_B],
                     )
-                    copy_cluster.tracked_ids.extend(list(intersection))
-                    for (camera_name, track_id) in intersection:
-                        copy_cluster.tracked_objects[
-                            camera_name
-                        ] = current_cluster.tracked_objects[camera_name]
-
-                    new_row_interesection_ids[current_cluster_number] = intersection
-
-                    intersection_size = len(intersection)
-                    size_covered += intersection_size
-                    new_row_cardinal_intersection[
-                        current_cluster_number
-                    ] = intersection_size
-
-                    current_cluster.total_covered += intersection_size
-                    current_cluster.has_been_covered = (
-                        current_cluster.total_covered == len(current_cluster)
-                    )
-
-                    if size_covered == size_of_cluster:
-                        # all other intersections with current_clusters should be empty afterwards for this cluster
-                        current_cluster_number = len(current_clusters) + 1
-                    else:
-                        current_cluster_number += 1
-
-                if size_covered > 0:
-                    new_self_clusters.append(copy_cluster)
-                    cardinal_intersection_matrix.append(new_row_cardinal_intersection)
-                    intersection_matrix_ids.append(new_row_interesection_ids)
-
-                cluster_number += 1
-
-            self.clusters = new_self_clusters
-
-            # once I have the matrix of intersections, I check if my clusters need to grow or be splitted
-            cluster_number = 0
-            while cluster_number < len(self.clusters):
-
-                cluster = self.clusters[cluster_number]
-
-                number_current_cluster_with_biggest_intersection = (
-                    cardinal_intersection_matrix[cluster_number].argmax()
-                )
-                intersection_size = cardinal_intersection_matrix[cluster_number][
-                    number_current_cluster_with_biggest_intersection
-                ]
-                current_cluster_with_biggest_intersection = current_clusters.clusters[
-                    number_current_cluster_with_biggest_intersection
-                ]
-
-                if intersection_size < size_of_cluster:
-                    cluster.split_votes = min(
-                        self.max_votes_split, cluster.split_votes + 1
-                    )
-                    cluster.grow_votes = max(0, cluster.grow_votes - 1)
-                elif len(current_cluster_with_biggest_intersection) == size_of_cluster:
-                    cluster.split_votes = max(0, cluster.split_votes - 1)
-                    cluster.grow_votes = max(0, cluster.grow_votes - 1)
+                elif self.join_distance_by == "mean":
+                    size_cluster_A = len(cluster_A)
+                    size_cluster_B = len(cluster_B)
+                    distance_to_joined_cluster = (
+                        size_cluster_A * distance_matrix[number_cluster_A]
+                        + size_cluster_B * distance_matrix[number_cluster_B]
+                    ) / (size_cluster_A + size_cluster_B)
                 else:
-                    cluster.grow_votes = min(
-                        self.max_votes_grow, cluster.grow_votes + 1
+                    raise ValueError(
+                        f"MultiCameraClusterizer.join_distance_by was changed to a value that is not 'mean' or 'max'."
                     )
-                    cluster.split_votes = max(0, cluster.split_votes - 1)
 
-                if cluster.grow_votes == self.max_votes_grow:
-                    # if the votes to grow are enough, then we will expand our cluster
-                    # we might need to steal ids from other clusters, so first we will remove those from the others
+                distance_matrix[number_cluster_A] = distance_to_joined_cluster
+                distance_matrix[:, number_cluster_A] = distance_to_joined_cluster
 
-                    other_cluster_number = 0
-                    while other_cluster_number < len(self.clusters):
-                        if (other_cluster_number != cluster_number) and (
-                            cardinal_intersection_matrix[other_cluster_number][
-                                number_current_cluster_with_biggest_intersection
-                            ]
-                            > 0
-                        ):
-                            intersection_with_other_cluster = intersection_matrix_ids[
-                                other_cluster_number
-                            ][number_current_cluster_with_biggest_intersection]
+                distance_matrix[number_cluster_B] = self.distance_threshold + 1
+                distance_matrix[:, number_cluster_B] = self.distance_threshold + 1
 
-                            # eliminate the tracked_ids that appear in the other cluster
-                            self.clusters[other_cluster_number].tracked_ids = list(
-                                set(self.clusters[other_cluster_number].tracked_ids)
-                                - intersection_with_other_cluster
+                current_clusters[number_cluster_A].tracked_objects.update(
+                    cluster_B.tracked_objects
+                )
+                current_clusters[number_cluster_A].tracked_ids.extend(
+                    cluster_B.tracked_ids
+                )
+                current_clusters[number_cluster_B] = None
+
+                min_distance = distance_matrix.min()
+
+            current_clusters = [
+                cluster for cluster in current_clusters if cluster is not None
+            ]
+            current_clusters = sorted(current_clusters, key=len)
+
+            current_clusters = ClustersList(current_clusters)
+
+            if len(self.past_clusters) == self.memory:
+                self.past_clusters.pop(0)
+
+            self.past_clusters.append(deepcopy(current_clusters))
+
+            # Let's intersect the past clusters
+            past_cluster_number = 0
+            while past_cluster_number < len(self.past_clusters) - 1:
+                past_cluster = self.past_clusters[past_cluster_number]
+                accumulated_intersections_since_we_started_with_this_past_cluster = 0
+                covered_current_cluster = False
+
+                # lists as [[('cam0', '2'), ('cam2', '2')], [('cam0', '1'), ('cam1', '1'), ('cam2', '1')]]
+                past_cluster_as_list = [
+                    cluster.tracked_ids for cluster in past_cluster.clusters
+                ]
+
+                sorted(past_cluster_as_list, key=len, reverse=True)
+
+                cluster_B_number = 0
+                for n in range(len(current_clusters)):
+                    current_clusters.clusters[n].has_been_covered = False
+                while cluster_B_number < len(past_cluster_as_list):
+                    cluster_B = past_cluster_as_list[cluster_B_number]
+                    accumulated_intersections_since_we_started_with_cluster_B = 0
+                    covered_cluster_B = False
+
+                    cluster_A_number = 0
+                    while cluster_A_number < len(current_clusters):
+                        cluster_A = current_clusters.clusters[cluster_A_number]
+
+                        if not cluster_A.has_been_covered:
+                            intersection = set(cluster_A.tracked_ids).intersection(
+                                set(cluster_B)
                             )
-
-                            # eliminate the corresponding tracked_objects in the other cluster
-                            for (
-                                camera_name,
-                                track_id,
-                            ) in intersection_with_other_cluster:
-                                self.clusters[other_cluster_number].tracked_objects.pop(
-                                    camera_name
+                            if len(intersection) > 0:
+                                accumulated_intersections_since_we_started_with_cluster_B += len(
+                                    intersection
+                                )
+                                accumulated_intersections_since_we_started_with_this_past_cluster += len(
+                                    intersection
                                 )
 
-                            # update the matrices of intersection for the other clusters
-                            intersection_matrix_ids[other_cluster_number][
-                                number_current_cluster_with_biggest_intersection
-                            ] = None
-                            cardinal_intersection_matrix[other_cluster_number][
-                                number_current_cluster_with_biggest_intersection
-                            ] = 0
+                                covered_cluster_B = (
+                                    accumulated_intersections_since_we_started_with_cluster_B
+                                    == len(cluster_B)
+                                )
+                                covered_current_cluster = (
+                                    accumulated_intersections_since_we_started_with_this_past_cluster
+                                    == len(current_clusters.all_track_ids)
+                                )
 
-                        other_cluster_number += 1
+                                if len(cluster_A) > len(intersection):
+                                    # split cluster_A
 
-                    cluster.tracked_objects = (
-                        current_cluster_with_biggest_intersection.tracked_objects
-                    )
-                    cluster.tracked_ids = (
-                        current_cluster_with_biggest_intersection.tracked_ids
-                    )
-                    self.clusters[cluster_number] = cluster
+                                    missing_indices = (
+                                        set(cluster_A.tracked_ids) - intersection
+                                    )
+                                    missing_trackers = {}
+                                    for (camera_name, track_id) in missing_indices:
+                                        missing_trackers[
+                                            camera_name
+                                        ] = cluster_A.tracked_objects.pop(camera_name)
 
-                    intersection_matrix_ids[cluster_number][
-                        number_current_cluster_with_biggest_intersection
-                    ] = set(current_cluster_with_biggest_intersection.tracked_ids)
+                                    cluster_A.tracked_ids = list(intersection)
+                                    cluster_A.has_been_covered = True
 
-                elif cluster.split_votes == self.max_votes_split:
-                    # if we have enough votes to split our cluster
-                    # we update the old cluster with the information of the biggest current cluster inside
-                    # for the other current clusters that intersect it, we create new clusters
+                                    missing_cluster = Cluster()
+                                    missing_cluster.tracked_objects = missing_trackers
+                                    missing_cluster.tracked_ids = list(missing_indices)
 
-                    other_current_cluster_number = 0
-                    while other_current_cluster_number < len(current_clusters):
-                        if (
-                            other_current_cluster_number
-                            != number_current_cluster_with_biggest_intersection
-                        ) and (
-                            cardinal_intersection_matrix[cluster_number][
-                                other_current_cluster_number
-                            ]
-                            > 0
-                        ):
-                            intersection = intersection_matrix_ids[cluster_number][
-                                other_current_cluster_number
-                            ]
+                                    current_clusters.clusters[
+                                        cluster_A_number
+                                    ] = cluster_A
+                                    current_clusters.clusters.append(missing_cluster)
+                                else:
+                                    cluster_A.has_been_covered = True
 
-                            # create new clusters for smaller subclusters inside
-                            new_cluster = Cluster(None, self.last_cluster_id)
-                            self.last_cluster_id += 1
+                                if covered_current_cluster:
+                                    # if the past_cluster already covered the current_cluster, then go to next past_cluster
+                                    cluster_A_number = len(current_clusters) + 1
+                                    cluster_B_number = len(past_cluster_as_list) + 1
+                                    past_cluster_number += 1
+                                elif covered_cluster_B:
+                                    # if I covered cluster_B with current_cluster, then go to next cluster_B in past_cluster
+                                    cluster_A_number = len(current_clusters) + 1
+                                    cluster_B_number += 1
+                        cluster_A_number += 1
+                    cluster_B_number += 1
+                past_cluster_number += 1
 
-                            new_cluster.tracked_ids = list(intersection)
-                            for (camera_name, track_id) in intersection:
-                                new_cluster.tracked_objects[
-                                    camera_name
-                                ] = cluster.tracked_objects[camera_name]
+            # Now current_clusters combines the information of the recent past
 
-                            self.clusters.append(new_cluster)
+            if len(self.clusters) == 0:
+                # if we had no clusters previously, just use the new ones
+                for n in range(len(current_clusters)):
+                    current_clusters.clusters[n].id = self.last_cluster_id
+                    self.last_cluster_id += 1
+                self.clusters = current_clusters.clusters
+            else:
+                # if we had clusters, we need to do intersections to see which current clusters correspond to and old one
+                # this will allow us to update the old cluster (and creating new ones if we need to)
 
-                            # need to create new rows for the new cluster
-                            new_row_interesection_ids = [None] * len(current_clusters)
-                            new_row_cardinal_intersection = np.zeros(
-                                (len(current_clusters),)
-                            )
+                # compute the matrix of intersection of clusters
+                cardinal_intersection_matrix = []
+                intersection_matrix_ids = []
 
-                            new_row_interesection_ids[
-                                other_current_cluster_number
-                            ] = intersection
-                            new_row_cardinal_intersection[
-                                other_current_cluster_number
-                            ] = len(intersection)
-
-                            cardinal_intersection_matrix.append(
-                                new_row_cardinal_intersection
-                            )
-                            intersection_matrix_ids.append(new_row_interesection_ids)
-
-                        other_current_cluster_number += 1
-
-                    # update the old cluster with only the biggest subcluster inside
-                    intersection = intersection_matrix_ids[cluster_number][
-                        number_current_cluster_with_biggest_intersection
-                    ]
-                    cluster.tracked_objects = {}
-                    cluster.tracked_ids = list(intersection)
-                    for camera_name, track_id in intersection:
-                        cluster.tracked_objects[
-                            camera_name
-                        ] = current_cluster_with_biggest_intersection.tracked_objects[
-                            camera_name
-                        ]
-
-                    # need to update the old cluster_number rows in the intersection matrix
+                cluster_number = 0
+                new_self_clusters = []
+                while cluster_number < len(self.clusters):
                     new_row_interesection_ids = [None] * len(current_clusters)
                     new_row_cardinal_intersection = np.zeros((len(current_clusters),))
 
-                    new_row_interesection_ids[
+                    cluster = self.clusters[cluster_number]
+
+                    copy_cluster = deepcopy(cluster)
+                    copy_cluster.tracked_ids = []
+                    copy_cluster.tracked_objects = {}
+
+                    size_of_cluster = len(cluster)
+                    size_covered = 0
+
+                    current_cluster_number = 0
+                    while current_cluster_number < len(current_clusters):
+                        current_cluster = current_clusters.clusters[
+                            current_cluster_number
+                        ]
+
+                        if current_cluster.total_covered == len(current_cluster):
+                            current_cluster_number += 1
+                            continue
+
+                        intersection = set(cluster.tracked_ids).intersection(
+                            set(current_cluster.tracked_ids)
+                        )
+                        copy_cluster.tracked_ids.extend(list(intersection))
+                        for (camera_name, track_id) in intersection:
+                            copy_cluster.tracked_objects[
+                                camera_name
+                            ] = current_cluster.tracked_objects[camera_name]
+
+                        new_row_interesection_ids[current_cluster_number] = intersection
+
+                        intersection_size = len(intersection)
+                        size_covered += intersection_size
+                        new_row_cardinal_intersection[
+                            current_cluster_number
+                        ] = intersection_size
+
+                        current_cluster.total_covered += intersection_size
+                        current_cluster.has_been_covered = (
+                            current_cluster.total_covered == len(current_cluster)
+                        )
+
+                        if size_covered == size_of_cluster:
+                            # all other intersections with current_clusters should be empty afterwards for this cluster
+                            current_cluster_number = len(current_clusters) + 1
+                        else:
+                            current_cluster_number += 1
+
+                    if size_covered > 0:
+                        new_self_clusters.append(copy_cluster)
+                        cardinal_intersection_matrix.append(
+                            new_row_cardinal_intersection
+                        )
+                        intersection_matrix_ids.append(new_row_interesection_ids)
+
+                    cluster_number += 1
+
+                self.clusters = new_self_clusters
+
+                # once I have the matrix of intersections, I check if my clusters need to grow or be splitted
+                cluster_number = 0
+                while cluster_number < len(self.clusters):
+
+                    cluster = self.clusters[cluster_number]
+
+                    number_current_cluster_with_biggest_intersection = (
+                        cardinal_intersection_matrix[cluster_number].argmax()
+                    )
+                    intersection_size = cardinal_intersection_matrix[cluster_number][
                         number_current_cluster_with_biggest_intersection
-                    ] = intersection
-                    new_row_cardinal_intersection = intersection_size
+                    ]
+                    current_cluster_with_biggest_intersection = (
+                        current_clusters.clusters[
+                            number_current_cluster_with_biggest_intersection
+                        ]
+                    )
 
-                    cardinal_intersection_matrix[
-                        cluster_number
-                    ] = new_row_cardinal_intersection
-                    intersection_matrix_ids[cluster_number] = new_row_interesection_ids
+                    if intersection_size < size_of_cluster:
+                        cluster.split_votes = min(
+                            self.max_votes_split, cluster.split_votes + 1
+                        )
+                        cluster.grow_votes = max(0, cluster.grow_votes - 1)
+                    elif (
+                        len(current_cluster_with_biggest_intersection)
+                        == size_of_cluster
+                    ):
+                        cluster.split_votes = max(0, cluster.split_votes - 1)
+                        cluster.grow_votes = max(0, cluster.grow_votes - 1)
+                    else:
+                        cluster.grow_votes = min(
+                            self.max_votes_grow, cluster.grow_votes + 1
+                        )
+                        cluster.split_votes = max(0, cluster.split_votes - 1)
 
-                    self.clusters[cluster_number] = cluster
+                    if cluster.grow_votes == self.max_votes_grow:
+                        # if the votes to grow are enough, then we will expand our cluster
+                        # we might need to steal ids from other clusters, so first we will remove those from the others
 
-                cluster_number += 1
+                        other_cluster_number = 0
+                        while other_cluster_number < len(self.clusters):
+                            if (other_cluster_number != cluster_number) and (
+                                cardinal_intersection_matrix[other_cluster_number][
+                                    number_current_cluster_with_biggest_intersection
+                                ]
+                                > 0
+                            ):
+                                intersection_with_other_cluster = (
+                                    intersection_matrix_ids[other_cluster_number][
+                                        number_current_cluster_with_biggest_intersection
+                                    ]
+                                )
 
-            # create new clusters with remaining ids that were not used
-            all_ids_in_self_clusters = set(
-                flatten_list([cluster.tracked_ids for cluster in self.clusters])
-            )
-            for current_cluster in current_clusters.clusters:
-                difference_ids = (
-                    set(current_cluster.tracked_ids) - all_ids_in_self_clusters
+                                # eliminate the tracked_ids that appear in the other cluster
+                                self.clusters[other_cluster_number].tracked_ids = list(
+                                    set(self.clusters[other_cluster_number].tracked_ids)
+                                    - intersection_with_other_cluster
+                                )
+
+                                # eliminate the corresponding tracked_objects in the other cluster
+                                for (
+                                    camera_name,
+                                    track_id,
+                                ) in intersection_with_other_cluster:
+                                    self.clusters[
+                                        other_cluster_number
+                                    ].tracked_objects.pop(camera_name)
+
+                                # update the matrices of intersection for the other clusters
+                                intersection_matrix_ids[other_cluster_number][
+                                    number_current_cluster_with_biggest_intersection
+                                ] = None
+                                cardinal_intersection_matrix[other_cluster_number][
+                                    number_current_cluster_with_biggest_intersection
+                                ] = 0
+
+                            other_cluster_number += 1
+
+                        cluster.tracked_objects = (
+                            current_cluster_with_biggest_intersection.tracked_objects
+                        )
+                        cluster.tracked_ids = (
+                            current_cluster_with_biggest_intersection.tracked_ids
+                        )
+                        self.clusters[cluster_number] = cluster
+
+                        intersection_matrix_ids[cluster_number][
+                            number_current_cluster_with_biggest_intersection
+                        ] = set(current_cluster_with_biggest_intersection.tracked_ids)
+
+                    elif cluster.split_votes == self.max_votes_split:
+                        # if we have enough votes to split our cluster
+                        # we update the old cluster with the information of the biggest current cluster inside
+                        # for the other current clusters that intersect it, we create new clusters
+
+                        other_current_cluster_number = 0
+                        while other_current_cluster_number < len(current_clusters):
+                            if (
+                                other_current_cluster_number
+                                != number_current_cluster_with_biggest_intersection
+                            ) and (
+                                cardinal_intersection_matrix[cluster_number][
+                                    other_current_cluster_number
+                                ]
+                                > 0
+                            ):
+                                intersection = intersection_matrix_ids[cluster_number][
+                                    other_current_cluster_number
+                                ]
+
+                                # create new clusters for smaller subclusters inside
+                                new_cluster = Cluster(None, self.last_cluster_id)
+                                self.last_cluster_id += 1
+
+                                new_cluster.tracked_ids = list(intersection)
+                                for (camera_name, track_id) in intersection:
+                                    new_cluster.tracked_objects[
+                                        camera_name
+                                    ] = cluster.tracked_objects[camera_name]
+
+                                self.clusters.append(new_cluster)
+
+                                # need to create new rows for the new cluster
+                                new_row_interesection_ids = [None] * len(
+                                    current_clusters
+                                )
+                                new_row_cardinal_intersection = np.zeros(
+                                    (len(current_clusters),)
+                                )
+
+                                new_row_interesection_ids[
+                                    other_current_cluster_number
+                                ] = intersection
+                                new_row_cardinal_intersection[
+                                    other_current_cluster_number
+                                ] = len(intersection)
+
+                                cardinal_intersection_matrix.append(
+                                    new_row_cardinal_intersection
+                                )
+                                intersection_matrix_ids.append(
+                                    new_row_interesection_ids
+                                )
+
+                            other_current_cluster_number += 1
+
+                        # update the old cluster with only the biggest subcluster inside
+                        intersection = intersection_matrix_ids[cluster_number][
+                            number_current_cluster_with_biggest_intersection
+                        ]
+                        cluster.tracked_objects = {}
+                        cluster.tracked_ids = list(intersection)
+                        for camera_name, track_id in intersection:
+                            cluster.tracked_objects[
+                                camera_name
+                            ] = current_cluster_with_biggest_intersection.tracked_objects[
+                                camera_name
+                            ]
+
+                        # need to update the old cluster_number rows in the intersection matrix
+                        new_row_interesection_ids = [None] * len(current_clusters)
+                        new_row_cardinal_intersection = np.zeros(
+                            (len(current_clusters),)
+                        )
+
+                        new_row_interesection_ids[
+                            number_current_cluster_with_biggest_intersection
+                        ] = intersection
+                        new_row_cardinal_intersection = intersection_size
+
+                        cardinal_intersection_matrix[
+                            cluster_number
+                        ] = new_row_cardinal_intersection
+                        intersection_matrix_ids[
+                            cluster_number
+                        ] = new_row_interesection_ids
+
+                        self.clusters[cluster_number] = cluster
+
+                    cluster_number += 1
+
+                # create new clusters with remaining ids that were not used
+                all_ids_in_self_clusters = set(
+                    flatten_list([cluster.tracked_ids for cluster in self.clusters])
                 )
+                for current_cluster in current_clusters.clusters:
+                    difference_ids = (
+                        set(current_cluster.tracked_ids) - all_ids_in_self_clusters
+                    )
 
-                if len(difference_ids) > 0:
-                    new_cluster = Cluster(None, self.last_cluster_id)
-                    self.last_cluster_id += 1
+                    if len(difference_ids) > 0:
+                        new_cluster = Cluster(None, self.last_cluster_id)
+                        self.last_cluster_id += 1
 
-                    for (camera_name, track_id) in difference_ids:
-                        new_cluster.tracked_objects[
-                            camera_name
-                        ] = current_cluster.tracked_objects[camera_name]
-                    new_cluster.tracked_ids = list(difference_ids)
+                        for (camera_name, track_id) in difference_ids:
+                            new_cluster.tracked_objects[
+                                camera_name
+                            ] = current_cluster.tracked_objects[camera_name]
+                        new_cluster.tracked_ids = list(difference_ids)
 
-                    self.clusters.append(new_cluster)
+                        self.clusters.append(new_cluster)
 
-            # just in case there is an empty cluster, filter it
-            # this might happen since we stole ids from others when growing
-            # also might happen since and old cluster might have not intersected with any new cluster
-            self.clusters = [cluster for cluster in self.clusters if len(cluster) > 0]
+                # just in case there is an empty cluster, filter it
+                # this might happen since we stole ids from others when growing
+                # also might happen since and old cluster might have not intersected with any new cluster
+                self.clusters = [
+                    cluster for cluster in self.clusters if len(cluster) > 0
+                ]
 
         return self.clusters
