@@ -597,7 +597,7 @@ def set_reference(
 
     frame_options_logo = tk.Frame(master=frame_options)
     image = Image.open(
-        os.path.join(os.path.dirname(__file__), "../docs/img/logo-dark.png")
+        os.path.join(os.path.dirname(__file__), "./logo_ui/logo-dark.png")
     )
     image = image.resize((300, 70))
     image = ImageTk.PhotoImage(image)
