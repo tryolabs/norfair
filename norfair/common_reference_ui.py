@@ -168,10 +168,10 @@ def set_reference(
 
     def estimate_transformation(points):
         global button_finish
-        curr_pts = np.array(
+        prev_pts = np.array(
             [point["reference"] for point in points.values() if not point["ignore"]]
         )  # use current points as reference points
-        prev_pts = np.array(
+        curr_pts = np.array(
             [point["footage"] for point in points.values() if not point["ignore"]]
         )  # use previous points as footage points (to deduce reference -> footage)
 
@@ -198,7 +198,7 @@ def set_reference(
         point_in_new_coordinates = change_of_coordinates(np.array([point]))[0]
 
         try:
-            point_in_new_coordinates = motion_transformation.abs_to_rel(
+            point_in_new_coordinates = motion_transformation.rel_to_abs(
                 np.array([point_in_new_coordinates])
             )[0]
         except AttributeError:
@@ -298,7 +298,7 @@ def set_reference(
                 try:
                     footage_point_in_rel_coords = skipper["footage"][
                         "motion_transformation"
-                    ].abs_to_rel(np.array([points[key]["footage"]]))[0]
+                    ].rel_to_abs(np.array([points[key]["footage"]]))[0]
                     footage_point_in_rel_coords = np.multiply(
                         footage_point_in_rel_coords,
                         np.array(
@@ -315,7 +315,7 @@ def set_reference(
                 try:
                     reference_point_in_rel_coords = skipper["reference"][
                         "motion_transformation"
-                    ].abs_to_rel(np.array([points[key]["reference"]]))[0]
+                    ].rel_to_abs(np.array([points[key]["reference"]]))[0]
                     reference_point_in_rel_coords = np.multiply(
                         reference_point_in_rel_coords,
                         np.array(
@@ -449,7 +449,7 @@ def set_reference(
         print("Footage window clicked at: ", footage_point.round(1))
 
         try:
-            footage_point = skipper["footage"]["motion_transformation"].rel_to_abs(
+            footage_point = skipper["footage"]["motion_transformation"].abs_to_rel(
                 np.array([footage_point])
             )[0]
         except AttributeError:
@@ -460,7 +460,7 @@ def set_reference(
         if not mode_annotate:
             if transformation is not None:
                 test_transformation(
-                    transformation.abs_to_rel,
+                    transformation.rel_to_abs,
                     canvas_reference,
                     footage_point,
                     reference_original_size,
@@ -553,7 +553,7 @@ def set_reference(
         print("Reference window clicked at: ", reference_point.round(1))
 
         try:
-            reference_point = skipper["reference"]["motion_transformation"].rel_to_abs(
+            reference_point = skipper["reference"]["motion_transformation"].abs_to_rel(
                 np.array([reference_point])
             )[0]
         except AttributeError:
@@ -564,7 +564,7 @@ def set_reference(
         if not mode_annotate:
             if transformation is not None:
                 test_transformation(
-                    transformation.rel_to_abs,
+                    transformation.abs_to_rel,
                     canvas_footage,
                     reference_point,
                     footage_original_size,
