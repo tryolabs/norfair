@@ -61,7 +61,7 @@ def set_reference(
         Creates a UI to annotate points that match in reference and footage, and estimate the transformation.
         To add a point, just click a pair of points (one from the footage window, and another from the reference window) and select "Add".
         To remove a point, just select the corresponding point at the bottom left corner, and select "Remove".
-        You can also ignore point, by clicking them and selecting "Ignore". The transformation will not used ingored points.
+        You can also ignore points, by clicking them and selecting "Ignore". The transformation will not used ingored points.
         To 'uningnore' points that have been previously ignored, just click them and select "Unignore".
 
         If either footage or reference are videos, you can jump to future frames to pick points that match.
