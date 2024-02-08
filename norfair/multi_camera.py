@@ -424,7 +424,8 @@ class MultiCameraClusterizer:
                     if cluster.grow_votes == self.max_votes_grow:
                         # if the votes to grow are enough, then we will expand our cluster
                         # we might need to steal ids from other clusters, so first we will remove those from the others
-                        cluster.grow_votes -= 1
+                        cluster.grow_votes = 0
+                        cluster.split_votes = 0
 
                         other_cluster_number = 0
                         while other_cluster_number < len(self.clusters):
@@ -481,7 +482,8 @@ class MultiCameraClusterizer:
                         # if we have enough votes to split our cluster
                         # we update the old cluster with the information of the biggest current cluster inside
                         # for the other current clusters that intersect it, we create new clusters
-                        cluster.split_votes -= 1
+                        cluster.split_votes = 0
+                        cluster.grow_votes = 0
 
                         other_current_cluster_number = 0
                         while other_current_cluster_number < len(current_clusters):

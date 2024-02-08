@@ -1,7 +1,7 @@
 import argparse
 import os
 import pickle
-import sys
+from logging import warning
 
 import cv2
 import numpy as np
@@ -192,36 +192,36 @@ def run():
         "--confidence-threshold",
         type=float,
         help="Confidence threshold of detections",
-        default=0.15,
+        default=0.2,
     )
     parser.add_argument(
         "--iou-threshold",
         type=float,
-        default=0.6,
-        help="Max IoU to consider when matching detections and tracked objects",
+        default=0.5,
+        help="Max '1-IoU' to consider when matching detections and tracked objects",
     )
     parser.add_argument(
         "--distance-threshold",
         type=float,
-        default=0.1,
+        default=0.15,
         help="Maximum distance that two tracked objects of different videos can have in order to match",
     )
     parser.add_argument(
         "--max-votes-grow",
         type=int,
-        default=5,
+        default=4,
         help="Amount of votes we need before increasing the size of a cluster",
     )
     parser.add_argument(
         "--max-votes-split",
         type=int,
-        default=5,
+        default=15,
         help="Amount of votes we need before decreasing the size of a cluster",
     )
     parser.add_argument(
         "--memory",
         type=int,
-        default=3,
+        default=2,
         help="How long into the past should we consider past clusters",
     )
     parser.add_argument(
@@ -233,13 +233,13 @@ def run():
     parser.add_argument(
         "--initialization-delay",
         type=float,
-        default=3,
+        default=6,
         help="Min detections needed to start the tracked object",
     )
     parser.add_argument(
         "--hit-counter-max",
         type=int,
-        default=30,
+        default=20,
         help="Max iteration the tracked object is kept after when there are no detections",
     )
     parser.add_argument(
@@ -353,8 +353,22 @@ def run():
         if args.use_motion_estimator_footage:
             motion_estimators[path].transformation = initial_transformations[path]
 
-    # now initialize the videos and their trackers
+    # initialize the reference if it exists
+    reference = {"video": None, "image": None, "motion_estimator": None}
     image_reference = None
+    if not first_video_is_reference:
+        # if failing to read it as an image, try to read it as a video
+        image_reference = cv2.imread(args.reference)
+        reference["image"] = image_reference
+        if image_reference is None:
+            video = Video(input_path=path)
+            image_reference = next(video.__iter__())
+            reference["video"] = video
+            reference["motion_estimator"] = motion_estimator_reference
+
+    # now initialize the videos and their trackers
+    fps = None
+    total_frames = None
     for path in args.files:
         extension = os.path.splitext(path)[1]
         if args.output_name is None:
@@ -363,8 +377,28 @@ def run():
             output_path = args.output_name
 
         video = Video(input_path=path, output_path=output_path)
+
+        # check that the fps
+        if fps is None:
+            fps = video.output_fps
+            total_frames = int(video.video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
+        else:
+            current_fps = video.output_fps
+            current_total_frames = int(
+                video.video_capture.get(cv2.CAP_PROP_FRAME_COUNT)
+            )
+            if current_fps != fps:
+                warning(
+                    f"{args.files[0]} is at {fps} FPS, but {path} is at {current_fps} FPS."
+                )
+            if total_frames != current_total_frames:
+                warning(
+                    f"{args.files[0]} has {total_frames} frames, but {path} has {current_total_frames} frames."
+                )
         if image_reference is None:
             image_reference = next(video.__iter__())
+        else:
+            next(video.__iter__())
         videos[path] = video
         trackers[path] = Tracker(
             distance_function="iou",
@@ -376,21 +410,19 @@ def run():
         )
         tracked_objects[path] = []
 
-    reference = {"video": None, "image": None, "motion_estimator": None}
-    if not first_video_is_reference:
-        # if failing to read it as an image, try to read it as a video
-        image_reference = cv2.imread(args.reference)
-        reference["image"] = image_reference
-        if image_reference is None:
-            video = Video(input_path=path)
-            image_reference = next(video.__iter__())
-            reference["video"] = video
-            reference["motion_estimator"] = motion_estimator_reference
+    big_black_frame = np.zeros(
+        tuple(
+            [
+                args.resolution[1]
+                * ((len(args.files) + (not first_video_is_reference) + 1) // 2),
+                args.resolution[0] * 2,
+                3,
+            ]
+        ),
+        dtype=np.uint8,
+    )
 
     height_reference = image_reference.shape[0]
-    big_black_frame = np.zeros(
-        tuple([args.resolution[1] * 2, args.resolution[0] * 2, 3]), dtype=np.uint8
-    )
 
     def normalized_foot_distance(tracker1, tracker2):
         return (
@@ -460,6 +492,8 @@ def run():
                     if reference["motion_estimator"] is not None:
                         if args.args.mask_detections:
                             mask = mask_generator(frame)
+                        else:
+                            mask = None
                         coord_transformations = reference["motion_estimator"].update(
                             frame, mask
                         )
