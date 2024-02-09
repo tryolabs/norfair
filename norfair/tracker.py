@@ -746,7 +746,7 @@ class Detection:
     Parameters
     ----------
     points : np.ndarray
-        Points detected. Must be a rank 2 array with shape `(n_points, n_dimensions)` where n_dimensions is 2 or 3.
+        Points detected. Must be a rank 2 array with shape `(n_points, n_dimensions)`.
     scores : np.ndarray, optional
         An array of length `n_points` which assigns a score to each of the points defined in `points`.
 
@@ -770,12 +770,19 @@ class Detection:
     def __init__(
         self,
         points: np.ndarray,
-        scores: np.ndarray = None,
+        scores: Union[float, int, np.ndarray] = None,
         data: Any = None,
         label: Hashable = None,
         embedding=None,
     ):
         self.points = validate_points(points)
+
+        if isinstance(scores, np.ndarray):
+            assert len(scores) == len(
+                self.points
+            ), "scores should be a np.ndarray with it's length being equal to the amount of points."
+        elif scores is not None:
+            scores = np.zeros((len(points),)) + scores
         self.scores = scores
         self.data = data
         self.label = label
