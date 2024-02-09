@@ -44,12 +44,24 @@ global button_says_ignore
 global button_ignore
 
 
+def resize_image(image, desired_width=None, desired_height=None):
+    aspect_ratio = image.height / image.width
+
+    if (desired_width is None) and (desired_height is not None):
+        desired_width = int(desired_height / aspect_ratio)
+    elif (desired_width is not None) and (desired_height is None):
+        desired_height = int(aspect_ratio * desired_width)
+
+    return image.resize((desired_width, desired_height), Image.LANCZOS)
+
+
 def set_reference(
     reference: str,
     footage: str,
     transformation_getter: TransformationGetter = None,
     mask_generator=None,
-    desired_size=700,
+    image_width=None,
+    image_height=None,
     motion_estimator_footage=None,
     motion_estimator_reference=None,
 ):
@@ -88,8 +100,11 @@ def set_reference(
      - mask_generator: optional function that creates a mask (np.ndarray) from a PIL image. This mask is then provided to the corresponding MotionEstimator to avoid
         sampling points within the mask.
 
-     - desired_size: int, optional
-        How large you want the clickable windows in the UI to be.
+     - image_width: int, optional
+        Width of the image of the UI. If the height is not provided, then it will be calculated so that the aspect ratio is preserved.
+
+     - image_height: int, optional
+        Height of the image of the UI. If the width is not provided, then it will be calculated so that the aspect ratio is preserved.
 
      - motion_estimator_footage: MotionEstimator, optional
         When using videos for the footage, you can provide a MotionEstimator to relate the coordinates in all the frames in the video.
@@ -149,7 +164,13 @@ def set_reference(
 
     skipper = {}
 
-    radius = max(int(desired_size / 100), 1)
+    radius = None
+    if (image_width is None) and (image_height is None):
+        image_height = 450
+    elif (image_width is not None) and (image_height is None):
+        radius = max(int(image_width / 100), 1)
+    if radius is None:
+        radius = max(int(image_height / 100), 1)
 
     points = {}
     points_sampled = len(points)
@@ -412,7 +433,8 @@ def set_reference(
     footage_original_height = image.height
     footage_original_size = (footage_original_width, footage_original_height)
 
-    image.thumbnail((desired_size, desired_size))
+    image = resize_image(image, desired_width=image_width, desired_height=image_height)
+
     footage_photo = ImageTk.PhotoImage(image)
     footage_canvas_width = footage_photo.width()
     footage_canvas_height = footage_photo.height()
@@ -420,8 +442,8 @@ def set_reference(
 
     canvas_footage = tk.Canvas(
         frame_images,
-        width=footage_photo.width(),
-        height=footage_photo.height(),
+        width=footage_canvas_width,
+        height=footage_canvas_height,
         bg="gray",
     )
     footage_image_container = canvas_footage.create_image(
@@ -516,7 +538,8 @@ def set_reference(
     reference_original_height = image.height
     reference_original_size = (reference_original_width, reference_original_height)
 
-    image.thumbnail((desired_size, desired_size))
+    image = resize_image(image, desired_width=image_width, desired_height=image_height)
+
     reference_photo = ImageTk.PhotoImage(image)
     reference_canvas_width = reference_photo.width()
     reference_canvas_height = reference_photo.height()
@@ -524,8 +547,8 @@ def set_reference(
 
     canvas_reference = tk.Canvas(
         frame_images,
-        width=reference_photo.width(),
-        height=reference_photo.height(),
+        width=reference_canvas_width,
+        height=reference_canvas_height,
         bg="gray",
     )
     reference_image_container = canvas_reference.create_image(
@@ -650,7 +673,9 @@ def set_reference(
                 skipper[video_type]["current_frame"] = 1
                 image = Image.fromarray(image)
 
-                image.thumbnail((desired_size, desired_size))
+                image = resize_image(
+                    image, desired_width=image_width, desired_height=image_height
+                )
                 image = ImageTk.PhotoImage(image)
 
                 skipper[video_type]["canvas"].itemconfig(
@@ -710,7 +735,9 @@ def set_reference(
 
             if change_image:
                 image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-                image.thumbnail((desired_size, desired_size))
+                image = resize_image(
+                    image, desired_width=image_width, desired_height=image_height
+                )
                 image = ImageTk.PhotoImage(image)
 
                 skipper[video_type]["canvas"].itemconfig(

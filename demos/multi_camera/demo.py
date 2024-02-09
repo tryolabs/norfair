@@ -167,6 +167,18 @@ def run():
         help="Output resolution for each subblock",
     )
     parser.add_argument(
+        "--ui-width",
+        type=int,
+        default=None,
+        help="Image width in the UI",
+    )
+    parser.add_argument(
+        "--ui-height",
+        type=int,
+        default=None,
+        help="Image height in the UI",
+    )
+    parser.add_argument(
         "--use-motion-estimator-footage",
         action="store_true",
         help="If your footage are a video where the camera might move, you should use a motion estimator. This argument will apply the motion estimator for all your videos indifferently.",
@@ -345,6 +357,8 @@ def run():
                 motion_estimator_footage=motion_estimator_footage,
                 motion_estimator_reference=motion_estimator_reference,
                 mask_generator=mask_generator,
+                image_width=args.ui_width,
+                image_height=args.ui_height,
             )
             if args.save_transformation:
                 with open(pickle_path, "wb") as file:
