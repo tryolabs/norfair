@@ -1,5 +1,7 @@
 import os
+import pickle
 import tkinter as tk
+import tkinter.filedialog
 from copy import deepcopy
 
 import cv2
@@ -320,35 +322,34 @@ def set_reference(
                     footage_point_in_rel_coords = skipper["footage"][
                         "motion_transformation"
                     ].rel_to_abs(np.array([points[key]["footage"]]))[0]
-                    footage_point_in_rel_coords = np.multiply(
-                        footage_point_in_rel_coords,
-                        np.array(
-                            [
-                                footage_canvas_size[0] / footage_original_size[0],
-                                footage_canvas_size[1] / footage_original_size[1],
-                            ]
-                        ),
-                    ).astype(int)
                 except AttributeError:
-                    footage_point_in_rel_coords = points[key]["footage_canvas"]
-                    pass
+                    footage_point_in_rel_coords = points[key]["footage"]
+                footage_point_in_rel_coords = np.multiply(
+                    footage_point_in_rel_coords,
+                    np.array(
+                        [
+                            footage_canvas_size[0] / footage_original_size[0],
+                            footage_canvas_size[1] / footage_original_size[1],
+                        ]
+                    ),
+                ).astype(int)
 
                 try:
                     reference_point_in_rel_coords = skipper["reference"][
                         "motion_transformation"
                     ].rel_to_abs(np.array([points[key]["reference"]]))[0]
-                    reference_point_in_rel_coords = np.multiply(
-                        reference_point_in_rel_coords,
-                        np.array(
-                            [
-                                reference_canvas_size[0] / reference_original_size[0],
-                                reference_canvas_size[1] / reference_original_size[1],
-                            ]
-                        ),
-                    ).astype(int)
                 except AttributeError:
-                    reference_point_in_rel_coords = points[key]["reference_canvas"]
-                    pass
+                    reference_point_in_rel_coords = points[key]["reference"]
+
+                reference_point_in_rel_coords = np.multiply(
+                    reference_point_in_rel_coords,
+                    np.array(
+                        [
+                            reference_canvas_size[0] / reference_original_size[0],
+                            reference_canvas_size[1] / reference_original_size[1],
+                        ]
+                    ),
+                ).astype(int)
 
                 if points[key]["ignore"]:
                     color = "gray"
@@ -429,21 +430,19 @@ def set_reference(
             motion_transformation = motion_estimator_footage.update(image, mask)
         image = Image.fromarray(image)
 
-    footage_original_width = image.width
-    footage_original_height = image.height
-    footage_original_size = (footage_original_width, footage_original_height)
+    footage_original_size = (image.width, image.height)
 
-    image = resize_image(image, desired_width=image_width, desired_height=image_height)
+    resized_image = resize_image(
+        image, desired_width=image_width, desired_height=image_height
+    )
 
-    footage_photo = ImageTk.PhotoImage(image)
-    footage_canvas_width = footage_photo.width()
-    footage_canvas_height = footage_photo.height()
-    footage_canvas_size = (footage_canvas_width, footage_canvas_height)
+    footage_photo = ImageTk.PhotoImage(resized_image)
+    footage_canvas_size = (footage_photo.width(), footage_photo.height())
 
     canvas_footage = tk.Canvas(
         frame_images,
-        width=footage_canvas_width,
-        height=footage_canvas_height,
+        width=footage_canvas_size[0],
+        height=footage_canvas_size[1],
         bg="gray",
     )
     footage_image_container = canvas_footage.create_image(
@@ -457,6 +456,8 @@ def set_reference(
         global canvas_reference
         global reference_original_size
         global reference_canvas_size
+        global footage_original_size
+        global footage_canvas_size
         global skipper
 
         footage_point_canvas = (event.x, event.y)
@@ -464,8 +465,8 @@ def set_reference(
 
         footage_point = np.array(
             [
-                event.x * (footage_original_width / footage_canvas_width),
-                event.y * (footage_original_height / footage_canvas_height),
+                event.x * (footage_original_size[0] / footage_canvas_size[0]),
+                event.y * (footage_original_size[1] / footage_canvas_size[1]),
             ]
         )
         print("Footage window clicked at: ", footage_point.round(1))
@@ -510,6 +511,7 @@ def set_reference(
         "image_container": footage_image_container,
         "current_frame_label": None,
         "path": footage,
+        "original_image": image,
     }
 
     motion_transformation = None
@@ -534,21 +536,18 @@ def set_reference(
 
         image = Image.fromarray(image)
 
-    reference_original_width = image.width
-    reference_original_height = image.height
-    reference_original_size = (reference_original_width, reference_original_height)
+    reference_original_size = (image.width, image.height)
+    resized_image = resize_image(
+        image, desired_width=image_width, desired_height=image_height
+    )
 
-    image = resize_image(image, desired_width=image_width, desired_height=image_height)
-
-    reference_photo = ImageTk.PhotoImage(image)
-    reference_canvas_width = reference_photo.width()
-    reference_canvas_height = reference_photo.height()
-    reference_canvas_size = (reference_canvas_width, reference_canvas_height)
+    reference_photo = ImageTk.PhotoImage(resized_image)
+    reference_canvas_size = (reference_photo.width(), reference_photo.height())
 
     canvas_reference = tk.Canvas(
         frame_images,
-        width=reference_canvas_width,
-        height=reference_canvas_height,
+        width=reference_canvas_size[0],
+        height=reference_canvas_size[1],
         bg="gray",
     )
     reference_image_container = canvas_reference.create_image(
@@ -560,6 +559,8 @@ def set_reference(
         global reference_point_canvas
         global transformation
         global canvas_footage
+        global reference_original_size
+        global reference_canvas_size
         global footage_original_size
         global footage_canvas_size
         global skipper
@@ -569,8 +570,8 @@ def set_reference(
 
         reference_point = np.array(
             [
-                event.x * (reference_original_width / reference_canvas_width),
-                event.y * (reference_original_height / reference_canvas_height),
+                event.x * (reference_original_size[0] / reference_canvas_size[0]),
+                event.y * (reference_original_size[1] / reference_canvas_size[1]),
             ]
         )
         print("Reference window clicked at: ", reference_point.round(1))
@@ -615,6 +616,7 @@ def set_reference(
         "image_container": reference_image_container,
         "current_frame_label": None,
         "path": reference,
+        "original_image": image,
     }
     ######### MAKE SUBBLOCK FOR LOGO
 
@@ -652,6 +654,8 @@ def set_reference(
             global skipper
             global canvas_footage
             global canvas_reference
+            global reference_canvas_size
+            global footage_canvas_size
 
             if skipper[video_type]["current_frame"] > 1:
                 skipper[video_type]["video"].video_capture.release()
@@ -672,9 +676,14 @@ def set_reference(
                     ].update(image, mask)
                 skipper[video_type]["current_frame"] = 1
                 image = Image.fromarray(image)
+                skipper[video_type]["original_image"] = image
 
+                if video_type == "reference":
+                    size = reference_canvas_size
+                else:
+                    size = footage_canvas_size
                 image = resize_image(
-                    image, desired_width=image_width, desired_height=image_height
+                    image, desired_width=size[0], desired_height=size[1]
                 )
                 image = ImageTk.PhotoImage(image)
 
@@ -698,6 +707,8 @@ def set_reference(
             global skipper
             global canvas_footage
             global canvas_reference
+            global reference_canvas_size
+            global footage_canvas_size
 
             try:
                 frames_to_skip = int(entry_skip.get())
@@ -735,8 +746,13 @@ def set_reference(
 
             if change_image:
                 image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+                skipper[video_type]["original_image"] = image
+                if video_type == "reference":
+                    size = reference_canvas_size
+                else:
+                    size = footage_canvas_size
                 image = resize_image(
-                    image, desired_width=image_width, desired_height=image_height
+                    image, desired_width=size[0], desired_height=size[1]
                 )
                 image = ImageTk.PhotoImage(image)
 
@@ -881,15 +897,37 @@ def set_reference(
         command=lambda: handle_add_annotation(),
     )
 
+    def create_annotation_button(point):
+        global points_sampled
+        global frame_options_annotations
+        global handling_mark_functions
+        global handle_mark_annotation
+
+        handling_mark_functions[points_sampled] = handle_mark_annotation(points_sampled)
+
+        new_button = tk.Button(
+            master=frame_options_annotations,
+            text=f"{points_sampled}: reference ({point['reference'][0]}, {point['reference'][1]}) <-> footage ({point['footage'][0]}, {point['footage'][1]})",
+            width=35,
+            height=1,
+            bg="blue",
+            fg="black",
+            highlightbackground="SystemButtonFace",
+        )
+
+        new_button.bind("<Button>", handling_mark_functions[points_sampled])
+        new_button.pack(side=tk.TOP)
+
+        canvas_footage.delete("myPoint")
+        canvas_reference.delete("myPoint")
+        return new_button
+
     def handle_add_annotation():
         global points
         global points_sampled
         global reference_point
         global footage_point
         global mode_annotate
-        global frame_options_annotations
-        global handling_mark_functions
-        global handle_mark_annotation
         global transformation
 
         if mode_annotate:
@@ -897,41 +935,19 @@ def set_reference(
                 new_point = {
                     "reference": reference_point,
                     "footage": footage_point,
-                    "reference_canvas": reference_point_canvas,
-                    "footage_canvas": footage_point_canvas,
                     "button": None,
                     "marked": False,
                     "ignore": False,
                 }
                 points[points_sampled] = new_point
 
-                handling_mark_functions[points_sampled] = handle_mark_annotation(
-                    points_sampled
-                )
-
-                new_button = tk.Button(
-                    master=frame_options_annotations,
-                    text=f"{points_sampled}: reference ({reference_point[0]}, {reference_point[1]}) <-> footage ({footage_point[0]}, {footage_point[1]})",
-                    width=35,
-                    height=1,
-                    bg="blue",
-                    fg="black",
-                    highlightbackground="SystemButtonFace",
-                )
-
-                new_button.bind("<Button>", handling_mark_functions[points_sampled])
-
-                new_button.pack(side=tk.TOP)
-                points[points_sampled]["button"] = new_button
+                points[points_sampled]["button"] = create_annotation_button(new_point)
 
                 reference_point = None
                 footage_point = None
                 points_sampled += 1
 
                 transformation = estimate_transformation(points)
-
-                canvas_footage.delete("myPoint")
-                canvas_reference.delete("myPoint")
             else:
                 print(
                     "Need to pick a point from the footage and from the reference to annotate them"
@@ -943,6 +959,118 @@ def set_reference(
     button_add_annotation.pack(side=tk.LEFT)
 
     frame_options_add.pack(side=tk.TOP)
+
+    ###### MAKE SUBBLOCK TO LOAD OR SAVE TRANSFORMATION
+
+    frame_options_files = tk.Frame(master=frame_options)
+    text_files = tk.Label(
+        master=frame_options_files,
+        text="Save/Load state",
+        foreground="white",
+        background="#5f9ea0",
+        width=20,
+        height=1,
+    )
+    button_save_state = tk.Button(
+        master=frame_options_files,
+        text="Save",
+        width=6,
+        height=1,
+        bg="blue",
+        fg="black",
+        command=lambda: handle_save_state(),
+    )
+    button_load_state = tk.Button(
+        master=frame_options_files,
+        text="Load",
+        width=6,
+        height=1,
+        bg="blue",
+        fg="black",
+        command=lambda: handle_load_state(),
+    )
+
+    def handle_save_state():
+        global points
+        global transformation
+
+        initialfile = f"{os.path.splitext(os.path.basename(reference))[0]}_to_{os.path.splitext(os.path.basename(footage))[0]}.pkl"
+
+        file = tkinter.filedialog.asksaveasfile(
+            initialfile=initialfile, mode="wb", defaultextension=".pkl"
+        )
+        if file is not None:
+            points_reference = []
+            points_footage = []
+            is_ignored = []
+            for point in points.values():
+                points_reference.append(point["reference"])
+                points_footage.append(point["footage"])
+                is_ignored.append(point["ignore"])
+            pickle.dump(
+                {
+                    "reference": points_reference,
+                    "footage": points_footage,
+                    "ignore": is_ignored,
+                    "transformation": transformation,
+                },
+                file,
+            )
+            file.close()
+
+    def handle_load_state():
+        global points
+        global transformation
+        global points_sampled
+
+        initialfile = f"{os.path.splitext(os.path.basename(reference))[0]}_to_{os.path.splitext(os.path.basename(footage))[0]}.pkl"
+
+        file = tkinter.filedialog.askopenfile(initialfile=initialfile, mode="rb")
+        if file is not None:
+
+            loaded_state = pickle.load(file)
+
+            # remove existing buttons
+            for point in points.values():
+                point["button"].destroy()
+            points = {}
+
+            points_reference = loaded_state["reference"]
+            points_footage = loaded_state["footage"]
+            transformation = loaded_state["transformation"]
+            is_ignored = loaded_state["ignore"]
+
+            points_sampled = 0
+            # create new points
+            for reference_point, footage_point, ignore in zip(
+                points_reference, points_footage, is_ignored
+            ):
+
+                new_point = {
+                    "reference": reference_point,
+                    "footage": footage_point,
+                    "button": None,
+                    "marked": False,
+                    "ignore": ignore,
+                }
+                points[points_sampled] = new_point
+                points[points_sampled]["button"] = create_annotation_button(new_point)
+                if ignore:
+                    points[points_sampled]["button"].configure(
+                        fg="gray", highlightbackground="gray"
+                    )
+
+                points_sampled += 1
+
+            reference_point = None
+            footage_point = None
+
+            file.close()
+
+    text_files.pack(side=tk.LEFT)
+    button_save_state.pack(side=tk.LEFT)
+    button_load_state.pack(side=tk.LEFT)
+    frame_options_files.pack(side=tk.TOP)
 
     ###### MAKE SUBBLOCK TO CHANGE BETWEEN ANOTATE AND TEST
     frame_options_annotate_or_test = tk.Frame(master=frame_options)
@@ -1089,6 +1217,90 @@ def set_reference(
     button_remove.pack(side=tk.LEFT)
 
     frame_options_remove.pack(side=tk.TOP)
+
+    ######  MAKE SUBBLOCK TO RESIZE FRAMES
+
+    def get_handle_resize(video_type, delta_height):
+        def handle_resize(event):
+            global footage_canvas_size
+            global footage_original_size
+            global reference_canvas_size
+            global reference_original_size
+            global skipper
+
+            if video_type == "reference":
+                new_canvas_height = max(reference_canvas_size[1] + delta_height, 10)
+                new_canvas_width = int(
+                    new_canvas_height
+                    * reference_canvas_size[0]
+                    / reference_canvas_size[1]
+                )
+                reference_canvas_size = (new_canvas_width, new_canvas_height)
+            else:
+                new_canvas_height = max(footage_canvas_size[1] + delta_height, 10)
+                new_canvas_width = int(
+                    new_canvas_height * footage_canvas_size[0] / footage_canvas_size[1]
+                )
+                footage_canvas_size = (new_canvas_width, new_canvas_height)
+
+            image = resize_image(
+                skipper[video_type]["original_image"],
+                desired_width=new_canvas_width,
+                desired_height=new_canvas_height,
+            )
+            image = ImageTk.PhotoImage(image)
+            skipper[video_type]["canvas"].itemconfig(
+                skipper[video_type]["image_container"], image=image
+            )
+            skipper[video_type]["canvas"].imgref = image
+            skipper[video_type]["canvas"].delete("myPoint")
+
+        return handle_resize
+
+    resizer = {}
+
+    for video_type in skipper.keys():
+
+        frame_options_resize = tk.Frame(master=frame_options)
+
+        resizer[video_type] = {}
+        resizer[video_type]["handle_increase"] = get_handle_resize(video_type, 10)
+        resizer[video_type]["handle_decrease"] = get_handle_resize(video_type, -10)
+
+        text = tk.Label(
+            master=frame_options_resize,
+            text=f"Resize {video_type}",
+            foreground="white",
+            background="#5f9ea0",
+            width=20,
+            height=1,
+        )
+
+        button_increase = tk.Button(
+            master=frame_options_resize,
+            text="+",
+            width=6,
+            height=1,
+            bg="blue",
+            fg="black",
+        )
+        button_decrease = tk.Button(
+            master=frame_options_resize,
+            text="-",
+            width=6,
+            height=1,
+            bg="blue",
+            fg="black",
+        )
+
+        button_increase.bind("<Button>", resizer[video_type]["handle_increase"])
+        button_decrease.bind("<Button>", resizer[video_type]["handle_decrease"])
+
+        text.pack(side=tk.LEFT)
+        button_decrease.pack(side=tk.LEFT)
+        button_increase.pack(side=tk.LEFT)
+
+        frame_options_resize.pack(side=tk.TOP)
 
     ########## pack options with images
 
