@@ -993,11 +993,12 @@ def set_reference(
     def handle_save_state():
         global points
         global transformation
+        global window
 
         initialfile = f"{os.path.splitext(os.path.basename(reference))[0]}_to_{os.path.splitext(os.path.basename(footage))[0]}.pkl"
 
         file = tkinter.filedialog.asksaveasfile(
-            initialfile=initialfile, mode="wb", defaultextension=".pkl"
+            parent=window, initialfile=initialfile, mode="wb", defaultextension=".pkl"
         )
         if file is not None:
             points_reference = []
@@ -1022,10 +1023,14 @@ def set_reference(
         global points
         global transformation
         global points_sampled
+        global window
+        global button_finish
 
         initialfile = f"{os.path.splitext(os.path.basename(reference))[0]}_to_{os.path.splitext(os.path.basename(footage))[0]}.pkl"
 
-        file = tkinter.filedialog.askopenfile(initialfile=initialfile, mode="rb")
+        file = tkinter.filedialog.askopenfile(
+            parent=window, initialfile=initialfile, mode="rb"
+        )
         if file is not None:
 
             loaded_state = pickle.load(file)
@@ -1039,6 +1044,13 @@ def set_reference(
             points_footage = loaded_state["footage"]
             transformation = loaded_state["transformation"]
             is_ignored = loaded_state["ignore"]
+
+            if transformation is not None:
+                button_finish.configure(fg="black", highlightbackground="green")
+            else:
+                button_finish.configure(
+                    fg="grey", highlightbackground="SystemButtonFace"
+                )
 
             points_sampled = 0
             # create new points
