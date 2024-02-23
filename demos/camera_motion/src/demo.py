@@ -224,20 +224,18 @@ def run():
             else partial(video.show, downsample_ratio=args.downsample_ratio)
         )
 
-        distance_threshold = args.distance_threshold
+        if args.distance_threshold is None:
+            distance_threshold = video.input_height / 10
+        else:
+            distance_threshold = args.distance_threshold
+
         if args.track_boxes:
             drawing_function = draw_boxes
-            distance_function = "iou"
-            if args.distance_threshold is None:
-                distance_threshold = 0.5
         else:
             drawing_function = draw_points
-            distance_function = "euclidean"
-            if args.distance_threshold is None:
-                distance_threshold = video.input_height / 10
 
         tracker = Tracker(
-            distance_function=distance_function,
+            distance_function="euclidean",
             detection_threshold=args.confidence_threshold,
             distance_threshold=distance_threshold,
             initialization_delay=args.initialization_delay,
@@ -279,6 +277,7 @@ def run():
                     text_thickness=None
                     if args.id_size is None
                     else int(args.id_size * 2),
+                    draw_ids=True,
                 )
 
             if args.absolute_grid:
