@@ -17,7 +17,7 @@ def draw_points(
     thickness: Optional[int] = None,
     color: ColorLike = "by_id",
     color_by_label: bool = None,  # deprecated
-    draw_labels: bool = True,
+    draw_labels: bool = False,
     text_size: Optional[int] = None,
     draw_ids: bool = True,
     draw_points: bool = True,  # pylint: disable=redefined-outer-name
