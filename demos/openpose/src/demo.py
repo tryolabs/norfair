@@ -118,11 +118,11 @@ if __name__ == "__main__":
                     ]
                 )
                 tracked_objects = tracker.update(
-                    detections=detections, period=args.skip_frame
+                    detections=detections,
                 )
                 norfair.draw_points(frame, detections)
             else:
-                tracked_objects = tracker.update(period=args.skip_frame)
+                tracked_objects = tracker.update()
 
             norfair.draw_tracked_objects(frame, tracked_objects)
             video.write(frame)

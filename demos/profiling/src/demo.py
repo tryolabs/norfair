@@ -52,7 +52,7 @@ def process_video(
             detector_time = time.time()
 
             tracked_objects = tracker.update(
-                detections=detections, period=frame_skip_period
+                detections=detections,
             )
             tracker_time = time.time()
 
