@@ -216,7 +216,7 @@ class AbsolutePaths:
         self.path_blend_factor = path_blend_factor
         self.frame_blend_factor = frame_blend_factor
 
-    def draw(self, frame, tracked_objects, coord_transform=None):
+    def draw(self, frame, tracked_objects, coord_transformations=None):
         """
         the objects have a relative frame: frame_det
         the objects have an absolute frame: frame_one
@@ -226,19 +226,19 @@ class AbsolutePaths:
          1. top_left is an arbitrary coordinate of some pixel inside background
         logic:
          1. draw track.get_estimate(absolute=True) + top_left, in background
-         2. transform background with the composition (coord_transform.abs_to_rel o minus_top_left_translation). If coord_transform is None, only use minus_top_left_translation.
+         2. transform background with the composition (coord_transformations.abs_to_rel o minus_top_left_translation). If coord_transformations is None, only use minus_top_left_translation.
          3. crop [:frame.width, :frame.height] from the result
          4. overlay that over frame
 
         Remark:
-        In any case, coord_transform should be the coordinate transformation between the tracker absolute coords (as abs) and frame coords (as rel)
+        In any case, coord_transformations should be the coordinate transformation between the tracker absolute coords (as abs) and frame coords (as rel)
         """
 
         # initialize background if necessary
         if self._background is None:
             if self.scale is None:
-                # set the default scale, depending if coord_transform is provided or not
-                if coord_transform is None:
+                # set the default scale, depending if coord_transformations is provided or not
+                if coord_transformations is None:
                     self.scale = 1
                 else:
                     self.scale = 3
@@ -293,12 +293,12 @@ class AbsolutePaths:
                 )
 
         # apply warp to self._background with composition abs_to_rel o -top_left_translation to background, and crop [:width, :height] to get frame overdrawn
-        if isinstance(coord_transform, HomographyTransformation):
+        if isinstance(coord_transformations, HomographyTransformation):
             minus_top_left_translation = np.array(
                 [[1, 0, -self.top_left[0]], [0, 1, -self.top_left[1]], [0, 0, 1]]
             )
             full_transformation = (
-                coord_transform.homography_matrix @ minus_top_left_translation
+                coord_transformations.homography_matrix @ minus_top_left_translation
             )
             background_size_frame = cv2.warpPerspective(
                 self._background,
@@ -308,11 +308,11 @@ class AbsolutePaths:
                 borderMode=cv2.BORDER_CONSTANT,
                 borderValue=(0, 0, 0),
             )
-        elif isinstance(coord_transform, TranslationTransformation):
+        elif isinstance(coord_transformations, TranslationTransformation):
             full_transformation = np.array(
                 [
-                    [1, 0, coord_transform.movement_vector[0] - self.top_left[0]],
-                    [0, 1, coord_transform.movement_vector[1] - self.top_left[1]],
+                    [1, 0, coord_transformations.movement_vector[0] - self.top_left[0]],
+                    [0, 1, coord_transformations.movement_vector[1] - self.top_left[1]],
                 ]
             )
             background_size_frame = cv2.warpAffine(

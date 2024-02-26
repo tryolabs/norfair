@@ -58,7 +58,7 @@ class FixedCamera:
     >>>     video.write(bigger_frame)
     """
 
-    def __init__(self, scale: float = 2, attenuation: float = 0.05):
+    def __init__(self, scale: float = None, attenuation: float = 0.05):
         self.scale = scale
         self._background = None
         self._attenuation_factor = 1 - attenuation
@@ -66,7 +66,7 @@ class FixedCamera:
     def adjust_frame(
         self,
         frame: np.ndarray,
-        coord_transformation: Union[
+        coord_transformations: Union[
             HomographyTransformation, TranslationTransformation
         ],
     ) -> np.ndarray:
@@ -77,7 +77,7 @@ class FixedCamera:
         ----------
         frame : np.ndarray
             The OpenCV frame.
-        coord_transformation : TranslationTransformation
+        coord_transformations : Union[TranslationTransformation, HomographyTransformation]
             The coordinate transformation as returned by the [`MotionEstimator`][norfair.camera_motion.MotionEstimator]
 
         Returns
@@ -88,6 +88,12 @@ class FixedCamera:
 
         # initialize background if necessary
         if self._background is None:
+            if self.scale is None:
+                if coord_transformations is None:
+                    self.scale = 1
+                else:
+                    self.scale = 3
+
             original_size = (
                 frame.shape[1],
                 frame.shape[0],
@@ -113,12 +119,12 @@ class FixedCamera:
 
         # warp the frame with the following composition:
         # top_left_translation o rel_to_abs
-        if isinstance(coord_transformation, HomographyTransformation):
+        if isinstance(coord_transformations, HomographyTransformation):
             top_left_translation = np.array(
                 [[1, 0, self.top_left[0]], [0, 1, self.top_left[1]], [0, 0, 1]]
             )
             full_transformation = (
-                top_left_translation @ coord_transformation.inverse_homography_matrix
+                top_left_translation @ coord_transformations.inverse_homography_matrix
             )
             background_with_current_frame = cv2.warpPerspective(
                 frame,
@@ -128,12 +134,12 @@ class FixedCamera:
                 borderMode=cv2.BORDER_CONSTANT,
                 borderValue=(0, 0, 0),
             )
-        elif isinstance(coord_transformation, TranslationTransformation):
+        elif isinstance(coord_transformations, TranslationTransformation):
 
             full_transformation = np.array(
                 [
-                    [1, 0, self.top_left[0] - coord_transformation.movement_vector[0]],
-                    [0, 1, self.top_left[1] - coord_transformation.movement_vector[1]],
+                    [1, 0, self.top_left[0] - coord_transformations.movement_vector[0]],
+                    [0, 1, self.top_left[1] - coord_transformations.movement_vector[1]],
                 ]
             )
             background_with_current_frame = cv2.warpAffine(
@@ -144,12 +150,14 @@ class FixedCamera:
                 borderMode=cv2.BORDER_CONSTANT,
                 borderValue=(0, 0, 0),
             )
-
-        self._background = cv2.addWeighted(
-            self._background,
-            0.5,
-            background_with_current_frame,
-            0.5,
-            0.0,
-        )
-        return self._background
+        try:
+            self._background = cv2.addWeighted(
+                self._background,
+                0.5,
+                background_with_current_frame,
+                0.5,
+                0.0,
+            )
+            return self._background
+        except UnboundLocalError:
+            return frame

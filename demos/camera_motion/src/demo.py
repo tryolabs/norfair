@@ -286,7 +286,7 @@ def run():
 
             if args.draw_paths:
                 frame = path_drawer.draw(
-                    frame, tracked_objects, coord_transform=coord_transformations
+                    frame, tracked_objects, coord_transformations=coord_transformations
                 )
 
             if use_fixed_camera:
