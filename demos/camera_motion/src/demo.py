@@ -142,7 +142,7 @@ def run():
         "--fixed-camera-scale",
         type=float,
         default=0,
-        help="Scale of the fixed camera, set to 0 to disable. Note that this only works for translation",
+        help="Scale of the fixed camera, set to 0 to disable.",
     )
     parser.add_argument(
         "--draw-absolute-grid",

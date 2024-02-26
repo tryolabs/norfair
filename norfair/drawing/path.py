@@ -249,6 +249,7 @@ class AbsolutePaths:
                 np.array(self._background.shape[:2]) // 2
                 - np.array(frame.shape[:2]) // 2
             )
+            self.top_left = self.top_left[::-1]
         else:
             self._background = (self._background * self._attenuation_factor).astype(
                 frame.dtype

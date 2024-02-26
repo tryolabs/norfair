@@ -100,6 +100,7 @@ class FixedCamera:
                 np.array(self._background.shape[:2]) // 2
                 - np.array(frame.shape[:2]) // 2
             )
+            self.top_left = self.top_left[::-1]
         else:
             self._background = (self._background * self._attenuation_factor).astype(
                 frame.dtype
@@ -109,7 +110,7 @@ class FixedCamera:
         # top_left_translation o rel_to_abs
         if isinstance(coord_transformation, HomographyTransformation):
             top_left_translation = np.array(
-                [[1, 0, self.top_left[1]], [0, 1, self.top_left[0]], [0, 0, 1]]
+                [[1, 0, self.top_left[0]], [0, 1, self.top_left[1]], [0, 0, 1]]
             )
             full_transformation = (
                 top_left_translation @ coord_transformation.inverse_homography_matrix
@@ -126,8 +127,8 @@ class FixedCamera:
 
             full_transformation = np.array(
                 [
-                    [1, 0, self.top_left[1] - coord_transformation.movement_vector[0]],
-                    [0, 1, self.top_left[0] - coord_transformation.movement_vector[1]],
+                    [1, 0, self.top_left[0] - coord_transformation.movement_vector[0]],
+                    [0, 1, self.top_left[1] - coord_transformation.movement_vector[1]],
                 ]
             )
             background_with_current_frame = cv2.warpAffine(
