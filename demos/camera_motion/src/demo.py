@@ -163,10 +163,10 @@ def run():
         help="Pass this flag to draw the paths of the objects (SLOW)",
     )
     parser.add_argument(
-        "--path-history",
+        "--path-drawer-scale",
         type=int,
-        default=20,
-        help="Length of the paths",
+        default=3,
+        help="Canvas (background) scale relative to frame size for the AbsolutePath drawer",
     )
     parser.add_argument(
         "--id-size",
@@ -215,7 +215,7 @@ def run():
             fixed_camera = FixedCamera(scale=args.fixed_camera_scale)
 
         if args.draw_paths:
-            path_drawer = AbsolutePaths(max_history=args.path_history, thickness=2)
+            path_drawer = AbsolutePaths(scale=args.path_drawer_scale)
 
         video = Video(input_path=input_path)
         show_or_write = (
