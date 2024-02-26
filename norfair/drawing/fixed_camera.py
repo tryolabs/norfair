@@ -1,6 +1,11 @@
 from typing import Union
 
-import cv2
+try:
+    import cv2
+except ImportError:
+    from norfair.utils import DummyOpenCVImport
+
+    cv2 = DummyOpenCVImport()
 import numpy as np
 
 from norfair.camera_motion import HomographyTransformation, TranslationTransformation
