@@ -160,12 +160,12 @@ def run():
         "--draw-paths",
         dest="draw_paths",
         action="store_true",
-        help="Pass this flag to draw the paths of the objects (SLOW)",
+        help="Pass this flag to draw the paths of the objects",
     )
     parser.add_argument(
         "--path-drawer-scale",
         type=int,
-        default=3,
+        default=None,
         help="Canvas (background) scale relative to frame size for the AbsolutePath drawer",
     )
     parser.add_argument(

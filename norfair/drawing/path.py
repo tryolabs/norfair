@@ -178,7 +178,7 @@ class AbsolutePaths:
 
     def __init__(
         self,
-        scale: float = 3,
+        scale: float = None,
         attenuation: float = 0.05,
         get_points_to_draw: Optional[Callable[[np.array], np.array]] = None,
         thickness: Optional[int] = None,
@@ -236,6 +236,13 @@ class AbsolutePaths:
 
         # initialize background if necessary
         if self._background is None:
+            if self.scale is None:
+                # set the default scale, depending if coord_transform is provided or not
+                if coord_transform is None:
+                    self.scale = 1
+                else:
+                    self.scale = 3
+
             original_size = (
                 frame.shape[1],
                 frame.shape[0],
@@ -318,10 +325,8 @@ class AbsolutePaths:
             )
         else:
             background_size_frame = self._background[
-                self.top_left[1] :, self.top_left[0] :
-            ]
-            background_size_frame = background_size_frame[
-                : frame.shape[0], : frame.shape[1]
+                self.top_left[1] : self.top_left[1] + frame.shape[0],
+                self.top_left[0] : self.top_left[0] + frame.shape[1],
             ]
 
         frame = cv2.addWeighted(
