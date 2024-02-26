@@ -1,7 +1,9 @@
+from typing import Union
+
+import cv2
 import numpy as np
 
-from norfair.camera_motion import TranslationTransformation
-from norfair.utils import warn_once
+from norfair.camera_motion import HomographyTransformation, TranslationTransformation
 
 
 class FixedCamera:
@@ -57,7 +59,11 @@ class FixedCamera:
         self._attenuation_factor = 1 - attenuation
 
     def adjust_frame(
-        self, frame: np.ndarray, coord_transformation: TranslationTransformation
+        self,
+        frame: np.ndarray,
+        coord_transformation: Union[
+            HomographyTransformation, TranslationTransformation
+        ],
     ) -> np.ndarray:
         """
         Render scaled up frame.
@@ -89,53 +95,55 @@ class FixedCamera:
                 [scaled_size[1], scaled_size[0], frame.shape[-1]],
                 frame.dtype,
             )
+            # top_left is the anchor coordinate from where we start drawing the fame on top of the background
+            self.top_left = (
+                np.array(self._background.shape[:2]) // 2
+                - np.array(frame.shape[:2]) // 2
+            )
         else:
             self._background = (self._background * self._attenuation_factor).astype(
                 frame.dtype
             )
 
-        # top_left is the anchor coordinate from where we start drawing the fame on top of the background
-        # aim to draw it in the center of the background but transformations will move this point
-        top_left = (
-            np.array(self._background.shape[:2]) // 2 - np.array(frame.shape[:2]) // 2
-        )
-        top_left = (
-            coord_transformation.rel_to_abs(top_left[::-1]).round().astype(int)[::-1]
-        )
-        # box of the background that will be updated and the limits of it
-        background_y0, background_y1 = (top_left[0], top_left[0] + frame.shape[0])
-        background_x0, background_x1 = (top_left[1], top_left[1] + frame.shape[1])
-        background_size_y, background_size_x = self._background.shape[:2]
+        # warp the frame with the following composition:
+        # top_left_translation o rel_to_abs
+        if isinstance(coord_transformation, HomographyTransformation):
+            top_left_translation = np.array(
+                [[1, 0, self.top_left[1]], [0, 1, self.top_left[0]], [0, 0, 1]]
+            )
+            full_transformation = (
+                top_left_translation @ coord_transformation.inverse_homography_matrix
+            )
+            background_with_current_frame = cv2.warpPerspective(
+                frame,
+                full_transformation,
+                tuple(self._background.shape[:2][::-1]),
+                cv2.INTER_LINEAR,
+                borderMode=cv2.BORDER_CONSTANT,
+                borderValue=(0, 0, 0),
+            )
+        elif isinstance(coord_transformation, TranslationTransformation):
 
-        # define box of the frame that will be used
-        # if the scale is not enough to support the movement, warn the user but keep drawing
-        # cropping the frame so that the operation doesn't fail
-        frame_y0, frame_y1, frame_x0, frame_x1 = (0, frame.shape[0], 0, frame.shape[1])
-        if (
-            background_y0 < 0
-            or background_x0 < 0
-            or background_y1 > background_size_y
-            or background_x1 > background_size_x
-        ):
-            warn_once(
-                "moving_camera_scale is not enough to cover the range of camera movement, frame will be cropped"
+            full_transformation = np.array(
+                [
+                    [1, 0, self.top_left[1] - coord_transformation.movement_vector[0]],
+                    [0, 1, self.top_left[0] - coord_transformation.movement_vector[1]],
+                ]
             )
-            # crop left or top of the frame if necessary
-            frame_y0 = max(-background_y0, 0)
-            frame_x0 = max(-background_x0, 0)
-            # crop right or bottom of the frame if necessary
-            frame_y1 = max(
-                min(background_size_y - background_y0, background_y1 - background_y0), 0
+            background_with_current_frame = cv2.warpAffine(
+                frame,
+                full_transformation,
+                tuple(self._background.shape[:2][::-1]),
+                cv2.INTER_LINEAR,
+                borderMode=cv2.BORDER_CONSTANT,
+                borderValue=(0, 0, 0),
             )
-            frame_x1 = max(
-                min(background_size_x - background_x0, background_x1 - background_x0), 0
-            )
-            # handle cases where the limits of the background become negative which numpy will interpret incorrectly
-            background_y0 = max(background_y0, 0)
-            background_x0 = max(background_x0, 0)
-            background_y1 = max(background_y1, 0)
-            background_x1 = max(background_x1, 0)
-        self._background[
-            background_y0:background_y1, background_x0:background_x1, :
-        ] = frame[frame_y0:frame_y1, frame_x0:frame_x1, :]
+
+        self._background = cv2.addWeighted(
+            self._background,
+            0.5,
+            background_with_current_frame,
+            0.5,
+            0.0,
+        )
         return self._background
