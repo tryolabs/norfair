@@ -11,40 +11,6 @@ from PIL import Image, ImageTk, UnidentifiedImageError
 from norfair import Video
 from norfair.camera_motion import HomographyTransformationGetter, TransformationGetter
 
-transformation = None
-
-window = None
-
-button_finish = None
-
-reference_point_canvas = None
-footage_point_canvas = None
-
-canvas_reference = None
-canvas_footage = None
-
-reference_original_size = None
-reference_canvas_size = None
-footage_original_size = None
-footage_canvas_size = None
-
-footage_point = None
-reference_point = None
-
-skipper = None
-
-points = None
-points_sampled = None
-
-mode_annotate = None
-
-frame_options_annotations = None
-handling_mark_functions = None
-handle_mark_annotation = None
-
-global button_says_ignore
-global button_ignore
-
 
 def resize_image(image, desired_width=None, desired_height=None):
     aspect_ratio = image.height / image.width
@@ -281,7 +247,7 @@ def set_reference(
             for info in skipper.values():
                 if info["video"] is not None:
                     info["video"].video_capture.release()
-                    cv2.destroyAllWindows()
+            cv2.destroyAllWindows()
             return transformation
         else:
             print("Can't leave without estimating the transformation.")

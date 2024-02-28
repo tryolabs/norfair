@@ -244,6 +244,18 @@ def run():
         help="Min detections needed to start the tracked object",
     )
     parser.add_argument(
+        "--clusterizer-initialization-delay",
+        type=float,
+        default=6,
+        help="Minimum age of a cluster (or it's objects) to be returned",
+    )
+    parser.add_argument(
+        "--filter-by-objects-age",
+        type=bool,
+        default=False,
+        help="Filter cluster by their objects age, instead of the clusters age.",
+    )
+    parser.add_argument(
         "--hit-counter-max",
         type=int,
         default=45,
@@ -450,6 +462,8 @@ def run():
         max_votes_grow=args.max_votes_grow,
         max_votes_split=args.max_votes_grow,
         memory=args.memory,
+        initialization_delay=args.clusterizer_initialization_delay,
+        filter_by_objects_age=args.filter_by_objects_age,
     )
 
     while True:

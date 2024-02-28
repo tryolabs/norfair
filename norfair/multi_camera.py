@@ -76,6 +76,8 @@ class MultiCameraClusterizer:
         max_votes_grow: int = 5,
         max_votes_split: int = 5,
         memory: int = 3,
+        initialization_delay: int = 4,
+        filter_by_objects_age: bool = False,
     ):
         """
         Associate trackers from different cameras/videos.
@@ -129,6 +131,12 @@ class MultiCameraClusterizer:
 
         self.max_votes_grow = max_votes_grow
         self.max_votes_split = max_votes_split
+
+        # I will give the trackers at least enough time to merge their cluster with another
+        self.initialization_delay = initialization_delay + max_votes_grow
+        self.filter_by_objects_age = filter_by_objects_age
+
+        self.id_to_ages = {}
 
     def update(self, trackers_by_camera):
         # trackers_by_camera = [list(tracked_objects_camera_0), list(tracked_objects_camera_1),...]
@@ -649,4 +657,29 @@ class MultiCameraClusterizer:
                     cluster for cluster in self.clusters if len(cluster) > 0
                 ]
 
-        return self.clusters
+        if self.filter_by_objects_age:
+            return [
+                cluster
+                for cluster in self.clusters
+                if any(
+                    [
+                        obj.age - obj.initialization_delay > self.initialization_delay
+                        for obj in cluster.tracked_objects.values()
+                    ]
+                )
+            ]
+        else:
+            id_to_ages = {}
+            for cluster in self.clusters:
+                if cluster.id in self.id_to_ages.keys():
+                    id_to_ages[cluster.id] = self.id_to_ages[cluster.id] + 1
+                else:
+                    id_to_ages[cluster.id] = 0
+
+            self.id_to_ages = id_to_ages
+
+            return [
+                cluster
+                for cluster in self.clusters
+                if id_to_ages[cluster.id] > self.initialization_delay
+            ]
