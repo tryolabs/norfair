@@ -207,33 +207,39 @@ def run():
         default=0.2,
     )
     parser.add_argument(
-        "--iou-threshold",
-        type=float,
-        default=0.5,
-        help="Max '1-IoU' to consider when matching detections and tracked objects",
-    )
-    parser.add_argument(
         "--distance-threshold",
         type=float,
-        default=0.15,
+        default=None,
+        help="Maximum distance to consider when matching detections and tracked objects",
+    )
+    parser.add_argument(
+        "--distance-function",
+        type=str,
+        default="mean_manhattan",
+        help="Distance function to use when matching detections and tracked objects ('iou', 'euclidean', 'mean_euclidean', or 'mean_manhattan')",
+    )
+    parser.add_argument(
+        "--clusterizer-distance-threshold",
+        type=float,
+        default=0.1,
         help="Maximum distance that two tracked objects of different videos can have in order to match",
     )
     parser.add_argument(
         "--max-votes-grow",
         type=int,
-        default=4,
+        default=8,
         help="Amount of votes we need before increasing the size of a cluster",
     )
     parser.add_argument(
         "--max-votes-split",
         type=int,
-        default=15,
+        default=10,
         help="Amount of votes we need before decreasing the size of a cluster",
     )
     parser.add_argument(
         "--memory",
         type=int,
-        default=2,
+        default=3,
         help="How long into the past should we consider past clusters",
     )
     parser.add_argument(
@@ -245,13 +251,13 @@ def run():
     parser.add_argument(
         "--initialization-delay",
         type=float,
-        default=6,
+        default=20,
         help="Min detections needed to start the tracked object",
     )
     parser.add_argument(
         "--hit-counter-max",
         type=int,
-        default=20,
+        default=35,
         help="Max iteration the tracked object is kept after when there are no detections",
     )
     parser.add_argument(
@@ -411,13 +417,31 @@ def run():
                 )
         if image_reference is None:
             image_reference = next(video.__iter__())
+            height = image_reference.shape[0]
         else:
-            next(video.__iter__())
+            height = next(video.__iter__()).shape[0]
+
         videos[path] = video
+
+        if args.distance_threshold is None:
+            if args.distance_function == "iou":
+                distance_threshold = 0.5
+            elif args.distance_function in [
+                "euclidean",
+                "mean_euclidean",
+                "mean_manhattan",
+            ]:
+                distance_threshold = height / 15
+            else:
+                raise ValueError(
+                    f"Can't provide default threshold for distance '{args.distance_function}'"
+                )
+        else:
+            distance_threshold = args.distance_threshold
         trackers[path] = Tracker(
             distance_function="iou",
             detection_threshold=args.confidence_threshold,
-            distance_threshold=args.iou_threshold,
+            distance_threshold=distance_threshold,
             initialization_delay=args.initialization_delay,
             hit_counter_max=args.hit_counter_max,
             camera_name=path,
@@ -446,7 +470,7 @@ def run():
 
     multicamera_clusterizer = MultiCameraClusterizer(
         normalized_foot_distance,
-        args.distance_threshold,
+        args.clusterizer_distance_threshold,
         join_distance_by=args.joined_distance,
         max_votes_grow=args.max_votes_grow,
         max_votes_split=args.max_votes_grow,

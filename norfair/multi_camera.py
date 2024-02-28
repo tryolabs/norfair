@@ -456,6 +456,21 @@ class MultiCameraClusterizer:
                                         other_cluster_number
                                     ].tracked_objects.pop(camera_name)
 
+                                # keep in the bigger cluster, the smallest id
+                                original_id = cluster.id
+                                original_other_id = self.clusters[
+                                    other_cluster_number
+                                ].id
+                                if len(self.clusters[other_cluster_number]) <= len(
+                                    cluster
+                                ):
+                                    cluster.id = min(original_id, original_other_id)
+                                else:
+                                    cluster.id = max(original_id, original_other_id)
+                                self.clusters[other_cluster_number].id = (
+                                    original_id + original_other_id - cluster.id
+                                )
+
                                 # update the matrices of intersection for the other clusters
                                 intersection_matrix_ids[other_cluster_number][
                                     number_current_cluster_with_biggest_intersection
@@ -486,6 +501,9 @@ class MultiCameraClusterizer:
                         cluster.grow_votes = 0
 
                         other_current_cluster_number = 0
+
+                        oldest_tracker_age_in_other_cluster = -1
+                        cluster_number_with_oldest_tracker = None
                         while other_current_cluster_number < len(current_clusters):
                             if (
                                 other_current_cluster_number
@@ -505,10 +523,21 @@ class MultiCameraClusterizer:
                                 self.last_cluster_id += 1
 
                                 new_cluster.tracked_ids = list(intersection)
+
                                 for (camera_name, track_id) in intersection:
                                     new_cluster.tracked_objects[
                                         camera_name
                                     ] = cluster.tracked_objects[camera_name]
+                                    if (
+                                        oldest_tracker_age_in_other_cluster
+                                        < cluster.tracked_objects[camera_name].age
+                                    ):
+                                        oldest_tracker_age_in_other_cluster = (
+                                            cluster.tracked_objects[camera_name].age
+                                        )
+                                        cluster_number_with_oldest_tracker = len(
+                                            self.clusters
+                                        )
 
                                 self.clusters.append(new_cluster)
 
@@ -542,12 +571,33 @@ class MultiCameraClusterizer:
                         ]
                         cluster.tracked_objects = {}
                         cluster.tracked_ids = list(intersection)
+                        oldest_tracker_age_in_cluster = -1
                         for camera_name, track_id in intersection:
                             cluster.tracked_objects[
                                 camera_name
                             ] = current_cluster_with_biggest_intersection.tracked_objects[
                                 camera_name
                             ]
+                            oldest_tracker_age_in_cluster = max(
+                                oldest_tracker_age_in_cluster,
+                                cluster.tracked_objects[camera_name].age,
+                            )
+
+                        # keep the smallest id in the cluster that has the oldest tracker.
+                        if (
+                            oldest_tracker_age_in_cluster
+                            < oldest_tracker_age_in_other_cluster
+                        ):
+                            other_cluster_id = self.clusters[
+                                cluster_number_with_oldest_tracker
+                            ].id
+                            cluster_id = cluster.id
+
+                            # We already know cluster_id < other_cluster_id, so min(cluster_id, other_cluster_id) = cluster_id
+                            cluster.id = other_cluster_id
+                            self.clusters[
+                                cluster_number_with_oldest_tracker
+                            ].id = cluster_id
 
                         # need to update the old cluster_number rows in the intersection matrix
                         new_row_interesection_ids = [None] * len(current_clusters)
