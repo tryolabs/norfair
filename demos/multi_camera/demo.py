@@ -183,17 +183,6 @@ def run():
         action="store_true",
         help="If your footage are a video where the camera might move, you should use a motion estimator. This argument will apply the motion estimator for all your videos indifferently.",
     )
-
-    parser.add_argument(
-        "--save-transformation",
-        action="store_true",
-        help="Save the transformations after using the UI, so you can pickle them again later.",
-    )
-    parser.add_argument(
-        "--load-transformation",
-        action="store_true",
-        help="Load transformations from pickle files instead of using the UI. If no pickle file is found, you will use the UI",
-    )
     parser.add_argument(
         "--model",
         type=str,
@@ -257,7 +246,7 @@ def run():
     parser.add_argument(
         "--hit-counter-max",
         type=int,
-        default=35,
+        default=45,
         help="Max iteration the tracked object is kept after when there are no detections",
     )
     parser.add_argument(
@@ -346,29 +335,15 @@ def run():
         reference_path = args.reference
     for path in args.files[first_video_is_reference:]:
 
-        pickle_path = f"{os.path.splitext(os.path.basename(reference_path))[0]}_{os.path.splitext(os.path.basename(path))[0]}.pkl"
-
-        initial_transformations[path] = None
-        if args.load_transformation:
-            try:
-                with open(pickle_path, "rb") as file:
-                    initial_transformations[path] = pickle.load(file)
-            except FileNotFoundError:
-                print(f"Couldn't load transformation for {path}. Using the UI instead")
-                pass
-        if initial_transformations[path] is None:
-            initial_transformations[path] = set_reference(
-                reference_path,
-                path,
-                motion_estimator_footage=motion_estimator_footage,
-                motion_estimator_reference=motion_estimator_reference,
-                mask_generator=mask_generator,
-                image_width=args.ui_width,
-                image_height=args.ui_height,
-            )
-            if args.save_transformation:
-                with open(pickle_path, "wb") as file:
-                    pickle.dump(initial_transformations[path], file)
+        initial_transformations[path] = set_reference(
+            reference_path,
+            path,
+            motion_estimator_footage=motion_estimator_footage,
+            motion_estimator_reference=motion_estimator_reference,
+            mask_generator=mask_generator,
+            image_width=args.ui_width,
+            image_height=args.ui_height,
+        )
 
         if args.use_motion_estimator_footage:
             motion_estimators[path].transformation = initial_transformations[path]

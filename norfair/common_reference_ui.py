@@ -1025,6 +1025,10 @@ def set_reference(
         global points_sampled
         global window
         global button_finish
+        global reference_point
+        global footage_point
+        global canvas_footage
+        global canvas_reference
 
         initialfile = f"{os.path.splitext(os.path.basename(reference))[0]}_to_{os.path.splitext(os.path.basename(footage))[0]}.pkl"
 
@@ -1034,11 +1038,6 @@ def set_reference(
         if file is not None:
 
             loaded_state = pickle.load(file)
-
-            # remove existing buttons
-            for point in points.values():
-                point["button"].destroy()
-            points = {}
 
             points_reference = loaded_state["reference"]
             points_footage = loaded_state["footage"]
@@ -1052,27 +1051,10 @@ def set_reference(
                     fg="grey", highlightbackground="SystemButtonFace"
                 )
 
-            points_sampled = 0
-            # create new points
-            for reference_point, footage_point, ignore in zip(
-                points_reference, points_footage, is_ignored
-            ):
+            points = recreate_all_buttons(points_reference, points_footage, is_ignored)
 
-                new_point = {
-                    "reference": reference_point,
-                    "footage": footage_point,
-                    "button": None,
-                    "marked": False,
-                    "ignore": ignore,
-                }
-                points[points_sampled] = new_point
-                points[points_sampled]["button"] = create_annotation_button(new_point)
-                if ignore:
-                    points[points_sampled]["button"].configure(
-                        fg="gray", highlightbackground="gray"
-                    )
-
-                points_sampled += 1
+            remove_drawings_in_canvas(canvas_footage)
+            remove_drawings_in_canvas(canvas_reference)
 
             reference_point = None
             footage_point = None
@@ -1083,6 +1065,39 @@ def set_reference(
     button_save_state.pack(side=tk.LEFT)
     button_load_state.pack(side=tk.LEFT)
     frame_options_files.pack(side=tk.TOP)
+
+    def recreate_all_buttons(points_reference, points_footage, is_ignored):
+        global points
+        global points_sampled
+
+        # remove existing buttons
+        for point in points.values():
+            point["button"].destroy()
+        points = {}
+
+        points_sampled = 0
+        # create new points
+        for reference_point, footage_point, ignore in zip(
+            points_reference, points_footage, is_ignored
+        ):
+
+            new_point = {
+                "reference": reference_point,
+                "footage": footage_point,
+                "button": None,
+                "marked": False,
+                "ignore": ignore,
+            }
+            points[points_sampled] = new_point
+            points[points_sampled]["button"] = create_annotation_button(new_point)
+            if ignore:
+                points[points_sampled]["button"].configure(
+                    fg="gray", highlightbackground="gray"
+                )
+
+            points_sampled += 1
+
+        return points
 
     ###### MAKE SUBBLOCK TO CHANGE BETWEEN ANOTATE AND TEST
     frame_options_annotate_or_test = tk.Frame(master=frame_options)
@@ -1229,6 +1244,62 @@ def set_reference(
     button_remove.pack(side=tk.LEFT)
 
     frame_options_remove.pack(side=tk.TOP)
+
+    ######  MAKE SUBBLOCK TO INVERT TRANSFORMATION
+
+    frame_options_invert = tk.Frame(master=frame_options)
+    text_invert = tk.Label(
+        master=frame_options_invert,
+        text="Invert (pts and transf)",
+        foreground="white",
+        background="#5f9ea0",
+        width=20,
+        height=1,
+    )
+    button_invert = tk.Button(
+        master=frame_options_invert,
+        text="Invert",
+        width=16,
+        height=1,
+        bg="blue",
+        fg="black",
+        command=lambda: handle_invert(),
+    )
+
+    def handle_invert():
+        global points
+        global transformation
+        global points_sampled
+        global footage_point
+        global reference_point
+        global canvas_footage
+        global canvas_reference
+
+        points_reference = []
+        points_footage = []
+        is_ignored = []
+
+        for key, couple in points.items():
+            # swap footage coordinate with reference
+            points_reference.append(couple["footage"])
+            points_footage.append(couple["reference"])
+            is_ignored.append(couple["ignore"])
+
+        remove_drawings_in_canvas(canvas_footage)
+        remove_drawings_in_canvas(canvas_reference)
+
+        points = recreate_all_buttons(points_reference, points_footage, is_ignored)
+        points_sampled = len(points)
+
+        reference_point = None
+        footage_point = None
+
+        transformation = estimate_transformation(points)
+
+    text_invert.pack(side=tk.LEFT)
+    button_invert.pack(side=tk.LEFT)
+
+    frame_options_invert.pack(side=tk.TOP)
 
     ######  MAKE SUBBLOCK TO RESIZE FRAMES
 
