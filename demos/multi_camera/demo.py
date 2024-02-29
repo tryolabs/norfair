@@ -246,7 +246,7 @@ def run():
     parser.add_argument(
         "--clusterizer-initialization-delay",
         type=float,
-        default=6,
+        default=20,
         help="Minimum age of a cluster (or it's objects) to be returned",
     )
     parser.add_argument(
