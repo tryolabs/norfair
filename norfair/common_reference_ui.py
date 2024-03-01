@@ -38,22 +38,31 @@ def set_reference(
 
     UI usage:
 
-        Creates a UI to annotate points that match in reference and footage, and estimate the transformation.
-        To add a point, just click a pair of points (one from the footage window, and another from the reference window) and select "Add".
-        To remove a point, just select the corresponding point at the bottom left corner, and select "Remove".
-        You can also ignore points, by clicking them and selecting "Ignore". The transformation will not used ingored points.
-        To 'uningnore' points that have been previously ignored, just click them and select "Unignore".
+        The UI has the puropose of annotating points that match in the reference and the footage (either images or videos), to estimate a transformation.
+
+        To add a point, just click a pair of points (one from the footage window, and another from the reference window) and select `"Add"`.
+        To remove a point, just select the corresponding point at the bottom left corner, and select `"Remove"`.
+        You can also ignore points, by clicking them and selecting `"Ignore"`. The transformation will not used ingored points.
+        To 'uningnore' points that have been previously ignored, just click them and select `"Unignore"`.
+
+        To resize the footage or the reference image, you can use the `"+"` and `"-"` buttons in the `'Resize footage'` and `'Resize reference'` sections of the Menu.
 
         If either footage or reference are videos, you can jump to future frames to pick points that match.
-        For example, to jump 215 frames in the footage, just write an integer number of frames to jump next to 'Frames to skip (footage)', and select "Skip frames".
-        A motion estimator can be used to relate the coordinates of the current frame you see (in either footage or reference) to coordinates in its corresponding first frame.
+        For example, to jump 215 frames in the footage, just write that number next to `'Frames to skip (footage)'`, and select `"Skip frames"`.
+
         You can go back to the first frame of the video (in either footage or reference) by selecting "Reset video".
 
-        Once a transformation has been estimated, you can test it:
-        To Test your transformation, Select the 'Test' mode, and pick a point in either the reference or the footage, and see the associated point in the other window.
-        You can keep adding more associated points until you are satisfied with the estimated transformation.
+        Once a transformation has been estimated (you will know that if the `"Finished"` button is green), you can test it:
+        To Test your transformation, Select the `"Test"` mode, and pick a point in either the reference or the footage, and see the associated point in the other window.
+        You can go back to the `"Annotate"` mode keep adding more associated points until you are satisfied with the estimated transformation.
 
-    Argument:
+        You can also save the state (points and transformation you have) to a `.pkl` file using the `"Save"` button, so that you can later load that state from the UI with the `"Load"` button.
+
+        You can swap the reference points with the footage points (inverting the transformation) with the `"Invert"` button. This is particularly useful if you have previously saved a state in which the reference was the current footage, and the footage was the current reference.
+
+        Once you are happy with the transformation, just click on `"Finished"`.
+
+    Argumentsco:
      - reference: str
         Path to the reference image or video
 

@@ -42,6 +42,7 @@ class Cluster:
         Class that relates trackers from different videos
 
         Attributes:
+        - Cluster.id: number identifying the cluster
         - Cluster.tracked_objects: dict of the form {str: TrackedObject}
             where str will indicate the name of the camera/video
         - Cluster.tracked_ids: list of tuples of the form (str, int)
@@ -90,7 +91,9 @@ class MultiCameraClusterizer:
             How far two clusters (group of trackers) need to be to not join them.
 
          - join_distance_by: str.
-            String indicating how we 'merge' distance between trackers to construct a distance between clusters.
+            String indicating how we combine distance between trackers to construct a distance between clusters.
+            Each cluster will have several TrackedObject instances, so in our approach we can either take
+            the maximum distance between their TrackedObject instances, or the average distance.
             Can be either 'max' or 'mean'.
 
          - max_votes_grow: int.
@@ -104,6 +107,14 @@ class MultiCameraClusterizer:
          - memory: int.
             Merge the information of the current update with past updates to generate clusters and vote (to grow, split or neither).
             This parameter indicates how far into the past we should look.
+
+        - initialization_delay: int.
+            When a new cluster is created, we wait a few frames before returning it in the update method, so that new clusters
+            have the chance to be merged with other existing clusters.
+
+        - filter_by_objects_age: bool.
+            When we wait to return a cluster, we can either wait by considering the age of the cluster, or the
+            age of the TrackedObject instances in the cluster.
         """
         if max_votes_grow < 1:
             raise ValueError("max_votes_grow parameter needs to be >= 1")
