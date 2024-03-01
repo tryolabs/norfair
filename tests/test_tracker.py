@@ -87,7 +87,7 @@ def test_simple(filter_factory):
             # check that counter goes down to 0 wen no detections
             for counter in range(counter_max - 1, -1, -1):
                 age += 1
-                tracked_objects = tracker.update()
+                tracked_objects = tracker.update(detections=[])
                 assert len(tracked_objects) == 1
                 obj = tracked_objects[0]
                 np.testing.assert_almost_equal(
@@ -97,7 +97,7 @@ def test_simple(filter_factory):
                 assert obj.hit_counter == counter
 
             # check that object dissapears in the next frame
-            assert len(tracker.update()) == 0
+            assert len(tracker.update(detections=[])) == 0
 
 
 @pytest.mark.parametrize(
@@ -242,11 +242,11 @@ def test_count(delay):
         assert tracker.current_object_count == 1
 
         for _ in range(delay + 1, 0, -1):
-            assert len(tracker.update()) == 1
+            assert len(tracker.update(detections=[])) == 1
             assert tracker.total_object_count == 1
             assert tracker.current_object_count == 1
 
-        assert len(tracker.update()) == 0
+        assert len(tracker.update(detections=[])) == 0
         assert tracker.total_object_count == 1
         assert tracker.current_object_count == 0
 
@@ -265,11 +265,11 @@ def test_count(delay):
         assert tracker.current_object_count == 2
 
         for _ in range(delay + 1, 0, -1):
-            assert len(tracker.update()) == 2
+            assert len(tracker.update(detections=[])) == 2
             assert tracker.total_object_count == 3
             assert tracker.current_object_count == 2
 
-        assert len(tracker.update()) == 0
+        assert len(tracker.update(detections=[])) == 0
         assert tracker.total_object_count == 3
         assert tracker.current_object_count == 0
 
@@ -332,7 +332,7 @@ def test_reid_hit_counter():
     # check that object is dead if it doesn't get matched to any detections
     obj_id = tracked_objects[0].id
     for _ in range(hit_counter_max + 1):
-        tracked_objects = tracker.update()
+        tracked_objects = tracker.update(detections=[])
     assert len(tracked_objects) == 0
 
     # check that previous object gets back to life after reid matching
@@ -345,7 +345,7 @@ def test_reid_hit_counter():
 
     # check that previous object gets eliminated after hit_counter_max + reid_hit_counter_max + 1
     for _ in range(hit_counter_max + reid_hit_counter_max + 1):
-        tracked_objects = tracker.update()
+        tracked_objects = tracker.update(detections=[])
     assert len(tracked_objects) == 0
     for _ in range(2):
         tracked_objects = tracker.update([Detection(points=np.array([[1, 1]]))])

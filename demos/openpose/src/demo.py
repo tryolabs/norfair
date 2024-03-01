@@ -104,25 +104,24 @@ if __name__ == "__main__":
                 detected_poses = datum.poseKeypoints
 
                 if detected_poses is None:
-                    tracked_objects = tracker.update(period=args.skip_frame)
-                    continue
-
-                detections = (
-                    []
-                    if not detected_poses.any()
-                    else [
-                        Detection(p, scores=s)
-                        for (p, s) in zip(
-                            detected_poses[:, :, :2], detected_poses[:, :, 2]
-                        )
-                    ]
-                )
+                    detections = []
+                else:
+                    detections = (
+                        []
+                        if not detected_poses.any()
+                        else [
+                            Detection(p, scores=s)
+                            for (p, s) in zip(
+                                detected_poses[:, :, :2], detected_poses[:, :, 2]
+                            )
+                        ]
+                    )
                 tracked_objects = tracker.update(
-                    detections=detections, period=args.skip_frame
+                    detections=detections,
                 )
                 norfair.draw_points(frame, detections)
             else:
-                tracked_objects = tracker.update(period=args.skip_frame)
+                tracked_objects = tracker.update()
 
             norfair.draw_tracked_objects(frame, tracked_objects)
             video.write(frame)
