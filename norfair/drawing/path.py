@@ -154,8 +154,6 @@ class AbsolutePaths:
         [Color][norfair.drawing.Color] of the circles representing the paths of interest.
     radius : Optional[int], optional
         Radius of the circles representing the paths of interest.
-    max_history : int, optional
-        Number of past points to include in the path. High values make the drawing slower
     path_blend_factor: Optional[float], optional
         When blending the frame and the canvas (with the paths overdrawn), we do:
         frame = path_blend_factor * canvas + frame_blend_factor * frame
