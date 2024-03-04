@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Callable, Optional, Sequence, Tuple
+from typing import Callable, Optional, Sequence, Tuple, Union
 
 try:
     import cv2
@@ -139,7 +139,11 @@ class AbsolutePaths:
     ----------
     get_points_to_draw : Optional[Callable[[np.array], np.array]], optional
         Function that takes a [`TrackedObject`][norfair.tracker.TrackedObject], and returns a list of points
-        (in the absolute coordinate frame) for which we want to draw their paths.
+        for which we want to draw their paths.
+        If using a MotionEstimator for the tracking, it is recommended to return the points in the absolute frame
+        (i.e: TrackedObject.get_estimate(absolute=True)). Otherwise, just return the points the relative frame.
+        Remember that the chosen coordinates will be transformed by coord_transformations (if it is not None) in the draw method,
+        by considering the points you returned as in absolute coordinates and the points that it will be drawing as in relative.
 
         By default we just average the points with greatest height ('feet') if the object has live points.
     scale : Optional[float], optional
@@ -204,7 +208,7 @@ class AbsolutePaths:
                     return np.mean(
                         obj.get_estimate(absolute=True)[feet_indices], axis=0
                     )
-                except:
+                except ValueError:
                     return np.mean(obj.estimate[feet_indices], axis=0)
 
         self.get_points_to_draw = get_points_to_draw
@@ -214,22 +218,44 @@ class AbsolutePaths:
         self.path_blend_factor = path_blend_factor
         self.frame_blend_factor = frame_blend_factor
 
-    def draw(self, frame, tracked_objects, coord_transformations=None):
+    def draw(
+        self,
+        frame,
+        tracked_objects,
+        coord_transformations: Optional[
+            Union[HomographyTransformation, TranslationTransformation]
+        ] = None,
+    ):
         """
-        the objects have a relative frame: frame_det
-        the objects have an absolute frame: frame_one
-        the frame passed could be either frame_det, or a new perspective where you want to draw the paths
+        Draw the paths of the points interest on a frame.
 
-        initialization:
-         1. top_left is an arbitrary coordinate of some pixel inside background
-        logic:
-         1. draw track.get_estimate(absolute=True) + top_left, in background
-         2. transform background with the composition (coord_transformations.abs_to_rel o minus_top_left_translation). If coord_transformations is None, only use minus_top_left_translation.
-         3. crop [:frame.width, :frame.height] from the result
-         4. overlay that over frame
+        Parameters
+        ----------
+        frame : np.ndarray
+            The OpenCV frame to draw on.
+        tracked_objects : Sequence[TrackedObject]
+            List of [`TrackedObject`][norfair.tracker.TrackedObject] to get the points of interest in order to update the paths.
+        coord_transformations=Optional[Union[HomographyTransformation, TranslationTransformation]]
+            Coordinate transformation between the tracker coordinates (in the coordinates returned by get_points_to_draw method) as absolute frame
+            and the frame coordinates as relative frame.
+            If no transformation is provided, we assume that the TrackedObjects coordinates coincide with their coordinates in the frame.
+            For example, if you are
+                1. using a MotionEstimator for the tracking, then get_points_to_draw can return points in absolute coords, and
+                coord_transformations would be the transformation between the absolute coords and the frame.
+                - Particular case: if we are drawing over the original frame where the detections were done (relative frame), then
+                get_points_to_draw returns points in absolute coordinates, and coord_transformations is the coordinate transformation
+                returned by your MotionEstimator that you use for the tracking.
 
-        Remark:
-        In any case, coord_transformations should be the coordinate transformation between the tracker absolute coords (as abs) and frame coords (as rel)
+                2. NOT using a MotionEstimator for the tracking, then get_points_to_draw can return points in only 'relative' coords,
+                and coord_transformations would be the transformation between the relative coordinates and the frame.
+                Particular case: if we want to draw over the original frame where the detections were done (relative frame), then
+                get_points_to_draw returns points in relative frame, and coord_transformations can just be None.
+
+
+        Returns
+        -------
+        np.array
+            The resulting frame.
         """
 
         # initialize background if necessary
