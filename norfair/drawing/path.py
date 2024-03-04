@@ -1,8 +1,15 @@
 from collections import defaultdict
-from typing import Callable, Optional, Sequence, Tuple
+from typing import Callable, Optional, Sequence, Tuple, Union
 
+try:
+    import cv2
+except ImportError:
+    from norfair.utils import DummyOpenCVImport
+
+    cv2 = DummyOpenCVImport()
 import numpy as np
 
+from norfair.camera_motion import HomographyTransformation, TranslationTransformation
 from norfair.drawing.color import Palette
 from norfair.drawing.drawer import Drawer
 from norfair.tracker import TrackedObject
@@ -128,25 +135,35 @@ class AbsolutePaths:
 
     Works just like [`Paths`][norfair.drawing.Paths] but supports camera motion.
 
-    !!! warning
-        This drawer is not optimized so it can be stremely slow. Performance degrades linearly with
-        `max_history * number_of_tracked_objects`.
-
     Parameters
     ----------
     get_points_to_draw : Optional[Callable[[np.array], np.array]], optional
-        Function that takes a list of points (the `.estimate` attribute of a [`TrackedObject`][norfair.tracker.TrackedObject])
-        and returns a list of points for which we want to draw their paths.
+        Function that takes a [`TrackedObject`][norfair.tracker.TrackedObject], and returns a list of points
+        for which we want to draw their paths.
+        If using a MotionEstimator for the tracking, it is recommended to return the points in the absolute frame
+        (i.e: TrackedObject.get_estimate(absolute=True)). Otherwise, just return the points the relative frame.
+        Remember that the chosen coordinates will be transformed by coord_transformations (if it is not None) in the draw method,
+        by considering the points you returned as in absolute coordinates and the points that it will be drawing as in relative.
 
-        By default it is the mean point of all the points in the tracker.
+        By default we just average the points with greatest height ('feet') if the object has live points.
+    scale : Optional[float], optional
+        Norfair will draw over a background canvas in the absolute coordinates. This determines how
+        relatively bigger is this canvas with respect to the original frame.
+        After the camera moves, part of the frame might get outside the canvas if scale is not large enough.
+    attenuation : Optional[float], optional
+        How fast we forget old points in the path. (0=Draw all points, 1=Draw only most current point)
     thickness : Optional[int], optional
         Thickness of the circles representing the paths of interest.
     color : Optional[Tuple[int, int, int]], optional
         [Color][norfair.drawing.Color] of the circles representing the paths of interest.
     radius : Optional[int], optional
         Radius of the circles representing the paths of interest.
-    max_history : int, optional
-        Number of past points to include in the path. High values make the drawing slower
+    path_blend_factor: Optional[float], optional
+        When blending the frame and the canvas (with the paths overdrawn), we do:
+        frame = path_blend_factor * canvas + frame_blend_factor * frame
+    frame_blend_factor:
+        When blending the frame and the canvas (with the paths overdrawn), we do:
+        frame = path_blend_factor * canvas + frame_blend_factor * frame
 
     Examples
     --------
@@ -163,70 +180,184 @@ class AbsolutePaths:
 
     def __init__(
         self,
+        scale: float = None,
+        attenuation: float = 0.05,
         get_points_to_draw: Optional[Callable[[np.array], np.array]] = None,
         thickness: Optional[int] = None,
         color: Optional[Tuple[int, int, int]] = None,
         radius: Optional[int] = None,
-        max_history=20,
+        path_blend_factor=2,
+        frame_blend_factor=1,
     ):
+        self.scale = scale
+        self._background = None
+        self._attenuation_factor = 1 - attenuation
 
         if get_points_to_draw is None:
 
-            def get_points_to_draw(points):
-                return [np.mean(np.array(points), axis=0)]
+            def get_points_to_draw(obj):
+                # don't draw the object if we haven't seen it recently
+                if not obj.live_points.any():
+                    return []
+
+                # obtain point with greatest height (feet)
+                points_height = obj.estimate[:, 1]
+                feet_indices = np.argwhere(points_height == points_height.max())
+                # average their absolute positions
+                try:
+                    return np.mean(
+                        obj.get_estimate(absolute=True)[feet_indices], axis=0
+                    )
+                except ValueError:
+                    return np.mean(obj.estimate[feet_indices], axis=0)
 
         self.get_points_to_draw = get_points_to_draw
-
         self.radius = radius
         self.thickness = thickness
         self.color = color
-        self.past_points = defaultdict(lambda: [])
-        self.max_history = max_history
-        self.alphas = np.linspace(0.99, 0.01, max_history)
+        self.path_blend_factor = path_blend_factor
+        self.frame_blend_factor = frame_blend_factor
 
-    def draw(self, frame, tracked_objects, coord_transform=None):
+    def draw(
+        self,
+        frame,
+        tracked_objects,
+        coord_transformations: Optional[
+            Union[HomographyTransformation, TranslationTransformation]
+        ] = None,
+    ):
+        """
+        Draw the paths of the points interest on a frame.
+
+        Parameters
+        ----------
+        frame : np.ndarray
+            The OpenCV frame to draw on.
+        tracked_objects : Sequence[TrackedObject]
+            List of [`TrackedObject`][norfair.tracker.TrackedObject] to get the points of interest in order to update the paths.
+        coord_transformations=Optional[Union[HomographyTransformation, TranslationTransformation]]
+            Coordinate transformation between the tracker coordinates (in the coordinates returned by get_points_to_draw method) as absolute frame
+            and the frame coordinates as relative frame.
+            If no transformation is provided, we assume that the TrackedObjects coordinates coincide with their coordinates in the frame.
+            For example, if you are
+                1. using a MotionEstimator for the tracking, then get_points_to_draw can return points in absolute coords, and
+                coord_transformations would be the transformation between the absolute coords and the frame.
+                - Particular case: if we are drawing over the original frame where the detections were done (relative frame), then
+                get_points_to_draw returns points in absolute coordinates, and coord_transformations is the coordinate transformation
+                returned by your MotionEstimator that you use for the tracking.
+
+                2. NOT using a MotionEstimator for the tracking, then get_points_to_draw can return points in only 'relative' coords,
+                and coord_transformations would be the transformation between the relative coordinates and the frame.
+                Particular case: if we want to draw over the original frame where the detections were done (relative frame), then
+                get_points_to_draw returns points in relative frame, and coord_transformations can just be None.
+
+
+        Returns
+        -------
+        np.array
+            The resulting frame.
+        """
+
+        # initialize background if necessary
+        if self._background is None:
+            if self.scale is None:
+                # set the default scale, depending if coord_transformations is provided or not
+                if coord_transformations is None:
+                    self.scale = 1
+                else:
+                    self.scale = 3
+
+            original_size = (
+                frame.shape[1],
+                frame.shape[0],
+            )  # OpenCV format is (width, height)
+
+            scaled_size = tuple(
+                (np.array(original_size) * np.array(self.scale)).round().astype(int)
+            )
+            self._background = np.zeros(
+                [scaled_size[1], scaled_size[0], frame.shape[-1]],
+                frame.dtype,
+            )
+
+            # this is the corner of the first passed frame (inside the background)
+            self.top_left = (
+                np.array(self._background.shape[:2]) // 2
+                - np.array(frame.shape[:2]) // 2
+            )
+            self.top_left = self.top_left[::-1]
+        else:
+            self._background = (self._background * self._attenuation_factor).astype(
+                frame.dtype
+            )
+
         frame_scale = frame.shape[0] / 100
 
         if self.radius is None:
             self.radius = int(max(frame_scale * 0.7, 1))
         if self.thickness is None:
             self.thickness = int(max(frame_scale / 7, 1))
-        for obj in tracked_objects:
-            if not obj.live_points.any():
-                continue
 
+        # draw in background (each point in top_left_translation(abs_coordinate))
+        for obj in tracked_objects:
             if self.color is None:
                 color = Palette.choose_color(obj.id)
             else:
                 color = self.color
 
-            points_to_draw = self.get_points_to_draw(obj.get_estimate(absolute=True))
+            points_to_draw = self.get_points_to_draw(obj)
 
-            for point in coord_transform.abs_to_rel(points_to_draw):
+            for point in points_to_draw:
                 Drawer.circle(
-                    frame,
-                    position=tuple(point.astype(int)),
+                    self._background,
+                    position=tuple((point + self.top_left).astype(int)),
                     radius=self.radius,
                     color=color,
                     thickness=self.thickness,
                 )
 
-            last = points_to_draw
-            for i, past_points in enumerate(self.past_points[obj.id]):
-                overlay = frame.copy()
-                last = coord_transform.abs_to_rel(last)
-                for j, point in enumerate(coord_transform.abs_to_rel(past_points)):
-                    Drawer.line(
-                        overlay,
-                        tuple(last[j].astype(int)),
-                        tuple(point.astype(int)),
-                        color=color,
-                        thickness=self.thickness,
-                    )
-                last = past_points
+        # apply warp to self._background with composition abs_to_rel o -top_left_translation to background, and crop [:width, :height] to get frame overdrawn
+        if isinstance(coord_transformations, HomographyTransformation):
+            minus_top_left_translation = np.array(
+                [[1, 0, -self.top_left[0]], [0, 1, -self.top_left[1]], [0, 0, 1]]
+            )
+            full_transformation = (
+                coord_transformations.homography_matrix @ minus_top_left_translation
+            )
+            background_size_frame = cv2.warpPerspective(
+                self._background,
+                full_transformation,
+                tuple(frame.shape[:2][::-1]),
+                cv2.INTER_LINEAR,
+                borderMode=cv2.BORDER_CONSTANT,
+                borderValue=(0, 0, 0),
+            )
+        elif isinstance(coord_transformations, TranslationTransformation):
+            full_transformation = np.array(
+                [
+                    [1, 0, coord_transformations.movement_vector[0] - self.top_left[0]],
+                    [0, 1, coord_transformations.movement_vector[1] - self.top_left[1]],
+                ]
+            )
+            background_size_frame = cv2.warpAffine(
+                self._background,
+                full_transformation,
+                tuple(frame.shape[:2][::-1]),
+                cv2.INTER_LINEAR,
+                borderMode=cv2.BORDER_CONSTANT,
+                borderValue=(0, 0, 0),
+            )
+        else:
+            background_size_frame = self._background[
+                self.top_left[1] : self.top_left[1] + frame.shape[0],
+                self.top_left[0] : self.top_left[0] + frame.shape[1],
+            ]
 
-                alpha = self.alphas[i]
-                frame = Drawer.alpha_blend(overlay, frame, alpha=alpha)
-            self.past_points[obj.id].insert(0, points_to_draw)
-            self.past_points[obj.id] = self.past_points[obj.id][: self.max_history]
+        frame = cv2.addWeighted(
+            frame,
+            self.frame_blend_factor,
+            background_size_frame,
+            self.path_blend_factor,
+            0.0,
+        )
         return frame
