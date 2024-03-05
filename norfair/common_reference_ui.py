@@ -759,7 +759,7 @@ def set_reference(
             frame_options_fps = tk.Frame(master=frame_options)
             title = tk.Label(
                 master=frame_options_fps,
-                text=f"FPS {video_type}: {fps}",
+                text=f"FPS {video_type}: {round(fps, 2)}",
                 foreground="white",
                 background="#34A2FE",
                 width=40,
