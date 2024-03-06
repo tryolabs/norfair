@@ -7,12 +7,68 @@ import cv2
 import numpy as np
 import torch
 
-from norfair import Palette, Video
+from norfair import Palette, Video, get_cutout, mean_manhattan
 from norfair.camera_motion import HomographyTransformation, MotionEstimator
 from norfair.common_reference_ui import set_reference
 from norfair.drawing.drawer import Drawer
 from norfair.multi_camera import MultiCameraClusterizer
 from norfair.tracker import Detection, Tracker
+
+
+def embedding_distance_detection_and_tracker(detection, tracker):
+    embedding_correlations = []
+    past_detections = tracker.past_detections + [tracker.last_detection]
+    for past_det in past_detections:
+        if past_det.embedding is None:
+            continue
+
+        embedding_correlations.append(
+            1
+            - cv2.compareHist(
+                past_det.embedding, detection.embedding, cv2.HISTCMP_CORREL
+            )
+        )
+
+    if len(embedding_correlations) > 0:
+        return np.mean(embedding_correlations)
+    else:
+        return 2
+
+
+def embedding_distance(tracker1, tracker2):
+    embedding_correlations = []
+    past_detections_1 = tracker1.past_detections + [tracker1.last_detection]
+    past_detections_2 = tracker2.past_detections + [tracker2.last_detection]
+
+    for past_det_1 in past_detections_1:
+        if past_det_1.embedding is None:
+            continue
+        for past_det_2 in past_detections_2:
+            if past_det_2.embedding is None:
+                continue
+
+            embedding_correlations.append(
+                1
+                - cv2.compareHist(
+                    past_det_1.embedding, past_det_2.embedding, cv2.HISTCMP_CORREL
+                )
+            )
+
+    if len(embedding_correlations) > 0:
+        return np.mean(embedding_correlations)
+    else:
+        return 2
+
+
+def get_hist(image):
+    hist = cv2.calcHist(
+        [cv2.cvtColor(image, cv2.COLOR_BGR2Lab)],
+        [0, 1],
+        None,
+        [128, 128],
+        [0, 256, 0, 256],
+    )
+    return cv2.normalize(hist, hist).flatten()
 
 
 def draw_feet(
@@ -119,7 +175,7 @@ def get_mask_from_boxes(frame, boxes):
     return mask
 
 
-def yolo_detections_to_norfair_detections(yolo_detections):
+def yolo_detections_to_norfair_detections(yolo_detections, frame):
     norfair_detections = []
     boxes = []
     detections_as_xyxy = yolo_detections.xyxy[0]
@@ -132,11 +188,31 @@ def yolo_detections_to_norfair_detections(yolo_detections):
             ]
         )
         boxes.append(bbox)
-        points = bbox
+        points = bbox.copy()
         scores = np.array([detection_as_xyxy[4], detection_as_xyxy[4]])
 
+        # get embedding
+        t_shirt_bbox_x = 0.7 * bbox[:, 0] + 0.3 * bbox[::-1, 0]
+        top = np.min(bbox[:, 1])
+        bottom = np.max(bbox[:, 1])
+        t_shirt_bbox_y = np.array([top * 0.7 + bottom * 0.3, top * 0.4 + bottom * 0.6])
+
+        bbox[:, 0] = t_shirt_bbox_x
+        bbox[:, 1] = t_shirt_bbox_y
+
+        cut = get_cutout(bbox, frame)
+        if cut.shape[0] > 0 and cut.shape[1] > 0:
+            embedding = get_hist(cut)
+        else:
+            embedding = None
+
         norfair_detections.append(
-            Detection(points=points, scores=scores, label=detection_as_xyxy[-1].item())
+            Detection(
+                points=points,
+                scores=scores,
+                label=detection_as_xyxy[-1].item(),
+                embedding=embedding,
+            )
         )
 
     return norfair_detections, boxes
@@ -198,31 +274,31 @@ def run():
     parser.add_argument(
         "--distance-threshold",
         type=float,
-        default=None,
+        default=1.5,
         help="Maximum distance to consider when matching detections and tracked objects",
     )
     parser.add_argument(
-        "--distance-function",
-        type=str,
-        default="mean_manhattan",
-        help="Distance function to use when matching detections and tracked objects ('iou', 'euclidean', 'mean_euclidean', or 'mean_manhattan')",
-    )
-    parser.add_argument(
-        "--clusterizer-distance-threshold",
+        "--foot-distance-threshold",
         type=float,
         default=0.1,
-        help="Maximum distance that two tracked objects of different videos can have in order to match",
+        help="Maximum spatial distance that two tracked objects of different videos can have in order to match",
+    )
+    parser.add_argument(
+        "--embedding-correlation-threshold",
+        type=float,
+        default=0.9,
+        help="Threshold for embedding match.",
     )
     parser.add_argument(
         "--max-votes-grow",
         type=int,
-        default=8,
+        default=3,
         help="Amount of votes we need before increasing the size of a cluster",
     )
     parser.add_argument(
         "--max-votes-split",
         type=int,
-        default=10,
+        default=15,
         help="Amount of votes we need before decreasing the size of a cluster",
     )
     parser.add_argument(
@@ -240,13 +316,13 @@ def run():
     parser.add_argument(
         "--initialization-delay",
         type=float,
-        default=20,
+        default=19,
         help="Min detections needed to start the tracked object",
     )
     parser.add_argument(
         "--clusterizer-initialization-delay",
-        type=float,
-        default=20,
+        type=int,
+        default=15,
         help="Minimum age of a cluster (or it's objects) to be returned",
     )
     parser.add_argument(
@@ -258,7 +334,7 @@ def run():
     parser.add_argument(
         "--hit-counter-max",
         type=int,
-        default=45,
+        default=20,
         help="Max iteration the tracked object is kept after when there are no detections",
     )
     parser.add_argument(
@@ -307,7 +383,7 @@ def run():
 
         def mask_generator(frame):
             detections = model(frame)
-            detections, boxes = yolo_detections_to_norfair_detections(detections)
+            detections, boxes = yolo_detections_to_norfair_detections(detections, frame)
             return get_mask_from_boxes(frame, boxes)
 
     else:
@@ -376,6 +452,20 @@ def run():
     # now initialize the videos and their trackers
     fps = None
     total_frames = None
+    distance_functions = {}
+
+    def get_distance_function_from_threshold(threshold):
+        # compare embeddings if spatial distance is small enough
+        def conditional_embedding_to_spatial(detection, tracked_object):
+            if mean_manhattan(detection, tracked_object) < threshold:
+                return embedding_distance_detection_and_tracker(
+                    detection, tracked_object
+                )
+            else:
+                return 2
+
+        return conditional_embedding_to_spatial
+
     for path in args.files:
         extension = os.path.splitext(path)[1]
         if args.output_name is None:
@@ -409,29 +499,18 @@ def run():
             height = next(video.__iter__()).shape[0]
 
         videos[path] = video
-
-        if args.distance_threshold is None:
-            if args.distance_function == "iou":
-                distance_threshold = 0.5
-            elif args.distance_function in [
-                "euclidean",
-                "mean_euclidean",
-                "mean_manhattan",
-            ]:
-                distance_threshold = height / 15
-            else:
-                raise ValueError(
-                    f"Can't provide default threshold for distance '{args.distance_function}'"
-                )
-        else:
-            distance_threshold = args.distance_threshold
+        distance_functions[path] = get_distance_function_from_threshold(height / 10)
         trackers[path] = Tracker(
-            distance_function="iou",
+            distance_function=distance_functions[path],
             detection_threshold=args.confidence_threshold,
-            distance_threshold=distance_threshold,
+            distance_threshold=args.distance_threshold,
             initialization_delay=args.initialization_delay,
             hit_counter_max=args.hit_counter_max,
             camera_name=path,
+            past_detections_length=10,
+            reid_distance_function=embedding_distance,
+            reid_distance_threshold=0.5,
+            reid_hit_counter_max=150,
         )
         tracked_objects[path] = []
 
@@ -455,9 +534,17 @@ def run():
             / height_reference
         )
 
+    def clusterizer_distance(tracker1, tracker2):
+        # if the foot distance is small
+        # then compare the embeddings
+        if normalized_foot_distance(tracker1, tracker2) < args.foot_distance_threshold:
+            return embedding_distance(tracker1, tracker2)
+        else:
+            return 2
+
     multicamera_clusterizer = MultiCameraClusterizer(
-        normalized_foot_distance,
-        args.clusterizer_distance_threshold,
+        clusterizer_distance,
+        args.embedding_correlation_threshold,
         join_distance_by=args.joined_distance,
         max_votes_grow=args.max_votes_grow,
         max_votes_split=args.max_votes_grow,
@@ -477,6 +564,7 @@ def run():
                 detections = model(frame)
                 detections, boxes = yolo_detections_to_norfair_detections(
                     detections,
+                    frame,
                 )
                 if args.mask_detections:
                     mask = get_mask_from_boxes(frame, boxes)
