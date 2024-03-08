@@ -338,6 +338,12 @@ def run():
         help="Max iteration the tracked object is kept after when there are no detections",
     )
     parser.add_argument(
+        "--reid-hit-counter-max",
+        type=int,
+        default=150,
+        help="Maximum amount of frames trying to reidentify the object",
+    )
+    parser.add_argument(
         "--nms-threshold", type=float, help="Iou threshold for detector", default=0.15
     )
     parser.add_argument(
@@ -510,7 +516,7 @@ def run():
             past_detections_length=10,
             reid_distance_function=embedding_distance,
             reid_distance_threshold=0.5,
-            reid_hit_counter_max=150,
+            reid_hit_counter_max=args.reid_hit_counter_max,
         )
         tracked_objects[path] = []
 
@@ -550,7 +556,7 @@ def run():
         max_votes_split=args.max_votes_grow,
         memory=args.memory,
         initialization_delay=args.clusterizer_initialization_delay,
-        filter_by_objects_age=args.filter_by_objects_age,
+        reid_hit_counter_max=args.reid_hit_counter_max,
     )
 
     while True:
