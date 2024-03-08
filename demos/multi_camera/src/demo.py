@@ -330,10 +330,10 @@ def run():
         help="Minimum age of a cluster (or it's objects) to be returned",
     )
     parser.add_argument(
-        "--filter-by-objects-age",
-        type=bool,
-        default=False,
-        help="Filter cluster by their objects age, instead of the clusters age.",
+        "--maximum-time-since-last-update",
+        type=int,
+        default=1,
+        help="Filter tracked objects that were not detected recently to not be considered in the distance function of the clusterizer",
     )
     parser.add_argument(
         "--hit-counter-max",
@@ -344,7 +344,7 @@ def run():
     parser.add_argument(
         "--reid-hit-counter-max",
         type=int,
-        default=300,
+        default=500,
         help="Maximum amount of frames trying to reidentify the object. (Use a value >=0)",
     )
     parser.add_argument(
@@ -521,7 +521,6 @@ def run():
             reid_distance_function=embedding_distance,
             reid_distance_threshold=args.reid_embedding_correlation_threshold,
             reid_hit_counter_max=args.reid_hit_counter_max,
-            pointwise_hit_counter_max=2,
         )
         tracked_objects[path] = []
 
@@ -562,7 +561,7 @@ def run():
         memory=args.memory,
         initialization_delay=args.clusterizer_initialization_delay,
         reid_hit_counter_max=args.reid_hit_counter_max,
-        use_only_living_trackers=False,
+        maximum_time_since_last_update=args.maximum_time_since_last_update,
     )
 
     while True:

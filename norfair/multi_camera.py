@@ -8,7 +8,13 @@ def flatten_list(nested_list):
     return list(itertools.chain(*nested_list))
 
 
-def redefine_distance(distance_function, distance_same_camera):
+def redefine_distance(
+    distance_function,
+    distance_same_camera,
+    distance_threshold,
+    clusters,
+    maximum_time_since_last_update,
+):
     """
     In order to not match trackers of the same camera, we need to make sure that the
     distance between objects of the same camera is at least:
@@ -19,8 +25,32 @@ def redefine_distance(distance_function, distance_same_camera):
     def new_distance(tracked_object_1, tracked_object_2):
         if tracked_object_1.camera_name == tracked_object_2.camera_name:
             return distance_same_camera
-        else:
-            return distance_function(tracked_object_1, tracked_object_2)
+        elif not (
+            (
+                (
+                    tracked_object_1.point_hit_counter
+                    >= tracked_object_1.hit_counter_max - maximum_time_since_last_update
+                ).any()
+            )
+            and (
+                (
+                    tracked_object_2.point_hit_counter
+                    >= tracked_object_2.hit_counter_max - maximum_time_since_last_update
+                ).any()
+            )
+        ):
+            for cluster in clusters:
+                current_ids = {
+                    (tracked_object_1.camera_name, tracked_object_1.id),
+                    (tracked_object_2.camera_name, tracked_object_2.id),
+                }
+                if len(current_ids.intersection(set(cluster.tracked_ids))) == 2:
+                    return min(
+                        distance_threshold * 0.99,
+                        distance_function(tracked_object_1, tracked_object_2),
+                    )
+
+        return distance_function(tracked_object_1, tracked_object_2)
 
     return new_distance
 
@@ -135,19 +165,22 @@ def generate_current_clusters(
     trackers_by_camera,
     distance_function,
     distance_threshold,
+    clusters,
     join_distance_by="mean",
-    use_only_living_trackers=False,
+    maximum_time_since_last_update=1,
 ):
 
     # In case number of camera is variable, I will redefine the distance function
     distance_same_camera = len(trackers_by_camera) ** 2 * distance_threshold + 1
-    distance_function = redefine_distance(distance_function, distance_same_camera)
+    distance_function = redefine_distance(
+        distance_function,
+        distance_same_camera,
+        distance_threshold,
+        clusters,
+        maximum_time_since_last_update,
+    )
 
     current_clusters = flatten_list(trackers_by_camera)
-
-    # use only alive trackers:
-    if use_only_living_trackers:
-        current_clusters = [obj for obj in current_clusters if obj.live_points.any()]
 
     if len(current_clusters) > 0:
         distance_matrix = (
@@ -441,7 +474,7 @@ class MultiCameraClusterizer:
         memory: int = 3,
         initialization_delay: int = 4,
         reid_hit_counter_max: int = 0,
-        use_only_living_trackers: bool = False,
+        maximum_time_since_last_update: int = 1,
     ):
         """
         Associate trackers from different cameras/videos.
@@ -479,8 +512,8 @@ class MultiCameraClusterizer:
             If doing reid in the tracking, then provide the reid_hit_counter_max so that the MultiCameraClusterizer instance knows
             for how long to keep storing clusters of tracked objects that have dissapeared.
 
-        - use_only_living_trackers: bool.
-            Filter tracked objects that have no alive points. This can be useful since tracked objects that are not alive might have
+        - maximum_time_since_last_update: int.
+            Filter tracked objects that were not detected recently. This can be useful since those tracked objects might have
             position that will not match well with their position in a different camera.
         """
         if max_votes_grow < 1:
@@ -515,7 +548,7 @@ class MultiCameraClusterizer:
         self.initialization_delay = initialization_delay + max_votes_grow
 
         self.reid_hit_counter_max = reid_hit_counter_max + 1
-        self.use_only_living_trackers = use_only_living_trackers
+        self.maximum_time_since_last_update = maximum_time_since_last_update
 
     def update(self, trackers_by_camera):
 
@@ -536,8 +569,9 @@ class MultiCameraClusterizer:
             trackers_by_camera,
             self.distance_function,
             self.distance_threshold,
+            self.clusters,
             self.join_distance_by,
-            self.use_only_living_trackers,
+            self.maximum_time_since_last_update,
         )
         self.past_clusters.insert(0, deepcopy(current_clusters))
 
