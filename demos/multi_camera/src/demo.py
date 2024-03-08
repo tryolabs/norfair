@@ -89,21 +89,24 @@ def draw_feet(
     for cluster in clusters:
         color = Palette.choose_color(cluster.id)
         cluster_center = 0
+        cluster_is_alive = False
         for tracked_object in cluster.tracked_objects.values():
-            point = get_absolute_feet(tracked_object)
-            if transformation_in_reference is not None:
-                point = transformation_in_reference.abs_to_rel(np.array([point]))[0]
+            if tracked_object.live_points.any():
+                cluster_is_alive = True
+                point = get_absolute_feet(tracked_object)
+                if transformation_in_reference is not None:
+                    point = transformation_in_reference.abs_to_rel(np.array([point]))[0]
 
-            cluster_center += point
-            frame = Drawer.circle(
-                frame,
-                tuple(point.astype(int)),
-                radius=radius,
-                color=color,
-                thickness=thickness,
-            )
+                cluster_center += point
+                frame = Drawer.circle(
+                    frame,
+                    tuple(point.astype(int)),
+                    radius=radius,
+                    color=color,
+                    thickness=thickness,
+                )
 
-        if draw_cluster_ids:
+        if draw_cluster_ids and cluster_is_alive:
             cluster_center /= len(cluster.tracked_objects)
             frame = Drawer.text(
                 frame,
@@ -127,41 +130,42 @@ def draw_cluster_bboxes(
     for cluster in clusters:
         color = Palette.choose_color(cluster.id)
         for path, tracked_object in cluster.tracked_objects.items():
-            frame = images[path]
+            if tracked_object.live_points.any():
+                frame = images[path]
 
-            if thickness is None:
-                current_thickness = max(int(max(frame.shape) / 500), 1)
-            else:
-                current_thickness = thickness
+                if thickness is None:
+                    current_thickness = max(int(max(frame.shape) / 500), 1)
+                else:
+                    current_thickness = thickness
 
-            # draw the bbox
-            points = tracked_object.estimate.astype(int)
-            frame = Drawer.rectangle(
-                frame,
-                tuple(points),
-                color=color,
-                thickness=current_thickness,
-            )
-
-            if draw_cluster_ids:
-                text = f"{cluster.id}"
-
-                # the anchor will become the bottom-left of the text,
-                # we select-top left of the bbox compensating for the thickness of the box
-                text_anchor = (
-                    points[0, 0] - current_thickness // 2,
-                    points[0, 1] - current_thickness // 2 - 1,
-                )
-
-                frame = Drawer.text(
+                # draw the bbox
+                points = tracked_object.estimate.astype(int)
+                frame = Drawer.rectangle(
                     frame,
-                    text,
-                    position=text_anchor,
-                    size=text_size,
+                    tuple(points),
                     color=color,
-                    thickness=text_thickness,
+                    thickness=current_thickness,
                 )
-                images[path] = frame
+
+                if draw_cluster_ids:
+                    text = f"{cluster.id}"
+
+                    # the anchor will become the bottom-left of the text,
+                    # we select-top left of the bbox compensating for the thickness of the box
+                    text_anchor = (
+                        points[0, 0] - current_thickness // 2,
+                        points[0, 1] - current_thickness // 2 - 1,
+                    )
+
+                    frame = Drawer.text(
+                        frame,
+                        text,
+                        position=text_anchor,
+                        size=text_size,
+                        color=color,
+                        thickness=text_thickness,
+                    )
+                    images[path] = frame
     return images
 
 
@@ -272,22 +276,22 @@ def run():
         default=0.2,
     )
     parser.add_argument(
-        "--distance-threshold",
-        type=float,
-        default=1.5,
-        help="Maximum distance to consider when matching detections and tracked objects",
-    )
-    parser.add_argument(
         "--foot-distance-threshold",
         type=float,
-        default=0.1,
+        default=0.2,
         help="Maximum spatial distance that two tracked objects of different videos can have in order to match",
+    )
+    parser.add_argument(
+        "--reid-embedding-correlation-threshold",
+        type=float,
+        default=0.5,
+        help="Threshold for embedding match during a reid phase after object has been lost. (The 1-correlation distance we use is bounded in [0, 2])",
     )
     parser.add_argument(
         "--embedding-correlation-threshold",
         type=float,
-        default=0.9,
-        help="Threshold for embedding match.",
+        default=1,
+        help="Threshold for embedding match.  (The 1-correlation distance we use is bounded in [0, 2]",
     )
     parser.add_argument(
         "--max-votes-grow",
@@ -340,8 +344,8 @@ def run():
     parser.add_argument(
         "--reid-hit-counter-max",
         type=int,
-        default=150,
-        help="Maximum amount of frames trying to reidentify the object",
+        default=300,
+        help="Maximum amount of frames trying to reidentify the object. (Use a value >=0)",
     )
     parser.add_argument(
         "--nms-threshold", type=float, help="Iou threshold for detector", default=0.15
@@ -509,14 +513,15 @@ def run():
         trackers[path] = Tracker(
             distance_function=distance_functions[path],
             detection_threshold=args.confidence_threshold,
-            distance_threshold=args.distance_threshold,
+            distance_threshold=args.embedding_correlation_threshold,
             initialization_delay=args.initialization_delay,
             hit_counter_max=args.hit_counter_max,
             camera_name=path,
             past_detections_length=10,
             reid_distance_function=embedding_distance,
-            reid_distance_threshold=0.5,
+            reid_distance_threshold=args.reid_embedding_correlation_threshold,
             reid_hit_counter_max=args.reid_hit_counter_max,
+            pointwise_hit_counter_max=2,
         )
         tracked_objects[path] = []
 
@@ -557,6 +562,7 @@ def run():
         memory=args.memory,
         initialization_delay=args.clusterizer_initialization_delay,
         reid_hit_counter_max=args.reid_hit_counter_max,
+        use_only_living_trackers=False,
     )
 
     while True:

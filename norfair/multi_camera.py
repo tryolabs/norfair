@@ -132,7 +132,11 @@ def cluster_intersection_matrix(current_clusters, clusters):
 
 
 def generate_current_clusters(
-    trackers_by_camera, distance_function, distance_threshold, join_distance_by="mean"
+    trackers_by_camera,
+    distance_function,
+    distance_threshold,
+    join_distance_by="mean",
+    use_only_living_trackers=False,
 ):
 
     # In case number of camera is variable, I will redefine the distance function
@@ -140,6 +144,10 @@ def generate_current_clusters(
     distance_function = redefine_distance(distance_function, distance_same_camera)
 
     current_clusters = flatten_list(trackers_by_camera)
+
+    # use only alive trackers:
+    if use_only_living_trackers:
+        current_clusters = [obj for obj in current_clusters if obj.live_points.any()]
 
     if len(current_clusters) > 0:
         distance_matrix = (
@@ -399,24 +407,26 @@ def remove_current_cluster_from_clusters(
 def swap_cluster_ids(clusters, cluster_number, cluster_number_with_oldest_tracker):
 
     old_cluster = clusters[cluster_number_with_oldest_tracker]
-    old_cluster_id = old_cluster.id
     old_cluster_fake_id = old_cluster.fake_id
-    old_cluster_age = old_cluster.age
 
     cluster = clusters[cluster_number]
-    cluster_id = cluster.id
     cluster_fake_id = cluster.fake_id
-    cluster_age = cluster.age
 
-    cluster.id = old_cluster_id
-    cluster.fake_id = old_cluster_fake_id
-    cluster.age = old_cluster_age
-    old_cluster.id = cluster_id
-    old_cluster.fake_id = cluster_fake_id
-    old_cluster.age = cluster_age
+    if old_cluster_fake_id < cluster_fake_id:
+        old_cluster_age = old_cluster.age
+        old_cluster_id = old_cluster.id
 
-    clusters[cluster_number_with_oldest_tracker] = old_cluster
-    clusters[cluster_number] = cluster
+        cluster_age = cluster.age
+        cluster_id = cluster.id
+        cluster.id = old_cluster_id
+        cluster.fake_id = old_cluster_fake_id
+        cluster.age = old_cluster_age
+        old_cluster.id = cluster_id
+        old_cluster.fake_id = cluster_fake_id
+        old_cluster.age = cluster_age
+
+        clusters[cluster_number_with_oldest_tracker] = old_cluster
+        clusters[cluster_number] = cluster
     return clusters
 
 
@@ -431,6 +441,7 @@ class MultiCameraClusterizer:
         memory: int = 3,
         initialization_delay: int = 4,
         reid_hit_counter_max: int = 0,
+        use_only_living_trackers: bool = False,
     ):
         """
         Associate trackers from different cameras/videos.
@@ -467,6 +478,10 @@ class MultiCameraClusterizer:
         - reid_hit_counter_max: int.
             If doing reid in the tracking, then provide the reid_hit_counter_max so that the MultiCameraClusterizer instance knows
             for how long to keep storing clusters of tracked objects that have dissapeared.
+
+        - use_only_living_trackers: bool.
+            Filter tracked objects that have no alive points. This can be useful since tracked objects that are not alive might have
+            position that will not match well with their position in a different camera.
         """
         if max_votes_grow < 1:
             raise ValueError("max_votes_grow parameter needs to be >= 1")
@@ -500,6 +515,7 @@ class MultiCameraClusterizer:
         self.initialization_delay = initialization_delay + max_votes_grow
 
         self.reid_hit_counter_max = reid_hit_counter_max + 1
+        self.use_only_living_trackers = use_only_living_trackers
 
     def update(self, trackers_by_camera):
 
@@ -521,6 +537,7 @@ class MultiCameraClusterizer:
             self.distance_function,
             self.distance_threshold,
             self.join_distance_by,
+            self.use_only_living_trackers,
         )
         self.past_clusters.insert(0, deepcopy(current_clusters))
 
@@ -591,13 +608,12 @@ class MultiCameraClusterizer:
 
                 self.clusters[cluster_number] = cluster
 
-                # keep the id of the cluster with the oldest object
-                if cluster_number not in cluster_numbers_with_oldest_tracker:
-                    self.clusters = swap_cluster_ids(
-                        self.clusters,
-                        cluster_number,
-                        cluster_numbers_with_oldest_tracker[0],
-                    )
+                # keep the smallest id with the oldest object
+                self.clusters = swap_cluster_ids(
+                    self.clusters,
+                    cluster_number,
+                    np.array(cluster_numbers_with_oldest_tracker).min(),
+                )
 
                 # update the matrix of intersections so that the current cluster is now contained in self.clusters[cluster_number]
                 intersection_matrix_ids[cluster_number][
