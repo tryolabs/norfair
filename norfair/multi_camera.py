@@ -662,8 +662,11 @@ class MultiCameraClusterizer:
 
                 # create the aditional clusters
                 additional_clusters = []
-                cluster_number_with_oldest_tracker = None
-                oldest_tracker_age_in_additional_cluster = -1
+
+                # we will keep the
+                cluster_number_with_greatest_hit_counter = None
+                greatest_hit_counter = -1
+                oldest_age_in_that_cluster = -1
                 for current_cluster_number, tracked_ids in enumerate(
                     intersection_matrix_ids[cluster_number]
                 ):
@@ -686,13 +689,31 @@ class MultiCameraClusterizer:
                             new_cluster.reid_hit_counter[camera_name] = 0
 
                             if (
-                                oldest_tracker_age_in_additional_cluster
-                                < cluster.tracked_objects[camera_name].age
-                            ):
-                                oldest_tracker_age_in_additional_cluster = (
-                                    cluster.tracked_objects[camera_name].age
+                                (
+                                    greatest_hit_counter
+                                    < cluster.tracked_objects[camera_name].hit_counter
                                 )
-                                cluster_number_with_oldest_tracker = (
+                                or (
+                                    (
+                                        greatest_hit_counter
+                                        == cluster.tracked_objects[
+                                            camera_name
+                                        ].hit_counter
+                                    )
+                                    and (
+                                        oldest_age_in_that_cluster
+                                        < cluster.tracked_objects[camera_name].age
+                                    )
+                                )
+                                or (cluster_number_with_greatest_hit_counter is None)
+                            ):
+                                greatest_hit_counter = cluster.tracked_objects[
+                                    camera_name
+                                ].hit_counter
+                                oldest_age_in_that_cluster = cluster.tracked_objects[
+                                    camera_name
+                                ].age
+                                cluster_number_with_greatest_hit_counter = (
                                     current_cluster_number
                                 )
 
@@ -701,14 +722,16 @@ class MultiCameraClusterizer:
                         additional_clusters.append(None)
 
                 cluster.tracked_ids.extend(
-                    additional_clusters[cluster_number_with_oldest_tracker].tracked_ids
+                    additional_clusters[
+                        cluster_number_with_greatest_hit_counter
+                    ].tracked_ids
                 )
                 cluster.tracked_objects = additional_clusters[
-                    cluster_number_with_oldest_tracker
+                    cluster_number_with_greatest_hit_counter
                 ].tracked_objects
                 cluster.reid_hit_counter.update(
                     additional_clusters[
-                        cluster_number_with_oldest_tracker
+                        cluster_number_with_greatest_hit_counter
                     ].reid_hit_counter
                 )
 
@@ -729,7 +752,10 @@ class MultiCameraClusterizer:
                         new_cluster.tracked_ids
                     )
 
-                    if current_cluster_number == cluster_number_with_oldest_tracker:
+                    if (
+                        current_cluster_number
+                        == cluster_number_with_greatest_hit_counter
+                    ):
                         intersection_matrix_ids[
                             cluster_number
                         ] = new_row_interesection_ids
