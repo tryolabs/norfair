@@ -463,6 +463,32 @@ def swap_cluster_ids(clusters, cluster_number, cluster_number_with_oldest_tracke
     return clusters
 
 
+def conditionally_update_which_id_keeper(
+    oldest_age,
+    greatest_hit_counter,
+    additional_cluster_number_keeping_old_id,
+    tracked_object,
+    keep_id_criteria,
+):
+
+    # keep the id by the age or by the hit_counter if the current cluster is promising
+    if not tracked_object.live_points.any():
+        # if this cluster hasn't matched recently, cluster is not promising
+        return False
+
+    if keep_id_criteria == "hit_counter":
+        update_cluster_number = (greatest_hit_counter < tracked_object.hit_counter) or (
+            (greatest_hit_counter == tracked_object.hit_counter)
+            and (oldest_age < tracked_object.age)
+        )
+    elif keep_id_criteria == "age":
+        update_cluster_number = (oldest_age < tracked_object.age) or (
+            (oldest_age == tracked_object.age)
+            and (greatest_hit_counter < tracked_object.hit_counter)
+        )
+    return update_cluster_number
+
+
 class MultiCameraClusterizer:
     def __init__(
         self,
@@ -475,6 +501,7 @@ class MultiCameraClusterizer:
         initialization_delay: int = 4,
         reid_hit_counter_max: int = 0,
         maximum_time_since_last_update: int = 1,
+        keep_id_criteria: str = "hit_counter",
     ):
         """
         Associate trackers from different cameras/videos.
@@ -515,6 +542,11 @@ class MultiCameraClusterizer:
         - maximum_time_since_last_update: int.
             Filter tracked objects that were not detected recently. This can be useful since those tracked objects might have
             position that will not match well with their position in a different camera.
+
+        - keep_id_criteria: str.
+            When splitting a cluster, we have to choose which subcluster will keep the id of the old cluster. We have 2 criterias;
+            'age' criteria: the cluster with the oldest tracked object keeps the cluster id
+            'hit_counter' criteria: the cluster with the tracked object with greatest hit_counter keeps the cluster id
         """
         if max_votes_grow < 1:
             raise ValueError("max_votes_grow parameter needs to be >= 1")
@@ -522,6 +554,11 @@ class MultiCameraClusterizer:
             raise ValueError("max_votes_split parameter needs to be >= 1")
         if memory < 0:
             raise ValueError("memory parameter needs to be >= 0")
+
+        if keep_id_criteria not in ["age", "hit_counter"]:
+            raise ValueError(
+                f"keep_id_criteria can only be either 'age' or 'hit_counter'"
+            )
 
         self.last_cluster_fake_id = 0
         self.last_cluster_id = 0
@@ -549,6 +586,8 @@ class MultiCameraClusterizer:
 
         self.reid_hit_counter_max = reid_hit_counter_max + 1
         self.maximum_time_since_last_update = maximum_time_since_last_update
+
+        self.keep_id_criteria = keep_id_criteria
 
     def update(self, trackers_by_camera):
 
@@ -663,10 +702,9 @@ class MultiCameraClusterizer:
                 # create the aditional clusters
                 additional_clusters = []
 
-                # we will keep the
-                cluster_number_with_greatest_hit_counter = None
+                additional_cluster_number_keeping_old_id = 0
                 greatest_hit_counter = -1
-                oldest_age_in_that_cluster = -1
+                oldest_age = -1
                 for current_cluster_number, tracked_ids in enumerate(
                     intersection_matrix_ids[cluster_number]
                 ):
@@ -688,32 +726,21 @@ class MultiCameraClusterizer:
                             ] = cluster.tracked_objects[camera_name]
                             new_cluster.reid_hit_counter[camera_name] = 0
 
-                            if (
-                                (
-                                    greatest_hit_counter
-                                    < cluster.tracked_objects[camera_name].hit_counter
+                            update_cluster_number = (
+                                conditionally_update_which_id_keeper(
+                                    oldest_age,
+                                    greatest_hit_counter,
+                                    additional_cluster_number_keeping_old_id,
+                                    cluster.tracked_objects[camera_name],
+                                    self.keep_id_criteria,
                                 )
-                                or (
-                                    (
-                                        greatest_hit_counter
-                                        == cluster.tracked_objects[
-                                            camera_name
-                                        ].hit_counter
-                                    )
-                                    and (
-                                        oldest_age_in_that_cluster
-                                        < cluster.tracked_objects[camera_name].age
-                                    )
-                                )
-                                or (cluster_number_with_greatest_hit_counter is None)
-                            ):
+                            )
+                            if update_cluster_number:
                                 greatest_hit_counter = cluster.tracked_objects[
                                     camera_name
                                 ].hit_counter
-                                oldest_age_in_that_cluster = cluster.tracked_objects[
-                                    camera_name
-                                ].age
-                                cluster_number_with_greatest_hit_counter = (
+                                oldest_age = cluster.tracked_objects[camera_name].age
+                                additional_cluster_number_keeping_old_id = (
                                     current_cluster_number
                                 )
 
@@ -723,15 +750,15 @@ class MultiCameraClusterizer:
 
                 cluster.tracked_ids.extend(
                     additional_clusters[
-                        cluster_number_with_greatest_hit_counter
+                        additional_cluster_number_keeping_old_id
                     ].tracked_ids
                 )
                 cluster.tracked_objects = additional_clusters[
-                    cluster_number_with_greatest_hit_counter
+                    additional_cluster_number_keeping_old_id
                 ].tracked_objects
                 cluster.reid_hit_counter.update(
                     additional_clusters[
-                        cluster_number_with_greatest_hit_counter
+                        additional_cluster_number_keeping_old_id
                     ].reid_hit_counter
                 )
 
@@ -754,7 +781,7 @@ class MultiCameraClusterizer:
 
                     if (
                         current_cluster_number
-                        == cluster_number_with_greatest_hit_counter
+                        == additional_cluster_number_keeping_old_id
                     ):
                         intersection_matrix_ids[
                             cluster_number

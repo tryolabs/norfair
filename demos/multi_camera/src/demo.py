@@ -318,6 +318,12 @@ def run():
         help="How a distance between clusters is done when associating trackers from different videos. Either 'mean' or 'max'",
     )
     parser.add_argument(
+        "--keep-id-criteria",
+        type=str,
+        default="hit_counter",
+        help="When splitting a cluster, we have to choose which subcluster will keep the id of the old cluster. Either 'age' or 'hit_counter'",
+    )
+    parser.add_argument(
         "--initialization-delay",
         type=float,
         default=19,
@@ -344,7 +350,7 @@ def run():
     parser.add_argument(
         "--reid-hit-counter-max",
         type=int,
-        default=500,
+        default=150,
         help="Maximum amount of frames trying to reidentify the object. (Use a value >=0)",
     )
     parser.add_argument(
@@ -562,6 +568,7 @@ def run():
         initialization_delay=args.clusterizer_initialization_delay,
         reid_hit_counter_max=args.reid_hit_counter_max,
         maximum_time_since_last_update=args.maximum_time_since_last_update,
+        keep_id_criteria=args.keep_id_criteria,
     )
 
     while True:
