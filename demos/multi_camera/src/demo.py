@@ -74,7 +74,8 @@ def get_hist(image):
 def draw_feet(
     frame,
     clusters,
-    transformation_in_reference=None,
+    initial_transformations,
+    reference_motion_transformation=None,
     thickness=None,
     radius=None,
     text_size=None,
@@ -93,9 +94,13 @@ def draw_feet(
         for tracked_object in cluster.tracked_objects.values():
             if tracked_object.live_points.any():
                 cluster_is_alive = True
-                point = get_absolute_feet(tracked_object)
-                if transformation_in_reference is not None:
-                    point = transformation_in_reference.abs_to_rel(np.array([point]))[0]
+                point = get_absolute_feet(
+                    tracked_object, initial_transformations[tracked_object.camera_name]
+                )
+                if reference_motion_transformation is not None:
+                    point = reference_motion_transformation.abs_to_rel(
+                        np.array([point])
+                    )[0]
 
                 cluster_center += point
                 frame = Drawer.circle(
@@ -222,10 +227,13 @@ def yolo_detections_to_norfair_detections(yolo_detections, frame):
     return norfair_detections, boxes
 
 
-def get_absolute_feet(tracked_object):
+def get_absolute_feet(tracked_object, initial_transformation):
     bbox_relative = tracked_object.estimate
     feet = np.array([[bbox_relative[:, 0].mean(), bbox_relative[:, 1].max()]])
-    return tracked_object.rel_to_abs(feet)[0]
+    try:
+        return initial_transformation.rel_to_abs(tracked_object.rel_to_abs(feet))[0]
+    except AttributeError:
+        return initial_transformation.rel_to_abs(feet)[0]
 
 
 def run():
@@ -449,9 +457,6 @@ def run():
             image_height=args.ui_height,
         )
 
-        if args.use_motion_estimator_footage:
-            motion_estimators[path].transformation = initial_transformations[path]
-
     # initialize the reference if it exists
     reference = {"video": None, "image": None, "motion_estimator": None}
     image_reference = None
@@ -491,7 +496,7 @@ def run():
 
         video = Video(input_path=path, output_path=output_path)
 
-        # check that the fps
+        # check the fps and total frames
         if fps is None:
             fps = video.output_fps
             total_frames = int(video.video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -546,7 +551,14 @@ def run():
 
     def normalized_foot_distance(tracker1, tracker2):
         return (
-            np.linalg.norm(get_absolute_feet(tracker1) - get_absolute_feet(tracker2))
+            np.linalg.norm(
+                get_absolute_feet(
+                    tracker1, initial_transformations[tracker1.camera_name]
+                )
+                - get_absolute_feet(
+                    tracker2, initial_transformations[tracker2.camera_name]
+                )
+            )
             / height_reference
         )
 
@@ -592,7 +604,7 @@ def run():
                 if args.use_motion_estimator_footage:
                     coord_transformations = motion_estimators[path].update(frame, mask)
                 else:
-                    coord_transformations = initial_transformations[path]
+                    coord_transformations = None
 
                 tracked_objects[path] = trackers[path].update(
                     detections=detections, coord_transformations=coord_transformations
@@ -619,6 +631,7 @@ def run():
                 ] = frame
 
             if not first_video_is_reference:
+                coord_transformations = None
                 if reference["video"] is not None:
                     frame = next(reference["video"].__iter__())
 
@@ -632,9 +645,10 @@ def run():
                         )
                 else:
                     frame = reference["image"].copy()
-                    coord_transformations = None
 
-                frame = draw_feet(frame, clusters, coord_transformations)
+                frame = draw_feet(
+                    frame, clusters, initial_transformations, coord_transformations
+                )
 
                 frame = cv2.resize(
                     frame, tuple(args.resolution), interpolation=cv2.INTER_AREA
