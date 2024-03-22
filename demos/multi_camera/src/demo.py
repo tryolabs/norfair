@@ -124,6 +124,22 @@ def draw_feet(
     return frame
 
 
+def get_embedding(bbox, frame):
+    t_shirt_bbox_x = 0.7 * bbox[:, 0] + 0.3 * bbox[::-1, 0]
+    top = np.min(bbox[:, 1])
+    bottom = np.max(bbox[:, 1])
+    t_shirt_bbox_y = np.array([top * 0.9 + bottom * 0.1, top * 0.5 + bottom * 0.5])
+
+    bbox[:, 0] = t_shirt_bbox_x
+    bbox[:, 1] = t_shirt_bbox_y
+
+    cut = get_cutout(bbox, frame)
+    if cut.shape[0] > 0 and cut.shape[1] > 0:
+        return get_hist(cut)
+    else:
+        return None
+
+
 def draw_cluster_bboxes(
     images,
     clusters,
@@ -199,21 +215,7 @@ def yolo_detections_to_norfair_detections(yolo_detections, frame):
         boxes.append(bbox)
         points = bbox.copy()
         scores = np.array([detection_as_xyxy[4], detection_as_xyxy[4]])
-
-        # get embedding
-        t_shirt_bbox_x = 0.7 * bbox[:, 0] + 0.3 * bbox[::-1, 0]
-        top = np.min(bbox[:, 1])
-        bottom = np.max(bbox[:, 1])
-        t_shirt_bbox_y = np.array([top * 0.7 + bottom * 0.3, top * 0.4 + bottom * 0.6])
-
-        bbox[:, 0] = t_shirt_bbox_x
-        bbox[:, 1] = t_shirt_bbox_y
-
-        cut = get_cutout(bbox, frame)
-        if cut.shape[0] > 0 and cut.shape[1] > 0:
-            embedding = get_hist(cut)
-        else:
-            embedding = None
+        embedding = get_embedding(bbox, frame)
 
         norfair_detections.append(
             Detection(
@@ -292,7 +294,7 @@ def run():
     parser.add_argument(
         "--reid-embedding-correlation-threshold",
         type=float,
-        default=0.5,
+        default=0.3,
         help="Threshold for embedding match during a reid phase after object has been lost. (The 1-correlation distance we use is bounded in [0, 2])",
     )
     parser.add_argument(

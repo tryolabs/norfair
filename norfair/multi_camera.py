@@ -471,6 +471,8 @@ def conditionally_update_which_id_keeper(
     keep_id_criteria,
 ):
 
+    if additional_cluster_number_keeping_old_id is None:
+        return True
     # keep the id by the age or by the hit_counter if the current cluster is promising
     if not tracked_object.live_points.any():
         # if this cluster hasn't matched recently, cluster is not promising
@@ -702,7 +704,7 @@ class MultiCameraClusterizer:
                 # create the aditional clusters
                 additional_clusters = []
 
-                additional_cluster_number_keeping_old_id = 0
+                additional_cluster_number_keeping_old_id = None
                 greatest_hit_counter = -1
                 oldest_age = -1
                 for current_cluster_number, tracked_ids in enumerate(
