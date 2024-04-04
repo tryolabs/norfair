@@ -503,6 +503,7 @@ class TrackedObject:
         self.last_detection: "Detection" = initial_detection
         self.age: int = 0
         self.is_initializing: bool = self.hit_counter <= self.initialization_delay
+        self.scores = initial_detection.scores
 
         self.initializing_id: Optional[int] = self._obj_factory.get_initializing_id()
         self.id: Optional[int] = None
@@ -545,6 +546,7 @@ class TrackedObject:
         self.age += 1
         # Advances the tracker's state
         self.filter.predict()
+        self.scores = np.array([np.nan] * self.num_points)
 
     @property
     def hit_counter_is_positive(self):
@@ -626,6 +628,8 @@ class TrackedObject:
 
         self.last_detection = detection
         self.hit_counter = min(self.hit_counter + 2 * period, self.hit_counter_max)
+
+        self.scores = detection.scores
 
         if self.is_initializing and self.hit_counter > self.initialization_delay:
             self.is_initializing = False
