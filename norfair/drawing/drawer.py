@@ -340,16 +340,13 @@ class Drawable:
             self.label = obj.label
             self.scores = obj.scores
             # TODO: alive points for detections could be the ones over the threshold
-            # but that info is not available here
             self.live_points = np.ones(obj.points.shape[0]).astype(bool)
 
         elif isinstance(obj, TrackedObject):
             self.points = obj.estimate
             self.id = obj.id
             self.label = obj.label
-            # TODO: TrackedObject.scores could be an interesting thing to have
-            # it could be the scores of the last detection or some kind of moving average
-            self.scores = None
+            self.scores = obj.scores
             self.live_points = obj.live_points
         elif obj is None:
             self.points = points

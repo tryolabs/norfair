@@ -546,7 +546,7 @@ class TrackedObject:
         self.age += 1
         # Advances the tracker's state
         self.filter.predict()
-        self.scores = np.array([np.nan] * self.num_points)
+        self.scores = None
 
     @property
     def hit_counter_is_positive(self):
