@@ -78,7 +78,7 @@ Most tracking demos are showcased with vehicles and pedestrians, but the detecto
 2. [YOLOv5](https://github.com/tryolabs/norfair/tree/master/demos/yolov5): tracking object centroids or bounding boxes.
 3. [YOLOv4](https://github.com/tryolabs/norfair/tree/master/demos/yolov4): tracking object centroids.
 4. [Detectron2](https://github.com/tryolabs/norfair/tree/master/demos/detectron2): tracking object centroids.
-5. [AlphaPose](https://github.com/tryolabs/norfair/tree/master/demos/alphapose): tracking human keypoints (pose estimation) and inserting Norfair into a complex existing pipeline using.
+5. [AlphaPose](https://github.com/tryolabs/norfair/tree/master/demos/alphapose): tracking human keypoints (pose estimation) and inserting Norfair into a complex existing pipeline.
 6. [OpenPose](https://github.com/tryolabs/norfair/tree/master/demos/openpose): tracking human keypoints.
 7. [YOLOPv2](https://github.com/CAIC-AD/YOLOPv2): tracking with a model for traffic object detection, drivable road area segmentation, and lane line detection.
 8. [YOLO-NAS](https://github.com/tryolabs/norfair/tree/master/demos/yolo_nas): tracking object centroids or bounding boxes.
