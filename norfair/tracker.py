@@ -631,6 +631,13 @@ class TrackedObject:
             self.is_initializing = False
             self._acquire_ids()
 
+        # Reset reid_hit_counter if we are are successfully tracking this object.
+        # If hit_counter was 0 when Tracker.update was called and ReID is being used,
+        # we preemptively set reid_hit_counter to reid_hit_counter_max. But if the object
+        # is hit, we need to reset it.
+        if self.hit_counter_is_positive:
+            self.reid_hit_counter = None
+
         # We use a kalman filter in which we consider each coordinate on each point as a sensor.
         # This is a hacky way to update only certain sensors (only x, y coordinates for
         # points which were detected).

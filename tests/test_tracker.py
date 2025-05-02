@@ -353,6 +353,59 @@ def test_reid_hit_counter():
     assert tracked_objects[0].id != obj_id
 
 
+def test_reid_hit_counter_reset():
+    #
+    # test that reid hit counter resets to None if it had started counting down but
+    # then the track was hit with an incoming detection
+    #
+
+    # simple reid distance
+    def dist(new_obj, tracked_obj):
+        return np.linalg.norm(new_obj.estimate - tracked_obj.estimate)
+
+    hit_counter_max = 2
+    reid_hit_counter_max = 2
+
+    tracker = Tracker(
+        distance_function="euclidean",
+        distance_threshold=1,
+        hit_counter_max=hit_counter_max,
+        initialization_delay=1,
+        reid_distance_function=dist,
+        reid_distance_threshold=5,
+        reid_hit_counter_max=reid_hit_counter_max,
+    )
+
+    # check that hit counters initialize correctly
+    tracked_objects = tracker.update([Detection(points=np.array([[1, 1]]))])
+    tracked_objects = tracker.update([Detection(points=np.array([[1, 1]]))])
+    assert len(tracked_objects) == 1
+    assert tracked_objects[0].hit_counter == 2
+    assert tracked_objects[0].reid_hit_counter == None
+
+    # check that object is still alive when hit_counter goes to 0
+    obj_id = tracked_objects[0].id
+    for _ in range(hit_counter_max):
+        tracked_objects = tracker.update()
+    assert len(tracked_objects) == 1
+    assert tracked_objects[0].hit_counter == 0
+    assert tracked_objects[0].reid_hit_counter is None
+
+    # check that object is alive and reid_hit_counter is None after being matched again
+    tracked_objects = tracker.update([Detection(points=np.array([[1, 1]]))])
+    assert len(tracked_objects) == 1
+    assert tracked_objects[0].hit_counter == 1
+    assert tracked_objects[0].reid_hit_counter is None
+
+    # check that after reid_hit_counter_max more updates, object still exists
+    for _ in range(reid_hit_counter_max + 2):
+        tracked_objects = tracker.update([Detection(points=np.array([[1, 1]]))])
+    assert len(tracked_objects) == 1
+    assert tracked_objects[0].hit_counter == 2
+    assert tracked_objects[0].reid_hit_counter is None
+    assert tracked_objects[0].id == obj_id
+
+
 # TODO tests list:
 #   - detections with different labels
 #   - partial matches where some points are missing
