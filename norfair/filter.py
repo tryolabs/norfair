@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 
 import numpy as np
-from filterpy.kalman import KalmanFilter
+
+from .kalman_filter import KalmanFilter
 
 
 class FilterFactory(ABC):
@@ -103,7 +104,6 @@ class NoFilter:
         return
 
     def update(self, detection_points_flatten, R=None, H=None):
-
         if H is not None:
             diagonal = np.diagonal(H).reshape((self.dim_z, 1))
             one_minus_diagonal = 1 - diagonal
