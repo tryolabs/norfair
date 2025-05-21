@@ -70,7 +70,7 @@ def main(
                 result = get_prediction(frame, detection_model)
 
             detections = get_detections(result.object_prediction_list)
-            tracked_objects = tracker.update(detections=detections, period=skip_period)
+            tracked_objects = tracker.update(detections=detections)
         else:
             tracked_objects = tracker.update()
 

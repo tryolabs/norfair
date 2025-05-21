@@ -77,7 +77,7 @@ def main(
                 else:
                     detection.embedding = None
 
-            tracked_objects = tracker.update(detections=detections, period=skip_period)
+            tracked_objects = tracker.update(detections=detections)
         else:
             tracked_objects = tracker.update()
         draw_points(cv2_frame, detections)
