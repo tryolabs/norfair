@@ -142,7 +142,7 @@ def run():
         "--fixed-camera-scale",
         type=float,
         default=0,
-        help="Scale of the fixed camera, set to 0 to disable. Note that this only works for translation",
+        help="Scale of the fixed camera, set to 0 to disable.",
     )
     parser.add_argument(
         "--draw-absolute-grid",
@@ -160,13 +160,13 @@ def run():
         "--draw-paths",
         dest="draw_paths",
         action="store_true",
-        help="Pass this flag to draw the paths of the objects (SLOW)",
+        help="Pass this flag to draw the paths of the objects",
     )
     parser.add_argument(
-        "--path-history",
+        "--path-drawer-scale",
         type=int,
-        default=20,
-        help="Length of the paths",
+        default=None,
+        help="Canvas (background) scale relative to frame size for the AbsolutePath drawer",
     )
     parser.add_argument(
         "--id-size",
@@ -215,7 +215,7 @@ def run():
             fixed_camera = FixedCamera(scale=args.fixed_camera_scale)
 
         if args.draw_paths:
-            path_drawer = AbsolutePaths(max_history=args.path_history, thickness=2)
+            path_drawer = AbsolutePaths(scale=args.path_drawer_scale)
 
         video = Video(input_path=input_path)
         show_or_write = (
@@ -286,7 +286,7 @@ def run():
 
             if args.draw_paths:
                 frame = path_drawer.draw(
-                    frame, tracked_objects, coord_transform=coord_transformations
+                    frame, tracked_objects, coord_transformations=coord_transformations
                 )
 
             if use_fixed_camera:
