@@ -87,7 +87,7 @@ class Tracker:
         pointwise_hit_counter_max: int = 4,
         detection_threshold: float = 0,
         filter_factory: FilterFactory = OptimizedKalmanFilterFactory(),
-        past_detections_length: int = 4,
+        past_detections_length: int = 0,
         reid_distance_function: Optional[
             Callable[["TrackedObject", "TrackedObject"], float]
         ] = None,
