@@ -99,7 +99,7 @@ class TranslationTransformationGetter(TransformationGetter):
     ) -> None:
         self.bin_size = bin_size
         self.proportion_points_used_threshold = proportion_points_used_threshold
-        self.data = None
+        self.transformation = TranslationTransformation(0)
 
     def __call__(
         self, curr_pts: np.ndarray, prev_pts: np.ndarray
@@ -119,14 +119,15 @@ class TranslationTransformationGetter(TransformationGetter):
         flow_mode = unique_flows[max_index]
 
         try:
-            flow_mode += self.data
+            flow_mode += self.transformation.movement_vector
         except TypeError:
             pass
 
+        current_transformation = TranslationTransformation(flow_mode)
         if update_prvs:
-            self.data = flow_mode
+            self.transformation = current_transformation
 
-        return update_prvs, TranslationTransformation(flow_mode)
+        return update_prvs, current_transformation
 
 
 #
@@ -204,7 +205,8 @@ class HomographyTransformationGetter(TransformationGetter):
         confidence: float = 0.995,
         proportion_points_used_threshold: float = 0.9,
     ) -> None:
-        self.data = None
+
+        self.transformation = HomographyTransformation(np.eye(3))
         if method is None:
             method = cv2.RANSAC
         self.method = method
@@ -227,10 +229,7 @@ class HomographyTransformationGetter(TransformationGetter):
                 "The homography couldn't be computed in this frame "
                 "due to low amount of points"
             )
-            if isinstance(self.data, np.ndarray):
-                return True, HomographyTransformation(self.data)
-            else:
-                return True, None
+            return True, self.transformation
 
         homography_matrix, points_used = cv2.findHomography(
             prev_pts,
@@ -246,14 +245,18 @@ class HomographyTransformationGetter(TransformationGetter):
         update_prvs = proportion_points_used < self.proportion_points_used_threshold
 
         try:
-            homography_matrix = homography_matrix @ self.data
+            homography_matrix = (
+                homography_matrix @ self.transformation.homography_matrix
+            )
         except (TypeError, ValueError):
             pass
 
-        if update_prvs:
-            self.data = homography_matrix
+        current_transformation = HomographyTransformation(homography_matrix)
 
-        return update_prvs, HomographyTransformation(homography_matrix)
+        if update_prvs:
+            self.transformation = current_transformation
+
+        return update_prvs, current_transformation
 
 
 #
