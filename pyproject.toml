@@ -35,30 +35,31 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.10"
 filterpy = "^1.4.5"
-rich = ">=9.10.0, <15.0.0"
-scipy = ">=1.5.4"
-numpy = [
-    {version = "^1.19.0", python = "<3.8"},
-    {version = "^1.23.0", python = ">=3.8"}
-]
+rich = "^14.0.1"
+scipy = ">=1.13.1"
+# Runtime NumPy range supports both 1.23+ and 2.x; MOT overrides to <2 via tox
+numpy = ">=1.23.0"
 opencv-python = { version = ">= 3.2.0, < 5.0.0", optional = true }
+# motmetrics will pull its own pandas dependency
 motmetrics = { version = "1.4.0", optional = true }
-importlib-metadata = { version = "4.8.3", python = "<3.8" }
 
 [tool.poetry.extras]
 metrics = ["motmetrics"]
 video = ["opencv-python"]
 
+# Test dependencies (Poetry group)
 [tool.poetry.group.test.dependencies]
-pylint = "^2.12.0"
-pytest = "^6.2.5"
-tox = "^3.26.0"
+pytest = ">=8.3.3"
+pytest-cov = ">=5.0.0"
+pylint = "^3.2.3"
+black = "^24.4.1"
+isort = "^5.13.2"
 
-[tool.poetry.group.dev.dependencies]
-black = "^22.12.0"
-isort = "^5.10.1"
+ 
+
+
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

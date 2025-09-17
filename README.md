@@ -35,7 +35,7 @@ Norfair is built, used and maintained by [Tryolabs](https://tryolabs.com).
 
 ## Installation
 
-Norfair currently supports Python 3.8+. The latest tested version to support Python 3.7 is [Norfair 2.2.0](https://github.com/tryolabs/norfair/releases/tag/v2.2.0). Later versions may work, but no specific support is planned.
+Norfair currently supports Python 3.10+.
 
 For the minimal version, install as:
 
