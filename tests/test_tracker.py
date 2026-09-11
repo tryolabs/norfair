@@ -353,6 +353,38 @@ def test_reid_hit_counter():
     assert tracked_objects[0].id != obj_id
 
 
+@pytest.mark.parametrize("past_detections_length", [0, 2, 4])
+def test_detection_age_always_set(past_detections_length):
+    #
+    # Age must be set on every matched detection, including those discarded
+    # from past_detections when the buffer is full (see issue #317).
+    #
+    tracker = Tracker(
+        "euclidean",
+        initialization_delay=0,
+        distance_threshold=100,
+        hit_counter_max=50,
+        past_detections_length=past_detections_length,
+    )
+
+    detections_by_frame = []
+    for _ in range(12):
+        det = Detection(points=np.array([[1, 1]]))
+        detections_by_frame.append(det)
+        tracked_objects = tracker.update([det])
+        assert len(tracked_objects) == 1
+        obj = tracked_objects[0]
+        assert obj.last_detection is det
+        assert det.age == obj.age
+        assert len(obj.past_detections) <= past_detections_length
+
+    stored_ids = {id(d) for d in obj.past_detections}
+    discarded = [d for d in detections_by_frame if id(d) not in stored_ids]
+    assert discarded
+    for d in discarded:
+        assert d.age is not None
+
+
 # TODO tests list:
 #   - detections with different labels
 #   - partial matches where some points are missing
