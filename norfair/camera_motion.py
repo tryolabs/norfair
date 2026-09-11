@@ -132,6 +132,24 @@ class TranslationTransformationGetter(TransformationGetter):
 #
 # Homography
 #
+def _apply_homography(points: np.ndarray, homography_matrix: np.ndarray) -> np.ndarray:
+    """Apply a homography to 1D (2,) or 2D (n_points, 2) points, preserving input shape."""
+    points = np.asarray(points)
+    single_point = points.ndim == 1
+    if single_point:
+        points = points.reshape(1, -1)
+    ones = np.ones((len(points), 1))
+    points_with_ones = np.hstack((points, ones))
+    points_transformed = points_with_ones @ homography_matrix.T
+    last_column = points_transformed[:, -1]
+    last_column[last_column == 0] = 0.0000001
+    points_transformed = points_transformed / last_column.reshape(-1, 1)
+    points_transformed = points_transformed[:, :2]
+    if single_point:
+        return points_transformed[0]
+    return points_transformed
+
+
 class HomographyTransformation(CoordinatesTransformation):
     """
     Coordinate transformation beweent points using an homography
@@ -147,23 +165,10 @@ class HomographyTransformation(CoordinatesTransformation):
         self.inverse_homography_matrix = np.linalg.inv(homography_matrix)
 
     def abs_to_rel(self, points: np.ndarray):
-        ones = np.ones((len(points), 1))
-        points_with_ones = np.hstack((points, ones))
-        points_transformed = points_with_ones @ self.homography_matrix.T
-        last_column = points_transformed[:, -1]
-        last_column[last_column == 0] = 0.0000001
-        points_transformed = points_transformed / last_column.reshape(-1, 1)
-        new_points_transformed = points_transformed[:, :2]
-        return new_points_transformed
+        return _apply_homography(points, self.homography_matrix)
 
     def rel_to_abs(self, points: np.ndarray):
-        ones = np.ones((len(points), 1))
-        points_with_ones = np.hstack((points, ones))
-        points_transformed = points_with_ones @ self.inverse_homography_matrix.T
-        last_column = points_transformed[:, -1]
-        last_column[last_column == 0] = 0.0000001
-        points_transformed = points_transformed / last_column.reshape(-1, 1)
-        return points_transformed[:, :2]
+        return _apply_homography(points, self.inverse_homography_matrix)
 
 
 class HomographyTransformationGetter(TransformationGetter):
